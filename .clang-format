@@ -1,0 +1,3 @@
+BasedOnStyle: Chromium
+SortIncludes: true
+AccessModifierOffset: -2
