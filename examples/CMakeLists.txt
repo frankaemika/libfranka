@@ -16,8 +16,8 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example} franka)
 endforeach()
 
+include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

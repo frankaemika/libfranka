@@ -14,4 +14,5 @@ add_custom_target(doc ALL
   VERBATIM
 )
 
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION share/doc)
+include(GNUInstallDirs)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${CMAKE_INSTALL_DOCDIR})

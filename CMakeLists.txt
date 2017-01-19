@@ -69,14 +69,14 @@ target_include_directories(franka PUBLIC
 target_include_directories(franka PRIVATE src)
 
 ## Installation
+include(GNUInstallDirs)
 install(TARGETS franka
   EXPORT FrankaConfig
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin # Install .dlls into bin/ directory on Windows
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # Install .dlls into bin/ directory on Windows
 )
-install(EXPORT FrankaConfig DESTINATION lib/cmake/Franka)
-install(DIRECTORY include/ DESTINATION include)
+install(EXPORT FrankaConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Export targets into build directory to allow usage without installation
 export(TARGETS franka FILE FrankaConfig.cmake)
