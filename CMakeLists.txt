@@ -68,7 +68,9 @@ target_include_directories(franka PRIVATE src)
 install(TARGETS franka
   EXPORT FrankaConfig
   ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib)
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin # Install .dlls into bin/ directory on Windows
+)
 install(EXPORT FrankaConfig DESTINATION lib/cmake/Franka)
 install(DIRECTORY include/ DESTINATION include)
 
