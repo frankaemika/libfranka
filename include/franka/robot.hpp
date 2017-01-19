@@ -15,7 +15,7 @@ namespace franka {
  * TODO
  */
 class Robot {
-public:
+ public:
   /**
    * TODO
    */
@@ -46,7 +46,7 @@ public:
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
-private:
+ private:
   Robot() = default;
 };
 
