@@ -1,5 +1,4 @@
-#ifndef FRANKA_ROBOT_H_
-#define FRANKA_ROBOT_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -51,5 +50,3 @@ class Robot {
 };
 
 }  // namespace franka
-
-#endif  // FRANKA_ROBOT_H_
