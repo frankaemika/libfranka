@@ -1,4 +1,4 @@
-#include "franka/robot.hpp"
+#include "franka/robot.h"
 
 namespace franka {
 

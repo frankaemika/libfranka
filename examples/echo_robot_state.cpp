@@ -1,5 +1,5 @@
 #include <iostream>
-#include <franka/robot.hpp>
+#include <franka/robot.h>
 
 int main(int argc, char** argv) {
   if (argc != 2) {

@@ -3,6 +3,7 @@ project(googletest-download VERSION "" LANGUAGES CXX)
 
 include(ExternalProject)
 ExternalProject_Add(googletest
+  DOWNLOAD_NAME googletest-${GTEST_VERSION}.tar.gz
   URL https://github.com/google/googletest/archive/release-${GTEST_VERSION}.tar.gz
   URL_HASH SHA256=${GTEST_ARCHIVE_HASH}
   SOURCE_DIR ${GTEST_SOURCE_DIR}
