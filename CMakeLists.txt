@@ -56,7 +56,7 @@ endif()
 ## Library
 add_library(franka SHARED
   src/robot.cpp
-)
+        include/franka/robot_state.h)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)

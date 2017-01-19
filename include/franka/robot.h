@@ -1,55 +1,42 @@
-#ifndef FRANKA_ROBOT_H_
-#define FRANKA_ROBOT_H_
+#pragma once
 
 #include <memory>
+#include "robot_state.h"
 #include <string>
 
-/**
- * TODO
- */
-using RobotState = int;
-
 namespace franka {
-
 /**
- * TODO
+ * Robot class maintains a connection to FRANKA CONTROL and provides the current robot state.
  */
 class Robot {
- public:
+  public:
   /**
-   * TODO
+   * Tries to establish a connection to the robot. Throws an exception if unsuccessful.
+   *
+   * @param[in] frankaAddress IP/hostname of FRANKA CONTROL
    */
-  using Ptr = std::shared_ptr<Robot>;
+  Robot(const std::string& frankaAddress);
 
   /**
-   * TODO
+   * Blocks until new robot state arrives.
    *
-   * @param[in] ip TODO
-   * @return TODO
-   */
-  static Ptr connect(const std::string& ip);
-
-  /**
-   * Block until new robot state arrives.
-   *
-   * @return True if a new robot state arrived, false if a timeout occured.
+   * @return True if a new robot state arrived, false if a timeout occurred.
    */
   bool waitForRobotState();
 
   /**
-   * TODO
+   * Returns last obtained robot state.
    *
-   * @return TODO
+   * @return RobotState structure
    */
-  RobotState getRobotState() const;
+  const RobotState& getRobotState() const;
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
  private:
-  Robot() = default;
+  class Impl;
+  std::unique_ptr<Impl> impl_;
 };
 
 }  // namespace franka
-
-#endif  // FRANKA_ROBOT_H_
