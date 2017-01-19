@@ -4,6 +4,8 @@ project(libfranka
   LANGUAGES CXX
 )
 
+list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_SOURCE_DIR}/cmake)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -15,7 +17,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
-set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty/sources" CACHE PATH
+set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
