@@ -15,6 +15,9 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
+set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty/sources" CACHE PATH
+  "Directory for third-party sources")
+
 option(BUILD_COVERAGE "Build with code coverage" OFF)
 if(BUILD_COVERAGE)
   find_program(LCOV_PROG lcov)

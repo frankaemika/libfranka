@@ -1,17 +1,21 @@
 ## Google Test
-set(GTEST_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/googletest)
+set(GTEST_INSTALL_PREFIX ${CMAKE_SOURCE_DIR}/3rdparty/googletest)
+set(GTEST_INCLUDE_DIR ${GTEST_INSTALL_PREFIX}/include)
+set(GTEST_LIBRARY_DIR ${GTEST_INSTALL_PREFIX}/lib)
+set(GTEST_VERSION 1.8.0)
 
 # Google Test uses pthreads if available, so we need to link that as well
 find_package(Threads)
 
 include(ExternalProject)
 ExternalProject_Add(googletest
-  URL https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+  URL https://github.com/google/googletest/archive/release-${GTEST_VERSION}.tar.gz
   URL_HASH SHA256=58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8
   CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX:PATH=${GTEST_INSTALL_PREFIX}
-  DOWNLOAD_DIR ${PROJECT_SOURCE_DIR}/3rdparty
-  SOURCE_DIR ${PROJECT_SOURCE_DIR}/3rdparty/googletest
-  BINARY_DIR ${PROJECT_SOURCE_DIR}/3rdparty/build/googletest
+  DOWNLOAD_NAME googletest-${GTEST_VERSION}.tar.gz
+  DOWNLOAD_DIR ${THIRDPARTY_SOURCES_DIR}
+  SOURCE_DIR ${THIRDPARTY_SOURCES_DIR}/googletest
+  BINARY_DIR ${CMAKE_BINARY_DIR}/googletest
 )
 
 set(GTEST_LIBRARIES gtest gtest_main)
@@ -19,12 +23,12 @@ foreach(library ${GTEST_LIBRARIES})
   add_library(${library} STATIC IMPORTED)
 
   # Workaround for https://gitlab.kitware.com/cmake/cmake/issues/15052
-  file(MAKE_DIRECTORY ${GTEST_INSTALL_PREFIX}/include)
+  file(MAKE_DIRECTORY ${GTEST_INCLUDE_DIR})
 
   set_target_properties(${library} PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES ${GTEST_INSTALL_PREFIX}/include
+    INTERFACE_INCLUDE_DIRECTORIES ${GTEST_INCLUDE_DIR}
     INTERFACE_LINK_LIBRARIES Threads::Threads
-    IMPORTED_LOCATION ${GTEST_INSTALL_PREFIX}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}${library}${CMAKE_STATIC_LIBRARY_SUFFIX})
+    IMPORTED_LOCATION ${GTEST_LIBRARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${library}${CMAKE_STATIC_LIBRARY_SUFFIX})
   add_dependencies(${library} googletest)
 endforeach()
 
