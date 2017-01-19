@@ -46,7 +46,7 @@ if(BUILD_COVERAGE)
     COMMAND ${LCOV_PROG} --remove ${COVERAGE_FILE} 'test/*' '/usr/*' --output-file ${COVERAGE_CLEANED_FILE}
     COMMAND ${GENHTML_PROG} -o ${COVERAGE_REPORT_DIR} ${COVERAGE_CLEANED_FILE}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS run_tests
+    DEPENDS run_all_tests
     COMMENT "Generating code coverage"
   )
 endif()

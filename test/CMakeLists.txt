@@ -28,7 +28,8 @@ foreach(library ${GTEST_LIBRARIES})
   set_target_properties(${library} PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES ${GTEST_INCLUDE_DIR}
     INTERFACE_LINK_LIBRARIES Threads::Threads
-    IMPORTED_LOCATION ${GTEST_LIBRARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${library}${CMAKE_STATIC_LIBRARY_SUFFIX})
+    IMPORTED_LOCATION ${GTEST_LIBRARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}${library}${CMAKE_STATIC_LIBRARY_SUFFIX}
+  )
   add_dependencies(${library} googletest)
 endforeach()
 
@@ -36,13 +37,13 @@ endforeach()
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka ${GTEST_LIBRARIES})
 
-add_executable(run_tests
+add_executable(run_all_tests
   robot_test.cpp
 )
-target_include_directories(run_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(run_tests ${TEST_DEPENDENCIES})
+target_include_directories(run_all_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
 
-add_test(Default run_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
+add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
 
 if(BUILD_COVERAGE)
   message(STATUS "Coverage enabled; not adding sanitizer targets.")
@@ -51,7 +52,7 @@ endif()
 
 ## Sanitizers
 include(CheckCXXCompilerFlag)
-get_target_property(TESTS run_tests SOURCES)
+get_target_property(TESTS run_all_tests SOURCES)
 
 set(ASan_FLAGS -g -O1 -fsanitize=address)
 set(UBSan_FLAGS -g -O1 -fsanitize=undefined)
@@ -67,7 +68,7 @@ foreach(sanitizer ${SANITIZERS})
 
   if(HAVE_${sanitizer})
     string(TOLOWER "${sanitizer}" sanitizer_lc)
-    set(target_name "run_tests_${sanitizer_lc}")
+    set(target_name "run_all_tests_${sanitizer_lc}")
 
     add_executable(${target_name} ${TESTS})
     target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -83,6 +84,6 @@ endforeach()
 find_program(VALGRIND_PROG valgrind)
 if(VALGRIND_PROG)
   add_test(NAME Valgrind
-    COMMAND ${VALGRIND_PROG} ./run_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/valgrind.xml
+    COMMAND ${VALGRIND_PROG} ./run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/valgrind.xml
   )
 endif()
