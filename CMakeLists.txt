@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.4)
 project(libfranka
   VERSION 0.0.1
   LANGUAGES CXX
@@ -55,6 +55,8 @@ endif()
 add_library(franka SHARED
   src/robot.cpp
 )
+set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.hpp src/*.hpp)
 
