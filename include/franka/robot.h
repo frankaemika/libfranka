@@ -1,21 +1,23 @@
 #pragma once
 
 #include <memory>
-#include "robot_state.h"
 #include <string>
+#include "robot_state.h"
 
 namespace franka {
 /**
- * Robot class maintains a connection to FRANKA CONTROL and provides the current robot state.
+ * Robot class maintains a connection to FRANKA CONTROL and provides the current
+ * robot state.
  */
 class Robot {
-  public:
+ public:
   /**
-   * Tries to establish a connection to the robot. Throws an exception if unsuccessful.
+   * Tries to establish a connection to the robot. Throws an exception if
+   * unsuccessful.
    *
    * @param[in] frankaAddress IP/hostname of FRANKA CONTROL
    */
-  Robot(const std::string& frankaAddress);
+  explicit Robot(const std::string& frankaAddress);
   ~Robot();
 
   /**

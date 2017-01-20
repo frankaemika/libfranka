@@ -1,24 +1,20 @@
 #include "franka/robot.h"
 
-using namespace franka;
-
 namespace franka {
 
 class Robot::Impl {
  public:
-  Impl(const std::string &frankaAddress);
+  explicit Impl(const std::string& frankaAddress);
 
   bool waitForRobotState();
-  const RobotState &getRobotState() const;
+  const RobotState& getRobotState() const;
+
  private:
-  //
+  RobotState robot_state_;
 };
 
-}  // namespace franka
-
-Robot::Robot(const std::string &frankaAddress)
-    : impl_(new Robot::Impl(frankaAddress)) {
-}
+Robot::Robot(const std::string& frankaAddress)
+    : impl_(new Robot::Impl(frankaAddress)) {}
 
 // Has to be declared here, as the Impl type is incomplete in the header
 Robot::~Robot() = default;
@@ -27,13 +23,13 @@ bool Robot::waitForRobotState() {
   return impl_->waitForRobotState();
 }
 
-const RobotState &Robot::getRobotState() const {
+const RobotState& Robot::getRobotState() const {
   return impl_->getRobotState();
 }
 
 /* Implementation */
 
-Robot::Impl::Impl(const std::string &frankaAddress) {
+Robot::Impl::Impl(const std::string& frankaAddress) : robot_state_{} {
   // Connect
 }
 
@@ -41,8 +37,8 @@ bool Robot::Impl::waitForRobotState() {
   return false;
 }
 
-const RobotState &Robot::Impl::getRobotState() const {
-  RobotState state;
-  return state;
+const RobotState& Robot::Impl::getRobotState() const {
+  return robot_state_;
 }
 
+}  // namespace franka
