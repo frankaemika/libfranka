@@ -16,6 +16,7 @@ class Robot {
    * @param[in] frankaAddress IP/hostname of FRANKA CONTROL
    */
   Robot(const std::string& frankaAddress);
+  ~Robot();
 
   /**
    * Blocks until new robot state arrives.

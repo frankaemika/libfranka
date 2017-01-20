@@ -1,5 +1,7 @@
 #include "franka/robot.h"
 
+using namespace franka;
+
 namespace franka {
 
 class Robot::Impl {
@@ -12,9 +14,14 @@ class Robot::Impl {
   //
 };
 
+}  // namespace franka
+
 Robot::Robot(const std::string &frankaAddress)
     : impl_(new Robot::Impl(frankaAddress)) {
 }
+
+// Has to be declared here, as the Impl type is incomplete in the header
+Robot::~Robot() = default;
 
 bool Robot::waitForRobotState() {
   return impl_->waitForRobotState();
@@ -24,12 +31,14 @@ const RobotState &Robot::getRobotState() const {
   return impl_->getRobotState();
 }
 
+/* Implementation */
+
 Robot::Impl::Impl(const std::string &frankaAddress) {
   // Connect
 }
 
 bool Robot::Impl::waitForRobotState() {
-  return true;
+  return false;
 }
 
 const RobotState &Robot::Impl::getRobotState() const {
@@ -37,4 +46,3 @@ const RobotState &Robot::Impl::getRobotState() const {
   return state;
 }
 
-}  // namespace franka
