@@ -2,7 +2,8 @@
 
 #include <memory>
 #include <string>
-#include "robot_state.h"
+
+#include <franka/robot_state.h>
 
 namespace franka {
 /**
@@ -40,6 +41,10 @@ class Robot {
  private:
   class Impl;
   std::unique_ptr<Impl> impl_;
+};
+
+struct NetworkException : public std::runtime_error {
+  explicit NetworkException(std::string const& message);
 };
 
 }  // namespace franka

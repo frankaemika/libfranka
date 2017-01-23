@@ -17,6 +17,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
+find_package(Boost REQUIRED COMPONENTS system)
+
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
 
@@ -54,9 +56,10 @@ if(BUILD_COVERAGE)
 endif()
 
 ## Library
+set(LIB_DEPENDENCIES ${GTEST_LIBRARIES})
+
 add_library(franka SHARED
-  src/robot.cpp
-        include/franka/robot_state.h)
+  src/robot.cpp)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
@@ -66,7 +69,9 @@ target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-target_include_directories(franka PRIVATE src)
+target_include_directories(franka PRIVATE src ${Boost_INCLUDE_DIR})
+
+target_link_libraries(franka ${Boost_LIBRARIES})
 
 ## Installation
 include(GNUInstallDirs)
