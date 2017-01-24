@@ -4,7 +4,12 @@ if(NOT DOXYGEN_PROG)
 endif()
 
 set(DOXYFILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-set(SOURCE_DIRS "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include")
+set(DOXYGEN_SOURCE_DIRS "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/include")
+if(STRICT)
+  set(DOXYGEN_WARN_AS_ERROR "YES")
+else()
+  set(DOXYGEN_WARN_AS_ERROR "NO")
+endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${DOXYFILE} @ONLY)
 
 add_custom_target(doc ALL

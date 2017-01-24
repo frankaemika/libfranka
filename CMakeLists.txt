@@ -20,6 +20,17 @@ endif()
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
 
+## Build options
+option(STRICT "Treat warnings as errors" OFF)
+if(STRICT)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
+     CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_compile_options(-Werror)
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/WX)
+  endif()
+endif()
+
 option(BUILD_COVERAGE "Build with code coverage" OFF)
 if(BUILD_COVERAGE)
   find_program(LCOV_PROG lcov)
