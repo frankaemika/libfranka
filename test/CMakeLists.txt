@@ -20,8 +20,29 @@ target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
 add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
 
 if(BUILD_COVERAGE)
-  message(STATUS "Coverage enabled; not adding sanitizer targets.")
-  return()
+  find_program(LCOV_PROG lcov)
+  if(NOT LCOV_PROG)
+    message(FATAL_ERROR "lcov not found.")
+  endif()
+
+  find_program(GENHTML_PROG genhtml)
+  if(NOT GENHTML_PROG)
+    message(FATAL_ERROR "genhtml not found.")
+  endif()
+
+  set(COVERAGE_REPORT_DIR "coverage")
+  set(COVERAGE_FILE "all_tests.coverage")
+
+  add_custom_target(coverage
+    COMMAND ${LCOV_PROG} --directory . --zerocounters
+    COMMAND ${CMAKE_CTEST_COMMAND} -R Default .
+    COMMAND ${LCOV_PROG} --directory . --capture --output-file ${COVERAGE_FILE}
+    COMMAND ${LCOV_PROG} --remove ${COVERAGE_FILE} 'test/*' '/usr/*' --output-file ${COVERAGE_FILE}
+    COMMAND ${GENHTML_PROG} -o ${COVERAGE_REPORT_DIR} ${COVERAGE_FILE}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    DEPENDS run_all_tests
+    COMMENT "Generating code coverage"
+  )
 endif()
 
 ## Sanitizers

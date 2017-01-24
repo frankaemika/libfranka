@@ -33,35 +33,10 @@ endif()
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
 if(BUILD_COVERAGE)
-  find_program(LCOV_PROG lcov)
-  if(NOT LCOV_PROG)
-    message(FATAL_ERROR "lcov not found.")
-  endif()
-
-  find_program(GENHTML_PROG genhtml)
-  if(NOT GENHTML_PROG)
-    message(FATAL_ERROR "genhtml not found.")
-  endif()
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+  add_compile_options(--coverage)
+  # Unfortunately, there is no add_link_options...
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
-
-  set(COVERAGE_REPORT_DIR "coverage")
-  set(COVERAGE_FILE "run_tests.coverage")
-  set(COVERAGE_CLEANED_FILE "run_tests-cleaned.coverage")
-
-  # Adjusted from https://github.com/bilke/cmake-modules/blob/master/CodeCoverage.cmake
-  add_custom_target(coverage
-    COMMAND ${LCOV_PROG} --directory . --zerocounters
-    COMMAND ${CMAKE_CTEST_COMMAND} .
-    COMMAND ${LCOV_PROG} --directory . --capture --output-file ${COVERAGE_FILE}
-    COMMAND ${LCOV_PROG} --remove ${COVERAGE_FILE} 'test/*' '/usr/*' --output-file ${COVERAGE_CLEANED_FILE}
-    COMMAND ${GENHTML_PROG} -o ${COVERAGE_REPORT_DIR} ${COVERAGE_CLEANED_FILE}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    DEPENDS run_all_tests
-    COMMENT "Generating code coverage"
-  )
 endif()
 
 ## Library
