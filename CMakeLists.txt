@@ -59,7 +59,7 @@ endif()
 set(LIB_DEPENDENCIES ${GTEST_LIBRARIES})
 
 add_library(franka SHARED
-  src/robot.cpp)
+  src/robot.cpp src/robot_state.cpp)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
@@ -69,9 +69,9 @@ target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-target_include_directories(franka PRIVATE src ${Boost_INCLUDE_DIR})
+target_include_directories(franka PRIVATE src)
 
-target_link_libraries(franka ${Boost_LIBRARIES})
+target_link_libraries(franka Boost::boost Boost::system)
 
 ## Installation
 include(GNUInstallDirs)

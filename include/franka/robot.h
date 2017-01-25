@@ -47,4 +47,8 @@ struct NetworkException : public std::runtime_error {
   explicit NetworkException(std::string const& message);
 };
 
+struct ProtocolException : public std::runtime_error {
+  explicit ProtocolException(std::string const& message);
+};
+
 }  // namespace franka

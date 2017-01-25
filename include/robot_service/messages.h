@@ -1,12 +1,17 @@
 #pragma once
 
-#include <stddef.h>
-#include <sys/types.h>
+#include <cstdint>
 
 namespace robot_service {
 
 enum class RIFunctionId : uint32_t {
   kConnect = 0
+};
+
+enum class StatusCode : uint32_t {
+  kSuccess = 0,
+  kIncompatibleLibraryVersion = 1,
+  kUnknownFunction = 2
 };
 
 struct RIConnectRequest {
@@ -16,11 +21,12 @@ struct RIConnectRequest {
 };
 
 struct RIConnectReply {
-  enum class StatusCode : uint32_t {
-    kSuccess = 0,
-    kIncompatibleLibraryVersion = 1
-  };
-  uint32_t status_code;
+  StatusCode status_code;
   uint16_t ri_version;
 };
+
+struct RIErrorReply {
+  StatusCode status_code;
+};
+
 }
