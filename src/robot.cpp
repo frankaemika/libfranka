@@ -1,6 +1,7 @@
 #include <franka/robot.h>
 
 #include <boost/asio.hpp>
+#include <iostream>
 
 #include "blocking_read_write.h"
 #include "robot_service/messages.h"
@@ -13,6 +14,7 @@ class Robot::Impl {
 
   bool waitForRobotState();
   const RobotState& getRobotState() const;
+  ServerVersion getServerVersion() const;
 
  private:
   const std::string franka_port_tcp_;
@@ -40,11 +42,20 @@ const RobotState& Robot::getRobotState() const {
   return impl_->getRobotState();
 }
 
+Robot::ServerVersion Robot::getServerVersion() const {
+  return impl_->getServerVersion();
+}
+
 NetworkException::NetworkException(std::string const& message)
     : std::runtime_error(message) {}
 
 ProtocolException::ProtocolException(std::string const& message)
     : std::runtime_error(message) {}
+
+IncompatibleVersionException::IncompatibleVersionException(
+    std::string const& message)
+    : std::runtime_error(message) {}
+
 /* Implementation */
 
 Robot::Impl::Impl(const std::string& frankaAddress)
@@ -77,13 +88,13 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     blockingWrite(io_service_, tcp_socket_, &connect_request,
                   sizeof(connect_request), std::chrono::seconds(5));
     robot_service::RIConnectReply connect_reply;
-    blockingReadBytes(io_service_, tcp_socket_, &connect_reply, sizeof(connect_reply),
-                          std::chrono::seconds(5));
-    std::cout<< "Read" << (unsigned int) connect_reply.status_code << " " << (unsigned int) connect_reply.ri_version << std::endl;
+    blockingRead(io_service_, tcp_socket_, &connect_reply,
+                 sizeof(connect_reply), std::chrono::seconds(5));
     if (connect_reply.status_code != robot_service::StatusCode::kSuccess) {
       if (connect_reply.status_code ==
           robot_service::StatusCode::kIncompatibleLibraryVersion) {
-        throw ProtocolException("libfranka: incompatible library version");
+        throw IncompatibleVersionException(
+            "libfranka: incompatible library version");
       }
       throw ProtocolException("libfranka: protocol error");
     }
@@ -95,14 +106,13 @@ Robot::Impl::Impl(const std::string& frankaAddress)
 
 bool Robot::Impl::waitForRobotState() {
   try {
-    blockingReceiveBytes(io_service_, *udp_socket_, &robot_state_, sizeof(robot_state_), std::chrono::seconds(5));
+    blockingReceiveBytes(io_service_, *udp_socket_, &robot_state_,
+                         sizeof(robot_state_), std::chrono::seconds(20));
     return true;
   } catch (boost::system::system_error const& e) {
-    if(e.code() == boost::asio::error::eof)
-    {
+    if (e.code() == boost::asio::error::eof) {
       return false;
-    }else
-    {
+    } else {
       throw NetworkException(std::string{"libfranka: "} + e.what());
     }
   }
@@ -110,6 +120,10 @@ bool Robot::Impl::waitForRobotState() {
 
 const RobotState& Robot::Impl::getRobotState() const {
   return robot_state_;
+}
+
+Robot::ServerVersion Robot::Impl::getServerVersion() const {
+  return ri_version_;
 }
 
 }  // namespace franka

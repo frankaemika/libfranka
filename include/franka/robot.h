@@ -12,6 +12,8 @@ namespace franka {
  */
 class Robot {
  public:
+  using ServerVersion = uint16_t;
+
   /**
    * Tries to establish a connection to the robot. Throws an exception if
    * unsuccessful.
@@ -35,6 +37,13 @@ class Robot {
    */
   const RobotState& getRobotState() const;
 
+  /**
+   * Returns the version reported by the connected server.
+   *
+   * @return Version of the connected server.
+   */
+  ServerVersion getServerVersion() const;
+
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
@@ -49,6 +58,10 @@ struct NetworkException : public std::runtime_error {
 
 struct ProtocolException : public std::runtime_error {
   explicit ProtocolException(std::string const& message);
+};
+
+struct IncompatibleVersionException : public std::runtime_error {
+  explicit IncompatibleVersionException(std::string const& message);
 };
 
 }  // namespace franka

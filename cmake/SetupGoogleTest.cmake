@@ -21,3 +21,11 @@ endif()
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 add_subdirectory(${GTEST_SOURCE_DIR}/googlemock ${GTEST_BINARY_DIR} EXCLUDE_FROM_ALL)
+mark_as_advanced(FORCE
+                 BUILD_SHARED_LIBS
+                 gmock_build_tests
+                 gtest_build_samples
+                 gtest_build_tests
+                 gtest_disable_pthreads
+                 gtest_force_shared_crt
+                 gtest_hide_internal_symbols)

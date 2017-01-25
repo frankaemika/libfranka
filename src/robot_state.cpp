@@ -1,14 +1,22 @@
 #include "franka/robot_state.h"
 
+#include <algorithm>
+#include <iterator>
+
 namespace franka {
 
-std::ostream& operator<<(std::ostream& os, const franka::RobotState& rs) {
-  os << boost::format(
-            "{timestamp: %1%, q: [%2%], dq: [%3%], tau_J: [%4%], dtau_J: "
-            "[%5%]}") %
-            rs.timestamp % joinArray(rs.q) % joinArray(rs.dq) %
-            joinArray(rs.tau_J) % joinArray(rs.dtau_J);
-  return os;
+template <class T, size_t N>
+std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
+  std::copy(array.cbegin(), array.cend(),
+            std::ostream_iterator<T>(ostream, ","));
+  return ostream;
+}
+
+std::ostream& operator<<(std::ostream& ostream,
+                         const franka::RobotState& robot_state) {
+  ostream << "q_start: " << robot_state.q_start;
+  // TODO: output all members
+  return ostream;
 }
 
 }  // namespace franka

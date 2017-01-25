@@ -77,6 +77,9 @@ std::size_t blockingRead(boost::asio::io_service& io_service,
   io_service.reset();
 
   if (timeout_fired) {
+    if (bytes_read > 0) {
+      throw franka::ProtocolException("libfranka: invalid object size");
+    }
     throw franka::NetworkException("libfranka: socket read timeout");
   } else if (read_error) {
     throw boost::system::system_error(read_error);
@@ -84,37 +87,11 @@ std::size_t blockingRead(boost::asio::io_service& io_service,
   return bytes_read;
 }
 
-size_t blockingReadBytes(
-    boost::asio::io_service& io_service,
-    boost::asio::ip::tcp::socket& socket,
-    void* data,
-    size_t size,
-    std::chrono::seconds timeout) {
-  auto time_start = std::chrono::system_clock::now();
-
-  size_t read = 0;
-  while (read < size) {
-    size_t bytes_left = size - read;
-    read += blockingRead(io_service, socket, data + read,
-                         bytes_left, timeout);
-
-    auto time_elapsed = std::chrono::system_clock::now() - time_start;
-    if (time_elapsed > timeout) {
-      if (read > 0) {
-        throw franka::ProtocolException("libfranka: invalid size");
-      } else {
-        throw franka::NetworkException("libfranka: socket read timeout");
-      }
-    }
-  }
-  return read;
-}
-
 size_t blockingReceive(boost::asio::io_service& io_service,
-                                        boost::asio::ip::udp::socket& socket,
-                                        void* data,
-                                        size_t size,
-                                        std::chrono::seconds timeout_duration) {
+                       boost::asio::ip::udp::socket& socket,
+                       void* data,
+                       size_t size,
+                       std::chrono::seconds timeout_duration) {
   boost::asio::steady_timer timer(io_service, timeout_duration);
   bool timeout_fired = false;
   timer.async_wait([&](const boost::system::error_code& ec) {
@@ -124,9 +101,12 @@ size_t blockingReceive(boost::asio::io_service& io_service,
     }
   });
 
-  boost::system::error_code read_error = boost::asio::error::would_block;
+  boost::system::error_code read_error;
   std::size_t bytes_read = 0;
-  socket.async_receive(boost::asio::buffer(data, size),
+  boost::asio::ip::udp::endpoint remote_endpoint;
+
+  socket.async_receive_from(
+      boost::asio::buffer(data, size), remote_endpoint,
       [&](const boost::system::error_code& ec, std::size_t length) {
         timer.cancel();
         read_error = ec;
@@ -136,7 +116,6 @@ size_t blockingReceive(boost::asio::io_service& io_service,
   // Block until all asynchronous operation were completed.
   io_service.run();
   io_service.reset();
-
   if (timeout_fired) {
     throw franka::NetworkException("libfranka: socket read timeout");
   } else if (read_error) {
@@ -145,17 +124,14 @@ size_t blockingReceive(boost::asio::io_service& io_service,
   return bytes_read;
 }
 
-
-size_t blockingReceiveBytes(
-    boost::asio::io_service& io_service,
-    boost::asio::ip::udp::socket& socket,
-    void* data,
-    size_t size,
-    std::chrono::seconds timeout) {
-  size_t received = blockingReceive(io_service, socket, data,
-                                    size, timeout);
-  if(received != size) {
-    throw franka::ProtocolException("libfranka: invalid size");
+size_t blockingReceiveBytes(boost::asio::io_service& io_service,
+                            boost::asio::ip::udp::socket& socket,
+                            void* data,
+                            size_t size,
+                            std::chrono::seconds timeout) {
+  size_t received = blockingReceive(io_service, socket, data, size, timeout);
+  if (received != size) {
+    throw franka::ProtocolException("libfranka: invalid object size");
   }
 
   return received;
