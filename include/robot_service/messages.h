@@ -4,9 +4,7 @@
 
 namespace robot_service {
 
-enum class RIFunctionId : uint32_t {
-  kConnect = 0
-};
+enum class RIFunctionId : uint32_t { kConnect = 0 };
 
 enum class StatusCode : uint32_t {
   kSuccess = 0,
@@ -28,5 +26,4 @@ struct RIConnectReply {
 struct RIErrorReply {
   StatusCode status_code;
 };
-
 }

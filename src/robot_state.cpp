@@ -11,4 +11,4 @@ std::ostream& operator<<(std::ostream& os, const franka::RobotState& rs) {
   return os;
 }
 
-} // namespace franka
+}  // namespace franka

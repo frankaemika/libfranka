@@ -58,7 +58,7 @@ Robot::Impl::Impl(const std::string& frankaAddress)
       io_service_{new boost::asio::io_service(0)},
       tcp_socket_{new boost::asio::ip::tcp::socket(*io_service_)},
       tcp_operations_{io_service_, tcp_socket_},
-      udp_socket_{}{
+      udp_socket_{} {
   using boost_tcp = boost::asio::ip::tcp;
   using boost_udp = boost::asio::ip::udp;
 
@@ -73,7 +73,7 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     auto endpoint = boost_udp::endpoint(boost_udp::v4(), 0);
     udp_socket_.reset(new boost_udp::socket(*io_service_, endpoint));
     boost_udp::endpoint local_endpoint = udp_socket_->local_endpoint();
-    unsigned short udp_port = local_endpoint.port();
+    uint16_t udp_port = local_endpoint.port();
 
     robot_service::RIConnectRequest connect_request;
     connect_request.function_id = robot_service::RIFunctionId::kConnect;
@@ -89,15 +89,17 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     // TODO: more specific error checking
     robot_service::RIConnectReply* connect_reply;
 
-    // TODO: catch the timeout, if something was received, then versions are incompatible
+    // TODO: catch the timeout, if something was received, then versions are
+    // incompatible
     std::vector<unsigned char> data = tcp_operations_.receive(
         sizeof(connect_reply), boost::posix_time::seconds(5));
 
-    connect_reply = reinterpret_cast<robot_service::RIConnectReply*>(data.data());
+    connect_reply =
+        reinterpret_cast<robot_service::RIConnectReply*>(data.data());
 
-    if(connect_reply->status_code != robot_service::StatusCode::kSuccess) {
-      if(connect_reply->status_code == robot_service::StatusCode::kIncompatibleLibraryVersion)
-      {
+    if (connect_reply->status_code != robot_service::StatusCode::kSuccess) {
+      if (connect_reply->status_code ==
+          robot_service::StatusCode::kIncompatibleLibraryVersion) {
         throw ProtocolException("libfranka: incompatible library version");
       }
       throw ProtocolException("libfranka: protocol error");
