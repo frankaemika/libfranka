@@ -60,4 +60,8 @@ struct ProtocolException : public std::runtime_error {
   explicit ProtocolException(std::string const& message);
 };
 
+struct IncompatibleVersionException : public std::runtime_error {
+  explicit IncompatibleVersionException(std::string const& message);
+};
+
 }  // namespace franka

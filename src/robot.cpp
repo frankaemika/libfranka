@@ -1,6 +1,7 @@
 #include <franka/robot.h>
 
 #include <boost/asio.hpp>
+#include <iostream>
 
 #include "network/blocking_read_write.h"
 #include "robot_service/messages.h"
@@ -52,6 +53,10 @@ NetworkException::NetworkException(std::string const& message)
 
 ProtocolException::ProtocolException(std::string const& message)
     : std::runtime_error(message) {}
+
+IncompatibleVersionException::IncompatibleVersionException(std::string const& message)
+    : std::runtime_error(message) {}
+
 /* Implementation */
 
 Robot::Impl::Impl(const std::string& frankaAddress)
@@ -100,7 +105,7 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     if (connect_reply->status_code != robot_service::StatusCode::kSuccess) {
       if (connect_reply->status_code ==
           robot_service::StatusCode::kIncompatibleLibraryVersion) {
-        throw ProtocolException("libfranka: incompatible library version");
+        throw IncompatibleVersionException("libfranka: incompatible library version");
       }
       throw ProtocolException("libfranka: protocol error");
     }
