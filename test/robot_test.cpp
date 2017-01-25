@@ -5,7 +5,7 @@
 #include <chrono>
 
 #include "franka/robot.h"
-#include "robot_service/messages.h"
+#include "../src/robot_service/messages.h"
 
 //TEST(Robot, CanConstruct) {
 //  franka::Robot robot("unit-test");

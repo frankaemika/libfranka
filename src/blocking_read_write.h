@@ -9,10 +9,9 @@
 
 namespace franka {
 
-template <typename Socket>
 void blockingWrite(boost::asio::io_service& io_service,
-                   Socket& socket,
-                   const unsigned char* data,
+                   boost::asio::ip::tcp::socket& socket,
+                   void* data,
                    size_t size,
                    std::chrono::seconds timeout_duration) {
   // Asio guarantees that its asynchronous operations will never fail
@@ -49,10 +48,9 @@ void blockingWrite(boost::asio::io_service& io_service,
   }
 }
 
-template <typename Socket>
 std::size_t blockingRead(boost::asio::io_service& io_service,
-                         Socket& socket,
-                         unsigned char* data,
+                         boost::asio::ip::tcp::socket& socket,
+                         void* data,
                          size_t size,
                          std::chrono::seconds timeout_duration) {
   boost::asio::steady_timer timer(io_service, timeout_duration);
@@ -86,31 +84,81 @@ std::size_t blockingRead(boost::asio::io_service& io_service,
   return bytes_read;
 }
 
-template <typename Socket>
-std::vector<unsigned char> blockingReadBytes(
+size_t blockingReadBytes(
     boost::asio::io_service& io_service,
-    Socket& socket,
+    boost::asio::ip::tcp::socket& socket,
+    void* data,
     size_t size,
     std::chrono::seconds timeout) {
   auto time_start = std::chrono::system_clock::now();
-  std::vector<unsigned char> data(size);
 
-  size_t received = 0;
-  while (received < size) {
-    size_t bytes_left = size - received;
-    received += blockingRead(io_service, socket, data.data() + received,
-                             bytes_left, timeout);
+  size_t read = 0;
+  while (read < size) {
+    size_t bytes_left = size - read;
+    read += blockingRead(io_service, socket, data + read,
+                         bytes_left, timeout);
 
     auto time_elapsed = std::chrono::system_clock::now() - time_start;
     if (time_elapsed > timeout) {
-      if (received > 0) {
-        throw franka::ProtocolException("libfranka: invalid object");
+      if (read > 0) {
+        throw franka::ProtocolException("libfranka: invalid size");
       } else {
         throw franka::NetworkException("libfranka: socket read timeout");
       }
     }
   }
-  return data;
+  return read;
+}
+
+size_t blockingReceive(boost::asio::io_service& io_service,
+                                        boost::asio::ip::udp::socket& socket,
+                                        void* data,
+                                        size_t size,
+                                        std::chrono::seconds timeout_duration) {
+  boost::asio::steady_timer timer(io_service, timeout_duration);
+  bool timeout_fired = false;
+  timer.async_wait([&](const boost::system::error_code& ec) {
+    if (ec != boost::asio::error::operation_aborted) {
+      io_service.stop();
+      timeout_fired = true;
+    }
+  });
+
+  boost::system::error_code read_error = boost::asio::error::would_block;
+  std::size_t bytes_read = 0;
+  socket.async_receive(boost::asio::buffer(data, size),
+      [&](const boost::system::error_code& ec, std::size_t length) {
+        timer.cancel();
+        read_error = ec;
+        bytes_read = length;
+      });
+
+  // Block until all asynchronous operation were completed.
+  io_service.run();
+  io_service.reset();
+
+  if (timeout_fired) {
+    throw franka::NetworkException("libfranka: socket read timeout");
+  } else if (read_error) {
+    throw boost::system::system_error(read_error);
+  }
+  return bytes_read;
+}
+
+
+size_t blockingReceiveBytes(
+    boost::asio::io_service& io_service,
+    boost::asio::ip::udp::socket& socket,
+    void* data,
+    size_t size,
+    std::chrono::seconds timeout) {
+  size_t received = blockingReceive(io_service, socket, data,
+                                    size, timeout);
+  if(received != size) {
+    throw franka::ProtocolException("libfranka: invalid size");
+  }
+
+  return received;
 }
 
 }  // namespace franka

@@ -2,7 +2,7 @@
 
 #include <boost/asio.hpp>
 
-#include "network/blocking_read_write.h"
+#include "blocking_read_write.h"
 #include "robot_service/messages.h"
 
 namespace franka {
@@ -16,16 +16,14 @@ class Robot::Impl {
 
  private:
   const std::string franka_port_tcp_;
-
-  uint16_t ri_version_;
   const uint16_t kRiLibraryVersion;
 
+  uint16_t ri_version_;
   RobotState robot_state_;
 
   boost::asio::io_service io_service_;
-
   boost::asio::ip::tcp::socket tcp_socket_;
-  std::shared_ptr<boost::asio::ip::udp::socket> udp_socket_;
+  std::unique_ptr<boost::asio::ip::udp::socket> udp_socket_;
 };
 
 Robot::Robot(const std::string& frankaAddress)
@@ -51,8 +49,8 @@ ProtocolException::ProtocolException(std::string const& message)
 
 Robot::Impl::Impl(const std::string& frankaAddress)
     : franka_port_tcp_{"1337"},
-      ri_version_{0},
       kRiLibraryVersion{1},
+      ri_version_{0},
       robot_state_{},
       io_service_{},
       tcp_socket_{io_service_},
@@ -70,45 +68,44 @@ Robot::Impl::Impl(const std::string& frankaAddress)
 
     auto endpoint = boost_udp::endpoint(boost_udp::v4(), 0);
     udp_socket_.reset(new boost_udp::socket(io_service_, endpoint));
-    boost_udp::endpoint local_endpoint = udp_socket_->local_endpoint();
-    uint16_t udp_port = local_endpoint.port();
 
     robot_service::RIConnectRequest connect_request;
     connect_request.function_id = robot_service::RIFunctionId::kConnect;
     connect_request.ri_library_version = kRiLibraryVersion;
-    connect_request.udp_port = udp_port;
+    connect_request.udp_port = udp_socket_->local_endpoint().port();
 
-    const unsigned char* request_data =
-        reinterpret_cast<const unsigned char*>(&connect_request);
-
-    blockingWrite(io_service_, tcp_socket_, request_data,
+    blockingWrite(io_service_, tcp_socket_, &connect_request,
                   sizeof(connect_request), std::chrono::seconds(5));
-
-    robot_service::RIConnectReply* connect_reply;
-    std::vector<unsigned char> data =
-        blockingReadBytes(io_service_, tcp_socket_, sizeof(connect_reply),
+    robot_service::RIConnectReply connect_reply;
+    blockingReadBytes(io_service_, tcp_socket_, &connect_reply, sizeof(connect_reply),
                           std::chrono::seconds(5));
-
-    connect_reply =
-        reinterpret_cast<robot_service::RIConnectReply*>(data.data());
-
-    if (connect_reply->status_code != robot_service::StatusCode::kSuccess) {
-      if (connect_reply->status_code ==
+    std::cout<< "Read" << (unsigned int) connect_reply.status_code << " " << (unsigned int) connect_reply.ri_version << std::endl;
+    if (connect_reply.status_code != robot_service::StatusCode::kSuccess) {
+      if (connect_reply.status_code ==
           robot_service::StatusCode::kIncompatibleLibraryVersion) {
         throw ProtocolException("libfranka: incompatible library version");
       }
       throw ProtocolException("libfranka: protocol error");
     }
-    ri_version_ = connect_reply->ri_version;
-
-    std::cout << "Connection with FRANKA established" << std::endl;
+    ri_version_ = connect_reply.ri_version;
   } catch (boost::system::system_error const& e) {
     throw NetworkException(std::string{"libfranka: "} + e.what());
   }
 }
 
 bool Robot::Impl::waitForRobotState() {
-  return false;
+  try {
+    blockingReceiveBytes(io_service_, *udp_socket_, &robot_state_, sizeof(robot_state_), std::chrono::seconds(5));
+    return true;
+  } catch (boost::system::system_error const& e) {
+    if(e.code() == boost::asio::error::eof)
+    {
+      return false;
+    }else
+    {
+      throw NetworkException(std::string{"libfranka: "} + e.what());
+    }
+  }
 }
 
 const RobotState& Robot::Impl::getRobotState() const {
