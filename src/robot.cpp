@@ -22,10 +22,9 @@ class Robot::Impl {
 
   RobotState robot_state_;
 
-  std::shared_ptr<boost::asio::io_service> io_service_;
+  boost::asio::io_service io_service_;
 
-  std::shared_ptr<boost::asio::ip::tcp::socket> tcp_socket_;
-  BlockingReadWrite<boost::asio::ip::tcp::socket> tcp_operations_;
+  boost::asio::ip::tcp::socket tcp_socket_;
   std::shared_ptr<boost::asio::ip::udp::socket> udp_socket_;
 };
 
@@ -55,23 +54,22 @@ Robot::Impl::Impl(const std::string& frankaAddress)
       ri_version_{0},
       kRiLibraryVersion{1},
       robot_state_{},
-      io_service_{new boost::asio::io_service(0)},
-      tcp_socket_{new boost::asio::ip::tcp::socket(*io_service_)},
-      tcp_operations_{io_service_, tcp_socket_},
-      udp_socket_{} {
+      io_service_{},
+      tcp_socket_{io_service_},
+      udp_socket_{nullptr} {
   using boost_tcp = boost::asio::ip::tcp;
   using boost_udp = boost::asio::ip::udp;
 
-  boost_tcp::resolver resolver(*io_service_);
+  boost_tcp::resolver resolver(io_service_);
   boost_tcp::resolver::query query(frankaAddress, franka_port_tcp_);
 
   try {
     boost_tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     // TODO: timeout on connect
-    boost::asio::connect(*tcp_socket_, endpoint_iterator);
+    boost::asio::connect(tcp_socket_, endpoint_iterator);
 
     auto endpoint = boost_udp::endpoint(boost_udp::v4(), 0);
-    udp_socket_.reset(new boost_udp::socket(*io_service_, endpoint));
+    udp_socket_.reset(new boost_udp::socket(io_service_, endpoint));
     boost_udp::endpoint local_endpoint = udp_socket_->local_endpoint();
     uint16_t udp_port = local_endpoint.port();
 
@@ -83,16 +81,13 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     const unsigned char* request_data =
         reinterpret_cast<const unsigned char*>(&connect_request);
 
-    tcp_operations_.write(request_data, sizeof(connect_request),
-                          boost::posix_time::seconds(4));
+    blockingWrite(io_service_, tcp_socket_, request_data,
+                  sizeof(connect_request), std::chrono::seconds(5));
 
-    // TODO: more specific error checking
     robot_service::RIConnectReply* connect_reply;
-
-    // TODO: catch the timeout, if something was received, then versions are
-    // incompatible
-    std::vector<unsigned char> data = tcp_operations_.receive(
-        sizeof(connect_reply), boost::posix_time::seconds(5));
+    std::vector<unsigned char> data =
+        blockingReadBytes(io_service_, tcp_socket_, sizeof(connect_reply),
+                          std::chrono::seconds(5));
 
     connect_reply =
         reinterpret_cast<robot_service::RIConnectReply*>(data.data());
