@@ -45,7 +45,8 @@ endif()
 set(LIB_DEPENDENCIES ${GTEST_LIBRARIES})
 
 add_library(franka SHARED
-  src/robot.cpp src/robot_state.cpp)
+  src/robot.cpp src/robot_state.cpp
+)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)

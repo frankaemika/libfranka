@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "network/blocking_read_write.h"
-#include "robot_service/messages.h"
+#include "message_types.h"
 
 namespace franka {
 
@@ -83,8 +83,8 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     boost_udp::endpoint local_endpoint = udp_socket_->local_endpoint();
     uint16_t udp_port = local_endpoint.port();
 
-    robot_service::RIConnectRequest connect_request;
-    connect_request.function_id = robot_service::RIFunctionId::kConnect;
+    message_types::ConnectRequest connect_request;
+    connect_request.function_id = message_types::FunctionId::kConnect;
     connect_request.ri_library_version = kRiLibraryVersion;
     connect_request.udp_port = udp_port;
 
@@ -94,17 +94,17 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     blockingWrite(io_service_, tcp_socket_, request_data,
                   sizeof(connect_request), std::chrono::seconds(5));
 
-    robot_service::RIConnectReply* connect_reply;
+    message_types::ConnectReply* connect_reply;
     std::vector<unsigned char> data =
         blockingReadBytes(io_service_, tcp_socket_, sizeof(connect_reply),
                           std::chrono::seconds(5));
 
     connect_reply =
-        reinterpret_cast<robot_service::RIConnectReply*>(data.data());
+        reinterpret_cast<message_types::ConnectReply*>(data.data());
 
-    if (connect_reply->status_code != robot_service::StatusCode::kSuccess) {
+    if (connect_reply->status_code != message_types::ConnectReply::StatusCode::kSuccess) {
       if (connect_reply->status_code ==
-          robot_service::StatusCode::kIncompatibleLibraryVersion) {
+          message_types::ConnectReply::StatusCode::kIncompatibleLibraryVersion) {
         throw IncompatibleVersionException("libfranka: incompatible library version");
       }
       throw ProtocolException("libfranka: protocol error");

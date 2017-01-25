@@ -1,8 +1,8 @@
 #include "mock_server.h"
 
-#include <franka/robot_state.h>
-
 #include <iostream>
+
+#include <franka/robot_state.h>
 
 MockServer::MockServer()
   : io_service_{} {
@@ -32,12 +32,12 @@ void MockServer::serverThread() {
   boost::asio::ip::tcp::socket tcp_socket(io_service_);
   acceptor.accept(tcp_socket);
 
-  robot_service::RIConnectRequest request;
+  message_types::ConnectRequest request;
   boost::asio::read(tcp_socket, boost::asio::buffer(&request, sizeof(request)));
 
-  robot_service::RIConnectReply reply;
+  message_types::ConnectReply reply;
   reply.ri_version = 1;
-  reply.status_code = robot_service::StatusCode::kSuccess;
+  reply.status_code = message_types::ConnectReply::StatusCode::kSuccess;
 
   if (on_connect_) {
     on_connect_(request, reply);

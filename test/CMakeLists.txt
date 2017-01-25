@@ -10,13 +10,14 @@ include(SetupGoogleTest)
 ## Test runner
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka ${GTEST_LIBRARIES})
+set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
 add_executable(run_all_tests
   robot_tests.cpp
   robot_state_tests.cpp
   mock_server.cpp
 )
-target_include_directories(run_all_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
 
 add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
@@ -68,7 +69,7 @@ foreach(sanitizer ${SANITIZERS})
     set(target_name "run_all_tests_${sanitizer_lc}")
 
     add_executable(${target_name} ${TESTS})
-    target_include_directories(${target_name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_include_directories(${target_name} PRIVATE ${TEST_INCLUDE_DIRECTORIES})
     target_link_libraries(${target_name} ${TEST_DEPENDENCIES} ${sanitizer_flags})
     target_compile_options(${target_name} PRIVATE ${sanitizer_flags})
     add_test(NAME ${sanitizer}

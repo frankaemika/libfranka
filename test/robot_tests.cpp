@@ -9,6 +9,7 @@
 #include "mock_server.h"
 
 using namespace franka;
+using namespace message_types;
 
 void randomRobotState(std::uniform_real_distribution<double>& dist, std::mt19937& mt, RobotState& robot_state);
 void testRobotStateIsZero(const RobotState& actual);
@@ -28,8 +29,8 @@ TEST(Robot, CanPerformHandshake) {
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   MockServer server;
-  server.onConnect([](const robot_service::RIConnectRequest&, robot_service::RIConnectReply& reply) {
-           reply.status_code = robot_service::StatusCode::kIncompatibleLibraryVersion;
+  server.onConnect([](const ConnectRequest&, ConnectReply& reply) {
+           reply.status_code = ConnectReply::StatusCode::kIncompatibleLibraryVersion;
          })
         .start();
 

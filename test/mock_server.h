@@ -9,11 +9,11 @@
 #include <boost/asio.hpp>
 
 #include <franka/robot_state.h>
-#include <robot_service/messages.h>
+#include "message_types.h"
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<void(const robot_service::RIConnectRequest&, robot_service::RIConnectReply&)>;
+  using ConnectCallbackT = std::function<void(const message_types::ConnectRequest&, message_types::ConnectReply&)>;
   using SendRobotStateCallbackT = std::function<const franka::RobotState&()>;
 
   MockServer();
