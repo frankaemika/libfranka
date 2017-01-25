@@ -12,7 +12,9 @@ set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka ${GTEST_LIBRARIES})
 
 add_executable(run_all_tests
-  robot_test.cpp
+  robot_tests.cpp
+  robot_state_tests.cpp
+  mock_server.cpp
 )
 target_include_directories(run_all_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
