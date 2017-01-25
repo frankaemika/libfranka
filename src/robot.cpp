@@ -13,6 +13,7 @@ class Robot::Impl {
 
   bool waitForRobotState();
   const RobotState& getRobotState() const;
+  ServerVersion getServerVersion() const;
 
  private:
   const std::string franka_port_tcp_;
@@ -40,6 +41,10 @@ bool Robot::waitForRobotState() {
 
 const RobotState& Robot::getRobotState() const {
   return impl_->getRobotState();
+}
+
+Robot::ServerVersion Robot::getServerVersion() const {
+  return impl_->getServerVersion();
 }
 
 NetworkException::NetworkException(std::string const& message)
@@ -113,6 +118,10 @@ bool Robot::Impl::waitForRobotState() {
 
 const RobotState& Robot::Impl::getRobotState() const {
   return robot_state_;
+}
+
+Robot::ServerVersion Robot::Impl::getServerVersion() const {
+  return ri_version_;
 }
 
 }  // namespace franka
