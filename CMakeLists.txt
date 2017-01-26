@@ -49,8 +49,8 @@ add_library(franka SHARED
 )
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
-file(GLOB_RECURSE HEADERS include/*.h src/*.h)
+file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
+file(GLOB_RECURSE HEADERS include/*.h src/*.h examples/*.h)
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
