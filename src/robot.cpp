@@ -4,7 +4,8 @@
 #include <iostream>
 
 #include "blocking_read_write.h"
-#include "robot_service/messages.h"
+#include "blocking_read_write.h"
+#include "message_types.h"
 
 namespace franka {
 
@@ -80,19 +81,20 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     auto endpoint = boost_udp::endpoint(boost_udp::v4(), 0);
     udp_socket_.reset(new boost_udp::socket(io_service_, endpoint));
 
-    robot_service::RIConnectRequest connect_request;
-    connect_request.function_id = robot_service::RIFunctionId::kConnect;
+    message_types::ConnectRequest connect_request;
+    connect_request.function_id = message_types::FunctionId::kConnect;
     connect_request.ri_library_version = kRiLibraryVersion;
     connect_request.udp_port = udp_socket_->local_endpoint().port();
 
     blockingWrite(io_service_, tcp_socket_, &connect_request,
                   sizeof(connect_request), std::chrono::seconds(5));
-    robot_service::RIConnectReply connect_reply;
+
+    message_types::ConnectReply connect_reply;
     blockingRead(io_service_, tcp_socket_, &connect_reply,
                  sizeof(connect_reply), std::chrono::seconds(5));
-    if (connect_reply.status_code != robot_service::StatusCode::kSuccess) {
+    if (connect_reply.status_code != message_types::ConnectReply::StatusCode::kSuccess) {
       if (connect_reply.status_code ==
-          robot_service::StatusCode::kIncompatibleLibraryVersion) {
+          message_types::ConnectReply::StatusCode::kIncompatibleLibraryVersion) {
         throw IncompatibleVersionException(
             "libfranka: incompatible library version");
       }

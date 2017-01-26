@@ -4,7 +4,10 @@
 #include <ostream>
 
 namespace franka {
+
 struct RobotState {
+  RobotState();
+
   std::array<double, 7> q_start;
   std::array<double, 16> O_T_EE_start;
   std::array<double, 2> elbow_start;
@@ -22,6 +25,6 @@ struct RobotState {
   std::array<double, 6> EE_F_ext_hat_EE;
 };
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const franka::RobotState& robot_state);
+std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
+
 }  // namespace franka

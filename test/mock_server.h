@@ -1,19 +1,17 @@
 #pragma once
 
+#include <boost/asio.hpp>
 #include <condition_variable>
-#include <functional>
 #include <mutex>
-#include <string>
 #include <thread>
 
-#include <boost/asio.hpp>
-
 #include <franka/robot_state.h>
-#include "../src/robot_service/messages.h"
+
+#include "../src/message_types.h"
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<void(const robot_service::RIConnectRequest&, robot_service::RIConnectReply&)>;
+  using ConnectCallbackT = std::function<void(const message_types::ConnectRequest&, message_types::ConnectReply&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
   MockServer();
