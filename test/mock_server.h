@@ -7,7 +7,7 @@
 
 #include <franka/robot_state.h>
 
-#include "../src/message_types.h"
+#include "message_types.h"
 
 class MockServer {
  public:
