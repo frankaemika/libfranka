@@ -53,9 +53,9 @@ void MockServer::serverThread() {
   boost_udp::socket udp_socket(io_service_, boost_udp::endpoint(boost_udp::v4(),0));
   franka::RobotState robot_state = on_send_robot_state_();
 
-  boost_udp::resolver resolver(io_service_);
-  boost_udp::resolver::query query(boost::asio::ip::udp::v4(), tcp_socket.remote_endpoint().address().to_string(),  std::to_string(request.udp_port));
-  boost_udp::endpoint receiver_endpoint = *resolver.resolve(query);
+  //boost_udp::resolver resolver(io_service_);
+  //boost_udp::resolver::query query(boost::asio::ip::udp::v4(), .to_string(),  std::to_string(request.udp_port));
+  boost_udp::endpoint receiver_endpoint(tcp_socket.remote_endpoint().address(), request.udp_port);
 
   udp_socket.send_to(boost::asio::buffer(&robot_state, sizeof(robot_state)), receiver_endpoint);
 }
