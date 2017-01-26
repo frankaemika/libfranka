@@ -55,6 +55,10 @@ target_include_directories(franka PUBLIC
 target_include_directories(franka PRIVATE src)
 
 ## Installation
+include(CMakePackageConfigHelpers)
+set(FRANKA_CONFIG_VERSION_FILE ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake)
+write_basic_package_version_file(${FRANKA_CONFIG_VERSION_FILE} COMPATIBILITY SameMajorVersion)
+
 include(GNUInstallDirs)
 install(TARGETS franka
   EXPORT FrankaConfig
@@ -62,6 +66,7 @@ install(TARGETS franka
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # Install .dlls into bin/ directory on Windows
 )
 install(EXPORT FrankaConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
+install(FILES ${FRANKA_CONFIG_VERSION_FILE} DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # Export targets into build directory to allow usage without installation
