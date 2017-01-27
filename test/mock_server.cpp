@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-#include <franka/robot_state.h>
+#include <Poco/Net/StreamSocket.h>
+#include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/ServerSocket.h>
 
-MockServer::MockServer()
-  : io_service_{} {
-}
+#include <franka/robot_state.h>
 
 MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
   on_connect_ = on_connect;
@@ -25,16 +25,14 @@ void MockServer::start() {
 }
 
 void MockServer::serverThread() {
-  using boost_udp = boost::asio::ip::udp;
-  // Wait for TCP connection
-  boost::asio::ip::tcp::acceptor acceptor(io_service_, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 1337));
+  Poco::Net::ServerSocket srv({"localhost", 1337}); // does bind + listen
   cv_.notify_one();
 
-  boost::asio::ip::tcp::socket tcp_socket(io_service_);
-  acceptor.accept(tcp_socket);
+  Poco::Net::SocketAddress remote_address;
+  Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
 
   message_types::ConnectRequest request;
-  boost::asio::read(tcp_socket, boost::asio::buffer(&request, sizeof(request)));
+  tcp_socket.receiveBytes(&request, sizeof(request));
 
   message_types::ConnectReply reply;
   reply.ri_version = 1;
@@ -44,20 +42,17 @@ void MockServer::serverThread() {
     on_connect_(request, reply);
   }
 
-  boost::asio::write(tcp_socket, boost::asio::buffer(&reply, sizeof(reply)));
+  tcp_socket.sendBytes(&reply, sizeof(reply));
 
   // Send robot state over UDP
   if (!on_send_robot_state_) {
     return;
   }
-  boost_udp::socket udp_socket(io_service_, boost_udp::endpoint(boost_udp::v4(),0));
+
+  Poco::Net::DatagramSocket udp_socket({std::string("localhost"), 0});
   franka::RobotState robot_state = on_send_robot_state_();
 
-  //boost_udp::resolver resolver(io_service_);
-  //boost_udp::resolver::query query(boost::asio::ip::udp::v4(), .to_string(),  std::to_string(request.udp_port));
-  boost_udp::endpoint receiver_endpoint(tcp_socket.remote_endpoint().address(), request.udp_port);
-
-  udp_socket.send_to(boost::asio::buffer(&robot_state, sizeof(robot_state)), receiver_endpoint);
+  udp_socket.sendTo(&robot_state, sizeof(robot_state), {remote_address.host(), request.udp_port});
 }
 
 MockServer::~MockServer() {

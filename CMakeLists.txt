@@ -17,7 +17,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Poco REQUIRED COMPONENTS Net Foundation)
 
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
@@ -46,7 +46,7 @@ set(LIB_DEPENDENCIES ${GTEST_LIBRARIES})
 
 add_library(franka SHARED
   src/robot.cpp src/robot_state.cpp
-)
+        src/network.cpp)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
@@ -58,7 +58,7 @@ target_include_directories(franka PUBLIC
 )
 target_include_directories(franka PRIVATE src)
 
-target_link_libraries(franka Boost::boost Boost::system)
+target_link_libraries(franka Poco::Net Poco::Foundation)
 
 ## Installation
 include(GNUInstallDirs)

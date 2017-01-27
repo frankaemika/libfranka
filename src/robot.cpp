@@ -1,32 +1,37 @@
 #include <franka/robot.h>
 
-#include <boost/asio.hpp>
+#include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/NetException.h>
+#include <Poco/Net/StreamSocket.h>
+#include <Poco/Timespan.h>
+#include <chrono>
 #include <iostream>
+#include <sstream>
 
-#include "blocking_read_write.h"
-#include "blocking_read_write.h"
 #include "message_types.h"
+#include "network.h"
 
 namespace franka {
 
 class Robot::Impl {
  public:
   explicit Impl(const std::string& frankaAddress);
+  ~Impl();
 
   bool waitForRobotState();
   const RobotState& getRobotState() const;
   ServerVersion getServerVersion() const;
 
  private:
-  const std::string franka_port_tcp_;
-  const uint16_t kRiLibraryVersion;
+  const uint16_t kFranka_port_tcp_;
+  const uint16_t kRiLibraryVersion_;
+  const std::chrono::seconds kTimeout_;
 
   uint16_t ri_version_;
   RobotState robot_state_;
 
-  boost::asio::io_service io_service_;
-  boost::asio::ip::tcp::socket tcp_socket_;
-  std::unique_ptr<boost::asio::ip::udp::socket> udp_socket_;
+  Poco::Net::StreamSocket tcp_socket_;
+  Poco::Net::DatagramSocket udp_socket_;
 };
 
 Robot::Robot(const std::string& frankaAddress)
@@ -60,63 +65,76 @@ IncompatibleVersionException::IncompatibleVersionException(
 /* Implementation */
 
 Robot::Impl::Impl(const std::string& frankaAddress)
-    : franka_port_tcp_{"1337"},
-      kRiLibraryVersion{1},
+    : kFranka_port_tcp_{1337},
+      kRiLibraryVersion_{1},
+      kTimeout_{5},
       ri_version_{0},
       robot_state_{},
-      io_service_{},
-      tcp_socket_{io_service_},
-      udp_socket_{nullptr} {
-  using boost_tcp = boost::asio::ip::tcp;
-  using boost_udp = boost::asio::ip::udp;
-
-  boost_tcp::resolver resolver(io_service_);
-  boost_tcp::resolver::query query(frankaAddress, franka_port_tcp_);
-
+      tcp_socket_{},
+      udp_socket_{} {
   try {
-    boost_tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    // TODO: timeout on connect
-    boost::asio::connect(tcp_socket_, endpoint_iterator);
+    tcp_socket_.connect({frankaAddress, kFranka_port_tcp_},
+                        Poco::Timespan(kTimeout_.count(), 0));
+    tcp_socket_.setBlocking(true);
+    tcp_socket_.setSendTimeout(Poco::Timespan(kTimeout_.count(), 0));
+    tcp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
 
-    auto endpoint = boost_udp::endpoint(boost_udp::v4(), 0);
-    udp_socket_.reset(new boost_udp::socket(io_service_, endpoint));
+    udp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
+    udp_socket_.bind({"0.0.0.0", 0});
 
     message_types::ConnectRequest connect_request;
     connect_request.function_id = message_types::FunctionId::kConnect;
-    connect_request.ri_library_version = kRiLibraryVersion;
-    connect_request.udp_port = udp_socket_->local_endpoint().port();
+    connect_request.ri_library_version = kRiLibraryVersion_;
+    connect_request.udp_port = udp_socket_.address().port();
 
-    blockingWrite(io_service_, tcp_socket_, &connect_request,
-                  sizeof(connect_request), std::chrono::seconds(5));
+    tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
     message_types::ConnectReply connect_reply;
-    blockingRead(io_service_, tcp_socket_, &connect_reply,
-                 sizeof(connect_reply), std::chrono::seconds(5));
-    if (connect_reply.status_code != message_types::ConnectReply::StatusCode::kSuccess) {
-      if (connect_reply.status_code ==
-          message_types::ConnectReply::StatusCode::kIncompatibleLibraryVersion) {
-        throw IncompatibleVersionException(
-            "libfranka: incompatible library version");
+    readBytes(tcp_socket_, &connect_reply, sizeof(connect_reply), kTimeout_);
+    if (connect_reply.status_code !=
+        message_types::ConnectReply::StatusCode::kSuccess) {
+      if (connect_reply.status_code == message_types::ConnectReply::StatusCode::
+                                           kIncompatibleLibraryVersion) {
+        std::stringstream message;
+        message << "libfranka: incompatible library version. "
+                << "Server version: " << connect_reply.ri_version
+                << "Library version: " << kRiLibraryVersion_;
+        throw IncompatibleVersionException(message.str());
       }
       throw ProtocolException("libfranka: protocol error");
     }
     ri_version_ = connect_reply.ri_version;
-  } catch (boost::system::system_error const& e) {
-    throw NetworkException(std::string{"libfranka: "} + e.what());
+  } catch (Poco::TimeoutException const& e) {
+    throw NetworkException("libfranka: FRANKA connection timeout");
+  } catch (Poco::Exception const& e) {
+    throw NetworkException(std::string{"libfranka: FRANKA connection: "} +
+                           e.what());
   }
+}
+
+Robot::Impl::~Impl() {
+  tcp_socket_.shutdown();
+  tcp_socket_.close();
+  udp_socket_.close();
 }
 
 bool Robot::Impl::waitForRobotState() {
   try {
-    blockingReceiveBytes(io_service_, *udp_socket_, &robot_state_,
-                         sizeof(robot_state_), std::chrono::seconds(20));
-    return true;
-  } catch (boost::system::system_error const& e) {
-    if (e.code() == boost::asio::error::eof) {
-      return false;
-    } else {
-      throw NetworkException(std::string{"libfranka: "} + e.what());
+    Poco::Net::SocketAddress server_address;
+    int bytes_received = udp_socket_.receiveFrom(
+        &robot_state_, sizeof(robot_state_), server_address, 0);
+    if (bytes_received == sizeof(robot_state_)) {
+      return true;
     }
+    if (bytes_received == 0) {
+      return false;
+    }
+    throw ProtocolException("libfranka:: incorrect object size");
+  } catch (Poco::TimeoutException const& e) {
+    throw NetworkException("libfranka: robot state read timeout");
+  } catch (Poco::Net::NetException const& e) {
+    throw NetworkException(std::string{"libfranka: robot state read: "} +
+                           e.what());
   }
 }
 

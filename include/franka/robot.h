@@ -52,14 +52,26 @@ class Robot {
   std::unique_ptr<Impl> impl_;
 };
 
+/**
+ * NetworkException is thrown when a connection to FRANKA cannot be established,
+ * or when
+ * a timeout occurs.
+ */
 struct NetworkException : public std::runtime_error {
   explicit NetworkException(std::string const& message);
 };
 
+/**
+ * ProtocolException is thrown when the server returns an incorrect message.
+ */
 struct ProtocolException : public std::runtime_error {
   explicit ProtocolException(std::string const& message);
 };
 
+/**
+ * IncompatibleVersionException is thrown if the server does not support this
+ * version of libfranka.
+ */
 struct IncompatibleVersionException : public std::runtime_error {
   explicit IncompatibleVersionException(std::string const& message);
 };

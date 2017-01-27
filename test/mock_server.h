@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/asio.hpp>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
@@ -14,7 +13,7 @@ class MockServer {
   using ConnectCallbackT = std::function<void(const message_types::ConnectRequest&, message_types::ConnectReply&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
-  MockServer();
+  MockServer() = default;
   ~MockServer();
 
   MockServer& onConnect(ConnectCallbackT on_connect);
@@ -24,7 +23,6 @@ class MockServer {
  private:
   void serverThread();
 
-  boost::asio::io_service io_service_;
   std::condition_variable cv_;
   std::mutex mutex_;
   std::thread server_thread_;

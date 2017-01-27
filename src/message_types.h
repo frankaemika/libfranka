@@ -4,9 +4,7 @@
 
 namespace message_types {
 
-enum class FunctionId : uint32_t {
-  kConnect = 0
-};
+enum class FunctionId : uint32_t { kConnect = 0 };
 
 struct ConnectRequest {
   FunctionId function_id;

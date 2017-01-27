@@ -5,6 +5,9 @@
 
 namespace franka {
 
+/**
+ * RobotState class describes FRANKA's state.
+ */
 struct RobotState {
   RobotState();
 
@@ -25,6 +28,7 @@ struct RobotState {
   std::array<double, 6> EE_F_ext_hat_EE;
 };
 
-std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
+std::ostream& operator<<(std::ostream& ostream,
+                         const franka::RobotState& robot_state);
 
 }  // namespace franka

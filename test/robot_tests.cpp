@@ -55,6 +55,4 @@ TEST(Robot, CanReceiveRobotState) {
 
   ASSERT_TRUE(robot.waitForRobotState());
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
-
-  std::cout << received_robot_state << std::endl;
 }
