@@ -80,7 +80,7 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     tcp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
 
     udp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
-    udp_socket_.bind({"192.168.2.35", 0});
+    udp_socket_.bind({"0.0.0.0", 0});
 
     message_types::ConnectRequest connect_request;
     connect_request.function_id = message_types::FunctionId::kConnect;
