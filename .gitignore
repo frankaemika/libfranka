@@ -1,4 +1,4 @@
-build/
-cmake-build-debug/
+build*/
+cmake-build-*/
 .idea/
 /3rdparty/*
