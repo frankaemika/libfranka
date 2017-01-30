@@ -4,16 +4,20 @@ project(libfranka-examples CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+if(TARGET franka)
+  # Integrated build of examples (included by add_subdirectory())
+  set(EXAMPLE_DEPENDENCIES franka)
+else()
   # Standalone build of examples
   find_package(Franka REQUIRED)
+  set(EXAMPLE_DEPENDENCIES Franka::franka)
 endif()
 
 set(EXAMPLES echo_robot_state)
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
-  target_link_libraries(${example} franka)
+  target_link_libraries(${example} ${EXAMPLE_DEPENDENCIES})
 endforeach()
 
 include(GNUInstallDirs)

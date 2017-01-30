@@ -17,10 +17,14 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
-find_package(Poco REQUIRED COMPONENTS Net Foundation)
-
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
+
+## Dependencies
+# Don't forget to adjust cmake/FrankaConfig.cmake.in
+# when making changes here.
+
+find_package(Poco REQUIRED COMPONENTS Net Foundation)
 
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
@@ -42,11 +46,11 @@ if(BUILD_COVERAGE)
 endif()
 
 ## Library
-set(LIB_DEPENDENCIES ${GTEST_LIBRARIES})
-
 add_library(franka SHARED
-  src/robot.cpp src/robot_state.cpp
-        src/network.cpp)
+  src/robot.cpp
+  src/robot_state.cpp
+  src/network.cpp
+)
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
@@ -62,16 +66,43 @@ target_link_libraries(franka Poco::Net Poco::Foundation)
 
 ## Installation
 include(GNUInstallDirs)
+set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
+
 install(TARGETS franka
-  EXPORT FrankaConfig
+  EXPORT FrankaTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} # Install .dlls into bin/ directory on Windows
 )
-install(EXPORT FrankaConfig DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# Export targets into build directory to allow usage without installation
-export(TARGETS franka FILE FrankaConfig.cmake)
+export(EXPORT FrankaTargets
+  NAMESPACE Franka::
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/FrankaTargets.cmake
+)
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
+  COMPATIBILITY SameMajorVersion
+)
+configure_package_config_file(cmake/FrankaConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
+  INSTALL_DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+)
+configure_file(cmake/FindPoco.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
+  COPYONLY
+)
+
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
+  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+)
+install(EXPORT FrankaTargets
+  NAMESPACE Franka::
+  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+)
 
 ## Subprojects
 option(BUILD_TESTS "Build tests" ON)
