@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+rm -rf build-release
+mkdir build-release
+cd build-release
+cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX:PATH=/usr -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON ..
+cmake --build .
+ctest -V
+cpack
+if [ "$GIT_BRANCH" = "origin/master" ]; then
+  DESTDIR=../master-install cmake --build . --target install
+fi

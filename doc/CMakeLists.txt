@@ -12,7 +12,7 @@ else()
 endif()
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${DOXYFILE} @ONLY)
 
-add_custom_target(doc ALL
+add_custom_target(doc
   COMMAND ${DOXYGEN_PROG} ${DOXYFILE}
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Generating documentation with Doxygen"
