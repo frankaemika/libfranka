@@ -3,14 +3,21 @@
 #include <array>
 #include <ostream>
 
+/** \file robot_state.h
+    \brief Contains the RobotState struct.
+*/
+
 namespace franka {
 
 /**
- * RobotState class describes FRANKA's state.
+ * RobotState struct describes FRANKA's state.
  */
 struct RobotState {
   RobotState();
 
+  /**
+   * Initial q.
+   */
   std::array<double, 7> q_start;
   std::array<double, 16> O_T_EE_start;
   std::array<double, 2> elbow_start;

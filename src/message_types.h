@@ -29,10 +29,7 @@ struct PingRequest {
 };
 
 struct PingReply {
-  enum class StatusCode : uint32_t {
-    kSuccess = 0,
-    kFail = 1
-  };
+  enum class StatusCode : uint32_t { kSuccess = 0, kFail = 1 };
   StatusCode status_code;
 };
 
