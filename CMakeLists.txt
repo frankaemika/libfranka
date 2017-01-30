@@ -153,11 +153,24 @@ if(CLANG_FORMAT_PROG)
     COMMENT "Formatting source code with clang-format"
     VERBATIM
   )
+  add_custom_target(check-format
+    COMMAND scripts/fail-on-output.sh ${CLANG_FORMAT_PROG} ${SOURCES} ${HEADERS}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMENT "Checking code formatting with clang-format"
+    VERBATIM
+  )
 endif()
 find_program(CLANG_TIDY_PROG clang-tidy DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   add_custom_target(tidy
     COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_CURRENT_BINARY_DIR} ${SOURCES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    DEPENDS franka
+    COMMENT "Running clang-tidy"
+    VERBATIM
+  )
+  add_custom_target(check-tidy
+    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_CURRENT_BINARY_DIR} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS franka
     COMMENT "Running clang-tidy"
