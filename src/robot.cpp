@@ -3,13 +3,11 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
-#include <Poco/Timespan.h>
 #include <chrono>
 #include <iostream>
 #include <sstream>
 
 #include "message_types.h"
-#include "network.h"
 
 namespace franka {
 
@@ -21,6 +19,11 @@ class Robot::Impl {
   bool waitForRobotState();
   const RobotState& getRobotState() const;
   ServerVersion getServerVersion() const;
+
+ protected:
+  // Can throw NetworkException and ProtocolException
+  template <class T>
+  void tcpReceiveObject(T& object);
 
  private:
   const uint16_t kFranka_port_tcp_;
@@ -90,7 +93,7 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
     message_types::ConnectReply connect_reply;
-    readObject(tcp_socket_, connect_reply, kTimeout_);
+    tcpReceiveObject(connect_reply);
 
     if (connect_reply.status_code !=
         message_types::ConnectReply::StatusCode::kSuccess) {
@@ -105,11 +108,13 @@ Robot::Impl::Impl(const std::string& frankaAddress)
       throw ProtocolException("libfranka: protocol error");
     }
     ri_version_ = connect_reply.ri_version;
+  } catch (Poco::Net::NetException const& e) {
+    throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
+                           e.what());
   } catch (Poco::TimeoutException const& e) {
     throw NetworkException("libfranka: FRANKA connection timeout");
   } catch (Poco::Exception const& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection: "} +
-                           e.what());
+    throw NetworkException(std::string{"libfranka: "} + e.what());
   }
 }
 
@@ -145,6 +150,23 @@ const RobotState& Robot::Impl::getRobotState() const {
 
 Robot::ServerVersion Robot::Impl::getServerVersion() const {
   return ri_version_;
+}
+
+template <class T>
+void Robot::Impl::tcpReceiveObject(T& object) {
+  try {
+    int rv = tcp_socket_.receiveBytes(&object, sizeof(object));
+    if (rv == 0) {
+      throw NetworkException("libfranka:: FRANKA connection closed");
+    } else if (rv != sizeof(object)) {
+      throw ProtocolException("libfranka:: incorrect object size");
+    }
+  } catch (Poco::Net::NetException const& e) {
+    throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
+                           e.what());
+  } catch (Poco::TimeoutException const& e) {
+    throw NetworkException("libfranka: FRANKA connection timeout");
+  }
 }
 
 }  // namespace franka
