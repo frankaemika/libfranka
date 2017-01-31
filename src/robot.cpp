@@ -154,18 +154,30 @@ Robot::ServerVersion Robot::Impl::getServerVersion() const {
 
 template <class T>
 void Robot::Impl::tcpReceiveObject(T& object) {
+  int bytes_read = 0;
   try {
-    int rv = tcp_socket_.receiveBytes(&object, sizeof(object));
-    if (rv == 0) {
-      throw NetworkException("libfranka:: FRANKA connection closed");
-    } else if (rv != sizeof(object)) {
-      throw ProtocolException("libfranka:: incorrect object size");
+    uint8_t* buff = reinterpret_cast<uint8_t*>(&object);  // NOLINT
+    constexpr int bytes_total = sizeof(T);
+
+    while (bytes_read < bytes_total) {
+      int bytes_left = bytes_total - bytes_read;
+      int rv = tcp_socket_.receiveBytes(buff + bytes_read,  // NOLINT
+                                        bytes_left, 0);
+      if (rv == 0) {
+        throw NetworkException("libfranka:: FRANKA connection closed");
+      }
+      bytes_read += rv;
     }
+
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
                            e.what());
   } catch (Poco::TimeoutException const& e) {
-    throw NetworkException("libfranka: FRANKA connection timeout");
+    if (bytes_read != 0) {
+      throw ProtocolException("libfranka:: incorrect object size");
+    } else {
+      throw NetworkException("libfranka: FRANKA connection timeout");
+    }
   }
 }
 
