@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-
 output="$($@)"
 if [[ "$output" ]]; then
   echo "$output"

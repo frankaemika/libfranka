@@ -90,7 +90,8 @@ Robot::Impl::Impl(const std::string& frankaAddress)
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
     message_types::ConnectReply connect_reply;
-    readBytes(tcp_socket_, &connect_reply, sizeof(connect_reply), kTimeout_);
+    readObject(tcp_socket_, connect_reply, kTimeout_);
+
     if (connect_reply.status_code !=
         message_types::ConnectReply::StatusCode::kSuccess) {
       if (connect_reply.status_code == message_types::ConnectReply::StatusCode::

@@ -49,8 +49,7 @@ endif()
 add_library(franka SHARED
   src/robot.cpp
   src/robot_state.cpp
-  src/network.cpp
-)
+        )
 set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
@@ -154,7 +153,7 @@ if(CLANG_FORMAT_PROG)
     VERBATIM
   )
   add_custom_target(check-format
-    COMMAND scripts/fail-on-output.sh ${CLANG_FORMAT_PROG} ${SOURCES} ${HEADERS}
+    COMMAND scripts/format-check.sh ${CLANG_FORMAT_PROG} -output-replacements-xml ${SOURCES} ${HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Checking code formatting with clang-format"
     VERBATIM

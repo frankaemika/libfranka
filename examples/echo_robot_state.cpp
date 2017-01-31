@@ -3,14 +3,12 @@
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./echo_robot_state <robot-ip>" << std::endl;
+    std::cerr << "Usage: ./echo_robot_state <robot-hostname>" << std::endl;
     return -1;
   }
 
-  std::string robot_ip(argv[1]);
-
   try {
-    franka::Robot robot(robot_ip);
+    franka::Robot robot(argv[1]);  // NOLINT
 
     while (robot.waitForRobotState()) {
       const franka::RobotState& robot_state = robot.getRobotState();
