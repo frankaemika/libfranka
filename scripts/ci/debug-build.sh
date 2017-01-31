@@ -10,4 +10,3 @@ cmake --build . --target check-format
 cmake --build .
 ctest -V
 cmake --build . --target check-tidy
-cmake --build . --target doc
