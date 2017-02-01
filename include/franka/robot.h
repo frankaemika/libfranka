@@ -5,12 +5,12 @@
 
 #include <franka/robot_state.h>
 
-/** \file robot.h
-    Contains the Robot class and Exception definitions.
+/** @file robot.h
+ *  Contains the Robot class and Exception definitions.
 */
 
 namespace franka {
-/** \class Robot
+/** @class Robot
  * Robot class maintains a connection to FRANKA CONTROL and provides the current
  * robot state.
  */
@@ -24,24 +24,22 @@ class Robot {
   /**
    * Tries to establish a connection with the FRANKA robot.
    *
-   * Throws:
-   * - NetworkException if the connection is unsuccessful.
-   * - IncompatibleVersionException if this library is not supported by FRANKA
-   * CONTROL
-   * - ProtocolException if data received from the host is invalid
+   * @throw NetworkException if the connection is unsuccessful.
+   * @throw IncompatibleVersionException if this library is not supported by
+   * FRANKA CONTROL
+   * @throw ProtocolException if data received from the host is invalid
    *
-   * @param[in] frankaAddress IP/hostname of FRANKA CONTROL
+   * @param[in] franka_address IP/hostname of FRANKA CONTROL
    */
-  explicit Robot(const std::string& frankaAddress);
+  explicit Robot(const std::string& franka_address);
   ~Robot();
 
   /**
    * Blocks until new robot state arrives. When the function returns true, the
-   * reference
-   * from getRobotState() points to new data.
-   * Throws:
-   * - NetworkException if the connetion is lost, e.g. after a timeout.
-   * - ProtocolException if received data has invalid format.
+   * reference from getRobotState() points to new data.
+   *
+   * @throw NetworkException if the connetion is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    *
    * @return True if a new robot state arrived, false if the connection is
    * cleanly closed.
@@ -54,14 +52,14 @@ class Robot {
    *
    * @return const reference to RobotState structure
    */
-  const RobotState& getRobotState() const;
+  const RobotState& robotState() const;
 
   /**
    * Returns the version reported by the connected server.
    *
    * @return Version of the connected server.
    */
-  ServerVersion getServerVersion() const;
+  ServerVersion serverVersion() const;
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
@@ -73,8 +71,7 @@ class Robot {
 
 /**
  * NetworkException is thrown when a connection to FRANKA cannot be established,
- * or when
- * a timeout occurs.
+ * or when a timeout occurs.
  */
 struct NetworkException : public std::runtime_error {
   /**

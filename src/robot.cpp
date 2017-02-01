@@ -10,15 +10,18 @@
 #include "message_types.h"
 
 namespace franka {
+constexpr const uint16_t kFrankaPortTcp = 1337;
+constexpr const uint16_t kRiLibraryVersion = 1;
+constexpr const std::chrono::seconds kTimeout{5};
 
 class Robot::Impl {
  public:
-  explicit Impl(const std::string& frankaAddress);
+  explicit Impl(const std::string& franka_address);
   ~Impl();
 
   bool waitForRobotState();
-  const RobotState& getRobotState() const;
-  ServerVersion getServerVersion() const;
+  const RobotState& robotState() const;
+  ServerVersion serverVersion() const;
 
  protected:
   // Can throw NetworkException and ProtocolException
@@ -26,10 +29,6 @@ class Robot::Impl {
   void tcpReceiveObject(T& object);
 
  private:
-  const uint16_t kFranka_port_tcp_;
-  const uint16_t kRiLibraryVersion_;
-  const std::chrono::seconds kTimeout_;
-
   uint16_t ri_version_;
   RobotState robot_state_;
 
@@ -37,8 +36,8 @@ class Robot::Impl {
   Poco::Net::DatagramSocket udp_socket_;
 };
 
-Robot::Robot(const std::string& frankaAddress)
-    : impl_(new Robot::Impl(frankaAddress)) {}
+Robot::Robot(const std::string& franka_address)
+    : impl_(new Robot::Impl(franka_address)) {}
 
 // Has to be declared here, as the Impl type is incomplete in the header
 Robot::~Robot() = default;
@@ -47,12 +46,12 @@ bool Robot::waitForRobotState() {
   return impl_->waitForRobotState();
 }
 
-const RobotState& Robot::getRobotState() const {
-  return impl_->getRobotState();
+const RobotState& Robot::robotState() const {
+  return impl_->robotState();
 }
 
-Robot::ServerVersion Robot::getServerVersion() const {
-  return impl_->getServerVersion();
+Robot::ServerVersion Robot::serverVersion() const {
+  return impl_->serverVersion();
 }
 
 NetworkException::NetworkException(std::string const& message)
@@ -67,47 +66,41 @@ IncompatibleVersionException::IncompatibleVersionException(
 
 /* Implementation */
 
-Robot::Impl::Impl(const std::string& frankaAddress)
-    : kFranka_port_tcp_{1337},
-      kRiLibraryVersion_{1},
-      kTimeout_{5},
-      ri_version_{0},
-      robot_state_{},
-      tcp_socket_{},
-      udp_socket_{} {
+Robot::Impl::Impl(const std::string& franka_address) : ri_version_{0} {
   try {
-    tcp_socket_.connect({frankaAddress, kFranka_port_tcp_},
-                        Poco::Timespan(kTimeout_.count(), 0));
+    tcp_socket_.connect({franka_address, kFrankaPortTcp},
+                        Poco::Timespan(kTimeout.count(), 0));
     tcp_socket_.setBlocking(true);
-    tcp_socket_.setSendTimeout(Poco::Timespan(kTimeout_.count(), 0));
-    tcp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
+    tcp_socket_.setSendTimeout(Poco::Timespan(kTimeout.count(), 0));
+    tcp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout.count(), 0));
 
-    udp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout_.count(), 0));
+    udp_socket_.setReceiveTimeout(Poco::Timespan(kTimeout.count(), 0));
     udp_socket_.bind({"0.0.0.0", 0});
 
     message_types::ConnectRequest connect_request;
     connect_request.function_id = message_types::FunctionId::kConnect;
-    connect_request.ri_library_version = kRiLibraryVersion_;
+    connect_request.ri_library_version = kRiLibraryVersion;
     connect_request.udp_port = udp_socket_.address().port();
 
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
     message_types::ConnectReply connect_reply;
     tcpReceiveObject(connect_reply);
-
-    if (connect_reply.status_code !=
-        message_types::ConnectReply::StatusCode::kSuccess) {
-      if (connect_reply.status_code == message_types::ConnectReply::StatusCode::
-                                           kIncompatibleLibraryVersion) {
+    switch (connect_reply.status_code) {
+      case message_types::ConnectReply::StatusCode::
+          kIncompatibleLibraryVersion: {
         std::stringstream message;
         message << "libfranka: incompatible library version. "
                 << "Server version: " << connect_reply.ri_version
-                << "Library version: " << kRiLibraryVersion_;
+                << "Library version: " << kRiLibraryVersion;
         throw IncompatibleVersionException(message.str());
       }
-      throw ProtocolException("libfranka: protocol error");
+      case message_types::ConnectReply::StatusCode::kSuccess:
+        ri_version_ = connect_reply.ri_version;
+        break;
+      default:
+        throw ProtocolException("libfranka: protocol error");
     }
-    ri_version_ = connect_reply.ri_version;
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
                            e.what());
@@ -144,11 +137,11 @@ bool Robot::Impl::waitForRobotState() {
   }
 }
 
-const RobotState& Robot::Impl::getRobotState() const {
+const RobotState& Robot::Impl::robotState() const {
   return robot_state_;
 }
 
-Robot::ServerVersion Robot::Impl::getServerVersion() const {
+Robot::ServerVersion Robot::Impl::serverVersion() const {
   return ri_version_;
 }
 
@@ -157,10 +150,10 @@ void Robot::Impl::tcpReceiveObject(T& object) {
   int bytes_read = 0;
   try {
     uint8_t* buff = reinterpret_cast<uint8_t*>(&object);  // NOLINT
-    constexpr int bytes_total = sizeof(T);
+    constexpr int kBytesTotal = sizeof(T);
 
-    while (bytes_read < bytes_total) {
-      int bytes_left = bytes_total - bytes_read;
+    while (bytes_read < kBytesTotal) {
+      int bytes_left = kBytesTotal - bytes_read;
       int rv = tcp_socket_.receiveBytes(buff + bytes_read,  // NOLINT
                                         bytes_left, 0);
       if (rv == 0) {

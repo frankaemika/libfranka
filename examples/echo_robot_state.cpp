@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
     franka::Robot robot(argv[1]);  // NOLINT
 
     while (robot.waitForRobotState()) {
-      const franka::RobotState& robot_state = robot.getRobotState();
+      const franka::RobotState& robot_state = robot.robotState();
       std::cout << robot_state << std::endl;
     }
   } catch (franka::NetworkException const& e) {

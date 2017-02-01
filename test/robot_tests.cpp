@@ -16,7 +16,7 @@ TEST(Robot, CanPerformHandshake) {
   server.start();
 
   Robot robot("127.0.0.1");
-  EXPECT_EQ(1, robot.getServerVersion());
+  EXPECT_EQ(1, robot.serverVersion());
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
@@ -34,7 +34,7 @@ TEST(Robot, RobotStateInitializedToZero) {
   server.start();
 
   Robot robot("127.0.0.1");
-  const RobotState& received_robot_state = robot.getRobotState();
+  const RobotState& received_robot_state = robot.robotState();
   testRobotStateIsZero(received_robot_state);
 }
 
@@ -50,7 +50,7 @@ TEST(Robot, CanReceiveRobotState) {
 
   Robot robot("127.0.0.1");
 
-  const RobotState& received_robot_state = robot.getRobotState();
+  const RobotState& received_robot_state = robot.robotState();
   testRobotStateIsZero(received_robot_state);
 
   ASSERT_TRUE(robot.waitForRobotState());
