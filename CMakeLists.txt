@@ -50,7 +50,11 @@ add_library(franka SHARED
   src/robot.cpp
   src/robot_state.cpp
 )
-set_target_properties(franka PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set_target_properties(franka PROPERTIES
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
+  VERSION ${libfranka_VERSION}
+  SOVERSION ${libfranka_VERSION_MAJOR}
+)
 
 file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
 file(GLOB_RECURSE HEADERS include/*.h src/*.h examples/*.h)
@@ -59,7 +63,6 @@ target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-target_include_directories(franka PRIVATE src)
 
 target_link_libraries(franka Poco::Net Poco::Foundation)
 
