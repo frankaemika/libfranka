@@ -15,4 +15,4 @@ When using libfranka, a typical program structure will use a loop:
       // Send commands
     }
 
-The samples folder contains more detailed examples.
+Samples showcasing different libfranka usecases can be found in the example folder.
