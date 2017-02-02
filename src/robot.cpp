@@ -149,13 +149,12 @@ template <class T>
 void Robot::Impl::tcpReceiveObject(T& object) {
   int bytes_read = 0;
   try {
-    uint8_t* buff = reinterpret_cast<uint8_t*>(&object);  // NOLINT
+    uint8_t* buff = reinterpret_cast<uint8_t*>(&object);
     constexpr int kBytesTotal = sizeof(T);
 
     while (bytes_read < kBytesTotal) {
       int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(buff + bytes_read,  // NOLINT
-                                        bytes_left, 0);
+      int rv = tcp_socket_.receiveBytes(buff + bytes_read, bytes_left, 0);
       if (rv == 0) {
         throw NetworkException("libfranka:: FRANKA connection closed");
       }

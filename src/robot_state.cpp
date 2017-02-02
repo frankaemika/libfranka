@@ -6,10 +6,7 @@
 
 namespace franka {
 
-RobotState::RobotState() {
-  std::memset(this, 0, sizeof(*this));
-}
-
+namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
@@ -18,6 +15,11 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
   ostream << "]";
   return ostream;
+}
+}  // anonymous namespace
+
+RobotState::RobotState() {
+  std::memset(this, 0, sizeof(*this));
 }
 
 std::ostream& operator<<(std::ostream& ostream,

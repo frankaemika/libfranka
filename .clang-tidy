@@ -1,4 +1,4 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic'
 HeaderFilterRegex: '.*'
 CheckOptions:
   - key:    readability-identifier-naming.ClassCase

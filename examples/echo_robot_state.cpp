@@ -8,7 +8,7 @@ int main(int argc, char** argv) {
   }
 
   try {
-    franka::Robot robot(argv[1]);  // NOLINT
+    franka::Robot robot(argv[1]);
 
     while (robot.waitForRobotState()) {
       const franka::RobotState& robot_state = robot.robotState();
