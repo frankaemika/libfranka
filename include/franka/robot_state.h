@@ -3,16 +3,20 @@
 #include <array>
 #include <ostream>
 
-/** @file robot_state.h
+/**
+ * @file robot_state.h
  * Contains the RobotState struct.
-*/
+ */
 
 namespace franka {
 
 /**
- * RobotState struct describes FRANKA's state.
+ * Describes FRANKA's state.
  */
 struct RobotState {
+  /**
+   * Creates an empty robot state.
+   */
   RobotState();
 
   /**

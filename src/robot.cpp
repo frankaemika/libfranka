@@ -54,16 +54,6 @@ Robot::ServerVersion Robot::serverVersion() const {
   return impl_->serverVersion();
 }
 
-NetworkException::NetworkException(std::string const& message)
-    : std::runtime_error(message) {}
-
-ProtocolException::ProtocolException(std::string const& message)
-    : std::runtime_error(message) {}
-
-IncompatibleVersionException::IncompatibleVersionException(
-    std::string const& message)
-    : std::runtime_error(message) {}
-
 /* Implementation */
 
 Robot::Impl::Impl(const std::string& franka_address) : ri_version_{0} {

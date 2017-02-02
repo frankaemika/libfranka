@@ -47,6 +47,7 @@ endif()
 
 ## Library
 add_library(franka SHARED
+  src/exception.cpp
   src/robot.cpp
   src/robot_state.cpp
 )
