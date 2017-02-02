@@ -10,9 +10,9 @@
 #include "message_types.h"
 
 namespace franka {
-constexpr const uint16_t kFrankaPortTcp = 1337;
-constexpr const uint16_t kRiLibraryVersion = 1;
-constexpr const std::chrono::seconds kTimeout{5};
+constexpr uint16_t kFrankaPortTcp = 1337;
+constexpr uint16_t kRiLibraryVersion = 1;
+constexpr std::chrono::seconds kTimeout{5};
 
 class Robot::Impl {
  public:
