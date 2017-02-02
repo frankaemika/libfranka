@@ -21,7 +21,7 @@ struct RobotState {
    */
   std::array<double, 7> q_start;
   /**
-   * \f$^OT_{start}\f$
+   * \f$^OT_{EE,start}\f$
    * Motion generator's start pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
