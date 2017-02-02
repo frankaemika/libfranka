@@ -3,50 +3,108 @@
 #include <memory>
 #include <string>
 
-/**
- * TODO
- */
-using RobotState = int;
+#include <franka/robot_state.h>
+
+/** @file robot.h
+ *  Contains the Robot class and Exception definitions.
+*/
 
 namespace franka {
-
-/**
- * TODO
+/** @class Robot
+ * Robot class maintains a connection to FRANKA CONTROL and provides the current
+ * robot state.
  */
 class Robot {
  public:
   /**
-   * TODO
+   * Version of the server running on FRANKA.
    */
-  using Ptr = std::shared_ptr<Robot>;
+  using ServerVersion = uint16_t;
 
   /**
-   * TODO
+   * Tries to establish a connection with the FRANKA robot.
    *
-   * @param[in] ip TODO
-   * @return TODO
+   * @throw NetworkException if the connection is unsuccessful.
+   * @throw IncompatibleVersionException if this library is not supported by
+   * FRANKA CONTROL
+   * @throw ProtocolException if data received from the host is invalid
+   *
+   * @param[in] franka_address IP/hostname of FRANKA CONTROL
    */
-  static Ptr connect(const std::string& ip);
+  explicit Robot(const std::string& franka_address);
+  ~Robot();
 
   /**
-   * Block until new robot state arrives.
+   * Blocks until new robot state arrives. When the function returns true, the
+   * reference from getRobotState() points to new data.
    *
-   * @return True if a new robot state arrived, false if a timeout occured.
+   * @throw NetworkException if the connetion is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   *
+   * @return True if a new robot state arrived, false if the connection is
+   * cleanly closed.
    */
   bool waitForRobotState();
 
   /**
-   * TODO
+   * Returns last obtained robot state. Updated after a call to
+   * waitForRobotState().
    *
-   * @return TODO
+   * @return const reference to RobotState structure
    */
-  RobotState getRobotState() const;
+  const RobotState& robotState() const;
+
+  /**
+   * Returns the version reported by the connected server.
+   *
+   * @return Version of the connected server.
+   */
+  ServerVersion serverVersion() const;
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
  private:
-  Robot() = default;
+  class Impl;
+  std::unique_ptr<Impl> impl_;
+};
+
+/**
+ * NetworkException is thrown when a connection to FRANKA cannot be established,
+ * or when a timeout occurs.
+ */
+struct NetworkException : public std::runtime_error {
+  /**
+   * Constructs the exception.
+   *
+   * @param[in] message more detailed description of the error
+   */
+  explicit NetworkException(std::string const& message);
+};
+
+/**
+ * ProtocolException is thrown when the server returns an incorrect message.
+ */
+struct ProtocolException : public std::runtime_error {
+  /**
+   * Constructs the exception.
+   *
+   * @param[in] message more detailed description of the error
+   */
+  explicit ProtocolException(std::string const& message);
+};
+
+/**
+ * IncompatibleVersionException is thrown if the server does not support this
+ * version of libfranka.
+ */
+struct IncompatibleVersionException : std::runtime_error {
+  /**
+   * Constructs the exception.
+   *
+   * @param[in] message more detailed description of the error
+   */
+  explicit IncompatibleVersionException(std::string const& message);
 };
 
 }  // namespace franka

@@ -1,4 +1,4 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic'
 HeaderFilterRegex: '.*'
 CheckOptions:
   - key:    readability-identifier-naming.ClassCase
@@ -11,3 +11,9 @@ CheckOptions:
     value:  CamelCase
   - key:    readability-identifier-naming.VariableCase
     value:  lower_case
+  - key:    readability-identifier-naming.ConstantPrefix
+    value:  'k'
+  - key:    readability-identifier-naming.ConstantCase 
+    value:  'CamelCase'
+  - key:    cert-oop11-cpp.IncludeStyle
+    value:  chromium
