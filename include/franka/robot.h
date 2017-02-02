@@ -67,8 +67,10 @@ class Robot {
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
- private:
+ protected:
   class Impl;
+
+ private:
   std::unique_ptr<Impl> impl_;
 };
 

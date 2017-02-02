@@ -16,7 +16,7 @@ class Robot::Impl {
 
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = kDefaultPort,
-                std::chrono::seconds timeout = kDefaultTimeout);
+                std::chrono::milliseconds timeout = kDefaultTimeout);
   ~Impl();
 
   bool waitForRobotState();

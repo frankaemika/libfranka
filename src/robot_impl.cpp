@@ -10,11 +10,14 @@
 
 namespace franka {
 
-Robot::Impl::Impl(const std::string& franka_address,
-                  uint16_t franka_port, std::chrono::seconds timeout)
-  : ri_version_{0} {
+constexpr uint16_t Robot::Impl::kDefaultPort;
+constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
-  Poco::Timespan poco_timeout(timeout.count(), 0);
+Robot::Impl::Impl(const std::string& franka_address,
+                  uint16_t franka_port,
+                  std::chrono::milliseconds timeout)
+    : ri_version_{0} {
+  Poco::Timespan poco_timeout(1000l * timeout.count());
   try {
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
     tcp_socket_.setBlocking(true);
