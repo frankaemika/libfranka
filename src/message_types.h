@@ -4,6 +4,8 @@
 
 namespace message_types {
 
+constexpr uint16_t kRiLibraryVersion = 1;
+
 enum class FunctionId : uint32_t {
   kConnect = 0,
   kPing = 1,
