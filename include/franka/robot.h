@@ -35,7 +35,7 @@ class Robot {
    * @param[in] franka_address IP/hostname of FRANKA CONTROL
    */
   explicit Robot(const std::string& franka_address);
-  ~Robot();
+  ~Robot() noexcept;
 
   /**
    * Blocks until new robot state arrives. When the function returns true, the
@@ -55,14 +55,14 @@ class Robot {
    *
    * @return const reference to RobotState structure
    */
-  const RobotState& robotState() const;
+  const RobotState& robotState() const noexcept;
 
   /**
    * Returns the version reported by the connected server.
    *
    * @return Version of the connected server.
    */
-  ServerVersion serverVersion() const;
+  ServerVersion serverVersion() const noexcept;
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;

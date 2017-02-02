@@ -14,11 +14,11 @@ bool Robot::waitForRobotState() {
   return impl_->waitForRobotState();
 }
 
-const RobotState& Robot::robotState() const {
+const RobotState& Robot::robotState() const noexcept {
   return impl_->robotState();
 }
 
-Robot::ServerVersion Robot::serverVersion() const {
+Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 

@@ -87,11 +87,11 @@ bool Robot::Impl::waitForRobotState() {
   }
 }
 
-const RobotState& Robot::Impl::robotState() const {
+const RobotState& Robot::Impl::robotState() const noexcept {
   return robot_state_;
 }
 
-Robot::ServerVersion Robot::Impl::serverVersion() const {
+Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
   return ri_version_;
 }
 

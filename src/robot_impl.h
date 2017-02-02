@@ -17,11 +17,11 @@ class Robot::Impl {
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = kDefaultPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout);
-  ~Impl();
+  ~Impl() noexcept;
 
   bool waitForRobotState();
-  const RobotState& robotState() const;
-  ServerVersion serverVersion() const;
+  const RobotState& robotState() const noexcept;
+  ServerVersion serverVersion() const noexcept;
 
  protected:
   // Can throw NetworkException and ProtocolException
