@@ -45,6 +45,9 @@ if(BUILD_COVERAGE)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
 
+## Submodules
+add_subdirectory(lib/research-interface-common)
+
 ## Library
 add_library(franka SHARED
   src/exception.cpp
@@ -66,7 +69,8 @@ target_include_directories(franka PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(franka Poco::Net Poco::Foundation)
+target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation)
+target_link_libraries(franka PRIVATE research-interface-common)
 
 ## Installation
 include(GNUInstallDirs)

@@ -6,16 +6,16 @@
 #include <Poco/Net/StreamSocket.h>
 
 #include <franka/robot.h>
+#include <research_interface/constants.h>
 
 namespace franka {
 
 class Robot::Impl {
  public:
-  static constexpr uint16_t kDefaultPort = 1337;
   static constexpr std::chrono::seconds kDefaultTimeout{5};
 
   explicit Impl(const std::string& franka_address,
-                uint16_t franka_port = kDefaultPort,
+                uint16_t franka_port = research_interface::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout);
   ~Impl() noexcept;
 

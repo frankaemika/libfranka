@@ -1,12 +1,14 @@
 #include <gtest/gtest.h>
 
+#include <research_interface/types.h>
+
 #include "franka/robot.h"
 #include "robot_impl.h"
 #include "mock_server.h"
 #include "helpers.h"
 
 using namespace franka;
-using namespace message_types;
+using namespace research_interface;
 
 class TestRobot : public franka::Robot {
  public:
@@ -28,7 +30,7 @@ TEST(Robot, CanPerformHandshake) {
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   MockServer server;
   server.onConnect([](const ConnectRequest&, ConnectReply& reply) {
-           reply.status_code = ConnectReply::StatusCode::kIncompatibleLibraryVersion;
+           reply.status = ConnectReply::Status::kIncompatibleLibraryVersion;
          })
         .start();
 
@@ -71,7 +73,7 @@ TEST(Robot, StopsIfNoRobotStateArrives) {
   server.start();
 
   using namespace std::chrono_literals;
-  TestRobot::Impl robot("127.0.0.1", TestRobot::Impl::kDefaultPort, 1ms);
+  TestRobot::Impl robot("127.0.0.1", kCommandPort, 1ms);
 
   ASSERT_THROW(robot.waitForRobotState(), NetworkException);
 }

@@ -6,11 +6,10 @@
 
 #include <Poco/Net/NetException.h>
 
-#include "message_types.h"
+#include <research_interface/types.h>
 
 namespace franka {
 
-constexpr uint16_t Robot::Impl::kDefaultPort;
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
 Robot::Impl::Impl(const std::string& franka_address,
@@ -27,26 +26,26 @@ Robot::Impl::Impl(const std::string& franka_address,
     udp_socket_.setReceiveTimeout(poco_timeout);
     udp_socket_.bind({"0.0.0.0", 0});
 
-    message_types::ConnectRequest connect_request;
-    connect_request.function_id = message_types::FunctionId::kConnect;
-    connect_request.ri_library_version = message_types::kRiLibraryVersion;
+    research_interface::ConnectRequest connect_request;
+    connect_request.function = research_interface::Function::kConnect;
+    connect_request.version = research_interface::kVersion;
     connect_request.udp_port = udp_socket_.address().port();
 
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
-    message_types::ConnectReply connect_reply;
+    research_interface::ConnectReply connect_reply;
     tcpReceiveObject(connect_reply);
-    switch (connect_reply.status_code) {
-      case message_types::ConnectReply::StatusCode::
+    switch (connect_reply.status) {
+      case research_interface::ConnectReply::Status::
           kIncompatibleLibraryVersion: {
         std::stringstream message;
         message << "libfranka: incompatible library version. "
-                << "Server version: " << connect_reply.ri_version
-                << "Library version: " << message_types::kRiLibraryVersion;
+                << "Server version: " << connect_reply.version
+                << "Library version: " << research_interface::kVersion;
         throw IncompatibleVersionException(message.str());
       }
-      case message_types::ConnectReply::StatusCode::kSuccess:
-        ri_version_ = connect_reply.ri_version;
+      case research_interface::ConnectReply::Status::kSuccess:
+        ri_version_ = connect_reply.version;
         break;
       default:
         throw ProtocolException("libfranka: protocol error");

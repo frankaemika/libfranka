@@ -7,6 +7,7 @@
 #include <Poco/Net/ServerSocket.h>
 
 #include <franka/robot_state.h>
+#include <research_interface/constants.h>
 
 MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
   on_connect_ = on_connect;
@@ -25,18 +26,18 @@ void MockServer::start() {
 }
 
 void MockServer::serverThread() {
-  Poco::Net::ServerSocket srv({"localhost", 1337}); // does bind + listen
+  Poco::Net::ServerSocket srv({"localhost", research_interface::kCommandPort}); // does bind + listen
   cv_.notify_one();
 
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
 
-  message_types::ConnectRequest request;
+  research_interface::ConnectRequest request;
   tcp_socket.receiveBytes(&request, sizeof(request));
 
-  message_types::ConnectReply reply;
-  reply.ri_version = 1;
-  reply.status_code = message_types::ConnectReply::StatusCode::kSuccess;
+  research_interface::ConnectReply reply;
+  reply.version = 1;
+  reply.status = research_interface::ConnectReply::Status::kSuccess;
 
   if (on_connect_) {
     on_connect_(request, reply);

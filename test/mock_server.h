@@ -6,11 +6,11 @@
 
 #include <franka/robot_state.h>
 
-#include "message_types.h"
+#include "research_interface/types.h"
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<void(const message_types::ConnectRequest&, message_types::ConnectReply&)>;
+  using ConnectCallbackT = std::function<void(const research_interface::ConnectRequest&, research_interface::ConnectReply&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
   MockServer() = default;
