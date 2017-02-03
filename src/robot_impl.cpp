@@ -60,7 +60,7 @@ Robot::Impl::Impl(const std::string& franka_address,
   }
 }
 
-Robot::Impl::~Impl() {
+Robot::Impl::~Impl() noexcept {
   tcp_socket_.shutdown();
   tcp_socket_.close();
   udp_socket_.close();

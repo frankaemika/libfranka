@@ -8,7 +8,7 @@ Robot::Robot(const std::string& franka_address)
     : impl_(new Robot::Impl(franka_address)) {}
 
 // Has to be declared here, as the Impl type is incomplete in the header
-Robot::~Robot() = default;
+Robot::~Robot() noexcept = default;
 
 bool Robot::waitForRobotState() {
   return impl_->waitForRobotState();
