@@ -10,11 +10,6 @@
 using namespace franka;
 using namespace research_interface;
 
-class TestRobot : public franka::Robot {
- public:
-   using Robot::Impl;
-};
-
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException);
 }
@@ -63,17 +58,4 @@ TEST(Robot, CanReceiveRobotState) {
 
   ASSERT_TRUE(robot.waitForRobotState());
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
-}
-
-TEST(Robot, StopsIfNoRobotStateArrives) {
-  RobotState sent_robot_state;
-  randomRobotState(sent_robot_state);
-
-  MockServer server;
-  server.start();
-
-  using namespace std::chrono_literals;
-  TestRobot::Impl robot("127.0.0.1", kCommandPort, 1ms);
-
-  ASSERT_THROW(robot.waitForRobotState(), NetworkException);
 }

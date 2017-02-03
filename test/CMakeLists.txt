@@ -14,6 +14,7 @@ set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src
 
 add_executable(run_all_tests
   robot_tests.cpp
+  robot_impl_tests.cpp
   robot_state_tests.cpp
 
   mock_server.cpp
