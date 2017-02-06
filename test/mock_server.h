@@ -5,8 +5,7 @@
 #include <thread>
 
 #include <franka/robot_state.h>
-
-#include "research_interface/types.h"
+#include <research_interface/types.h>
 
 class MockServer {
  public:

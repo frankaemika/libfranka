@@ -8,7 +8,8 @@
 #include "helpers.h"
 
 using namespace franka;
-using namespace research_interface;
+using research_interface::ConnectRequest;
+using research_interface::ConnectReply;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException);

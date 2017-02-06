@@ -66,12 +66,58 @@ Robot::Impl::~Impl() noexcept {
   udp_socket_.close();
 }
 
+void Robot::Impl::setRobotState(
+    const research_interface::RobotState& robot_state) {
+  static_assert(sizeof(robot_state_) == sizeof(robot_state),
+                "research_interface::RobotState size changed - adjust "
+                "franka::RobotState?");
+  std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
+            robot_state_.q_start.begin());
+  std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
+            robot_state_.O_T_EE_start.begin());
+  std::copy(robot_state.elbow_start.cbegin(), robot_state.elbow_start.cend(),
+            robot_state_.elbow_start.begin());
+  std::copy(robot_state.tau_J.cbegin(), robot_state.tau_J.cend(),
+            robot_state_.tau_J.begin());
+  std::copy(robot_state.dtau_J.cbegin(), robot_state.dtau_J.cend(),
+            robot_state_.dtau_J.begin());
+  std::copy(robot_state.q.cbegin(), robot_state.q.cend(),
+            robot_state_.q.begin());
+  std::copy(robot_state.dq.cbegin(), robot_state.dq.cend(),
+            robot_state_.dq.begin());
+  std::copy(robot_state.q_d.cbegin(), robot_state.q_d.cend(),
+            robot_state_.q_d.begin());
+  std::copy(robot_state.joint_contact.cbegin(),
+            robot_state.joint_contact.cend(),
+            robot_state_.joint_contact.begin());
+  std::copy(robot_state.cartesian_contact.cbegin(),
+            robot_state.cartesian_contact.cend(),
+            robot_state_.cartesian_contact.begin());
+  std::copy(robot_state.joint_collision.cbegin(),
+            robot_state.joint_collision.cend(),
+            robot_state_.joint_collision.begin());
+  std::copy(robot_state.cartesian_collision.cbegin(),
+            robot_state.cartesian_collision.cend(),
+            robot_state_.cartesian_collision.begin());
+  std::copy(robot_state.tau_ext_hat_filtered.cbegin(),
+            robot_state.tau_ext_hat_filtered.cend(),
+            robot_state_.tau_ext_hat_filtered.begin());
+  std::copy(robot_state.O_F_ext_hat_EE.cbegin(),
+            robot_state.O_F_ext_hat_EE.cend(),
+            robot_state_.O_F_ext_hat_EE.begin());
+  std::copy(robot_state.EE_F_ext_hat_EE.cbegin(),
+            robot_state.EE_F_ext_hat_EE.cend(),
+            robot_state_.EE_F_ext_hat_EE.begin());
+}
+
 bool Robot::Impl::waitForRobotState() {
   try {
+    research_interface::RobotState robot_state;
     Poco::Net::SocketAddress server_address;
     int bytes_received = udp_socket_.receiveFrom(
-        &robot_state_, sizeof(robot_state_), server_address, 0);
-    if (bytes_received == sizeof(robot_state_)) {
+        &robot_state, sizeof(robot_state), server_address, 0);
+    if (bytes_received == sizeof(robot_state)) {
+      setRobotState(robot_state);
       return true;
     }
     if (bytes_received == 0) {

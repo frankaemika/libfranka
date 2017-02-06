@@ -7,6 +7,7 @@
 
 #include <franka/robot.h>
 #include <research_interface/constants.h>
+#include <research_interface/rbk_types.h>
 
 namespace franka {
 
@@ -19,6 +20,7 @@ class Robot::Impl {
                 std::chrono::milliseconds timeout = kDefaultTimeout);
   ~Impl() noexcept;
 
+  void setRobotState(const research_interface::RobotState& robot_state);
   bool waitForRobotState();
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
