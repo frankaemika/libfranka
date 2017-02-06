@@ -112,6 +112,13 @@ void Robot::Impl::setRobotState(
 
 bool Robot::Impl::waitForRobotState() {
   try {
+    if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
+      if (tcp_socket_.receiveBytes(nullptr, 0, 0) == 0) {
+        // Connection closed by server.
+        return false;
+      }
+    }
+
     research_interface::RobotState robot_state;
     Poco::Net::SocketAddress server_address;
     int bytes_received = udp_socket_.receiveFrom(
@@ -119,9 +126,6 @@ bool Robot::Impl::waitForRobotState() {
     if (bytes_received == sizeof(robot_state)) {
       setRobotState(robot_state);
       return true;
-    }
-    if (bytes_received == 0) {
-      return false;
     }
     throw ProtocolException("libfranka:: incorrect object size");
   } catch (Poco::TimeoutException const& e) {
