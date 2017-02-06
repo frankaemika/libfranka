@@ -50,7 +50,6 @@ add_subdirectory(lib/research-interface-common)
 
 ## Library
 add_library(franka SHARED
-  src/exception.cpp
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
