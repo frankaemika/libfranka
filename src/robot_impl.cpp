@@ -113,10 +113,10 @@ void Robot::Impl::setRobotState(
 bool Robot::Impl::waitForRobotState() {
   try {
     if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-      if (tcp_socket_.receiveBytes(nullptr, 0, 0) == 0) {
-        // Connection closed by server.
-        return false;
-      }
+      // The current server implementation does not send any data
+      // to libfranka. Therefore, any message on the socket indicates
+      // that the connection has been closed (server sent EOF).
+      return false;
     }
 
     research_interface::RobotState robot_state;
