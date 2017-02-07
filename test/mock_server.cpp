@@ -49,12 +49,15 @@ void MockServer::stop() {
 }
 
 void MockServer::serverThread() {
-  std::unique_lock<std::mutex> lock(mutex_);
-  Poco::Net::ServerSocket srv({"localhost", research_interface::kCommandPort}); // does bind + listen
-  initialized_ = true;
-  lock.unlock();
+  Poco::Net::ServerSocket srv;
+  {
+    std::lock_guard<std::mutex> _(mutex_);
+    srv = Poco::Net::ServerSocket({"localhost", research_interface::kCommandPort}); // does bind + listen
+    initialized_ = true;
+  }
   cv_.notify_one();
 
+  std::unique_lock<std::mutex> lock(mutex_);
   cv_.wait(lock, [this]{ return continue_; });
 
   Poco::Net::SocketAddress remote_address;
