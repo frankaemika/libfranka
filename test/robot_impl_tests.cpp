@@ -30,3 +30,18 @@ TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
 
   ASSERT_THROW(robot.waitForRobotState(), NetworkException);
 }
+
+TEST(Robot, StopsIfControlConnectionClosed) {
+  RobotState sent_robot_state;
+  randomRobotState(sent_robot_state);
+
+  MockServer server;
+  server.start();
+
+  using namespace std::chrono_literals;
+  Robot::Impl robot("127.0.0.1", research_interface::kCommandPort, 1ms);
+
+  server.stop();
+
+  ASSERT_FALSE(robot.waitForRobotState());
+}

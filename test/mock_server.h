@@ -12,12 +12,13 @@ class MockServer {
   using ConnectCallbackT = std::function<void(const research_interface::ConnectRequest&, research_interface::ConnectReply&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
-  MockServer() = default;
+  MockServer();
   ~MockServer();
 
   MockServer& onConnect(ConnectCallbackT on_connect);
   MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
   void start();
+  void stop();
 
  private:
   void serverThread();
@@ -25,6 +26,9 @@ class MockServer {
   std::condition_variable cv_;
   std::mutex mutex_;
   std::thread server_thread_;
+  bool shutdown_;
+  bool continue_;
+  bool initialized_;
 
   ConnectCallbackT on_connect_;
   SendRobotStateCallbackT on_send_robot_state_;

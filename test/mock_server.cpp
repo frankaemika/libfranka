@@ -1,7 +1,5 @@
 #include "mock_server.h"
 
-#include <iostream>
-
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/ServerSocket.h>
@@ -9,6 +7,16 @@
 #include <franka/robot_state.h>
 #include <research_interface/constants.h>
 #include <research_interface/rbk_types.h>
+
+MockServer::MockServer()
+    : shutdown_{false},
+      continue_{false},
+      initialized_{false} {
+}
+
+MockServer::~MockServer() {
+  stop();
+}
 
 MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
   on_connect_ = on_connect;
@@ -21,14 +29,33 @@ MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_s
 }
 
 void MockServer::start() {
-  server_thread_ = std::thread(&MockServer::serverThread, this);
   std::unique_lock<std::mutex> lock(mutex_);
-  cv_.wait(lock);
+  server_thread_ = std::thread(&MockServer::serverThread, this);
+  cv_.wait(lock, [this]{ return initialized_; });
+  continue_ = true;
+  cv_.notify_one();
+}
+
+void MockServer::stop() {
+  if (shutdown_) {
+    return;
+  }
+  {
+    std::lock_guard<std::mutex> _(mutex_);
+    shutdown_ = true;
+  }
+  cv_.notify_one();
+  server_thread_.join();
 }
 
 void MockServer::serverThread() {
+  std::unique_lock<std::mutex> lock(mutex_);
   Poco::Net::ServerSocket srv({"localhost", research_interface::kCommandPort}); // does bind + listen
+  initialized_ = true;
+  lock.unlock();
   cv_.notify_one();
+
+  cv_.wait(lock, [this]{ return continue_; });
 
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
@@ -48,6 +75,7 @@ void MockServer::serverThread() {
 
   // Send robot state over UDP
   if (!on_send_robot_state_) {
+    cv_.wait(lock, [this]{ return shutdown_; });
     return;
   }
 
@@ -97,10 +125,6 @@ void MockServer::serverThread() {
             rbk_robot_state.EE_F_ext_hat_EE.begin());
 
   udp_socket.sendTo(&rbk_robot_state, sizeof(rbk_robot_state), {remote_address.host(), request.udp_port});
-}
 
-MockServer::~MockServer() {
-  if (server_thread_.joinable()) {
-    server_thread_.join();
-  }
+  cv_.wait(lock, [this]{ return shutdown_; });
 }

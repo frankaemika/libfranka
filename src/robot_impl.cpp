@@ -1,7 +1,6 @@
 #include "robot_impl.h"
 
 #include <chrono>
-#include <iostream>
 #include <sstream>
 
 #include <Poco/Net/NetException.h>
