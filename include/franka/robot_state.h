@@ -29,7 +29,7 @@ struct RobotState {
    * Motion generator's start pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE_start;
+  std::array<double, 16> o_t_ee_start;
   /**
    * Elbow start position.
    * Elbow is defined as the joint position of 3rd joint and the sign of the 4th
@@ -40,12 +40,12 @@ struct RobotState {
    * \f$\tau_{J}\f$
    * Measured joint torque. Unit: \f$[Nm]\f$
    */
-  std::array<double, 7> tau_J;
+  std::array<double, 7> tau_j;
   /**
    * \f$\dot{\tau_{J}}\f$
    * Derivative of measured joint torque. Unit: \f$[\frac{Nm}{s}]\f$
    */
-  std::array<double, 7> dtau_J;
+  std::array<double, 7> dtau_j;
   /**
    * \f$q\f$
    * Measured link side position (joint values). Unit: \f$[rad]\f$
@@ -92,13 +92,13 @@ struct RobotState {
    * External wrench(force, torque) acting on end-effector relative to the base
    * frame scaled by a factor. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> O_F_ext_hat_EE;
+  std::array<double, 6> o_f_ext_hat_ee;
   /**
    * \f$^{EE}F_{EE,ext}\f$
    * External wrench(force, torque) acting on end-effector relative to
    * end-effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> EE_F_ext_hat_EE;
+  std::array<double, 6> ee_f_ext_hat_ee;
 };
 
 /**

@@ -91,13 +91,13 @@ void MockServer::serverThread() {
                 "franka::RobotState?");
   std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
             rbk_robot_state.q_start.begin());
-  std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
+  std::copy(robot_state.o_t_ee_start.cbegin(), robot_state.o_t_ee_start.cend(),
             rbk_robot_state.O_T_EE_start.begin());
   std::copy(robot_state.elbow_start.cbegin(), robot_state.elbow_start.cend(),
             rbk_robot_state.elbow_start.begin());
-  std::copy(robot_state.tau_J.cbegin(), robot_state.tau_J.cend(),
+  std::copy(robot_state.tau_j.cbegin(), robot_state.tau_j.cend(),
             rbk_robot_state.tau_J.begin());
-  std::copy(robot_state.dtau_J.cbegin(), robot_state.dtau_J.cend(),
+  std::copy(robot_state.dtau_j.cbegin(), robot_state.dtau_j.cend(),
             rbk_robot_state.dtau_J.begin());
   std::copy(robot_state.q.cbegin(), robot_state.q.cend(),
             rbk_robot_state.q.begin());
@@ -120,11 +120,11 @@ void MockServer::serverThread() {
   std::copy(robot_state.tau_ext_hat_filtered.cbegin(),
             robot_state.tau_ext_hat_filtered.cend(),
             rbk_robot_state.tau_ext_hat_filtered.begin());
-  std::copy(robot_state.O_F_ext_hat_EE.cbegin(),
-            robot_state.O_F_ext_hat_EE.cend(),
+  std::copy(robot_state.o_f_ext_hat_ee.cbegin(),
+            robot_state.o_f_ext_hat_ee.cend(),
             rbk_robot_state.O_F_ext_hat_EE.begin());
-  std::copy(robot_state.EE_F_ext_hat_EE.cbegin(),
-            robot_state.EE_F_ext_hat_EE.cend(),
+  std::copy(robot_state.ee_f_ext_hat_ee.cbegin(),
+            robot_state.ee_f_ext_hat_ee.cend(),
             rbk_robot_state.EE_F_ext_hat_EE.begin());
 
   udp_socket.sendTo(&rbk_robot_state, sizeof(rbk_robot_state), {remote_address.host(), request.udp_port});

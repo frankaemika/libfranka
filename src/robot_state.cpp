@@ -25,18 +25,18 @@ RobotState::RobotState() {
 std::ostream& operator<<(std::ostream& ostream,
                          const franka::RobotState& robot_state) {
   ostream << "{q_start: " << robot_state.q_start
-          << ", O_T_EE_start: " << robot_state.O_T_EE_start
+          << ", O_T_EE_start: " << robot_state.o_t_ee_start
           << ", elbow_start: " << robot_state.elbow_start
-          << ", tau_J: " << robot_state.tau_J
-          << ", dtau_J: " << robot_state.dtau_J << ", q: " << robot_state.q
+          << ", tau_J: " << robot_state.tau_j
+          << ", dtau_J: " << robot_state.dtau_j << ", q: " << robot_state.q
           << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d
           << ", joint_contact: " << robot_state.joint_contact
           << ", cartesian_contact: " << robot_state.cartesian_contact
           << ", joint_collision: " << robot_state.joint_collision
           << ", cartesian_collision: " << robot_state.cartesian_collision
           << ", tau_ext_hat_filtered: " << robot_state.tau_ext_hat_filtered
-          << ", O_F_ext_hat_EE: " << robot_state.O_F_ext_hat_EE
-          << ", EE_F_ext_hat_EE: " << robot_state.EE_F_ext_hat_EE << "}";
+          << ", O_F_ext_hat_EE: " << robot_state.o_f_ext_hat_ee
+          << ", EE_F_ext_hat_EE: " << robot_state.ee_f_ext_hat_ee << "}";
   return ostream;
 }
 
