@@ -12,7 +12,7 @@ When using `libfranka`, a typical program structure will use a loop:
 franka::Robot robot(robot_hostname);
 
 while (robot.waitForRobotState()) {
-  const franka::RobotState& robot_state = robot.getRobotState();
+  const franka::RobotState& robot_state = robot.robotState();
   // Send commands
 }
 ```
