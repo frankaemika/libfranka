@@ -73,13 +73,13 @@ void Robot::Impl::setRobotState(
   std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
             robot_state_.q_start.begin());
   std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
-            robot_state_.o_t_ee_start.begin());
+            robot_state_.O_T_EE_start.begin());
   std::copy(robot_state.elbow_start.cbegin(), robot_state.elbow_start.cend(),
             robot_state_.elbow_start.begin());
   std::copy(robot_state.tau_J.cbegin(), robot_state.tau_J.cend(),
-            robot_state_.tau_j.begin());
+            robot_state_.tau_J.begin());
   std::copy(robot_state.dtau_J.cbegin(), robot_state.dtau_J.cend(),
-            robot_state_.dtau_j.begin());
+            robot_state_.dtau_J.begin());
   std::copy(robot_state.q.cbegin(), robot_state.q.cend(),
             robot_state_.q.begin());
   std::copy(robot_state.dq.cbegin(), robot_state.dq.cend(),
@@ -103,10 +103,10 @@ void Robot::Impl::setRobotState(
             robot_state_.tau_ext_hat_filtered.begin());
   std::copy(robot_state.O_F_ext_hat_EE.cbegin(),
             robot_state.O_F_ext_hat_EE.cend(),
-            robot_state_.o_f_ext_hat_ee.begin());
+            robot_state_.O_F_ext_hat_EE.begin());
   std::copy(robot_state.EE_F_ext_hat_EE.cbegin(),
             robot_state.EE_F_ext_hat_EE.cend(),
-            robot_state_.ee_f_ext_hat_ee.begin());
+            robot_state_.EE_F_ext_hat_EE.begin());
 }
 
 bool Robot::Impl::waitForRobotState() {

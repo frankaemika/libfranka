@@ -10,17 +10,17 @@ void testRobotStateIsZero(const RobotState& actual) {
   for (size_t i = 0; i < actual.q_start.size(); i++) {
     EXPECT_EQ(0.0, actual.q_start[i]);
   }
-  for (size_t i = 0; i < actual.o_t_ee_start.size(); i++) {
-    EXPECT_EQ(0.0, actual.o_t_ee_start[i]);
+  for (size_t i = 0; i < actual.O_T_EE_start.size(); i++) {
+    EXPECT_EQ(0.0, actual.O_T_EE_start[i]);
   }
   for (size_t i = 0; i < actual.elbow_start.size(); i++) {
     EXPECT_EQ(0.0, actual.elbow_start[i]);
   }
-  for (size_t i = 0; i < actual.tau_j.size(); i++) {
-    EXPECT_EQ(0.0, actual.tau_j[i]);
+  for (size_t i = 0; i < actual.tau_J.size(); i++) {
+    EXPECT_EQ(0.0, actual.tau_J[i]);
   }
-  for (size_t i = 0; i < actual.dtau_j.size(); i++) {
-    EXPECT_EQ(0.0, actual.dtau_j[i]);
+  for (size_t i = 0; i < actual.dtau_J.size(); i++) {
+    EXPECT_EQ(0.0, actual.dtau_J[i]);
   }
   for (size_t i = 0; i < actual.q.size(); i++) {
     EXPECT_EQ(0.0, actual.q[i]);
@@ -46,11 +46,11 @@ void testRobotStateIsZero(const RobotState& actual) {
   for (size_t i = 0; i < actual.tau_ext_hat_filtered.size(); i++) {
     EXPECT_EQ(0.0, actual.tau_ext_hat_filtered[i]);
   }
-  for (size_t i = 0; i < actual.o_f_ext_hat_ee.size(); i++) {
-    EXPECT_EQ(0.0, actual.o_f_ext_hat_ee[i]);
+  for (size_t i = 0; i < actual.O_F_ext_hat_EE.size(); i++) {
+    EXPECT_EQ(0.0, actual.O_F_ext_hat_EE[i]);
   }
-  for (size_t i = 0; i < actual.ee_f_ext_hat_ee.size(); i++) {
-    EXPECT_EQ(0.0, actual.ee_f_ext_hat_ee[i]);
+  for (size_t i = 0; i < actual.EE_F_ext_hat_EE.size(); i++) {
+    EXPECT_EQ(0.0, actual.EE_F_ext_hat_EE[i]);
   }
 }
 
@@ -58,17 +58,17 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   for (size_t i = 0; i < actual.q_start.size(); i++) {
     EXPECT_EQ(expected.q_start[i], actual.q_start[i]);
   }
-  for (size_t i = 0; i < actual.o_t_ee_start.size(); i++) {
-    EXPECT_EQ(expected.o_t_ee_start[i], actual.o_t_ee_start[i]);
+  for (size_t i = 0; i < actual.O_T_EE_start.size(); i++) {
+    EXPECT_EQ(expected.O_T_EE_start[i], actual.O_T_EE_start[i]);
   }
   for (size_t i = 0; i < actual.elbow_start.size(); i++) {
     EXPECT_EQ(expected.elbow_start[i], actual.elbow_start[i]);
   }
-  for (size_t i = 0; i < actual.tau_j.size(); i++) {
-    EXPECT_EQ(expected.tau_j[i], actual.tau_j[i]);
+  for (size_t i = 0; i < actual.tau_J.size(); i++) {
+    EXPECT_EQ(expected.tau_J[i], actual.tau_J[i]);
   }
-  for (size_t i = 0; i < actual.dtau_j.size(); i++) {
-    EXPECT_EQ(expected.dtau_j[i], actual.dtau_j[i]);
+  for (size_t i = 0; i < actual.dtau_J.size(); i++) {
+    EXPECT_EQ(expected.dtau_J[i], actual.dtau_J[i]);
   }
   for (size_t i = 0; i < actual.q.size(); i++) {
     EXPECT_EQ(expected.q[i], actual.q[i]);
@@ -94,11 +94,11 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   for (size_t i = 0; i < actual.tau_ext_hat_filtered.size(); i++) {
     EXPECT_EQ(expected.tau_ext_hat_filtered[i], actual.tau_ext_hat_filtered[i]);
   }
-  for (size_t i = 0; i < actual.o_f_ext_hat_ee.size(); i++) {
-    EXPECT_EQ(expected.o_f_ext_hat_ee[i], actual.o_f_ext_hat_ee[i]);
+  for (size_t i = 0; i < actual.O_F_ext_hat_EE.size(); i++) {
+    EXPECT_EQ(expected.O_F_ext_hat_EE[i], actual.O_F_ext_hat_EE[i]);
   }
-  for (size_t i = 0; i < actual.ee_f_ext_hat_ee.size(); i++) {
-    EXPECT_EQ(expected.ee_f_ext_hat_ee[i], actual.ee_f_ext_hat_ee[i]);
+  for (size_t i = 0; i < actual.EE_F_ext_hat_EE.size(); i++) {
+    EXPECT_EQ(expected.EE_F_ext_hat_EE[i], actual.EE_F_ext_hat_EE[i]);
   }
 }
 
@@ -110,17 +110,17 @@ void randomRobotState(RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.q_start.size(); i++) {
     robot_state.q_start[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.o_t_ee_start.size(); i++) {
-    robot_state.o_t_ee_start[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.O_T_EE_start.size(); i++) {
+    robot_state.O_T_EE_start[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.elbow_start.size(); i++) {
     robot_state.elbow_start[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_j.size(); i++) {
-    robot_state.tau_j[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
+    robot_state.tau_J[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dtau_j.size(); i++) {
-    robot_state.dtau_j[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.dtau_J.size(); i++) {
+    robot_state.dtau_J[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.q.size(); i++) {
     robot_state.q[i] = randomDouble();
@@ -146,10 +146,10 @@ void randomRobotState(RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
     robot_state.tau_ext_hat_filtered[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.o_f_ext_hat_ee.size(); i++) {
-    robot_state.o_f_ext_hat_ee[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.O_F_ext_hat_EE.size(); i++) {
+    robot_state.O_F_ext_hat_EE[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.ee_f_ext_hat_ee.size(); i++) {
-    robot_state.ee_f_ext_hat_ee[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.EE_F_ext_hat_EE.size(); i++) {
+    robot_state.EE_F_ext_hat_EE[i] = randomDouble();
   }
 }
