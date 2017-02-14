@@ -7,6 +7,11 @@
 
 #include <research_interface/types.h>
 
+// `using std::string_literals::operator""s` produces a GCC warning that cannot
+// be disabled, so we have to use `using namespace ...`.
+// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
+using namespace std::string_literals;  // NOLINT
+
 namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
@@ -48,12 +53,11 @@ Robot::Impl::Impl(const std::string& franka_address,
         throw ProtocolException("libfranka: protocol error");
     }
   } catch (Poco::Net::NetException const& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
-                           e.what());
+    throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
     throw NetworkException("libfranka: FRANKA connection timeout");
   } catch (Poco::Exception const& e) {
-    throw NetworkException(std::string{"libfranka: "} + e.what());
+    throw NetworkException("libfranka: "s + e.what());
   }
 }
 
@@ -130,8 +134,7 @@ bool Robot::Impl::waitForRobotState() {
   } catch (Poco::TimeoutException const& e) {
     throw NetworkException("libfranka: robot state read timeout");
   } catch (Poco::Net::NetException const& e) {
-    throw NetworkException(std::string{"libfranka: robot state read: "} +
-                           e.what());
+    throw NetworkException("libfranka: robot state read: "s + e.what());
   }
 }
 
@@ -160,8 +163,7 @@ T Robot::Impl::tcpReceiveObject() {
     }
     return T(*reinterpret_cast<const T*>(buffer.data()));
   } catch (Poco::Net::NetException const& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
-                           e.what());
+    throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
     if (bytes_read != 0) {
       throw ProtocolException("libfranka:: incorrect object size");
