@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <research_interface/constants.h>
+#include <research_interface/types.h>
 
 #include <franka/exception.h>
 #include <franka/robot_state.h>

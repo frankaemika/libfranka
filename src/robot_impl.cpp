@@ -25,15 +25,13 @@ Robot::Impl::Impl(const std::string& franka_address,
     udp_socket_.setReceiveTimeout(poco_timeout);
     udp_socket_.bind({"0.0.0.0", 0});
 
-    research_interface::ConnectRequest connect_request;
-    connect_request.function = research_interface::Function::kConnect;
-    connect_request.version = research_interface::kVersion;
-    connect_request.udp_port = udp_socket_.address().port();
+    research_interface::ConnectRequest connect_request(
+        udp_socket_.address().port());
 
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
-    research_interface::ConnectReply connect_reply;
-    tcpReceiveObject(connect_reply);
+    research_interface::ConnectReply connect_reply =
+        tcpReceiveObject<research_interface::ConnectReply>();
     switch (connect_reply.status) {
       case research_interface::ConnectReply::Status::
           kIncompatibleLibraryVersion: {
@@ -118,11 +116,13 @@ bool Robot::Impl::waitForRobotState() {
       return false;
     }
 
-    research_interface::RobotState robot_state;
+    std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
     Poco::Net::SocketAddress server_address;
-    int bytes_received = udp_socket_.receiveFrom(
-        &robot_state, sizeof(robot_state), server_address, 0);
-    if (bytes_received == sizeof(robot_state)) {
+    int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(),
+                                                 server_address, 0);
+    if (bytes_received == buffer.size()) {
+      research_interface::RobotState robot_state(
+          *reinterpret_cast<research_interface::RobotState*>(buffer.data()));
       setRobotState(robot_state);
       return true;
     }
@@ -144,21 +144,21 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
 }
 
 template <class T>
-void Robot::Impl::tcpReceiveObject(T& object) {
+T Robot::Impl::tcpReceiveObject() {
   int bytes_read = 0;
   try {
-    uint8_t* buff = reinterpret_cast<uint8_t*>(&object);
+    std::array<uint8_t, sizeof(T)> buffer;
     constexpr int kBytesTotal = sizeof(T);
 
     while (bytes_read < kBytesTotal) {
       int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(buff + bytes_read, bytes_left, 0);
+      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left, 0);
       if (rv == 0) {
         throw NetworkException("libfranka:: FRANKA connection closed");
       }
       bytes_read += rv;
     }
-
+    return T(*reinterpret_cast<const T*>(buffer.data()));
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection error: "} +
                            e.what());

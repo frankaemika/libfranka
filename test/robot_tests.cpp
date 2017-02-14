@@ -25,8 +25,8 @@ TEST(Robot, CanPerformHandshake) {
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   MockServer server;
-  server.onConnect([](const ConnectRequest&, ConnectReply& reply) {
-           reply.status = ConnectReply::Status::kIncompatibleLibraryVersion;
+  server.onConnect([](const ConnectRequest&) {
+           return ConnectReply(ConnectReply::Status::kIncompatibleLibraryVersion);
          })
         .start();
 

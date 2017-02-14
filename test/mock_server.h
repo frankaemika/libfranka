@@ -9,7 +9,7 @@
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<void(const research_interface::ConnectRequest&, research_interface::ConnectReply&)>;
+  using ConnectCallbackT = std::function<research_interface::ConnectReply(const research_interface::ConnectRequest&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
   MockServer();

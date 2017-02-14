@@ -5,7 +5,7 @@
 #include <Poco/Net/ServerSocket.h>
 
 #include <franka/robot_state.h>
-#include <research_interface/constants.h>
+#include <research_interface/types.h>
 #include <research_interface/rbk_types.h>
 
 MockServer::MockServer()
@@ -63,16 +63,13 @@ void MockServer::serverThread() {
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
 
-  research_interface::ConnectRequest request;
-  tcp_socket.receiveBytes(&request, sizeof(request));
+  std::array<uint8_t, sizeof(research_interface::ConnectRequest)> buffer;
+  tcp_socket.receiveBytes(buffer.data(), buffer.size());
+  research_interface::ConnectRequest request(*reinterpret_cast<research_interface::ConnectRequest*>(buffer.data()));
 
-  research_interface::ConnectReply reply;
-  reply.version = 1;
-  reply.status = research_interface::ConnectReply::Status::kSuccess;
-
-  if (on_connect_) {
-    on_connect_(request, reply);
-  }
+  research_interface::ConnectReply reply = on_connect_
+                                           ? on_connect_(request)
+                                           : research_interface::ConnectReply(research_interface::ConnectReply::Status::kSuccess);
 
   tcp_socket.sendBytes(&reply, sizeof(reply));
 

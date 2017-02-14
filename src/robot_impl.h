@@ -6,8 +6,8 @@
 #include <Poco/Net/StreamSocket.h>
 
 #include <franka/robot.h>
-#include <research_interface/constants.h>
 #include <research_interface/rbk_types.h>
+#include <research_interface/types.h>
 
 namespace franka {
 
@@ -28,7 +28,7 @@ class Robot::Impl {
  protected:
   // Can throw NetworkException and ProtocolException
   template <class T>
-  void tcpReceiveObject(T& object);
+  T tcpReceiveObject();
 
  private:
   uint16_t ri_version_;
