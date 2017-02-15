@@ -1,11 +1,15 @@
 #include <gtest/gtest.h>
 
+#include <research_interface/types.h>
+
 #include "franka/robot.h"
+#include "robot_impl.h"
 #include "mock_server.h"
 #include "helpers.h"
 
 using namespace franka;
-using namespace message_types;
+using research_interface::ConnectRequest;
+using research_interface::ConnectReply;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException);
@@ -21,8 +25,8 @@ TEST(Robot, CanPerformHandshake) {
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   MockServer server;
-  server.onConnect([](const ConnectRequest&, ConnectReply& reply) {
-           reply.status_code = ConnectReply::StatusCode::kIncompatibleLibraryVersion;
+  server.onConnect([](const ConnectRequest&) {
+           return ConnectReply(ConnectReply::Status::kIncompatibleLibraryVersion);
          })
         .start();
 

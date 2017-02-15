@@ -45,9 +45,13 @@ if(BUILD_COVERAGE)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
 
+## Submodules
+add_subdirectory(lib/research-interface-common)
+
 ## Library
 add_library(franka SHARED
   src/robot.cpp
+  src/robot_impl.cpp
   src/robot_state.cpp
 )
 set_target_properties(franka PROPERTIES
@@ -64,7 +68,8 @@ target_include_directories(franka PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(franka Poco::Net Poco::Foundation)
+target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation)
+target_link_libraries(franka PRIVATE research-interface-common)
 
 ## Installation
 include(GNUInstallDirs)
@@ -165,14 +170,14 @@ endif()
 find_program(CLANG_TIDY_PROG clang-tidy DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_CURRENT_BINARY_DIR} ${SOURCES}
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS franka
     COMMENT "Running clang-tidy"
     VERBATIM
   )
   add_custom_target(check-tidy
-    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_CURRENT_BINARY_DIR} ${SOURCES}
+    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS franka
     COMMENT "Running clang-tidy"

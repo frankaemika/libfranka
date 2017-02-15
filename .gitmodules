@@ -1,0 +1,3 @@
+[submodule "lib/research-interface-common"]
+	path = lib/research-interface-common
+	url = https://github.com/frankaemika/research-interface-common.git

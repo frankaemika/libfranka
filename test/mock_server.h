@@ -5,20 +5,20 @@
 #include <thread>
 
 #include <franka/robot_state.h>
-
-#include "message_types.h"
+#include <research_interface/types.h>
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<void(const message_types::ConnectRequest&, message_types::ConnectReply&)>;
+  using ConnectCallbackT = std::function<research_interface::ConnectReply(const research_interface::ConnectRequest&)>;
   using SendRobotStateCallbackT = std::function<franka::RobotState()>;
 
-  MockServer() = default;
+  MockServer();
   ~MockServer();
 
   MockServer& onConnect(ConnectCallbackT on_connect);
   MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
   void start();
+  void stop();
 
  private:
   void serverThread();
@@ -26,6 +26,9 @@ class MockServer {
   std::condition_variable cv_;
   std::mutex mutex_;
   std::thread server_thread_;
+  bool shutdown_;
+  bool continue_;
+  bool initialized_;
 
   ConnectCallbackT on_connect_;
   SendRobotStateCallbackT on_send_robot_state_;
