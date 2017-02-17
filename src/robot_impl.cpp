@@ -72,6 +72,7 @@ void Robot::Impl::setRobotState(
   static_assert(sizeof(robot_state_) == sizeof(robot_state),
                 "research_interface::RobotState size changed - adjust "
                 "franka::RobotState?");
+  robot_state_.message_id = robot_state.message_id;
   std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
             robot_state_.q_start.begin());
   std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
