@@ -20,6 +20,12 @@ struct RobotState {
   RobotState();
 
   /**
+   * \f$message_id\f$
+   * Message Id for internal checks, to send with next command.
+   */
+  double message_id;
+
+  /**
    * \f$q_{start}\f$
    * Motion generator's start pose in joint space. Unit: \f$[rad]\f$
    */
