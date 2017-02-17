@@ -35,8 +35,8 @@ std::ostream& operator<<(std::ostream& ostream,
           << ", joint_collision: " << robot_state.joint_collision
           << ", cartesian_collision: " << robot_state.cartesian_collision
           << ", tau_ext_hat_filtered: " << robot_state.tau_ext_hat_filtered
-          << ", O_F_ext_hat_EE: " << robot_state.O_F_ext_hat_EE
-          << ", EE_F_ext_hat_EE: " << robot_state.EE_F_ext_hat_EE << "}";
+          << ", O_F_ext_hat_K: " << robot_state.O_F_ext_hat_K
+          << ", K_F_ext_hat_K: " << robot_state.K_F_ext_hat_K << "}";
   return ostream;
 }
 

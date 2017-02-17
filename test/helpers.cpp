@@ -46,11 +46,11 @@ void testRobotStateIsZero(const RobotState& actual) {
   for (size_t i = 0; i < actual.tau_ext_hat_filtered.size(); i++) {
     EXPECT_EQ(0.0, actual.tau_ext_hat_filtered[i]);
   }
-  for (size_t i = 0; i < actual.O_F_ext_hat_EE.size(); i++) {
-    EXPECT_EQ(0.0, actual.O_F_ext_hat_EE[i]);
+  for (size_t i = 0; i < actual.O_F_ext_hat_K.size(); i++) {
+    EXPECT_EQ(0.0, actual.O_F_ext_hat_K[i]);
   }
-  for (size_t i = 0; i < actual.EE_F_ext_hat_EE.size(); i++) {
-    EXPECT_EQ(0.0, actual.EE_F_ext_hat_EE[i]);
+  for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
+    EXPECT_EQ(0.0, actual.K_F_ext_hat_K[i]);
   }
 }
 
@@ -94,11 +94,11 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   for (size_t i = 0; i < actual.tau_ext_hat_filtered.size(); i++) {
     EXPECT_EQ(expected.tau_ext_hat_filtered[i], actual.tau_ext_hat_filtered[i]);
   }
-  for (size_t i = 0; i < actual.O_F_ext_hat_EE.size(); i++) {
-    EXPECT_EQ(expected.O_F_ext_hat_EE[i], actual.O_F_ext_hat_EE[i]);
+  for (size_t i = 0; i < actual.O_F_ext_hat_K.size(); i++) {
+    EXPECT_EQ(expected.O_F_ext_hat_K[i], actual.O_F_ext_hat_K[i]);
   }
-  for (size_t i = 0; i < actual.EE_F_ext_hat_EE.size(); i++) {
-    EXPECT_EQ(expected.EE_F_ext_hat_EE[i], actual.EE_F_ext_hat_EE[i]);
+  for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
+    EXPECT_EQ(expected.K_F_ext_hat_K[i], actual.K_F_ext_hat_K[i]);
   }
 }
 
@@ -146,10 +146,10 @@ void randomRobotState(RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
     robot_state.tau_ext_hat_filtered[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_F_ext_hat_EE.size(); i++) {
-    robot_state.O_F_ext_hat_EE[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.O_F_ext_hat_K.size(); i++) {
+    robot_state.O_F_ext_hat_K[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.EE_F_ext_hat_EE.size(); i++) {
-    robot_state.EE_F_ext_hat_EE[i] = randomDouble();
+  for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
+    robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
 }

@@ -101,18 +101,18 @@ struct RobotState {
   std::array<double, 7> tau_ext_hat_filtered;
 
   /**
-   * \f$^OF_{EE,ext}\f$
+   * \f$^OF_{K,ext}\f$
    * External wrench(force, torque) acting on end-effector relative to the base
    * frame scaled by a factor. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> O_F_ext_hat_EE;  // NOLINT
+  std::array<double, 6> O_F_ext_hat_K;  // NOLINT
 
   /**
-   * \f$^{EE}F_{EE,ext}\f$
+   * \f$^{K}F_{K,ext}\f$
    * External wrench(force, torque) acting on end-effector relative to
    * end-effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> EE_F_ext_hat_EE;  // NOLINT
+  std::array<double, 6> K_F_ext_hat_K;  // NOLINT
 };
 
 /**
