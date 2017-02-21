@@ -37,8 +37,9 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "joint_collision");
   EXPECT_PRED2(stringContains, output, "cartesian_collision");
   EXPECT_PRED2(stringContains, output, "tau_ext_hat_filtered");
-  EXPECT_PRED2(stringContains, output, "O_F_ext_hat_EE");
-  EXPECT_PRED2(stringContains, output, "EE_F_ext_hat_EE");
+  EXPECT_PRED2(stringContains, output, "O_F_ext_hat_K");
+  EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
+  EXPECT_PRED2(stringContains, output, "message_id");
 }
 
 TEST(RobotState, CanCopyConstruct) {

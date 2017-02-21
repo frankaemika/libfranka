@@ -117,12 +117,12 @@ void MockServer::serverThread() {
   std::copy(robot_state.tau_ext_hat_filtered.cbegin(),
             robot_state.tau_ext_hat_filtered.cend(),
             rbk_robot_state.tau_ext_hat_filtered.begin());
-  std::copy(robot_state.O_F_ext_hat_EE.cbegin(),
-            robot_state.O_F_ext_hat_EE.cend(),
-            rbk_robot_state.O_F_ext_hat_EE.begin());
-  std::copy(robot_state.EE_F_ext_hat_EE.cbegin(),
-            robot_state.EE_F_ext_hat_EE.cend(),
-            rbk_robot_state.EE_F_ext_hat_EE.begin());
+  std::copy(robot_state.O_F_ext_hat_K.cbegin(),
+            robot_state.O_F_ext_hat_K.cend(),
+            rbk_robot_state.O_F_ext_hat_K.begin());
+  std::copy(robot_state.K_F_ext_hat_K.cbegin(),
+            robot_state.K_F_ext_hat_K.cend(),
+            rbk_robot_state.K_F_ext_hat_K.begin());
 
   udp_socket.sendTo(&rbk_robot_state, sizeof(rbk_robot_state), {remote_address.host(), request.udp_port});
 
