@@ -5,6 +5,7 @@
 
 #include <franka/exception.h>
 #include <franka/robot_state.h>
+// #include <franka/motion_generator.h>
 
 /**
  * @file robot.h
@@ -12,6 +13,12 @@
  */
 
 namespace franka {
+
+
+class CartesianPoseMotionGenerator;
+class CartesianVelocityMotionGenerator;
+class JointPoseMotionGenerator;
+class JointVelocityMotionGenerator;
 
 /**
  * Maintains a connection to FRANKA CONTROL and provides the current
@@ -38,16 +45,17 @@ class Robot {
   ~Robot() noexcept;
 
   /**
-   * Blocks until new robot state arrives. When the function returns true, the
-   * reference from getRobotState() points to new data.
+   * Blocks until new robot state arrives. Then it sends the current command
+   * over the UDP connection. When the function returns true, the
+   * reference from getRobotState() points to new data and the robot command was sent.
    *
    * @throw NetworkException if the connetion is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    *
-   * @return True if a new robot state arrived, false if the connection is
+   * @return True if a new robot state arrived and a robot command was sent, false if the connection is
    * cleanly closed.
    */
-  bool waitForRobotState();
+  bool update();
 
   /**
    * Returns last obtained robot state. Updated after a call to
@@ -64,11 +72,20 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
+  const CartesianPoseMotionGenerator& startCartesianPoseMotionGenerator();
+
+  const CartesianVelocityMotionGenerator& startCartesianVelocityMotionGenerator();
+
+  const JointPoseMotionGenerator& startJointPoseMotionGenerator();
+
+  const JointVelocityMotionGenerator& startJointVelocityMotionGenerator();
+
+
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
-
- protected:
   class Impl;
+ // protected:
+
 
  private:
   std::unique_ptr<Impl> impl_;

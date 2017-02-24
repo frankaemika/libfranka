@@ -40,4 +40,12 @@ struct IncompatibleVersionException : public Exception {
   using Exception::Exception;
 };
 
+/**
+ * MotionGeneratorException is thrown in case of attempting to start a
+ * motion generator while another motion generator is already running
+ */
+struct MotionGeneratorException : public Exception {
+  using Exception::Exception;
+};
+
 }  // namespace franka
