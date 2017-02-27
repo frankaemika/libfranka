@@ -5,8 +5,8 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/StreamSocket.h>
 
-#include <franka/robot.h>
 #include <franka/motion_generator.h>
+#include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
 
@@ -23,15 +23,15 @@ class Robot::Impl {
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update();
-  research_interface::RobotCommand& getRobotCommand() {return robot_command_;}
-  bool& getMotionGeneratorRunning() {return motion_generator_running_;}
+  research_interface::RobotCommand& getRobotCommand() { return robot_command_; }
+  bool& getMotionGeneratorRunning() { return motion_generator_running_; }
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
 
-  CartesianPoseMotionGenerator&& startCartesianPoseMotionGenerator();
-  CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
-  JointPoseMotionGenerator&& startJointPoseMotionGenerator();
-  JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
+  CartesianPoseMotionGenerator::Impl startCartesianPoseMotionGenerator();
+  // CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
+  // JointPoseMotionGenerator&& startJointPoseMotionGenerator();
+  // JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
 
   bool setCartesianPoseMotionGeneratorInRCU();
   bool setCartesianVelocityMotionGeneratorInRCU();
@@ -44,9 +44,9 @@ class Robot::Impl {
   T tcpReceiveObject();
 
  private:
+  uint16_t ri_version_;
   bool motion_generator_running_;
   research_interface::RobotCommand robot_command_;
-  uint16_t ri_version_;
   RobotState robot_state_;
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;

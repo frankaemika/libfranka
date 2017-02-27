@@ -4,8 +4,8 @@
 #include <string>
 
 #include <franka/exception.h>
+#include <franka/motion_generator.h>
 #include <franka/robot_state.h>
-// #include <franka/motion_generator.h>
 
 /**
  * @file robot.h
@@ -13,12 +13,6 @@
  */
 
 namespace franka {
-
-
-class CartesianPoseMotionGenerator;
-class CartesianVelocityMotionGenerator;
-class JointPoseMotionGenerator;
-class JointVelocityMotionGenerator;
 
 /**
  * Maintains a connection to FRANKA CONTROL and provides the current
@@ -47,12 +41,14 @@ class Robot {
   /**
    * Blocks until new robot state arrives. Then it sends the current command
    * over the UDP connection. When the function returns true, the
-   * reference from getRobotState() points to new data and the robot command was sent.
+   * reference from getRobotState() points to new data and the robot command was
+   * sent.
    *
    * @throw NetworkException if the connetion is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    *
-   * @return True if a new robot state arrived and a robot command was sent, false if the connection is
+   * @return True if a new robot state arrived and a robot command was sent,
+   * false if the connection is
    * cleanly closed.
    */
   bool update();
@@ -72,20 +68,18 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
-  CartesianPoseMotionGenerator&& startCartesianPoseMotionGenerator();
+  CartesianPoseMotionGenerator startCartesianPoseMotionGenerator();
 
-  CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
+  // CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
 
-  JointPoseMotionGenerator&& startJointPoseMotionGenerator();
+  // JointPoseMotionGenerator&& startJointPoseMotionGenerator();
 
-  JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
-
+  // JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
-  class Impl;
- // protected:
 
+  class Impl;
 
  private:
   std::unique_ptr<Impl> impl_;

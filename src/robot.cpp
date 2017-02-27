@@ -1,5 +1,6 @@
 #include <franka/robot.h>
 
+#include "motion_generator_impl.h"
 #include "robot_impl.h"
 
 namespace franka {
@@ -22,20 +23,22 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-CartesianPoseMotionGenerator&& Robot::startCartesianPoseMotionGenerator() {
-  return impl_->startCartesianPoseMotionGenerator();
+CartesianPoseMotionGenerator Robot::startCartesianPoseMotionGenerator() {
+  return CartesianPoseMotionGenerator(
+      impl_->startCartesianPoseMotionGenerator());
 }
 
-CartesianVelocityMotionGenerator&& Robot::startCartesianVelocityMotionGenerator() {
-  return impl_->startCartesianVelocityMotionGenerator();
-}
-
-JointPoseMotionGenerator&& Robot::startJointPoseMotionGenerator() {
-  return impl_->startJointPoseMotionGenerator();
-}
-
-JointVelocityMotionGenerator&& Robot::startJointVelocityMotionGenerator() {
-  return impl_->startJointVelocityMotionGenerator();
-}
+// CartesianVelocityMotionGenerator&&
+// Robot::startCartesianVelocityMotionGenerator() {
+//   return impl_->startCartesianVelocityMotionGenerator();
+// }
+//
+// JointPoseMotionGenerator&& Robot::startJointPoseMotionGenerator() {
+//   return impl_->startJointPoseMotionGenerator();
+// }
+//
+// JointVelocityMotionGenerator&& Robot::startJointVelocityMotionGenerator() {
+//   return impl_->startJointVelocityMotionGenerator();
+// }
 
 }  // namespace franka

@@ -13,7 +13,7 @@ else()
   set(EXAMPLE_DEPENDENCIES Franka::franka)
 endif()
 
-set(EXAMPLES echo_robot_state)
+set(EXAMPLES echo_robot_state generate_motion)
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
