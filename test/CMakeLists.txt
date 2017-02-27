@@ -20,8 +20,16 @@ add_executable(run_all_tests
   mock_server.cpp
   helpers.cpp
 )
+
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
+
+add_executable(motion_generator_mock_test 
+  motion_generator_test.cpp
+)
+target_include_directories(motion_generator_mock_test PRIVATE ${TEST_INCLUDE_DIRECTORIES})
+target_link_libraries (motion_generator_mock_test ${TEST_DEPENDENCIES})
+
 
 add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
 

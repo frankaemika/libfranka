@@ -3,7 +3,16 @@
 
 namespace franka {
 
-MotionGenerator::MotionGenerator(franka::Robot::Impl& robot): robot_command_(robot.getRobotCommand()) {}
+MotionGenerator::MotionGenerator(franka::Robot::Impl& robot):
+    robot_command_(robot.getRobotCommand()),
+    motion_generator_running_(robot.getMotionGeneratorRunning()) {
+}
+
+MotionGenerator::MotionGenerator(const MotionGenerator&& motion_generator):
+    robot_command_(motion_generator.robot_command_),
+    motion_generator_running_(motion_generator.motion_generator_running_) {
+
+}
 
 void CartesianPoseMotionGenerator::setDesiredPose(std::array<double, 7>& desired_pose) {
   if(checkPose(desired_pose)) {

@@ -22,19 +22,19 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-const CartesianPoseMotionGenerator& Robot::startCartesianPoseMotionGenerator() {
+CartesianPoseMotionGenerator&& Robot::startCartesianPoseMotionGenerator() {
   return impl_->startCartesianPoseMotionGenerator();
 }
 
-const CartesianVelocityMotionGenerator& Robot::startCartesianVelocityMotionGenerator() {
+CartesianVelocityMotionGenerator&& Robot::startCartesianVelocityMotionGenerator() {
   return impl_->startCartesianVelocityMotionGenerator();
 }
 
-const JointPoseMotionGenerator& Robot::startJointPoseMotionGenerator() {
+JointPoseMotionGenerator&& Robot::startJointPoseMotionGenerator() {
   return impl_->startJointPoseMotionGenerator();
 }
 
-const JointVelocityMotionGenerator& Robot::startJointVelocityMotionGenerator() {
+JointVelocityMotionGenerator&& Robot::startJointVelocityMotionGenerator() {
   return impl_->startJointVelocityMotionGenerator();
 }
 

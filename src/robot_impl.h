@@ -23,14 +23,15 @@ class Robot::Impl {
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update();
-  const research_interface::RobotCommand& getRobotCommand() const {return robot_command_;}
+  research_interface::RobotCommand& getRobotCommand() {return robot_command_;}
+  bool& getMotionGeneratorRunning() {return motion_generator_running_;}
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
 
-  const CartesianPoseMotionGenerator& startCartesianPoseMotionGenerator();
-  const CartesianVelocityMotionGenerator& startCartesianVelocityMotionGenerator();
-  const JointPoseMotionGenerator& startJointPoseMotionGenerator();
-  const JointVelocityMotionGenerator& startJointVelocityMotionGenerator();
+  CartesianPoseMotionGenerator&& startCartesianPoseMotionGenerator();
+  CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
+  JointPoseMotionGenerator&& startJointPoseMotionGenerator();
+  JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
 
   bool setCartesianPoseMotionGeneratorInRCU();
   bool setCartesianVelocityMotionGeneratorInRCU();
@@ -43,12 +44,12 @@ class Robot::Impl {
   T tcpReceiveObject();
 
  private:
+  bool motion_generator_running_;
+  research_interface::RobotCommand robot_command_;
   uint16_t ri_version_;
   RobotState robot_state_;
-  research_interface::RobotCommand robot_command_;
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
-  bool motion_generator_running_;
 };
 
 }  // namespace franka

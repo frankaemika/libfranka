@@ -72,13 +72,13 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
-  const CartesianPoseMotionGenerator& startCartesianPoseMotionGenerator();
+  CartesianPoseMotionGenerator&& startCartesianPoseMotionGenerator();
 
-  const CartesianVelocityMotionGenerator& startCartesianVelocityMotionGenerator();
+  CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
 
-  const JointPoseMotionGenerator& startJointPoseMotionGenerator();
+  JointPoseMotionGenerator&& startJointPoseMotionGenerator();
 
-  const JointVelocityMotionGenerator& startJointVelocityMotionGenerator();
+  JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
 
 
   Robot(const Robot&) = delete;

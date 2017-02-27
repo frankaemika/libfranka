@@ -186,7 +186,7 @@ T Robot::Impl::tcpReceiveObject() {
     }
 }
 
-const CartesianPoseMotionGenerator& Robot::Impl::startCartesianPoseMotionGenerator() {
+CartesianPoseMotionGenerator&& Robot::Impl::startCartesianPoseMotionGenerator() {
     if (!motion_generator_running_) {
         // set Configs for CartesianPoseMotionGenerator in rbk
         if (setCartesianPoseMotionGeneratorInRCU()) {
@@ -200,7 +200,7 @@ const CartesianPoseMotionGenerator& Robot::Impl::startCartesianPoseMotionGenerat
     }
 }
 
-const CartesianVelocityMotionGenerator& Robot::Impl::startCartesianVelocityMotionGenerator() {
+CartesianVelocityMotionGenerator&& Robot::Impl::startCartesianVelocityMotionGenerator() {
     if (!motion_generator_running_) {
         // set Configs for CartesianVelocityMotionGenerator in rbk
         if (setCartesianVelocityMotionGeneratorInRCU()) {
@@ -214,7 +214,7 @@ const CartesianVelocityMotionGenerator& Robot::Impl::startCartesianVelocityMotio
     }
 }
 
-const JointPoseMotionGenerator& Robot::Impl::startJointPoseMotionGenerator() {
+JointPoseMotionGenerator&& Robot::Impl::startJointPoseMotionGenerator() {
     if (!motion_generator_running_) {
         // set Configs for JointPoseMotionGenerator in rbk
         if (setJointPoseMotionGeneratorInRCU()) {
@@ -228,7 +228,7 @@ const JointPoseMotionGenerator& Robot::Impl::startJointPoseMotionGenerator() {
     }
 }
 
-const JointVelocityMotionGenerator& Robot::Impl::startJointVelocityMotionGenerator() {
+JointVelocityMotionGenerator&& Robot::Impl::startJointVelocityMotionGenerator() {
     if (!motion_generator_running_) {
         // set Configs for JointVelocityMotionGenerator in rbk
         if (setJointVelocityMotionGeneratorInRCU()) {
