@@ -20,23 +20,23 @@ CartesianPoseMotionGenerator::~CartesianPoseMotionGenerator() noexcept =
     default;
 
 bool CartesianPoseMotionGenerator::Impl::checkHomogeneousTransformation(
-  std::array<double, 16> transform) {
-  if (transform[3]!=0.0 || transform[7]!=0.0 ||
-       transform[11]!=0.0 || transform[15]!=1.0) {
+    std::array<double, 16> transform) {
+  if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 ||
+      transform[15] != 1.0) {
     return false;
   }
-  for (size_t j=0; j<3; ++j) { // i..column
-    if (sqrt(pow(transform[j*4+0],2) +
-          pow(transform[j*4+1],2) +
-          pow(transform[j*4+2],2)) > ORTHONORMAL_THRESHOLD) {
-       return false;
+  for (size_t j = 0; j < 3; ++j) {  // i..column
+    if (fabs(sqrt(pow(transform[j * 4 + 0], 2) + pow(transform[j * 4 + 1], 2) +
+                  pow(transform[j * 4 + 2], 2)) -
+             1.0) > ORTHONORMAL_THRESHOLD) {
+      return false;
     }
   }
-  for (size_t i=0; i<3; ++i) { // j..row
-    if (sqrt(pow(transform[0 * 4 + i],2) +
-          pow(transform[1 * 4 + i],2) +
-          pow(transform[2 * 4 + i],2)) > ORTHONORMAL_THRESHOLD) {
-       return false;
+  for (size_t i = 0; i < 3; ++i) {  // j..row
+    if (fabs(sqrt(pow(transform[0 * 4 + i], 2) + pow(transform[1 * 4 + i], 2) +
+                  pow(transform[2 * 4 + i], 2)) -
+             1.0) > ORTHONORMAL_THRESHOLD) {
+      return false;
     }
   }
   return true;
@@ -44,19 +44,19 @@ bool CartesianPoseMotionGenerator::Impl::checkHomogeneousTransformation(
 
 void CartesianPoseMotionGenerator::setDesiredPose(
     const std::array<double, 16>& desired_pose) noexcept {
-    impl_->setDesiredPose(desired_pose);
+  impl_->setDesiredPose(desired_pose);
 }
 
 void CartesianPoseMotionGenerator::Impl::setDesiredPose(
     const std::array<double, 16>& desired_pose) noexcept {
-    if (checkHomogeneousTransformation(desired_pose)) {
-      std::copy(desired_pose.cbegin(), desired_pose.cend(),
-            command().O_T_EE_d.begin());
-    } else {
-        throw MotionGeneratorException(
-            "libfranka:: Attempt to set invalid transformation in motion"
-            "generator.\nHas to be column major!");
-    }
+  if (checkHomogeneousTransformation(desired_pose)) {
+    std::copy(desired_pose.cbegin(), desired_pose.cend(),
+              command().O_T_EE_d.begin());
+  } else {
+    throw MotionGeneratorException(
+        "libfranka:: Attempt to set invalid transformation in motion"
+        "generator.\nHas to be column major!");
+  }
 }
 
 CartesianVelocityMotionGenerator::CartesianVelocityMotionGenerator(
@@ -72,7 +72,7 @@ CartesianVelocityMotionGenerator::~CartesianVelocityMotionGenerator() noexcept =
 
 void CartesianVelocityMotionGenerator::setDesiredVelocity(
     const std::array<double, 6>& desired_velocity) noexcept {
-    impl_->setDesiredVelocity(desired_velocity);
+  impl_->setDesiredVelocity(desired_velocity);
 }
 
 void CartesianVelocityMotionGenerator::Impl::setDesiredVelocity(
@@ -93,13 +93,12 @@ JointPoseMotionGenerator::~JointPoseMotionGenerator() noexcept = default;
 
 void JointPoseMotionGenerator::setDesiredPose(
     const std::array<double, 7>& desired_pose) noexcept {
-    impl_->setDesiredPose(desired_pose);
+  impl_->setDesiredPose(desired_pose);
 }
 
 void JointPoseMotionGenerator::Impl::setDesiredPose(
     const std::array<double, 7>& desired_pose) noexcept {
-  std::copy(desired_pose.cbegin(), desired_pose.cend(),
-            command().q_d.begin());
+  std::copy(desired_pose.cbegin(), desired_pose.cend(), command().q_d.begin());
 }
 
 JointVelocityMotionGenerator::JointVelocityMotionGenerator(
@@ -115,7 +114,7 @@ JointVelocityMotionGenerator::~JointVelocityMotionGenerator() noexcept =
 
 void JointVelocityMotionGenerator::setDesiredVelocity(
     const std::array<double, 7>& desired_velocity) noexcept {
-    impl_->setDesiredVelocity(desired_velocity);
+  impl_->setDesiredVelocity(desired_velocity);
 }
 
 void JointVelocityMotionGenerator::Impl::setDesiredVelocity(
