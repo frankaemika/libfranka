@@ -5,10 +5,6 @@
 
 #include <Poco/Net/NetException.h>
 
-#include <research_interface/types.h>
-
-#include "motion_generator_impl.h"
-
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
@@ -139,18 +135,6 @@ bool Robot::Impl::update() {
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
-
-  // TODO: send command
-  /*
-  try {
-      udp_socket_.connect(Poco::Net::SocketAddress(??)); // ?? necessary
-      udp_socket_.sendBytes(*robot_command_, sizeof(robot_command_));
-  }
-  catch (Poco::Net::NetException const& e) {
-          throw NetworkException("libfranka: robot command write: "s +
-  e.what());
-  }
-  */
 }
 
 const RobotState& Robot::Impl::robotState() const noexcept {
@@ -159,6 +143,11 @@ const RobotState& Robot::Impl::robotState() const noexcept {
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
   return ri_version_;
+}
+
+research_interface::MotionGeneratorCommand&
+Robot::Impl::motionCommand() noexcept {
+  return robot_command_.motion;
 }
 
 template <class T>
@@ -183,28 +172,21 @@ T Robot::Impl::tcpReceiveObject() {
     if (bytes_read != 0) {
       throw ProtocolException("libfranka:: incorrect object size");
     } else {
-      throw NetworkException("libfranka:: FRANKA connection timeout");
+      throw NetworkException("libfranka: FRANKA connection timeout");
     }
   }
 }
 
-CartesianPoseMotionGenerator::Impl
-Robot::Impl::startCartesianPoseMotionGenerator() {
-  return CartesianPoseMotionGenerator::Impl(*this);
+void Robot::Impl::startMotionGenerator() {
+  if (motion_generator_running_) {
+    throw MotionGeneratorException(
+        "libfranka:: Attempt to start multiple motion generators!");
+  }
+  motion_generator_running_ = true;
 }
 
-CartesianVelocityMotionGenerator::Impl
-Robot::Impl::startCartesianVelocityMotionGenerator() {
-  return CartesianVelocityMotionGenerator::Impl(*this);
-}
-
-JointPoseMotionGenerator::Impl Robot::Impl::startJointPoseMotionGenerator() {
-  return JointPoseMotionGenerator::Impl(*this);
-}
-
-JointVelocityMotionGenerator::Impl
-Robot::Impl::startJointVelocityMotionGenerator() {
-  return JointVelocityMotionGenerator::Impl(*this);
+void Robot::Impl::stopMotionGenerator() {
+  motion_generator_running_ = false;
 }
 
 }  // namespace franka
