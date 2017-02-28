@@ -50,14 +50,14 @@ bool CartesianPoseMotionGenerator::checkHomogeneousTransformation(
 
 void CartesianPoseMotionGenerator::setDesiredPose(
     const std::array<double, 16>& desired_pose) noexcept {
-    if (checkHomogeneousTransformation(desired_pose)) {
-        std::copy(desired_pose.cbegin(), desired_pose.cend(),
-                  robot.impl().motionCommand().O_T_EE_d.begin());
-    } else {
-      throw MotionGeneratorException(
-          "libfranka:: Attempt to set invalid transformation in motion"
-          "generator.\nHas to be column major!");
-    }
+  if (checkHomogeneousTransformation(desired_pose)) {
+    std::copy(desired_pose.cbegin(), desired_pose.cend(),
+              robot.impl().motionCommand().O_T_EE_d.begin());
+  } else {
+    throw MotionGeneratorException(
+        "libfranka:: Attempt to set invalid transformation in motion"
+        "generator.\nHas to be column major!");
+  }
 }
 
 CartesianVelocityMotionGenerator::CartesianVelocityMotionGenerator(Robot& robot)
@@ -70,8 +70,8 @@ CartesianVelocityMotionGenerator::~CartesianVelocityMotionGenerator() noexcept =
 
 void CartesianVelocityMotionGenerator::setDesiredVelocity(
     const std::array<double, 6>& desired_velocity) noexcept {
-    std::copy(desired_velocity.cbegin(), desired_velocity.cend(),
-              robot.impl().motionCommand().O_dP_EE_d.begin());
+  std::copy(desired_velocity.cbegin(), desired_velocity.cend(),
+            robot.impl().motionCommand().O_dP_EE_d.begin());
 }
 
 JointPoseMotionGenerator::JointPoseMotionGenerator(Robot& robot)
@@ -97,8 +97,8 @@ JointVelocityMotionGenerator::~JointVelocityMotionGenerator() noexcept =
 
 void JointVelocityMotionGenerator::setDesiredVelocity(
     const std::array<double, 7>& desired_velocity) noexcept {
-    std::copy(desired_velocity.cbegin(), desired_velocity.cend(),
-              robot.impl().motionCommand().dq_d.begin());
+  std::copy(desired_velocity.cbegin(), desired_velocity.cend(),
+            robot.impl().motionCommand().dq_d.begin());
 }
 
 }  // namespace franka

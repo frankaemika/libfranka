@@ -77,7 +77,8 @@ class CartesianPoseMotionGenerator : public MotionGenerator {
   void setDesiredPose(const std::array<double, 16>& desired_pose) noexcept;
 
   /**
-   * Checks a cartesian pose command (a homogeneous transformation) for validity.
+   * Checks a cartesian pose command (a homogeneous transformation) for
+   * validity.
    *
    * @param[in] transform Homogeneous transformation to be checked
    * @return True if transformation has ortho-normal rotation matrix,
