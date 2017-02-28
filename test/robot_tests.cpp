@@ -43,7 +43,7 @@ TEST(Robot, RobotStateInitializedToZero) {
 }
 
 TEST(Robot, CanReceiveRobotState) {
-  RobotState sent_robot_state;
+  research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
   MockServer server;

@@ -1,10 +1,5 @@
 #include <gtest/gtest.h>
 
-#include <research_interface/types.h>
-
-#include <franka/exception.h>
-#include <franka/robot_state.h>
-
 #include "robot_impl.h"
 
 #include "mock_server.h"
@@ -12,6 +7,8 @@
 
 using franka::RobotState;
 using franka::NetworkException;
+using franka::MotionGeneratorException;
+using MotionGeneratorType = research_interface::StartMotionGeneratorRequest::Type;
 
 class Robot : public ::franka::Robot {
  public:
@@ -19,7 +16,7 @@ class Robot : public ::franka::Robot {
 };
 
 TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
-  RobotState sent_robot_state;
+  research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
   MockServer server;
@@ -32,7 +29,7 @@ TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
 }
 
 TEST(Robot, StopsIfControlConnectionClosed) {
-  RobotState sent_robot_state;
+  research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
   MockServer server;
@@ -44,4 +41,46 @@ TEST(Robot, StopsIfControlConnectionClosed) {
   server.stop();
 
   ASSERT_FALSE(robot.update());
+}
+
+TEST(Robot, CanStartMotionGenerator) {
+  MockServer server;
+  server.start();
+
+  Robot::Impl robot("127.0.0.1");
+  EXPECT_NO_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity));
+}
+
+TEST(Robot, CanNotStartMultipleMotionGenerators) {
+  MockServer server;
+  server.start();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startMotionGenerator(MotionGeneratorType::kJointVelocity);
+  EXPECT_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity), MotionGeneratorException);
+}
+
+TEST(Robot, CanSendMotionGeneratorCommand) {
+  MockServer server;
+  server
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+      EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kJointVelocity, request.type);
+      return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
+    })
+    .onSendRobotState([]() {
+      research_interface::RobotState robot_state;
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kJointVelocity;
+      return robot_state;
+    })
+    .start();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startMotionGenerator(MotionGeneratorType::kJointVelocity);
+
+  research_interface::RobotCommand command;
+  randomRobotCommand(command);
+  robot.motionCommand() = command.motion;
+  robot.update();
+
+  testRobotCommandsAreEqual(command.motion, server.lastCommand().motion);
 }
