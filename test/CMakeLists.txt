@@ -20,7 +20,6 @@ add_executable(run_all_tests
   mock_server.cpp
   helpers.cpp
 )
-
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
 

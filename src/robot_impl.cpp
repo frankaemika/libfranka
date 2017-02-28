@@ -139,18 +139,6 @@ bool Robot::Impl::update() {
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
-
-  // TODO: send command
-  /*
-  try {
-      udp_socket_.connect(Poco::Net::SocketAddress(??)); // ?? necessary
-      udp_socket_.sendBytes(*robot_command_, sizeof(robot_command_));
-  }
-  catch (Poco::Net::NetException const& e) {
-          throw NetworkException("libfranka: robot command write: "s +
-  e.what());
-  }
-  */
 }
 
 const RobotState& Robot::Impl::robotState() const noexcept {
@@ -183,7 +171,7 @@ T Robot::Impl::tcpReceiveObject() {
     if (bytes_read != 0) {
       throw ProtocolException("libfranka:: incorrect object size");
     } else {
-      throw NetworkException("libfranka:: FRANKA connection timeout");
+      throw NetworkException("libfranka: FRANKA connection timeout");
     }
   }
 }
