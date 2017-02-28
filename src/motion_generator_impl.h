@@ -39,4 +39,19 @@ class CartesianPoseMotionGenerator::Impl : public MotionGenerator {
   using MotionGenerator::MotionGenerator;
 };
 
+class CartesianVelocityMotionGenerator::Impl : public MotionGenerator {
+ public:
+  using MotionGenerator::MotionGenerator;
+};
+
+class JointPoseMotionGenerator::Impl : public MotionGenerator {
+ public:
+  using MotionGenerator::MotionGenerator;
+};
+
+class JointVelocityMotionGenerator::Impl : public MotionGenerator {
+ public:
+  using MotionGenerator::MotionGenerator;
+};
+
 }  // namespace franka

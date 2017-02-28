@@ -28,17 +28,19 @@ CartesianPoseMotionGenerator Robot::startCartesianPoseMotionGenerator() {
       impl_->startCartesianPoseMotionGenerator());
 }
 
-// CartesianVelocityMotionGenerator&&
-// Robot::startCartesianVelocityMotionGenerator() {
-//   return impl_->startCartesianVelocityMotionGenerator();
-// }
-//
-// JointPoseMotionGenerator&& Robot::startJointPoseMotionGenerator() {
-//   return impl_->startJointPoseMotionGenerator();
-// }
-//
-// JointVelocityMotionGenerator&& Robot::startJointVelocityMotionGenerator() {
-//   return impl_->startJointVelocityMotionGenerator();
-// }
+CartesianVelocityMotionGenerator
+Robot::startCartesianVelocityMotionGenerator() {
+  return CartesianVelocityMotionGenerator(
+      impl_->startCartesianVelocityMotionGenerator());
+}
+
+JointPoseMotionGenerator Robot::startJointPoseMotionGenerator() {
+  return JointPoseMotionGenerator(impl_->startJointPoseMotionGenerator());
+}
+
+JointVelocityMotionGenerator Robot::startJointVelocityMotionGenerator() {
+  return JointVelocityMotionGenerator(
+      impl_->startJointVelocityMotionGenerator());
+}
 
 }  // namespace franka

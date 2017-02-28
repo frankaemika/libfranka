@@ -193,78 +193,18 @@ Robot::Impl::startCartesianPoseMotionGenerator() {
   return CartesianPoseMotionGenerator::Impl(*this);
 }
 
-// CartesianVelocityMotionGenerator&&
-// Robot::Impl::startCartesianVelocityMotionGenerator() {
-//     if (!motion_generator_running_) {
-//         // set Configs for CartesianVelocityMotionGenerator in rbk
-//         if (setCartesianVelocityMotionGeneratorInRCU()) {
-//             motion_generator_running_ = true;
-//             return CartesianVelocityMotionGenerator(*this);
-//         } else {
-//             throw MotionGeneratorException("libfranka:: Could not enable
-//             motion generator!");
-//         }
-//     } else {
-//         throw MotionGeneratorException("libfranka:: Attempt to start multiple
-//         motion generators!");
-//     }
-// }
-//
-// JointPoseMotionGenerator&& Robot::Impl::startJointPoseMotionGenerator() {
-//     if (!motion_generator_running_) {
-//         // set Configs for JointPoseMotionGenerator in rbk
-//         if (setJointPoseMotionGeneratorInRCU()) {
-//             motion_generator_running_ = true;
-//             return JointPoseMotionGenerator(*this);
-//         } else {
-//             throw MotionGeneratorException("libfranka:: Could not enable
-//             motion generator!");
-//         }
-//     } else {
-//         throw MotionGeneratorException("libfranka:: Attempt to start multiple
-//         motion generators!");
-//     }
-// }
-//
-// JointVelocityMotionGenerator&&
-// Robot::Impl::startJointVelocityMotionGenerator() {
-//     if (!motion_generator_running_) {
-//         // set Configs for JointVelocityMotionGenerator in rbk
-//         if (setJointVelocityMotionGeneratorInRCU()) {
-//             motion_generator_running_ = true;
-//             return JointVelocityMotionGenerator(*this);
-//         } else {
-//             throw MotionGeneratorException("libfranka:: Could not enable
-//             motion generator!");
-//         }
-//      } else {
-//         throw MotionGeneratorException("libfranka:: Attempt to start multiple
-//         motion generators!");
-//     }
-// }
-//
-// bool Robot::Impl::setCartesianPoseMotionGeneratorInRCU() {
-//     // If not already set ...
-//     // TODO
-//     return true;
-// }
-//
-// bool Robot::Impl::setCartesianVelocityMotionGeneratorInRCU() {
-//     // If not already set ...
-//     // TODO
-//     return true;
-// }
-//
-// bool Robot::Impl::setJointPoseMotionGeneratorInRCU() {
-//     // If not already set ...
-//     // TODO
-//     return true;
-// }
-//
-// bool Robot::Impl::setJointVelocityMotionGeneratorInRCU() {
-//     // If not already set ...
-//     // TODO
-//     return true;
-// }
+CartesianVelocityMotionGenerator::Impl
+Robot::Impl::startCartesianVelocityMotionGenerator() {
+  return CartesianVelocityMotionGenerator::Impl(*this);
+}
+
+JointPoseMotionGenerator::Impl Robot::Impl::startJointPoseMotionGenerator() {
+  return JointPoseMotionGenerator::Impl(*this);
+}
+
+JointVelocityMotionGenerator::Impl
+Robot::Impl::startJointVelocityMotionGenerator() {
+  return JointVelocityMotionGenerator::Impl(*this);
+}
 
 }  // namespace franka

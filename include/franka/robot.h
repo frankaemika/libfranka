@@ -68,13 +68,53 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
+  /**
+   * Tries to start and instantiate a motion generator for Cartesian
+   * Poses
+   *
+   * @throw MotionGeneratorException if another motion generator is
+   * already running
+   *
+   * @return A CartesianPoseMotionGenerator that allows to stream
+   * Cartesian pose commands to the robot
+   */
   CartesianPoseMotionGenerator startCartesianPoseMotionGenerator();
 
-  // CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
+  /**
+   * Tries to start and instantiate a motion generator for Cartesian
+   * Velocities
+   *
+   * @throw MotionGeneratorException if another motion generator is
+   * already running
+   *
+   * @return A CartesianVelocityMotionGenerator that allows to stream
+   * Cartesian velocity commands to the robot
+   */
+  CartesianVelocityMotionGenerator startCartesianVelocityMotionGenerator();
 
-  // JointPoseMotionGenerator&& startJointPoseMotionGenerator();
+  /**
+   * Tries to start and instantiate a motion generator for joint
+   * poses
+   *
+   * @throw MotionGeneratorException if another motion generator is
+   * already running
+   *
+   * @return A JointPoseMotionGenerator that allows to stream
+   * joint pose commands to the robot
+   */
+  JointPoseMotionGenerator startJointPoseMotionGenerator();
 
-  // JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
+  /**
+   * Tries to start and instantiate a motion generator for joint
+   * velocities
+   *
+   * @throw MotionGeneratorException if another motion generator is
+   * already running
+   *
+   * @return A JointVelocityMotionGenerator that allows to stream
+   * joint velocity commands to the robot
+   */
+  JointVelocityMotionGenerator startJointVelocityMotionGenerator();
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;

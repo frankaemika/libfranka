@@ -29,9 +29,10 @@ class Robot::Impl {
   ServerVersion serverVersion() const noexcept;
 
   CartesianPoseMotionGenerator::Impl startCartesianPoseMotionGenerator();
-  // CartesianVelocityMotionGenerator&& startCartesianVelocityMotionGenerator();
-  // JointPoseMotionGenerator&& startJointPoseMotionGenerator();
-  // JointVelocityMotionGenerator&& startJointVelocityMotionGenerator();
+  CartesianVelocityMotionGenerator::Impl
+  startCartesianVelocityMotionGenerator();
+  JointPoseMotionGenerator::Impl startJointPoseMotionGenerator();
+  JointVelocityMotionGenerator::Impl startJointVelocityMotionGenerator();
 
   bool setCartesianPoseMotionGeneratorInRCU();
   bool setCartesianVelocityMotionGeneratorInRCU();
