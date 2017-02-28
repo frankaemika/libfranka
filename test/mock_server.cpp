@@ -1,5 +1,7 @@
 #include "mock_server.h"
 
+#include <cstring>
+
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/ServerSocket.h>
@@ -82,10 +84,8 @@ void MockServer::serverThread() {
   Poco::Net::DatagramSocket udp_socket({std::string("localhost"), 0});
   franka::RobotState robot_state = on_send_robot_state_();
   research_interface::RobotState rbk_robot_state;
+  std::memset(&rbk_robot_state, 0, sizeof(rbk_robot_state));
 
-  static_assert(sizeof(rbk_robot_state) == sizeof(robot_state),
-                "research_interface::RobotState size changed - adjust "
-                "franka::RobotState?");
   std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
             rbk_robot_state.q_start.begin());
   std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
@@ -123,6 +123,7 @@ void MockServer::serverThread() {
   std::copy(robot_state.K_F_ext_hat_K.cbegin(),
             robot_state.K_F_ext_hat_K.cend(),
             rbk_robot_state.K_F_ext_hat_K.begin());
+  rbk_robot_state.message_id = robot_state.message_id;
 
   udp_socket.sendTo(&rbk_robot_state, sizeof(rbk_robot_state), {remote_address.host(), request.udp_port});
 
