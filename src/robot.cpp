@@ -1,6 +1,5 @@
 #include <franka/robot.h>
 
-#include "motion_generator_impl.h"
 #include "robot_impl.h"
 
 namespace franka {
@@ -10,6 +9,10 @@ Robot::Robot(const std::string& franka_address)
 
 // Has to be declared here, as the Impl type is incomplete in the header
 Robot::~Robot() noexcept = default;
+
+Robot::Impl& Robot::impl() noexcept {
+  return *impl_;
+}
 
 bool Robot::update() {
   return impl_->update();
@@ -24,23 +27,20 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
 }
 
 CartesianPoseMotionGenerator Robot::startCartesianPoseMotionGenerator() {
-  return CartesianPoseMotionGenerator(
-      impl_->startCartesianPoseMotionGenerator());
+  return CartesianPoseMotionGenerator(*this);
 }
 
 CartesianVelocityMotionGenerator
 Robot::startCartesianVelocityMotionGenerator() {
-  return CartesianVelocityMotionGenerator(
-      impl_->startCartesianVelocityMotionGenerator());
+  return CartesianVelocityMotionGenerator(*this);
 }
 
 JointPoseMotionGenerator Robot::startJointPoseMotionGenerator() {
-  return JointPoseMotionGenerator(impl_->startJointPoseMotionGenerator());
+  return JointPoseMotionGenerator(*this);
 }
 
 JointVelocityMotionGenerator Robot::startJointVelocityMotionGenerator() {
-  return JointVelocityMotionGenerator(
-      impl_->startJointVelocityMotionGenerator());
+  return JointVelocityMotionGenerator(*this);
 }
 
 }  // namespace franka

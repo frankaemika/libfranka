@@ -23,21 +23,12 @@ class Robot::Impl {
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update();
-  research_interface::RobotCommand& getRobotCommand() { return robot_command_; }
-  bool& getMotionGeneratorRunning() { return motion_generator_running_; }
+  research_interface::MotionGeneratorCommand& motionCommand() noexcept;
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
 
-  CartesianPoseMotionGenerator::Impl startCartesianPoseMotionGenerator();
-  CartesianVelocityMotionGenerator::Impl
-  startCartesianVelocityMotionGenerator();
-  JointPoseMotionGenerator::Impl startJointPoseMotionGenerator();
-  JointVelocityMotionGenerator::Impl startJointVelocityMotionGenerator();
-
-  bool setCartesianPoseMotionGeneratorInRCU();
-  bool setCartesianVelocityMotionGeneratorInRCU();
-  bool setJointPoseMotionGeneratorInRCU();
-  bool setJointVelocityMotionGeneratorInRCU();
+  void startMotionGenerator();
+  void stopMotionGenerator();
 
  protected:
   // Can throw NetworkException and ProtocolException

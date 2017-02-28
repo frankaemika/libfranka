@@ -9,29 +9,63 @@
 
 namespace franka {
 
+class Robot;
+
+/**
+ * Motion generator base class.
+ */
+class MotionGenerator {
+ public:
+  /**
+   * Moves a motion generator.
+   *
+   * @param[in] motion_generator Motion generator to move
+   */
+  MotionGenerator(MotionGenerator&& motion_generator) noexcept;
+
+  /**
+   * Creates a new motion generator.
+   * @param[in] robot Robot instance
+   */
+  explicit MotionGenerator(Robot& robot) noexcept;
+
+  /**
+   * Destructs the motion generator.
+   */
+  virtual ~MotionGenerator() noexcept;
+
+  MotionGenerator(const MotionGenerator&) = delete;
+
+ protected:
+  /**
+   * Robot instance.
+   */
+  Robot& robot;
+};
+
 /**
  * Allows to stream Cartesian pose commands to the franka robot
  */
-class CartesianPoseMotionGenerator {
+class CartesianPoseMotionGenerator : public MotionGenerator {
  public:
-  class Impl;
+  /**
+   * Creates a new motion generator.
+   * @param[in] robot Robot instance
+   */
+  explicit CartesianPoseMotionGenerator(Robot& robot);
 
   /**
    * Moves a motion generator.
    *
-   * @param[in] motion_generator Generator to move
+   * @param[in] motion_generator Motion generator to move
    */
   CartesianPoseMotionGenerator(
       CartesianPoseMotionGenerator&& motion_generator) noexcept;
 
   /**
-   * Moves a motion generator implementation.
-   *
-   * @param[in] impl Generator impl to move
+   * Destructs the motion generator.
    */
-  explicit CartesianPoseMotionGenerator(Impl&& impl);
-
-  ~CartesianPoseMotionGenerator() noexcept;
+  ~CartesianPoseMotionGenerator() noexcept override;
 
   /**
    * Tries to set a cartesian motion command as a homogeneous transformation.
@@ -40,41 +74,31 @@ class CartesianPoseMotionGenerator {
    * that transforms from the end-effector frame EE to base frame O
    */
   void setDesiredPose(const std::array<double, 16>& desired_pose) noexcept;
-
-  CartesianPoseMotionGenerator() = delete;
-  CartesianPoseMotionGenerator(const CartesianPoseMotionGenerator&) = delete;
-  CartesianPoseMotionGenerator& operator=(const CartesianPoseMotionGenerator&) =
-      delete;
-  CartesianPoseMotionGenerator& operator=(
-      const CartesianPoseMotionGenerator&&) = delete;
-
- private:
-  std::unique_ptr<Impl> impl_;
 };
 
 /**
  * Allows to stream Cartesian velocity commands to the franka robot
  */
-class CartesianVelocityMotionGenerator {
+class CartesianVelocityMotionGenerator : public MotionGenerator {
  public:
-  class Impl;
+  /**
+   * Creates a new motion generator.
+   * @param[in] robot Robot instance
+   */
+  explicit CartesianVelocityMotionGenerator(Robot& robot);
 
   /**
    * Moves a motion generator.
    *
-   * @param[in] motion_generator Generator to move
+   * @param[in] motion_generator Motion generator to move
    */
   CartesianVelocityMotionGenerator(
       CartesianVelocityMotionGenerator&& motion_generator) noexcept;
 
   /**
-   * Moves a motion generator implementation.
-   *
-   * @param[in] impl Generator impl to move
+   * Destructs the motion generator.
    */
-  explicit CartesianVelocityMotionGenerator(Impl&& impl);
-
-  ~CartesianVelocityMotionGenerator() noexcept;
+  ~CartesianVelocityMotionGenerator() noexcept override;
 
   /**
    * Sets a desired Cartesian velocity command.
@@ -85,42 +109,31 @@ class CartesianVelocityMotionGenerator {
    */
   void setDesiredVelocity(
       const std::array<double, 6>& desired_velocity) noexcept;
-
-  CartesianVelocityMotionGenerator() = delete;
-  CartesianVelocityMotionGenerator(const CartesianVelocityMotionGenerator&) =
-      delete;
-  CartesianVelocityMotionGenerator& operator=(
-      const CartesianVelocityMotionGenerator&) = delete;
-  CartesianVelocityMotionGenerator& operator=(
-      const CartesianVelocityMotionGenerator&&) = delete;
-
- private:
-  std::unique_ptr<Impl> impl_;
 };
 
 /**
  * Allows to stream joint pose commands to the franka robot
  */
-class JointPoseMotionGenerator {
+class JointPoseMotionGenerator : public MotionGenerator {
  public:
-  class Impl;
+  /**
+   * Creates a new motion generator.
+   * @param[in] robot Robot instance
+   */
+  explicit JointPoseMotionGenerator(Robot& robot);
 
   /**
    * Moves a motion generator.
    *
-   * @param[in] motion_generator Generator to move
+   * @param[in] motion_generator Motion generator to move
    */
   JointPoseMotionGenerator(
       JointPoseMotionGenerator&& motion_generator) noexcept;
 
   /**
-   * Moves a motion generator implementation.
-   *
-   * @param[in] impl Generator impl to move
+   * Destructs the motion generator.
    */
-  explicit JointPoseMotionGenerator(Impl&& impl);
-
-  ~JointPoseMotionGenerator() noexcept;
+  ~JointPoseMotionGenerator() noexcept override;
 
   /**
    * Sets a desired joint pose command.
@@ -128,40 +141,31 @@ class JointPoseMotionGenerator {
    * @param[in] desired_pose Desired joint angles in [rad]
    */
   void setDesiredPose(const std::array<double, 7>& desired_pose) noexcept;
-
-  JointPoseMotionGenerator() = delete;
-  JointPoseMotionGenerator(const JointPoseMotionGenerator&) = delete;
-  JointPoseMotionGenerator& operator=(const JointPoseMotionGenerator&) = delete;
-  JointPoseMotionGenerator& operator=(const JointPoseMotionGenerator&&) =
-      delete;
-
- private:
-  std::unique_ptr<Impl> impl_;
 };
 
 /**
  * Allows to stream joint velocity commands to the franka robot
  */
-class JointVelocityMotionGenerator {
+class JointVelocityMotionGenerator : public MotionGenerator {
  public:
-  class Impl;
+  /**
+   * Creates a new motion generator.
+   * @param[in] robot Robot instance
+   */
+  explicit JointVelocityMotionGenerator(Robot& robot);
 
   /**
    * Moves a motion generator.
    *
-   * @param[in] motion_generator Generator to move
+   * @param[in] motion_generator Motion generator to move
    */
   JointVelocityMotionGenerator(
       JointVelocityMotionGenerator&& motion_generator) noexcept;
 
   /**
-   * Moves a motion generator implementation.
-   *
-   * @param[in] impl Generator impl to move
+   * Destructs the motion generator.
    */
-  explicit JointVelocityMotionGenerator(Impl&& impl);
-
-  ~JointVelocityMotionGenerator() noexcept;
+  ~JointVelocityMotionGenerator() noexcept override;
 
   /**
    * Sets a desired joint velocity command.
@@ -170,16 +174,6 @@ class JointVelocityMotionGenerator {
    */
   void setDesiredVelocity(
       const std::array<double, 7>& desired_velocity) noexcept;
-
-  JointVelocityMotionGenerator() = delete;
-  JointVelocityMotionGenerator(const JointVelocityMotionGenerator&) = delete;
-  JointVelocityMotionGenerator& operator=(const JointVelocityMotionGenerator&) =
-      delete;
-  JointVelocityMotionGenerator& operator=(
-      const JointVelocityMotionGenerator&&) = delete;
-
- private:
-  std::unique_ptr<Impl> impl_;
 };
 
 }  // namespace franka
