@@ -15,7 +15,7 @@ MotionGenerator::~MotionGenerator() noexcept {
 
 CartesianPoseMotionGenerator::CartesianPoseMotionGenerator(Robot& robot)
     : MotionGenerator(robot) {
-  robot.impl().startMotionGenerator();
+  robot.impl().startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition);
 }
 
 CartesianPoseMotionGenerator::~CartesianPoseMotionGenerator() noexcept =
@@ -29,7 +29,7 @@ void CartesianPoseMotionGenerator::setDesiredPose(
 
 CartesianVelocityMotionGenerator::CartesianVelocityMotionGenerator(Robot& robot)
     : MotionGenerator(robot) {
-  robot.impl().startMotionGenerator();
+  robot.impl().startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type::kCartesianVelocity);
 }
 
 CartesianVelocityMotionGenerator::~CartesianVelocityMotionGenerator() noexcept =
@@ -43,7 +43,7 @@ void CartesianVelocityMotionGenerator::setDesiredVelocity(
 
 JointPoseMotionGenerator::JointPoseMotionGenerator(Robot& robot)
     : MotionGenerator(robot) {
-  robot.impl().startMotionGenerator();
+  robot.impl().startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type::kJointPosition);
 }
 
 JointPoseMotionGenerator::~JointPoseMotionGenerator() noexcept = default;
@@ -56,7 +56,7 @@ void JointPoseMotionGenerator::setDesiredPose(
 
 JointVelocityMotionGenerator::JointVelocityMotionGenerator(Robot& robot)
     : MotionGenerator(robot) {
-  robot.impl().startMotionGenerator();
+  robot.impl().startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type::kJointVelocity);
 }
 
 JointVelocityMotionGenerator::~JointVelocityMotionGenerator() noexcept =

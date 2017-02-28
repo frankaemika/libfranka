@@ -27,7 +27,7 @@ class Robot::Impl {
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
 
-  void startMotionGenerator();
+  void startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type motion_generator_type);
   void stopMotionGenerator();
 
  protected:
