@@ -174,7 +174,9 @@ T Robot::Impl::tcpReceiveObject() {
   }
 }
 
-void Robot::Impl::startMotionGenerator(research_interface::StartMotionGeneratorRequest::Type motion_generator_type) {
+void Robot::Impl::startMotionGenerator(
+    research_interface::StartMotionGeneratorRequest::Type
+        motion_generator_type) {
   if (motion_generator_running_) {
     throw MotionGeneratorException(
         "libfranka:: Attempt to start multiple motion generators!");
