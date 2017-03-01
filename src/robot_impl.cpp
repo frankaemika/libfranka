@@ -61,9 +61,14 @@ Robot::Impl::Impl(const std::string& franka_address,
 }
 
 Robot::Impl::~Impl() noexcept {
-  tcp_socket_.shutdown();
-  tcp_socket_.close();
-  udp_socket_.close();
+  try {
+    tcp_socket_.close();
+    udp_socket_.close();
+  } catch (Poco::Net::NetException const& e) {
+    throw NetworkException("libfranka: FRANKA socket error: "s + e.what());
+  } catch (Poco::Exception const& e) {
+    throw NetworkException("libfranka: "s + e.what());
+  }
 }
 
 void Robot::Impl::setRobotState(
@@ -290,6 +295,7 @@ void Robot::Impl::stopMotionGenerator() {
 void Robot::Impl::handleStartMotionGeneratorReply(
     const research_interface::StartMotionGeneratorReply&
         start_motion_generator_request) {
+  motion_generator_running_ = false;
   switch (start_motion_generator_request.status) {
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
     case research_interface::StartMotionGeneratorReply::Status::kAborted:

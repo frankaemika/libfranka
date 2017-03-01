@@ -25,9 +25,11 @@ class Robot::Impl {
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update();
+
   research_interface::MotionGeneratorCommand& motionCommand() noexcept;
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
+  bool motionGeneratorRunning() const { return motion_generator_running_; }
 
   bool handleReplies();
   template <typename T>
@@ -47,11 +49,11 @@ class Robot::Impl {
   void stopMotionGenerator();
 
  protected:
+ private:
   // Can throw NetworkException and ProtocolException
   template <class T>
   T tcpReceiveObject();
 
- private:
   uint16_t ri_version_;
   bool motion_generator_running_;
   research_interface::RobotCommand robot_command_;
