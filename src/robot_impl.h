@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <list>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/StreamSocket.h>
@@ -28,7 +29,11 @@ class Robot::Impl {
   ServerVersion serverVersion() const noexcept;
 
   bool handleReplies();
-  void expectReply(research_interface::Function function, std::function<bool(void*)> onReply);
+  template <typename T>
+  void handleReply(std::function<void(T)> handle, std::list<research_interface::Function>::iterator it);
+
+  void handleStartMotionGeneratorReply(const research_interface::StartMotionGeneratorReply &start_motion_generator_reply);
+  void handleStopMotionGeneratorReply(const research_interface::StopMotionGeneratorReply &stop_motion_generator_reply);
 
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type
@@ -47,7 +52,9 @@ class Robot::Impl {
   RobotState robot_state_;
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
-  std::vector<std::pair<research_interface::Function, std::function<bool(void*)>>> reply_callbacks_;
+
+  std::vector<uint8_t> read_buffer_;
+  std::list<research_interface::Function> expected_replies_;
 };
 
 }  // namespace franka

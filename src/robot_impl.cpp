@@ -1,6 +1,6 @@
 #include "robot_impl.h"
 
-#include <chrono>
+#include <algorithm>
 #include <sstream>
 
 #include <Poco/Net/NetException.h>
@@ -145,14 +145,49 @@ Robot::Impl::motionCommand() noexcept {
 }
 
 bool Robot::Impl::handleReplies() {
-    if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
+  using namespace std::placeholders;
+  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
+    size_t offset = read_buffer_.size();
+    read_buffer_.resize(offset + tcp_socket_.available());
+    int rv = tcp_socket_.receiveBytes(&read_buffer_[offset], tcp_socket_.available(), MSG_DONTWAIT);
+    if (rv == 0) {
       return false;
     }
-    return true;
+
+    if (read_buffer_.size() < sizeof(research_interface::Function)) {
+      return true;
+    }
+
+    research_interface::Function function = *reinterpret_cast<research_interface::Function *>(read_buffer_.data());
+
+    auto it = std::find(expected_replies_.begin(), expected_replies_.end(), function);
+    if (it == std::end(expected_replies_)) {
+      throw ProtocolException("libfranka: unexpected reply!");
+    }
+    switch (function) {
+      case research_interface::Function::kStartMotionGenerator:
+        handleReply<research_interface::StartMotionGeneratorReply>(
+            std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this, _1), it);
+        break;
+      case research_interface::Function::kStopMotionGenerator:
+        handleReply<research_interface::StopMotionGeneratorReply>(
+            std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this, _1), it);
+        break;
+      default:
+        throw ProtocolException("libfranka: unsupported reply!");
+    }
+  }
+  return true;
 }
 
-void Robot::Impl::expectReply(research_interface::Function function, std::function<bool(void *)> onReply) {
-  reply_callbacks_.push_back(std::make_pair(function, onReply));
+template<typename T>
+void Robot::Impl::handleReply(std::function<void(T)> handle, std::list<research_interface::Function>::iterator it) {
+  if (read_buffer_.size() < sizeof(T)) {
+    return;
+  }
+  T reply = tcpReceiveObject<T>();
+  expected_replies_.erase(it);
+  handle(reply);
 }
 
 template <class T>
@@ -206,20 +241,31 @@ void Robot::Impl::startMotionGenerator(
     default:
       throw new ProtocolException("libfranka: unexpected motion generator reply!");
   }
+  expected_replies_.push_back(research_interface::Function::kStartMotionGenerator);
 }
+
 void Robot::Impl::stopMotionGenerator() {
   motion_generator_running_ = false;
 
   research_interface::StopMotionGeneratorRequest request;
   tcp_socket_.sendBytes(&request, sizeof(request));
 
-  research_interface::StopMotionGeneratorReply motion_generator_reply =
-      tcpReceiveObject<research_interface::StopMotionGeneratorReply>();
+  expected_replies_.push_back(research_interface::Function::kStopMotionGenerator);
+}
 
-  switch (motion_generator_reply.status) {
-    case research_interface::StopMotionGeneratorReply::Status::kSuccess:
+void Robot::Impl::handleStartMotionGeneratorReply(const research_interface::StartMotionGeneratorReply &start_motion_generator_request) {
+  switch (start_motion_generator_request.status) {
+    case research_interface::StartMotionGeneratorReply::Status::kFinished:
+    case research_interface::StartMotionGeneratorReply::Status::kAborted:
       break;
+    case research_interface::StartMotionGeneratorReply::Status::kRejected:
+      throw new ProtocolException("libfranka: start motion generator command rejected!");
     default:
+      throw new ProtocolException("libfranka: unexpected motion generator reply!");
+  }
+}
+void Robot::Impl::handleStopMotionGeneratorReply(const research_interface::StopMotionGeneratorReply &stop_motion_generator_reply) {
+  if (stop_motion_generator_reply.status != research_interface::StopMotionGeneratorReply::Status::kSuccess) {
       throw new ProtocolException("libfranka: unexpected motion generator reply!");
   }
 }
