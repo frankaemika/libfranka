@@ -109,3 +109,57 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   robot.motionCommand() = sent_command.motion;
   EXPECT_TRUE(robot.update());
 }
+
+TEST(Robot, CanReceiveMotionGenerationError) {
+  MockServer server;
+  server
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+      EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition, request.type);
+      return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startMotionGenerator(MotionGeneratorType::kCartesianPosition);
+
+  EXPECT_TRUE(robot.update());
+
+  server
+    .onReceiveRobotCommand([](const research_interface::RobotCommand) {
+    })
+    .sendReply<research_interface::StartMotionGeneratorReply>([]() {
+      return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kRejected);
+    })
+    .spinOnce();
+
+  EXPECT_THROW(robot.update(), MotionGeneratorException);
+}
+
+TEST(Robot, CanStopMotionGenerator) {
+  MockServer server;
+  server
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+      EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianVelocity, request.type);
+      return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianVelocity;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startMotionGenerator(MotionGeneratorType::kCartesianVelocity);
+
+  EXPECT_TRUE(robot.update());
+
+  server
+    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
+      return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
+    })
+    .spinOnce();
+
+  robot.stopMotionGenerator();
+}
