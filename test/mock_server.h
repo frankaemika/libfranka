@@ -39,7 +39,9 @@ class MockServer {
   MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
 
-  void spinOnce();
+  MockServer& sync(std::function<void()>* wait_function);
+
+  void spinOnce(bool block = false);
 
  private:
   struct Socket {

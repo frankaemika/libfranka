@@ -165,7 +165,7 @@ bool Robot::Impl::handleReplies() {
     size_t offset = read_buffer_.size();
     read_buffer_.resize(offset + tcp_socket_.available());
     int rv = tcp_socket_.receiveBytes(&read_buffer_[offset],
-                                      tcp_socket_.available(), MSG_DONTWAIT);
+                                      tcp_socket_.available());
     if (rv == 0) {
       return false;
     }
@@ -228,7 +228,7 @@ T Robot::Impl::tcpReceiveObject() {
 
     while (bytes_read < kBytesTotal) {
       int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left, 0);
+      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left);
       if (rv == 0) {
         throw NetworkException("libfranka: FRANKA connection closed");
       }

@@ -92,29 +92,31 @@ MockServer& MockServer::onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_re
   return *this;
 }
 
-void MockServer::spinOnce() {
-  {
-    std::lock_guard<std::mutex> _(mutex_);
-    continue_ = true;
-  }
+void MockServer::spinOnce(bool block) {
+  std::unique_lock<std::mutex> lock(mutex_);
+  continue_ = true;
   cv_.notify_one();
+  if (block) {
+    cv_.wait(lock, [this]() { return !continue_; });
+  }
 }
 
 void MockServer::serverThread() {
+  std::unique_lock<std::mutex> lock(mutex_);
+
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
-  {
-    std::lock_guard<std::mutex> _(mutex_);
-    srv = Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort}); // does bind + listen
-    initialized_ = true;
-  }
-  cv_.notify_one();
 
-  std::unique_lock<std::mutex> lock(mutex_);
+  srv = Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort}); // does bind + listen
+  initialized_ = true;
+
+  cv_.notify_one();
   cv_.wait(lock, [this]{ return continue_; });
 
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
+  tcp_socket.setBlocking(true);
+  tcp_socket.setNoDelay(true);
 
   Socket tcp_socket_wrapper;
   tcp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
@@ -152,17 +154,19 @@ void MockServer::serverThread() {
       commands_.front().second(tcp_socket_wrapper, udp_socket_wrapper);
       commands_.pop();
     }
+
+    ASSERT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ));
+
+    if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
+      // Received something on the TCP socket.
+      // Test that the Robot closed the connection.
+      std::array<uint8_t, 16> buffer;
+      int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
+      ASSERT_EQ(0, rv);
+    }
+
     continue_ = false;
-  }
-
-  ASSERT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ));
-
-  if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
-    // Received something on the TCP socket.
-    // Test that the Robot closed the connection.
-    std::array<uint8_t, 16> buffer;
-    int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
-    ASSERT_EQ(0, rv);
+    cv_.notify_one();
   }
 }
 

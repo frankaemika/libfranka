@@ -82,7 +82,6 @@ TEST(Robot, CanNotStartMultipleMotionGenerators) {
 TEST(Robot, CanSendMotionGeneratorCommand) {
   research_interface::RobotCommand sent_command;
   randomRobotCommand(sent_command);
-  const double motion_timestep = 0.001;
 
   MockServer server;
   server
@@ -98,14 +97,15 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   Robot::Impl robot("127.0.0.1");
   robot.startMotionGenerator(MotionGeneratorType::kCartesianPosition);
 
+  robot.motionCommand() = sent_command.motion;
+
   server
     .onReceiveRobotCommand([&](const research_interface::RobotCommand& command) {
-      sent_command.motion.timestamp += motion_timestep;
+      sent_command.motion.timestamp += Robot::Impl::kCommandTimeStep;
       testRobotCommandsAreEqual(sent_command.motion, command.motion);
     })
     .spinOnce();
 
-  robot.motionCommand() = sent_command.motion;
   EXPECT_TRUE(robot.update());
 }
 
@@ -119,6 +119,8 @@ TEST(Robot, CanReceiveMotionGenerationError) {
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
     })
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
     .spinOnce();
 
   Robot::Impl robot("127.0.0.1");
@@ -127,15 +129,11 @@ TEST(Robot, CanReceiveMotionGenerationError) {
   EXPECT_TRUE(robot.update());
 
   server
-    .onReceiveRobotCommand([](const research_interface::RobotCommand) {
-    })
     .sendReply<research_interface::StartMotionGeneratorReply>([]() {
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kRejected);
     })
-    .sendEmptyRobotState()
-    .spinOnce();
+    .spinOnce(/* block until reply has been sent */ true);
 
-  
   EXPECT_THROW(robot.update(), MotionGeneratorException);
 }
 
