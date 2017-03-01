@@ -132,8 +132,10 @@ TEST(Robot, CanReceiveMotionGenerationError) {
     .sendReply<research_interface::StartMotionGeneratorReply>([]() {
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kRejected);
     })
+    .sendEmptyRobotState()
     .spinOnce();
 
+  
   EXPECT_THROW(robot.update(), MotionGeneratorException);
 }
 
