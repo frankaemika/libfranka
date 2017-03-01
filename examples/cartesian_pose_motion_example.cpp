@@ -1,6 +1,7 @@
-#include <franka/robot.h>
 #include <cmath>
 #include <iostream>
+
+#include <franka/robot.h>
 
 int main(int argc, char** argv) {
   if (argc != 2) {
