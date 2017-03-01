@@ -26,8 +26,6 @@ node {
 
     stage('Archive results') {
       junit 'build/test_results/*.xml'
-      step([$class: 'Mailer', notifyEveryUnstableBuild: true, sendToIndividuals: true])
-
       archive 'build-release/*.deb, build-release/*.tar.gz'
       publishHTML([allowMissing: false,
                    alwaysLinkToLastBuild: false,
@@ -48,5 +46,6 @@ node {
     throw e;
   } finally {
     step([$class: 'StashNotifier'])
+    step([$class: 'Mailer', notifyEveryUnstableBuild: true, sendToIndividuals: true])
   }
 }
