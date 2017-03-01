@@ -155,6 +155,8 @@ TEST(Robot, CanStopMotionGenerator) {
   EXPECT_TRUE(robot.update());
 
   server
+    .onReceiveRobotCommand([](const research_interface::RobotCommand) {
+      })
     .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
       return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
     })

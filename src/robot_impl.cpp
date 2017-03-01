@@ -116,8 +116,8 @@ bool Robot::Impl::update() {
 
     std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
     Poco::Net::SocketAddress server_address;
-    int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(),
-                                                 server_address);
+    int bytes_received =
+        udp_socket_.receiveFrom(buffer.data(), buffer.size(), server_address);
     if (bytes_received == buffer.size()) {
       research_interface::RobotState robot_state(
           *reinterpret_cast<research_interface::RobotState*>(buffer.data()));
@@ -130,8 +130,8 @@ bool Robot::Impl::update() {
         robot_command_.message_id = robot_state.message_id;
         robot_command_.motion.timestamp += kCommandTimeStep;
 
-        int bytes_sent = udp_socket_.sendTo(&robot_command_,
-                           sizeof(robot_command_), server_address);
+        int bytes_sent = udp_socket_.sendTo(
+            &robot_command_, sizeof(robot_command_), server_address);
         if (bytes_sent != sizeof(robot_command_)) {
           throw NetworkException("libfranka: UDP send error");
         }
@@ -208,10 +208,11 @@ void Robot::Impl::handleReply(
     return;
   }
 
-  T reply = *reinterpret_cast<T *>(read_buffer_.data());
+  T reply = *reinterpret_cast<T*>(read_buffer_.data());
 
   size_t remaining_bytes = read_buffer_.size() - sizeof(reply);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)], remaining_bytes);
+  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)],
+               remaining_bytes);
   read_buffer_.resize(remaining_bytes);
 
   expected_replies_.erase(it);
@@ -270,8 +271,7 @@ void Robot::Impl::startMotionGenerator(
           "libfranka: attempted to start motion generator, but not connected!");
     case research_interface::StartMotionGeneratorReply::Status::kInvalidType:
     default:
-      throw ProtocolException(
-          "libfranka: unexpected motion generator reply!");
+      throw ProtocolException("libfranka: unexpected motion generator reply!");
   }
   expected_replies_.push_back(
       research_interface::Function::kStartMotionGenerator);
@@ -298,8 +298,7 @@ void Robot::Impl::handleStartMotionGeneratorReply(
       throw MotionGeneratorException(
           "libfranka: start motion generator command rejected!");
     default:
-      throw ProtocolException(
-          "libfranka: unexpected motion generator reply!");
+      throw ProtocolException("libfranka: unexpected motion generator reply!");
   }
 }
 void Robot::Impl::handleStopMotionGeneratorReply(
@@ -307,8 +306,7 @@ void Robot::Impl::handleStopMotionGeneratorReply(
         stop_motion_generator_reply) {
   if (stop_motion_generator_reply.status !=
       research_interface::StopMotionGeneratorReply::Status::kSuccess) {
-    throw ProtocolException(
-        "libfranka: unexpected motion generator reply!");
+    throw ProtocolException("libfranka: unexpected motion generator reply!");
   }
 }
 
