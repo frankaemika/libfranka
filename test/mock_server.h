@@ -2,8 +2,9 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <string>
 #include <thread>
-#include <vector>
+#include <queue>
 
 #include <franka/robot_state.h>
 #include <research_interface/types.h>
@@ -61,13 +62,15 @@ class MockServer {
   bool initialized_;
 
   ConnectCallbackT on_connect_;
-  std::vector<std::function<void(Socket&, Socket&)>> commands_;
+  std::queue<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
 };
 
 template <typename TReply>
 MockServer& MockServer::sendReply(std::function<TReply()> create_reply) {
+  using namespace std::string_literals;
+
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.push_back([=](Socket& tcp_socket, Socket&) {
+  commands_.emplace("sendReply<"s + typeid(TReply).name() + ">" , [=](Socket& tcp_socket, Socket&) {
     TReply reply = create_reply();
     tcp_socket.sendBytes(&reply, sizeof(reply));
   });

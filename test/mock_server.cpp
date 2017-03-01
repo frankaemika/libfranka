@@ -1,6 +1,7 @@
 #include "mock_server.h"
 
 #include <cstring>
+#include <sstream>
 
 #include <gtest/gtest.h>
 #include <Poco/Net/ServerSocket.h>
@@ -26,7 +27,13 @@ MockServer::~MockServer() {
   server_thread_.join();
 
   if (!commands_.empty()) {
-    ADD_FAILURE() << "Mock server did not process all commands.";
+    std::stringstream ss;
+    ss << "Mock server did not process all commands. Unprocessed commands:" << std::endl;
+    while (!commands_.empty()) {
+      ss << commands_.front().first << std::endl;
+      commands_.pop();
+    }
+    ADD_FAILURE() << ss.str();
   }
 }
 
@@ -57,7 +64,7 @@ MockServer& MockServer::sendEmptyRobotState() {
 
 MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.push_back([=](Socket&, Socket& udp_socket) {
+  commands_.emplace("onSendRobotState", [=](Socket&, Socket& udp_socket) {
     research_interface::RobotState robot_state = on_send_robot_state();
     udp_socket.sendBytes(&robot_state, sizeof(robot_state));
   });
@@ -77,7 +84,7 @@ MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_s
 
 MockServer& MockServer::onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.push_back([=](Socket&, Socket& udp_socket) {
+  commands_.emplace("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
     research_interface::RobotCommand robot_command;
     udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
     on_receive_robot_command(robot_command);
@@ -141,10 +148,10 @@ void MockServer::serverThread() {
 
   while (!shutdown_) {
     cv_.wait(lock, [this]{ return continue_ || shutdown_; });
-    for (auto command : commands_) {
-      command(tcp_socket_wrapper, udp_socket_wrapper);
+    while (!commands_.empty()) {
+      commands_.front().second(tcp_socket_wrapper, udp_socket_wrapper);
+      commands_.pop();
     }
-    commands_.clear();
     continue_ = false;
   }
 
@@ -161,8 +168,11 @@ void MockServer::serverThread() {
 
 template <typename TRequest, typename TReply>
 MockServer& MockServer::waitForCommand(std::function<TReply(const TRequest&)> callback) {
+  using namespace std::string_literals;
+
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.push_back([this,callback](Socket& tcp_socket, Socket&) {
+  std::string name = "waitForCommand<"s + typeid(TRequest).name() + ", " + typeid(TReply).name();
+  commands_.emplace(name, [this,callback](Socket& tcp_socket, Socket&) {
     handleCommand<TRequest, TReply>(tcp_socket, callback);
   });
   return *this;
