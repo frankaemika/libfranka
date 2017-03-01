@@ -70,8 +70,9 @@ class CartesianPoseMotionGenerator : public MotionGenerator {
   /**
    * Tries to set a cartesian motion command as a homogeneous transformation.
    *
-   * @param[in] desired_pose Homogeneous transformation O_T_EE_d, column major,
-   * that transforms from the end-effector frame EE to base frame O
+   * @param[in] desired_pose Homogeneous transformation
+   * \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
+   * end-effector frame \f$EE\f$ to base frame \f$O\f$
    * @throw MotionGeneratorException when non-valid pose was passed
    */
   void setDesiredPose(const std::array<double, 16>& desired_pose) noexcept;
@@ -80,9 +81,10 @@ class CartesianPoseMotionGenerator : public MotionGenerator {
    * Checks a cartesian pose command (a homogeneous transformation) for
    * validity.
    *
-   * @param[in] transform Homogeneous transformation to be checked
+   * @param[in] transform Homogeneous transformation to be checked,
+   * passed as column major array
    * @return True if transformation has ortho-normal rotation matrix,
-   * the last row is [0 0 0 1] and the array defines a row major matrix
+   * the last row is [0 0 0 1] and the array defines a column major matrix
    */
   bool checkHomogeneousTransformation(std::array<double, 16> transform);
 };
