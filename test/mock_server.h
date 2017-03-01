@@ -13,7 +13,9 @@ class MockServer {
  public:
   using ConnectCallbackT = std::function<research_interface::ConnectReply(const research_interface::ConnectRequest&)>;
   using StartMotionGeneratorCallbackT = std::function<research_interface::StartMotionGeneratorReply(const research_interface::StartMotionGeneratorRequest&)>;
+  using SendRobotStateAlternativeCallbackT = std::function<void(research_interface::RobotState&)>;
   using SendRobotStateCallbackT = std::function<research_interface::RobotState()>;
+  using ReceiveRobotCommandCallbackT = std::function<void(const research_interface::RobotCommand&)>;
 
   MockServer();
   ~MockServer();
@@ -21,12 +23,13 @@ class MockServer {
   MockServer& sendEmptyRobotState();
 
   MockServer& onConnect(ConnectCallbackT on_connect);
-  MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
   MockServer& onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator);
 
-  void spinOnce();
+  MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
+  MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
+  MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
 
-  const research_interface::RobotCommand& lastCommand();
+  void spinOnce();
 
  private:
   struct Socket {
@@ -48,9 +51,6 @@ class MockServer {
   bool continue_;
   bool initialized_;
 
-  std::vector<std::function<void(Socket&, Socket&)>> commands_;
-
   ConnectCallbackT on_connect_;
-
-  research_interface::RobotCommand last_command_;
+  std::vector<std::function<void(Socket&, Socket&)>> commands_;
 };

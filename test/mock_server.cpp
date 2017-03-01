@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include <gtest/gtest.h>
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
@@ -10,8 +11,6 @@ MockServer::MockServer()
     : shutdown_{false},
       continue_{false},
       initialized_{false} {
-  std::memset(&last_command_, 0, sizeof(last_command_));
-
   std::unique_lock<std::mutex> lock(mutex_);
   server_thread_ = std::thread(&MockServer::serverThread, this);
 
@@ -25,27 +24,10 @@ MockServer::~MockServer() {
   }
   cv_.notify_one();
   server_thread_.join();
-}
 
-template <typename TRequest, typename TReply>
-MockServer& MockServer::waitForCommand(std::function<TReply(const TRequest&)> callback) {
-  commands_.push_back([this,callback](Socket& tcp_socket, Socket&) {
-    handleCommand<TRequest, TReply>(tcp_socket, callback);
-  });
-  return *this;
-}
-
-template <typename TRequest, typename TReply>
-void MockServer::handleCommand(Socket& tcp_socket, std::function<TReply(const TRequest&)> callback) {
-  std::array<uint8_t, sizeof(TRequest)> buffer;
-  tcp_socket.receiveBytes(buffer.data(), buffer.size());
-  TRequest request(*reinterpret_cast<TRequest*>(buffer.data()));
-  TReply reply = callback(request);
-  tcp_socket.sendBytes(&reply, sizeof(reply));
-}
-
-const research_interface::RobotCommand& MockServer::lastCommand() {
-  return last_command_;
+  if (!commands_.empty()) {
+    ADD_FAILURE() << "Mock server did not process all commands.";
+  }
 }
 
 MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
@@ -58,17 +40,35 @@ MockServer& MockServer::onStartMotionGenerator(StartMotionGeneratorCallbackT on_
 }
 
 MockServer& MockServer::sendEmptyRobotState() {
-  return onSendRobotState([]() {
+  return onSendRobotState(SendRobotStateAlternativeCallbackT());
+}
+
+MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
+  std::lock_guard<std::mutex> _(mutex_);
+  commands_.push_back([=](Socket&, Socket& udp_socket) {
+    research_interface::RobotState robot_state = on_send_robot_state();
+    udp_socket.sendBytes(&robot_state, sizeof(robot_state));
+  });
+  return *this;
+}
+
+MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state) {
+  return onSendRobotState([=]() {
     research_interface::RobotState robot_state;
     std::memset(&robot_state, 0, sizeof(robot_state));
+    if (on_send_robot_state) {
+      on_send_robot_state(robot_state);
+    }
     return robot_state;
   });
 }
 
-MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
+MockServer& MockServer::onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command) {
+  std::lock_guard<std::mutex> _(mutex_);
   commands_.push_back([=](Socket&, Socket& udp_socket) {
-    research_interface::RobotState robot_state = on_send_robot_state();
-    udp_socket.sendBytes(&robot_state, sizeof(robot_state));
+    research_interface::RobotCommand robot_command;
+    udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
+    on_receive_robot_command(robot_command);
   });
   return *this;
 }
@@ -123,7 +123,7 @@ void MockServer::serverThread() {
   };
 
   while (!shutdown_) {
-    cv_.wait(lock, [this]{ return !commands_.empty() || shutdown_; });
+    cv_.wait(lock, [this]{ return continue_ || shutdown_; });
     if (shutdown_) {
       break;
     }
@@ -132,5 +132,24 @@ void MockServer::serverThread() {
       command(tcp_socket_wrapper, udp_socket_wrapper);
     }
     commands_.clear();
+    continue_ = false;
   }
+}
+
+template <typename TRequest, typename TReply>
+MockServer& MockServer::waitForCommand(std::function<TReply(const TRequest&)> callback) {
+  std::lock_guard<std::mutex> _(mutex_);
+  commands_.push_back([this,callback](Socket& tcp_socket, Socket&) {
+    handleCommand<TRequest, TReply>(tcp_socket, callback);
+  });
+  return *this;
+}
+
+template <typename TRequest, typename TReply>
+void MockServer::handleCommand(Socket& tcp_socket, std::function<TReply(const TRequest&)> callback) {
+  std::array<uint8_t, sizeof(TRequest)> buffer;
+  tcp_socket.receiveBytes(buffer.data(), buffer.size());
+  TRequest request(*reinterpret_cast<TRequest*>(buffer.data()));
+  TReply reply = callback(request);
+  tcp_socket.sendBytes(&reply, sizeof(reply));
 }
