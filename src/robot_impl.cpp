@@ -39,8 +39,8 @@ Robot::Impl::Impl(const std::string& franka_address,
       case research_interface::ConnectReply::Status::
           kIncompatibleLibraryVersion: {
         std::stringstream message;
-        message << "libfranka: incompatible library version. "
-                << "Server version: " << connect_reply.version
+        message << "libfranka: incompatible library version. " << std::endl
+                << "Server version: " << connect_reply.version << std::endl
                 << "Library version: " << research_interface::kVersion;
         throw IncompatibleVersionException(message.str());
       }
