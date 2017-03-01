@@ -109,11 +109,8 @@ void Robot::Impl::setRobotState(
 
 bool Robot::Impl::update() {
   try {
-    if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-      // The current server implementation does not send any data
-      // to libfranka. Therefore, any message on the socket indicates
-      // that the connection has been closed (server sent EOF).
-      return false;
+    if (!handleReplies()) {
+      return false; // server sent EOF
     }
 
     std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
@@ -126,7 +123,7 @@ bool Robot::Impl::update() {
       setRobotState(robot_state);
       return true;
     }
-    throw ProtocolException("libfranka:: incorrect object size");
+    throw ProtocolException("libfranka: incorrect object size");
   } catch (Poco::TimeoutException const& e) {
     throw NetworkException("libfranka: robot state read timeout");
   } catch (Poco::Net::NetException const& e) {
@@ -147,6 +144,17 @@ Robot::Impl::motionCommand() noexcept {
   return robot_command_.motion;
 }
 
+bool Robot::Impl::handleReplies() {
+    if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
+      return false;
+    }
+    return true;
+}
+
+void Robot::Impl::expectReply(research_interface::Function function, std::function<bool(void *)> onReply) {
+  reply_callbacks_.push_back(std::make_pair(function, onReply));
+}
+
 template <class T>
 T Robot::Impl::tcpReceiveObject() {
   int bytes_read = 0;
@@ -158,7 +166,7 @@ T Robot::Impl::tcpReceiveObject() {
       int bytes_left = kBytesTotal - bytes_read;
       int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left, 0);
       if (rv == 0) {
-        throw NetworkException("libfranka:: FRANKA connection closed");
+        throw NetworkException("libfranka: FRANKA connection closed");
       }
       bytes_read += rv;
     }
@@ -167,7 +175,7 @@ T Robot::Impl::tcpReceiveObject() {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
     if (bytes_read != 0) {
-      throw ProtocolException("libfranka:: incorrect object size");
+      throw ProtocolException("libfranka: incorrect object size");
     } else {
       throw NetworkException("libfranka: FRANKA connection timeout");
     }
@@ -179,13 +187,41 @@ void Robot::Impl::startMotionGenerator(
         motion_generator_type) {
   if (motion_generator_running_) {
     throw MotionGeneratorException(
-        "libfranka:: Attempt to start multiple motion generators!");
+        "libfranka: attempted to start multiple motion generators!");
   }
   motion_generator_running_ = true;
-}
 
+  research_interface::StartMotionGeneratorRequest request(motion_generator_type);
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  research_interface::StartMotionGeneratorReply motion_generator_reply =
+      tcpReceiveObject<research_interface::StartMotionGeneratorReply>();
+
+  switch (motion_generator_reply.status) {
+    case research_interface::StartMotionGeneratorReply::Status::kSuccess:
+      break;
+    case research_interface::StartMotionGeneratorReply::Status::kNotConnected:
+      throw new ProtocolException("libfranka: attempted to start motion generator, but not connected!");
+    case research_interface::StartMotionGeneratorReply::Status::kInvalidType:
+    default:
+      throw new ProtocolException("libfranka: unexpected motion generator reply!");
+  }
+}
 void Robot::Impl::stopMotionGenerator() {
   motion_generator_running_ = false;
+
+  research_interface::StopMotionGeneratorRequest request;
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  research_interface::StopMotionGeneratorReply motion_generator_reply =
+      tcpReceiveObject<research_interface::StopMotionGeneratorReply>();
+
+  switch (motion_generator_reply.status) {
+    case research_interface::StopMotionGeneratorReply::Status::kSuccess:
+      break;
+    default:
+      throw new ProtocolException("libfranka: unexpected motion generator reply!");
+  }
 }
 
 }  // namespace franka

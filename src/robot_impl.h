@@ -27,6 +27,9 @@ class Robot::Impl {
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
 
+  bool handleReplies();
+  void expectReply(research_interface::Function function, std::function<bool(void*)> onReply);
+
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type
           motion_generator_type);
@@ -44,6 +47,7 @@ class Robot::Impl {
   RobotState robot_state_;
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
+  std::vector<std::pair<research_interface::Function, std::function<bool(void*)>>> reply_callbacks_;
 };
 
 }  // namespace franka
