@@ -99,10 +99,12 @@ void MockServer::serverThread() {
 
   Socket tcp_socket_wrapper;
   tcp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
-    tcp_socket.sendBytes(data, size);
+    int rv = tcp_socket.sendBytes(data, size);
+    ASSERT_EQ(static_cast<int>(size), rv);
   };
   tcp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
-    tcp_socket.receiveBytes(data, size);
+    int rv = tcp_socket.receiveBytes(data, size);
+    ASSERT_EQ(static_cast<int>(size), rv);
   };
 
   uint16_t udp_port;
@@ -114,12 +116,15 @@ void MockServer::serverThread() {
   });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});
+  udp_socket.setBlocking(true);
   Socket udp_socket_wrapper;
   udp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
-    udp_socket.sendTo(data, size, {remote_address.host(), udp_port});
+    int rv = udp_socket.sendTo(data, size, {remote_address.host(), udp_port});
+    ASSERT_EQ(static_cast<int>(size), rv);
   };
   udp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
-    udp_socket.receiveFrom(data, size, remote_address);
+    int rv = udp_socket.receiveFrom(data, size, remote_address);
+    ASSERT_EQ(static_cast<int>(size), rv);
   };
 
   while (!shutdown_) {
@@ -133,6 +138,16 @@ void MockServer::serverThread() {
     }
     commands_.clear();
     continue_ = false;
+  }
+
+  ASSERT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ));
+
+  if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
+    // Received something on the TCP socket.
+    // Test that the Robot closed the connection.
+    std::array<uint8_t, 16> buffer;
+    int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
+    ASSERT_EQ(0, rv);
   }
 }
 
