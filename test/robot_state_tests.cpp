@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-#include "franka/robot_state.h"
+#include <franka/robot_state.h>
+
 #include "helpers.h"
 
 using namespace franka;

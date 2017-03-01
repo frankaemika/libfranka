@@ -2,23 +2,46 @@
 
 #include <cstring>
 
+#include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/DatagramSocket.h>
-#include <Poco/Net/ServerSocket.h>
-
-#include <franka/robot_state.h>
-#include <research_interface/types.h>
-#include <research_interface/rbk_types.h>
 
 MockServer::MockServer()
     : shutdown_{false},
       continue_{false},
       initialized_{false} {
   std::memset(&last_command_, 0, sizeof(last_command_));
+
+  std::unique_lock<std::mutex> lock(mutex_);
+  server_thread_ = std::thread(&MockServer::serverThread, this);
+
+  cv_.wait(lock, [this]{ return initialized_; });
 }
 
 MockServer::~MockServer() {
-  stop();
+  {
+    std::lock_guard<std::mutex> _(mutex_);
+    shutdown_ = true;
+  }
+  cv_.notify_one();
+  server_thread_.join();
+}
+
+template <typename TRequest, typename TReply>
+MockServer& MockServer::waitForCommand(std::function<TReply(const TRequest&)> callback) {
+  commands_.push_back([this,callback](Socket& tcp_socket, Socket&) {
+    handleCommand<TRequest, TReply>(tcp_socket, callback);
+  });
+  return *this;
+}
+
+template <typename TRequest, typename TReply>
+void MockServer::handleCommand(Socket& tcp_socket, std::function<TReply(const TRequest&)> callback) {
+  std::array<uint8_t, sizeof(TRequest)> buffer;
+  tcp_socket.receiveBytes(buffer.data(), buffer.size());
+  TRequest request(*reinterpret_cast<TRequest*>(buffer.data()));
+  TReply reply = callback(request);
+  tcp_socket.sendBytes(&reply, sizeof(reply));
 }
 
 const research_interface::RobotCommand& MockServer::lastCommand() {
@@ -31,40 +54,39 @@ MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
 }
 
 MockServer& MockServer::onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator) {
-  on_start_motion_generator_ = on_start_motion_generator;
-  return *this;
+  return waitForCommand<research_interface::StartMotionGeneratorRequest, research_interface::StartMotionGeneratorReply>(on_start_motion_generator);
+}
+
+MockServer& MockServer::sendEmptyRobotState() {
+  return onSendRobotState([]() {
+    research_interface::RobotState robot_state;
+    std::memset(&robot_state, 0, sizeof(robot_state));
+    return robot_state;
+  });
 }
 
 MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
-  on_send_robot_state_ = on_send_robot_state;
+  commands_.push_back([=](Socket&, Socket& udp_socket) {
+    research_interface::RobotState robot_state = on_send_robot_state();
+    udp_socket.sendBytes(&robot_state, sizeof(robot_state));
+  });
   return *this;
 }
 
-void MockServer::start() {
-  std::unique_lock<std::mutex> lock(mutex_);
-  server_thread_ = std::thread(&MockServer::serverThread, this);
-  cv_.wait(lock, [this]{ return initialized_; });
-  continue_ = true;
-  cv_.notify_one();
-}
-
-void MockServer::stop() {
-  if (shutdown_) {
-    return;
-  }
+void MockServer::spinOnce() {
   {
     std::lock_guard<std::mutex> _(mutex_);
-    shutdown_ = true;
+    continue_ = true;
   }
   cv_.notify_one();
-  server_thread_.join();
 }
 
 void MockServer::serverThread() {
+  const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
   {
     std::lock_guard<std::mutex> _(mutex_);
-    srv = Poco::Net::ServerSocket({"localhost", research_interface::kCommandPort}); // does bind + listen
+    srv = Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort}); // does bind + listen
     initialized_ = true;
   }
   cv_.notify_one();
@@ -75,33 +97,40 @@ void MockServer::serverThread() {
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
 
-  std::array<uint8_t, sizeof(research_interface::ConnectRequest)> buffer;
-  tcp_socket.receiveBytes(buffer.data(), buffer.size());
-  research_interface::ConnectRequest request(*reinterpret_cast<research_interface::ConnectRequest*>(buffer.data()));
+  Socket tcp_socket_wrapper;
+  tcp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
+    tcp_socket.sendBytes(data, size);
+  };
+  tcp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
+    tcp_socket.receiveBytes(data, size);
+  };
 
-  research_interface::ConnectReply reply = on_connect_
-                                           ? on_connect_(request)
-                                           : research_interface::ConnectReply(research_interface::ConnectReply::Status::kSuccess);
+  uint16_t udp_port;
+  handleCommand<research_interface::ConnectRequest, research_interface::ConnectReply>(tcp_socket_wrapper, [&,this](const research_interface::ConnectRequest& request) {
+    udp_port = request.udp_port;
+    return on_connect_
+           ? on_connect_(request)
+           : research_interface::ConnectReply(research_interface::ConnectReply::Status::kSuccess);
+  });
 
-  tcp_socket.sendBytes(&reply, sizeof(reply));
+  Poco::Net::DatagramSocket udp_socket({kHostname, 0});
+  Socket udp_socket_wrapper;
+  udp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
+    udp_socket.sendTo(data, size, {remote_address.host(), udp_port});
+  };
+  udp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
+    udp_socket.receiveFrom(data, size, remote_address);
+  };
 
-  if (on_start_motion_generator_) {
-    std::array<uint8_t, sizeof(research_interface::StartMotionGeneratorRequest)> buffer;
-    tcp_socket.receiveBytes(&buffer, sizeof(buffer));
-    research_interface::StartMotionGeneratorReply reply = on_start_motion_generator_(*reinterpret_cast<research_interface::StartMotionGeneratorRequest*>(buffer.data()));
-    tcp_socket.sendBytes(&reply, sizeof(reply));
+  while (!shutdown_) {
+    cv_.wait(lock, [this]{ return !commands_.empty() || shutdown_; });
+    if (shutdown_) {
+      break;
+    }
+
+    for (auto command : commands_) {
+      command(tcp_socket_wrapper, udp_socket_wrapper);
+    }
+    commands_.clear();
   }
-
-  // Send robot state over UDP
-  if (!on_send_robot_state_) {
-    cv_.wait(lock, [this]{ return shutdown_; });
-    return;
-  }
-
-  Poco::Net::DatagramSocket udp_socket({std::string("localhost"), 0});
-  research_interface::RobotState robot_state = on_send_robot_state_();
-
-  udp_socket.sendTo(&robot_state, sizeof(robot_state), {remote_address.host(), request.udp_port});
-
-  cv_.wait(lock, [this]{ return shutdown_; });
 }
