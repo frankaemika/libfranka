@@ -13,11 +13,10 @@ int main(int argc, char** argv) {
     std::cout << "Starting joint velocity motion generator" << std::endl;
     franka::JointVelocityMotionGenerator motion_generator =
         robot.startJointVelocityMotionGenerator();
-    std::cout << "succeeded to start motion generator! " << std::endl;
+    std::cout << "Succeeded to start motion generator! " << std::endl;
     double time(0.0);
     double T(4.0);
     double omega_max(0.2);
-    // double angle(M_PI / 4);
 
     while (robot.update()) {
       int cycle = int(pow(-1.0, (time - fmod(time, T)) / T));
@@ -32,7 +31,7 @@ int main(int argc, char** argv) {
       time += 0.001;
       if (time > 2 * T) {
         std::cout << std::endl
-                  << "finished motion, shutting down example" << std::endl;
+                  << "Finished motion, shutting down example" << std::endl;
         break;
       }
     }

@@ -8,30 +8,31 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: ./generate_motion <robot-hostname>" << std::endl;
     return -1;
   }
+
   try {
     franka::Robot robot(argv[1]);
-    std::cout << "Starting Cartesian velocity motion generator" << std::endl;
-    franka::CartesianVelocityMotionGenerator motion_generator =
-        robot.startCartesianVelocityMotionGenerator();
+    robot.update();
+    std::cout << "Starting joint pose motion generator" << std::endl;
+    franka::JointPoseMotionGenerator motion_generator =
+        robot.startJointPoseMotionGenerator();
     std::cout << "Succeeded to start motion generator! " << std::endl;
-    double time(0.0);
-    double T(4.0);
-    double v_max(0.1);
-    double angle(M_PI / 4);
 
+    double time(0.0);
+    std::array<double, 7> initial_pose;
+    std::copy(robot.robotState().q.cbegin(), robot.robotState().q.cend(),
+              initial_pose.begin());
     while (robot.update()) {
-      int cycle = int(pow(-1.0, (time - fmod(time, T)) / T));
-      double v =
-          double(cycle) * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / T * time));
-      double v_x = std::cos(angle) * v;
-      double v_z = -std::sin(angle) * v;
+      double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
       try {
-        motion_generator.setDesiredVelocity({{v_x, 0.0, v_z, 0.0, 0.0, 0.0}});
+        motion_generator.setDesiredPose(
+            {{initial_pose[0], initial_pose[1], initial_pose[2],
+              initial_pose[3] + delta_angle, initial_pose[4] + delta_angle,
+              initial_pose[5], initial_pose[6] + delta_angle}});
       } catch (franka::MotionGeneratorException const& e) {
         std::cout << e.what() << std::endl;
       }
       time += 0.001;
-      if (time > 2 * T) {
+      if (time > 10.0) {
         std::cout << std::endl
                   << "Finished motion, shutting down example" << std::endl;
         break;

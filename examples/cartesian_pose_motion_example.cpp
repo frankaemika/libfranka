@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
     robot.update();
-    std::cout << "Starting Motion Generator" << std::endl;
+    std::cout << "Starting Cartesian pose motion generator" << std::endl;
     franka::CartesianPoseMotionGenerator motion_generator =
         robot.startCartesianPoseMotionGenerator();
     std::cout << "succeeded to start motion generator! " << std::endl;
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
       time += 0.001;
       if (time > 10.0) {
         std::cout << std::endl
-                  << "finished motion, shutting down example" << std::endl;
+                  << "Finished motion, shutting down example" << std::endl;
         break;
       }
     }
