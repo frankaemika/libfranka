@@ -16,6 +16,7 @@ namespace franka {
 class Robot::Impl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
+  static constexpr double kCommandTimeStep{0.001};
 
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = research_interface::kCommandPort,
@@ -30,10 +31,15 @@ class Robot::Impl {
 
   bool handleReplies();
   template <typename T>
-  void handleReply(std::function<void(T)> handle, std::list<research_interface::Function>::iterator it);
+  void handleReply(std::function<void(T)> handle,
+                   std::list<research_interface::Function>::iterator it);
 
-  void handleStartMotionGeneratorReply(const research_interface::StartMotionGeneratorReply &start_motion_generator_reply);
-  void handleStopMotionGeneratorReply(const research_interface::StopMotionGeneratorReply &stop_motion_generator_reply);
+  void handleStartMotionGeneratorReply(
+      const research_interface::StartMotionGeneratorReply&
+          start_motion_generator_reply);
+  void handleStopMotionGeneratorReply(
+      const research_interface::StopMotionGeneratorReply&
+          stop_motion_generator_reply);
 
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type

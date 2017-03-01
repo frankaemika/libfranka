@@ -141,10 +141,6 @@ void MockServer::serverThread() {
 
   while (!shutdown_) {
     cv_.wait(lock, [this]{ return continue_ || shutdown_; });
-    if (shutdown_) {
-      break;
-    }
-
     for (auto command : commands_) {
       command(tcp_socket_wrapper, udp_socket_wrapper);
     }

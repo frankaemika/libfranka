@@ -1,4 +1,5 @@
 #include <franka/motion_generator.h>
+#include <cstring>
 
 #include "robot_impl.h"
 
@@ -25,6 +26,7 @@ CartesianPoseMotionGenerator::~CartesianPoseMotionGenerator() noexcept =
 
 void CartesianPoseMotionGenerator::setDesiredPose(
     const std::array<double, 16>& desired_pose) noexcept {
+  robot.impl().motionCommand().motion_generation_finished = false;
   std::copy(desired_pose.cbegin(), desired_pose.cend(),
             robot.impl().motionCommand().O_T_EE_d.begin());
 }

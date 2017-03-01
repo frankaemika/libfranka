@@ -31,9 +31,6 @@ TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
 }
 
 TEST(Robot, StopsIfControlConnectionClosed) {
-  research_interface::RobotState sent_robot_state;
-  randomRobotState(sent_robot_state);
-
   std::unique_ptr<Robot::Impl> robot;
   {
     MockServer server;
@@ -85,6 +82,7 @@ TEST(Robot, CanNotStartMultipleMotionGenerators) {
 TEST(Robot, CanSendMotionGeneratorCommand) {
   research_interface::RobotCommand sent_command;
   randomRobotCommand(sent_command);
+  const double motion_timestep = 0.001;
 
   MockServer server;
   server
@@ -102,6 +100,7 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
 
   server
     .onReceiveRobotCommand([&](const research_interface::RobotCommand& command) {
+      sent_command.motion.timestamp += motion_timestep;
       testRobotCommandsAreEqual(sent_command.motion, command.motion);
     })
     .spinOnce();
