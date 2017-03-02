@@ -53,6 +53,7 @@ add_library(franka SHARED
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
+  src/motion_generator.cpp
 )
 set_target_properties(franka PROPERTIES
   WINDOWS_EXPORT_ALL_SYMBOLS ON

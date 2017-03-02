@@ -57,6 +57,6 @@ TEST(Robot, CanReceiveRobotState) {
   const RobotState& received_robot_state = robot.robotState();
   testRobotStateIsZero(received_robot_state);
 
-  ASSERT_TRUE(robot.waitForRobotState());
+  ASSERT_TRUE(robot.update());
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
 }

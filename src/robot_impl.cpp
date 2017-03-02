@@ -5,8 +5,6 @@
 
 #include <Poco/Net/NetException.h>
 
-#include <research_interface/types.h>
-
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
@@ -19,7 +17,7 @@ constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
                   std::chrono::milliseconds timeout)
-    : ri_version_{0} {
+    : motion_generator_running_{false} {
   Poco::Timespan poco_timeout(1000l * timeout.count());
   try {
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
@@ -112,7 +110,7 @@ void Robot::Impl::setRobotState(
             robot_state_.K_F_ext_hat_K.begin());
 }
 
-bool Robot::Impl::waitForRobotState() {
+bool Robot::Impl::update() {
   try {
     if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
       // The current server implementation does not send any data
@@ -147,6 +145,11 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
   return ri_version_;
 }
 
+research_interface::MotionGeneratorCommand&
+Robot::Impl::motionCommand() noexcept {
+  return robot_command_.motion;
+}
+
 template <class T>
 T Robot::Impl::tcpReceiveObject() {
   int bytes_read = 0;
@@ -172,6 +175,18 @@ T Robot::Impl::tcpReceiveObject() {
       throw NetworkException("libfranka: FRANKA connection timeout");
     }
   }
+}
+
+void Robot::Impl::startMotionGenerator() {
+  if (motion_generator_running_) {
+    throw MotionGeneratorException(
+        "libfranka:: Attempt to start multiple motion generators!");
+  }
+  motion_generator_running_ = true;
+}
+
+void Robot::Impl::stopMotionGenerator() {
+  motion_generator_running_ = false;
 }
 
 }  // namespace franka

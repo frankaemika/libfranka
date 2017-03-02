@@ -5,6 +5,7 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/StreamSocket.h>
 
+#include <franka/motion_generator.h>
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
@@ -21,9 +22,13 @@ class Robot::Impl {
   ~Impl() noexcept;
 
   void setRobotState(const research_interface::RobotState& robot_state);
-  bool waitForRobotState();
+  bool update();
+  research_interface::MotionGeneratorCommand& motionCommand() noexcept;
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
+
+  void startMotionGenerator();
+  void stopMotionGenerator();
 
  protected:
   // Can throw NetworkException and ProtocolException
@@ -32,8 +37,9 @@ class Robot::Impl {
 
  private:
   uint16_t ri_version_;
+  bool motion_generator_running_;
+  research_interface::RobotCommand robot_command_;
   RobotState robot_state_;
-
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
 };
