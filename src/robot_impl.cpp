@@ -4,7 +4,6 @@
 
 #include <Poco/Net/NetException.h>
 #include <cstring>
-#include <iostream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.

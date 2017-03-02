@@ -43,7 +43,7 @@ bool CartesianPoseMotionGenerator::checkHomogeneousTransformation(
     }
   }
   for (size_t i = 0; i < 3; ++i) {  // j..row
-    if (std::abs(std::sqrt(pow(transform[0 * 4 + i], 2) +
+    if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) +
                            std::pow(transform[1 * 4 + i], 2) +
                            std::pow(transform[2 * 4 + i], 2)) -
                  1.0) > kOrthonormalThreshold) {
@@ -55,7 +55,6 @@ bool CartesianPoseMotionGenerator::checkHomogeneousTransformation(
 
 void CartesianPoseMotionGenerator::setDesiredPose(
     const std::array<double, 16>& desired_pose) noexcept {
-  robot.impl().motionCommand().motion_generation_finished = false;
   if (checkHomogeneousTransformation(desired_pose)) {
     std::copy(desired_pose.cbegin(), desired_pose.cend(),
               robot.impl().motionCommand().O_T_EE_d.begin());
