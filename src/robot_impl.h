@@ -37,6 +37,8 @@ class Robot::Impl {
   void stopMotionGenerator();
 
  private:
+  bool waitForRobotState(Poco::Net::SocketAddress* server_address, research_interface::RobotState* robot_state);
+
   bool handleReplies();
 
   void receiveRobotState(Poco::Net::SocketAddress* server_address);

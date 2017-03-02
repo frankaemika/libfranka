@@ -101,6 +101,9 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   robot.motionCommand() = sent_command.motion;
 
   server
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
+    })
     .onReceiveRobotCommand([&](const research_interface::RobotCommand& command) {
       sent_command.motion.timestamp += Robot::Impl::kCommandTimeStep;
       testRobotCommandsAreEqual(sent_command.motion, command.motion);
@@ -121,12 +124,18 @@ TEST(Robot, CanReceiveMotionGenerationError) {
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
     })
-    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
-    })
     .spinOnce();
 
   Robot::Impl robot("127.0.0.1");
   robot.startMotionGenerator(MotionGeneratorType::kCartesianPosition);
+
+  server
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
+    })
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
+    .spinOnce();
 
   EXPECT_TRUE(robot.update());
 
@@ -150,25 +159,35 @@ TEST(Robot, CanStopMotionGenerator) {
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianVelocity;
     })
-    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
-      })
     .spinOnce();
 
   Robot::Impl robot("127.0.0.1");
   robot.startMotionGenerator(MotionGeneratorType::kCartesianVelocity);
 
-  EXPECT_TRUE(robot.update());
-
   server
-    .sendEmptyRobotState()
-      .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
-        return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
-      })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
+    })
     .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
     })
     .spinOnce();
 
+  EXPECT_TRUE(robot.update());
+
+  server
+    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
+      return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
+    })
+    .spinOnce();
+
   robot.stopMotionGenerator();
+
+  server
+    .sendEmptyRobotState()
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
+    .spinOnce();
+
   EXPECT_TRUE(robot.update());
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }

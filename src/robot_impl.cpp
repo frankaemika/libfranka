@@ -109,34 +109,17 @@ void Robot::Impl::setRobotState(
             robot_state_.K_F_ext_hat_K.begin());
 }
 
-bool Robot::Impl::update() {
+bool Robot::Impl::waitForRobotState(Poco::Net::SocketAddress* server_address, research_interface::RobotState* robot_state) {
   try {
     if (!handleReplies()) {
       return false;  // server sent EOF
     }
 
     std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
-    Poco::Net::SocketAddress server_address;
     int bytes_received =
-        udp_socket_.receiveFrom(buffer.data(), buffer.size(), server_address);
+        udp_socket_.receiveFrom(buffer.data(), buffer.size(), *server_address);
     if (bytes_received == buffer.size()) {
-      research_interface::RobotState robot_state(
-          *reinterpret_cast<research_interface::RobotState*>(buffer.data()));
-      setRobotState(robot_state);
-
-      if (motion_generator_running_) {
-        if (robot_command_.motion.motion_generation_finished) {
-          motion_generator_running_ = false;
-        }
-        robot_command_.message_id = robot_state.message_id;
-        robot_command_.motion.timestamp += kCommandTimeStep;
-
-        int bytes_sent = udp_socket_.sendTo(
-            &robot_command_, sizeof(robot_command_), server_address);
-        if (bytes_sent != sizeof(robot_command_)) {
-          throw NetworkException("libfranka: UDP send error");
-        }
-      }
+      *robot_state = *reinterpret_cast<research_interface::RobotState*>(buffer.data());
       return true;
     }
     throw ProtocolException("libfranka: incorrect object size");
@@ -145,6 +128,34 @@ bool Robot::Impl::update() {
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
+}
+
+bool Robot::Impl::update() {
+  Poco::Net::SocketAddress server_address;
+  research_interface::RobotState robot_state;
+  if (!waitForRobotState(&server_address, &robot_state)) {
+    return false;
+  }
+  setRobotState(robot_state);
+
+  if (motion_generator_running_) {
+    if (robot_command_.motion.motion_generation_finished) {
+      motion_generator_running_ = false;
+    }
+    robot_command_.message_id = robot_state.message_id;
+    robot_command_.motion.timestamp += kCommandTimeStep;
+
+    try {
+      int bytes_sent = udp_socket_.sendTo(
+          &robot_command_, sizeof(robot_command_), server_address);
+      if (bytes_sent != sizeof(robot_command_)) {
+        throw NetworkException("libfranka: robot command send error");
+      }
+    } catch (Poco::Net::NetException const& e) {
+      throw NetworkException("libfranka: robot command send: "s + e.what());
+    }
+  }
+  return true;
 }
 
 const RobotState& Robot::Impl::robotState() const noexcept {
@@ -277,6 +288,31 @@ void Robot::Impl::startMotionGenerator(
   }
 
   expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
+
+  research_interface::MotionGeneratorMode motion_generator_mode;
+  switch (motion_generator_type) {
+    case decltype(motion_generator_type)::kJointPosition:
+      motion_generator_mode = decltype(motion_generator_mode)::kJointPosition;
+      break;
+    case decltype(motion_generator_type)::kJointVelocity:
+      motion_generator_mode = decltype(motion_generator_mode)::kJointVelocity;
+      break;
+    case decltype(motion_generator_type)::kCartesianPosition:
+      motion_generator_mode = decltype(motion_generator_mode)::kCartesianPosition;
+      break;
+    case decltype(motion_generator_type)::kCartesianVelocity:
+      motion_generator_mode = decltype(motion_generator_mode)::kCartesianVelocity;
+      break;
+  }
+
+  Poco::Net::SocketAddress server_address;
+  research_interface::RobotState robot_state;
+  while (waitForRobotState(&server_address, &robot_state)) {
+    if (robot_state.motion_generator_mode == motion_generator_mode) {
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
 }
 
 void Robot::Impl::stopMotionGenerator() {
