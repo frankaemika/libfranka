@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <list>
+#include <unordered_set>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/StreamSocket.h>
@@ -31,26 +31,24 @@ class Robot::Impl {
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
 
-  bool handleReplies();
-  template <typename T>
-  void handleReply(std::function<void(T)> handle,
-                   std::list<research_interface::Function>::iterator it);
-
-  void handleStartMotionGeneratorReply(
-      const research_interface::StartMotionGeneratorReply&
-          start_motion_generator_reply);
-  void handleStopMotionGeneratorReply(
-      const research_interface::StopMotionGeneratorReply&
-          stop_motion_generator_reply);
-
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type
           motion_generator_type);
   void stopMotionGenerator();
 
- protected:
  private:
-  // Can throw NetworkException and ProtocolException
+  bool handleReplies();
+
+  void receiveRobotState(Poco::Net::SocketAddress* server_address);
+
+  template <research_interface::Function F, typename T>
+  void handleReply(std::function<void(T)> handle);
+
+  void handleStartMotionGeneratorReply(
+      const research_interface::StartMotionGeneratorReply& reply);
+  void handleStopMotionGeneratorReply(
+      const research_interface::StopMotionGeneratorReply& reply);
+
   template <class T>
   T tcpReceiveObject();
 
@@ -62,7 +60,16 @@ class Robot::Impl {
   Poco::Net::DatagramSocket udp_socket_;
 
   std::vector<uint8_t> read_buffer_;
-  std::list<research_interface::Function> expected_replies_;
+  // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
+  // taken from http://stackoverflow.com/a/24847480/249642
+  struct EnumClassHash {
+    template <typename T>
+    size_t operator()(T t) const {
+      return static_cast<size_t>(t);
+    }
+  };
+  std::unordered_set<research_interface::Function, EnumClassHash>
+      expected_replies_;
 };
 
 }  // namespace franka
