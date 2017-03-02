@@ -146,7 +146,6 @@ void testRobotStatesAreEqual(const research_interface::RobotState& expected, con
   for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
     EXPECT_EQ(expected.K_F_ext_hat_K[i], actual.K_F_ext_hat_K[i]);
   }
-  EXPECT_EQ(expected.message_id, actual.message_id);
 }
 
 double randomDouble() {
@@ -199,7 +198,6 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
-  robot_state.message_id = randomDouble();
 }
 
 void randomRobotState(research_interface::RobotState& robot_state) {
