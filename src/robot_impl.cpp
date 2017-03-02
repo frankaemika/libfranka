@@ -84,7 +84,8 @@ bool Robot::Impl::update() {
     if (bytes_received != buffer.size()) {
       throw ProtocolException("libfranka: incorrect object size");
     }
-    robot_state_ = *reinterpret_cast<research_interface::RobotState*>(buffer.data());
+    robot_state_ =
+        *reinterpret_cast<research_interface::RobotState*>(buffer.data());
   } catch (const Poco::TimeoutException& e) {
     throw NetworkException("libfranka: robot state read timeout");
   } catch (const Poco::Net::NetException& e) {
@@ -247,15 +248,18 @@ void Robot::Impl::startMotionGenerator(
       motion_generator_mode = decltype(motion_generator_mode)::kJointVelocity;
       break;
     case decltype(motion_generator_type)::kCartesianPosition:
-      motion_generator_mode = decltype(motion_generator_mode)::kCartesianPosition;
+      motion_generator_mode =
+          decltype(motion_generator_mode)::kCartesianPosition;
       break;
     case decltype(motion_generator_type)::kCartesianVelocity:
-      motion_generator_mode = decltype(motion_generator_mode)::kCartesianVelocity;
+      motion_generator_mode =
+          decltype(motion_generator_mode)::kCartesianVelocity;
       break;
   }
 
   while (update()) {
-    if (robot_state_.rcuRobotState().motion_generator_mode == motion_generator_mode) {
+    if (robot_state_.rcuRobotState().motion_generator_mode ==
+        motion_generator_mode) {
       motion_generator_running_ = true;
       return;
     }
@@ -275,7 +279,8 @@ void Robot::Impl::stopMotionGenerator() {
 
   robot_command_.motion.motion_generation_finished = true;
   while (update()) {
-    if (robot_state_.rcuRobotState().motion_generator_mode == research_interface::MotionGeneratorMode::kIdle) {
+    if (robot_state_.rcuRobotState().motion_generator_mode ==
+        research_interface::MotionGeneratorMode::kIdle) {
       motion_generator_running_ = false;
       return;
     }
