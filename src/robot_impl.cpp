@@ -295,13 +295,16 @@ void Robot::Impl::handleStartMotionGeneratorReply(
   motion_generator_running_ = false;
   switch (reply.status) {
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
-    case research_interface::StartMotionGeneratorReply::Status::kAborted:
       break;
+    case research_interface::StartMotionGeneratorReply::Status::kAborted:
+      throw MotionGeneratorException(
+          "libfranka: motion generator command aborted!");
     case research_interface::StartMotionGeneratorReply::Status::kRejected:
       throw MotionGeneratorException(
-          "libfranka: start motion generator command rejected!");
+          "libfranka: motion generator command rejected!");
     default:
-      throw ProtocolException("libfranka: unexpected motion generator reply!");
+      throw ProtocolException(
+          "libfranka: unexpected start motion generator reply!");
   }
 }
 
@@ -309,7 +312,8 @@ void Robot::Impl::handleStopMotionGeneratorReply(
     const research_interface::StopMotionGeneratorReply& reply) {
   if (reply.status !=
       research_interface::StopMotionGeneratorReply::Status::kSuccess) {
-    throw ProtocolException("libfranka: unexpected motion generator reply!");
+    throw ProtocolException(
+        "libfranka: unexpected stop motion generator reply!");
   }
 }
 
