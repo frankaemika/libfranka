@@ -5,6 +5,7 @@
 
 #include <Poco/Net/NetException.h>
 #include <cstring>
+#include <iostream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
@@ -62,6 +63,7 @@ Robot::Impl::Impl(const std::string& franka_address,
 
 Robot::Impl::~Impl() noexcept {
   try {
+    tcp_socket_.shutdown();
     tcp_socket_.close();
     udp_socket_.close();
   } catch (Poco::Net::NetException const& e) {

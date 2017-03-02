@@ -161,6 +161,7 @@ void MockServer::serverThread() {
       // Received something on the TCP socket.
       // Test that the Robot closed the connection.
       std::array<uint8_t, 16> buffer;
+
       int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
       ASSERT_EQ(0, rv);
     }

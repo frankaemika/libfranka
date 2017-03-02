@@ -46,6 +46,7 @@ class Robot {
    *
    * @throw NetworkException if the connetion is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw MotionGeneratorException if motion generation commands were rejected.
    *
    * @return True if a new robot state arrived and a robot command was sent,
    * false if the connection is

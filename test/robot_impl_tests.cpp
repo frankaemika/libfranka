@@ -150,7 +150,7 @@ TEST(Robot, CanStopMotionGenerator) {
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianVelocity;
     })
-      .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
       })
     .spinOnce();
 
@@ -160,11 +160,12 @@ TEST(Robot, CanStopMotionGenerator) {
   EXPECT_TRUE(robot.update());
 
   server
-    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
-      return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
-    })
     .sendEmptyRobotState()
-    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {})
+      .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
+        return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
+      })
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
     .spinOnce();
 
   robot.stopMotionGenerator();
