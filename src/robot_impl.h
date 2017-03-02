@@ -43,7 +43,7 @@ class Robot::Impl {
 
   void receiveRobotState(Poco::Net::SocketAddress* server_address);
 
-  template <research_interface::Function F, typename T>
+  template <typename T>
   void handleReply(std::function<void(T)> handle);
 
   void handleStartMotionGeneratorReply(
@@ -51,7 +51,7 @@ class Robot::Impl {
   void handleStopMotionGeneratorReply(
       const research_interface::StopMotionGeneratorReply& reply);
 
-  template <class T>
+  template <research_interface::Function F, typename T>
   T tcpReceiveObject();
 
   uint16_t ri_version_;

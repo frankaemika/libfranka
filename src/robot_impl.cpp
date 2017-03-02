@@ -35,7 +35,8 @@ Robot::Impl::Impl(const std::string& franka_address,
     tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
 
     research_interface::ConnectReply connect_reply =
-        tcpReceiveObject<research_interface::ConnectReply>();
+        tcpReceiveObject<research_interface::Function::kConnect,
+                         research_interface::ConnectReply>();
     switch (connect_reply.status) {
       case research_interface::ConnectReply::Status::
           kIncompatibleLibraryVersion: {
@@ -148,14 +149,12 @@ bool Robot::Impl::handleReplies() {
     }
     switch (function) {
       case research_interface::Function::kStartMotionGenerator:
-        handleReply<research_interface::Function::kStartMotionGenerator,
-                    research_interface::StartMotionGeneratorReply>(
+        handleReply<research_interface::StartMotionGeneratorReply>(
             std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
                       std::placeholders::_1));
         break;
       case research_interface::Function::kStopMotionGenerator:
-        handleReply<research_interface::Function::kStopMotionGenerator,
-                    research_interface::StopMotionGeneratorReply>(
+        handleReply<research_interface::StopMotionGeneratorReply>(
             std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
                       std::placeholders::_1));
         break;
@@ -166,7 +165,7 @@ bool Robot::Impl::handleReplies() {
   return true;
 }
 
-template <research_interface::Function F, typename T>
+template <typename T>
 void Robot::Impl::handleReply(std::function<void(T)> handle) {
   if (read_buffer_.size() < sizeof(T)) {
     return;
@@ -179,11 +178,11 @@ void Robot::Impl::handleReply(std::function<void(T)> handle) {
                remaining_bytes);
   read_buffer_.resize(remaining_bytes);
 
-  expected_replies_.erase(F);
+  expected_replies_.erase(reply.function);
   handle(reply);
 }
 
-template <class T>
+template <research_interface::Function F, typename T>
 T Robot::Impl::tcpReceiveObject() {
   int bytes_read = 0;
   try {
@@ -198,7 +197,10 @@ T Robot::Impl::tcpReceiveObject() {
       }
       bytes_read += rv;
     }
-    return T(*reinterpret_cast<const T*>(buffer.data()));
+    if (*reinterpret_cast<research_interface::Function*>(buffer.data()) != F) {
+      throw ProtocolException("libfranka: received reply of wrong type.");
+    }
+    return *reinterpret_cast<const T*>(buffer.data());
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
@@ -224,7 +226,8 @@ void Robot::Impl::startMotionGenerator(
   tcp_socket_.sendBytes(&request, sizeof(request));
 
   research_interface::StartMotionGeneratorReply motion_generator_reply =
-      tcpReceiveObject<research_interface::StartMotionGeneratorReply>();
+      tcpReceiveObject<research_interface::Function::kStartMotionGenerator,
+                       research_interface::StartMotionGeneratorReply>();
 
   switch (motion_generator_reply.status) {
     case research_interface::StartMotionGeneratorReply::Status::kSuccess:
