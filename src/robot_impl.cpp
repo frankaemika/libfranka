@@ -64,12 +64,7 @@ Robot::Impl::Impl(const std::string& franka_address,
 Robot::Impl::~Impl() noexcept {
   try {
     tcp_socket_.shutdown();
-    tcp_socket_.close();
-    udp_socket_.close();
-  } catch (Poco::Net::NetException const& e) {
-    throw NetworkException("libfranka: FRANKA socket error: "s + e.what());
-  } catch (Poco::Exception const& e) {
-    throw NetworkException("libfranka: "s + e.what());
+  } catch (...) {
   }
 }
 
