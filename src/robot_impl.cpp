@@ -155,6 +155,10 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
   return ri_version_;
 }
 
+bool Robot::Impl::motionGeneratorRunning() const noexcept {
+  return motion_generator_running_;
+}
+
 research_interface::MotionGeneratorCommand&
 Robot::Impl::motionCommand() noexcept {
   return robot_command_.motion;

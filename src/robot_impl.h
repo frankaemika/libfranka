@@ -29,7 +29,7 @@ class Robot::Impl {
   research_interface::MotionGeneratorCommand& motionCommand() noexcept;
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
-  bool motionGeneratorRunning() const { return motion_generator_running_; }
+  bool motionGeneratorRunning() const noexcept;
 
   bool handleReplies();
   template <typename T>
