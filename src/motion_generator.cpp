@@ -1,7 +1,7 @@
 #include <franka/motion_generator.h>
-#include <cstring>
 
 #include <cmath>
+#include <cstring>
 
 #include "robot_impl.h"
 
@@ -28,22 +28,25 @@ CartesianPoseMotionGenerator::~CartesianPoseMotionGenerator() noexcept =
 
 bool CartesianPoseMotionGenerator::checkHomogeneousTransformation(
     std::array<double, 16> transform) {
-  const double orthonormal_threshold = 1e-6;
+  constexpr double kOrthonormalThreshold = 1e-6;
+
   if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 ||
       transform[15] != 1.0) {
     return false;
   }
   for (size_t j = 0; j < 3; ++j) {  // i..column
-    if (fabs(sqrt(pow(transform[j * 4 + 0], 2) + pow(transform[j * 4 + 1], 2) +
-                  pow(transform[j * 4 + 2], 2)) -
-             1.0) > orthonormal_threshold) {
+    if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) +
+                           std::pow(transform[j * 4 + 1], 2) +
+                           std::pow(transform[j * 4 + 2], 2)) -
+                 1.0) > kOrthonormalThreshold) {
       return false;
     }
   }
   for (size_t i = 0; i < 3; ++i) {  // j..row
-    if (fabs(sqrt(pow(transform[0 * 4 + i], 2) + pow(transform[1 * 4 + i], 2) +
-                  pow(transform[2 * 4 + i], 2)) -
-             1.0) > orthonormal_threshold) {
+    if (std::abs(std::sqrt(pow(transform[0 * 4 + i], 2) +
+                           std::pow(transform[1 * 4 + i], 2) +
+                           std::pow(transform[2 * 4 + i], 2)) -
+                 1.0) > kOrthonormalThreshold) {
       return false;
     }
   }
@@ -58,7 +61,7 @@ void CartesianPoseMotionGenerator::setDesiredPose(
               robot.impl().motionCommand().O_T_EE_d.begin());
   } else {
     throw MotionGeneratorException(
-        "libfranka:: Attempt to set invalid transformation in motion"
+        "libfranka: Attempt to set invalid transformation in motion"
         "generator.\nHas to be column major!");
   }
 }

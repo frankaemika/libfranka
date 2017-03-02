@@ -165,7 +165,6 @@ Robot::Impl::motionCommand() noexcept {
 }
 
 bool Robot::Impl::handleReplies() {
-  using namespace std::placeholders;
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     size_t offset = read_buffer_.size();
     read_buffer_.resize(offset + tcp_socket_.available());
@@ -190,12 +189,14 @@ bool Robot::Impl::handleReplies() {
     switch (function) {
       case research_interface::Function::kStartMotionGenerator:
         handleReply<research_interface::StartMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this, _1),
+            std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
+                      std::placeholders::_1),
             it);
         break;
       case research_interface::Function::kStopMotionGenerator:
         handleReply<research_interface::StopMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this, _1),
+            std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
+                      std::placeholders::_1),
             it);
         break;
       default:
@@ -294,9 +295,9 @@ void Robot::Impl::stopMotionGenerator() {
 
 void Robot::Impl::handleStartMotionGeneratorReply(
     const research_interface::StartMotionGeneratorReply&
-        start_motion_generator_request) {
+        start_motion_generator_reply) {
   motion_generator_running_ = false;
-  switch (start_motion_generator_request.status) {
+  switch (start_motion_generator_reply.status) {
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
     case research_interface::StartMotionGeneratorReply::Status::kAborted:
       break;

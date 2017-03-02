@@ -5,7 +5,8 @@
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: ./generate_cartesian_pose_motion <robot-hostname>"
+              << std::endl;
     return -1;
   }
 
@@ -40,11 +41,9 @@ int main(int argc, char** argv) {
         break;
       }
     }
-  } catch (franka::NetworkException const& e) {
+  } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
-  } catch (franka::MotionGeneratorException const& e) {
-    std::cout << e.what() << std::endl;
   }
 
   return 0;
