@@ -178,6 +178,7 @@ TEST(Robot, CanStopMotionGenerator) {
     .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
       return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
     })
+    .sendEmptyRobotState()
     .spinOnce();
 
   robot.stopMotionGenerator();

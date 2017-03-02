@@ -1,6 +1,5 @@
 #include "robot_impl.h"
 
-#include <algorithm>
 #include <sstream>
 
 #include <Poco/Net/NetException.h>
@@ -68,81 +67,32 @@ Robot::Impl::~Impl() noexcept {
   }
 }
 
-void Robot::Impl::setRobotState(
-    const research_interface::RobotState& robot_state) {
-  std::copy(robot_state.q_start.cbegin(), robot_state.q_start.cend(),
-            robot_state_.q_start.begin());
-  std::copy(robot_state.O_T_EE_start.cbegin(), robot_state.O_T_EE_start.cend(),
-            robot_state_.O_T_EE_start.begin());
-  std::copy(robot_state.elbow_start.cbegin(), robot_state.elbow_start.cend(),
-            robot_state_.elbow_start.begin());
-  std::copy(robot_state.tau_J.cbegin(), robot_state.tau_J.cend(),
-            robot_state_.tau_J.begin());
-  std::copy(robot_state.dtau_J.cbegin(), robot_state.dtau_J.cend(),
-            robot_state_.dtau_J.begin());
-  std::copy(robot_state.q.cbegin(), robot_state.q.cend(),
-            robot_state_.q.begin());
-  std::copy(robot_state.dq.cbegin(), robot_state.dq.cend(),
-            robot_state_.dq.begin());
-  std::copy(robot_state.q_d.cbegin(), robot_state.q_d.cend(),
-            robot_state_.q_d.begin());
-  std::copy(robot_state.joint_contact.cbegin(),
-            robot_state.joint_contact.cend(),
-            robot_state_.joint_contact.begin());
-  std::copy(robot_state.cartesian_contact.cbegin(),
-            robot_state.cartesian_contact.cend(),
-            robot_state_.cartesian_contact.begin());
-  std::copy(robot_state.joint_collision.cbegin(),
-            robot_state.joint_collision.cend(),
-            robot_state_.joint_collision.begin());
-  std::copy(robot_state.cartesian_collision.cbegin(),
-            robot_state.cartesian_collision.cend(),
-            robot_state_.cartesian_collision.begin());
-  std::copy(robot_state.tau_ext_hat_filtered.cbegin(),
-            robot_state.tau_ext_hat_filtered.cend(),
-            robot_state_.tau_ext_hat_filtered.begin());
-  std::copy(robot_state.O_F_ext_hat_K.cbegin(),
-            robot_state.O_F_ext_hat_K.cend(),
-            robot_state_.O_F_ext_hat_K.begin());
-  std::copy(robot_state.K_F_ext_hat_K.cbegin(),
-            robot_state.K_F_ext_hat_K.cend(),
-            robot_state_.K_F_ext_hat_K.begin());
-}
-
-bool Robot::Impl::waitForRobotState(Poco::Net::SocketAddress* server_address, research_interface::RobotState* robot_state) {
+bool Robot::Impl::update() {
   try {
     if (!handleReplies()) {
       return false;  // server sent EOF
     }
+  } catch (const Poco::Net::NetException& e) {
+    throw NetworkException("libfranka: control connection read: "s + e.what());
+  }
 
+  Poco::Net::SocketAddress server_address;
+  try {
     std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
     int bytes_received =
-        udp_socket_.receiveFrom(buffer.data(), buffer.size(), *server_address);
-    if (bytes_received == buffer.size()) {
-      *robot_state = *reinterpret_cast<research_interface::RobotState*>(buffer.data());
-      return true;
+        udp_socket_.receiveFrom(buffer.data(), buffer.size(), server_address);
+    if (bytes_received != buffer.size()) {
+      throw ProtocolException("libfranka: incorrect object size");
     }
-    throw ProtocolException("libfranka: incorrect object size");
-  } catch (Poco::TimeoutException const& e) {
+    robot_state_ = *reinterpret_cast<research_interface::RobotState*>(buffer.data());
+  } catch (const Poco::TimeoutException& e) {
     throw NetworkException("libfranka: robot state read timeout");
-  } catch (Poco::Net::NetException const& e) {
+  } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
-}
-
-bool Robot::Impl::update() {
-  Poco::Net::SocketAddress server_address;
-  research_interface::RobotState robot_state;
-  if (!waitForRobotState(&server_address, &robot_state)) {
-    return false;
-  }
-  setRobotState(robot_state);
 
   if (motion_generator_running_) {
-    if (robot_command_.motion.motion_generation_finished) {
-      motion_generator_running_ = false;
-    }
-    robot_command_.message_id = robot_state.message_id;
+    robot_command_.message_id = robot_state_.rcuRobotState().message_id;
     robot_command_.motion.timestamp += kCommandTimeStep;
 
     try {
@@ -266,7 +216,6 @@ void Robot::Impl::startMotionGenerator(
     throw MotionGeneratorException(
         "libfranka: attempted to start multiple motion generators!");
   }
-  motion_generator_running_ = true;
   std::memset(&robot_command_, 0, sizeof(robot_command_));
 
   research_interface::StartMotionGeneratorRequest request(
@@ -305,10 +254,9 @@ void Robot::Impl::startMotionGenerator(
       break;
   }
 
-  Poco::Net::SocketAddress server_address;
-  research_interface::RobotState robot_state;
-  while (waitForRobotState(&server_address, &robot_state)) {
-    if (robot_state.motion_generator_mode == motion_generator_mode) {
+  while (update()) {
+    if (robot_state_.rcuRobotState().motion_generator_mode == motion_generator_mode) {
+      motion_generator_running_ = true;
       return;
     }
   }
@@ -316,12 +264,23 @@ void Robot::Impl::startMotionGenerator(
 }
 
 void Robot::Impl::stopMotionGenerator() {
-  robot_command_.motion.motion_generation_finished = true;
+  if (!motion_generator_running_) {
+    return;
+  }
 
   research_interface::StopMotionGeneratorRequest request;
   tcp_socket_.sendBytes(&request, sizeof(request));
 
   expected_replies_.insert(research_interface::Function::kStopMotionGenerator);
+
+  robot_command_.motion.motion_generation_finished = true;
+  while (update()) {
+    if (robot_state_.rcuRobotState().motion_generator_mode == research_interface::MotionGeneratorMode::kIdle) {
+      motion_generator_running_ = false;
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
 }
 
 void Robot::Impl::handleStartMotionGeneratorReply(

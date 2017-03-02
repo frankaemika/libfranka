@@ -18,7 +18,7 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 }  // anonymous namespace
 
-RobotState::RobotState() {
+RobotState::RobotState() noexcept {
   std::memset(this, 0, sizeof(*this));
 }
 

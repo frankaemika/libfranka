@@ -17,7 +17,7 @@ struct RobotState {
   /**
    * Creates an empty robot state.
    */
-  RobotState();
+  RobotState() noexcept;
 
   /**
    * \f$q_{start}\f$

@@ -11,6 +11,8 @@
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
 
+#include "complete_robot_state.h"
+
 namespace franka {
 
 class Robot::Impl {
@@ -37,8 +39,6 @@ class Robot::Impl {
   void stopMotionGenerator();
 
  private:
-  bool waitForRobotState(Poco::Net::SocketAddress* server_address, research_interface::RobotState* robot_state);
-
   bool handleReplies();
 
   void receiveRobotState(Poco::Net::SocketAddress* server_address);
@@ -57,7 +57,7 @@ class Robot::Impl {
   uint16_t ri_version_;
   bool motion_generator_running_;
   research_interface::RobotCommand robot_command_;
-  RobotState robot_state_;
+  CompleteRobotState robot_state_;
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
 
