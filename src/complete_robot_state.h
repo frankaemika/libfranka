@@ -13,7 +13,7 @@ class CompleteRobotState : public RobotState {
       const research_interface::RobotState& rcu_robot_state) noexcept;
 
  private:
-  research_interface::RobotState rcu_robot_state;
+  research_interface::RobotState rcu_robot_state_;
 };
 
 }  // namespace franka

@@ -1,7 +1,7 @@
 #include <cmath>
 #include <fstream>
-#include <iterator>
 #include <iostream>
+#include <iterator>
 #include <vector>
 
 #include <franka/robot.h>
@@ -18,7 +18,8 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 int main(int argc, char** argv) {
   if (argc != 4) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
+    std::cerr << "Usage: " << argv[0]
+              << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
     return -1;
   }
 
@@ -27,7 +28,7 @@ int main(int argc, char** argv) {
   csv_file_stream.open(argv[2], std::fstream::in);
 
   std::vector<std::array<double, 7>> samples;
-  while(csv_file_stream) {
+  while (csv_file_stream) {
     std::array<double, 7> q;
     char delimiter;
     for (int i = 0; i < 7; i++) {
@@ -45,9 +46,8 @@ int main(int argc, char** argv) {
     franka::JointPoseMotionGenerator motion_generator =
         robot.startJointPoseMotionGenerator();
 
-    for(std::array<double, 7>& q : samples)
-    {
-      if(!robot.update()) {
+    for (std::array<double, 7>& q : samples) {
+      if (!robot.update()) {
         std::cout << "Connection lost" << std::endl;
         break;
       }
@@ -64,13 +64,13 @@ int main(int argc, char** argv) {
   std::cout << "Logging results to file: " << argv[3] << std::endl;
   std::fstream output_stream;
   output_stream.open(argv[3], std::fstream::out);
-  for(unsigned int s = 0; s < states.size(); s++) {
+  for (unsigned int s = 0; s < states.size(); s++) {
     output_stream << "Sample: #" << s << std::endl;
     output_stream << "q_d: \t" << samples[s] << std::endl;
-    output_stream << "Robot state:" <<  std::endl;
+    output_stream << "Robot state:" << std::endl;
     output_stream << "q: \t" << states[s].q << std::endl;
     output_stream << "q_d: \t" << states[s].q_d << std::endl;
-    output_stream << "dq: \t" << states[s].dq<< std::endl;
+    output_stream << "dq: \t" << states[s].dq << std::endl;
     output_stream << "______" << std::endl;
   }
 
