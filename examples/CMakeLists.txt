@@ -19,6 +19,7 @@ set(EXAMPLES
   generate_cartesian_velocity_motion
   generate_joint_pose_motion
   generate_joint_velocity_motion
+  execute_trajectory
 )
 
 foreach(example ${EXAMPLES})
