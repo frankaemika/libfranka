@@ -13,37 +13,49 @@ CompleteRobotState& CompleteRobotState::operator=(
     const research_interface::RobotState& rcu_robot_state) noexcept {
   rcu_robot_state_ = rcu_robot_state;
   std::copy(rcu_robot_state.q_start.cbegin(), rcu_robot_state.q_start.cend(),
-            q_start.begin());
+            robot_state_.q_start.begin());
   std::copy(rcu_robot_state.O_T_EE_start.cbegin(),
-            rcu_robot_state.O_T_EE_start.cend(), O_T_EE_start.begin());
+            rcu_robot_state.O_T_EE_start.cend(),
+            robot_state_.O_T_EE_start.begin());
   std::copy(rcu_robot_state.elbow_start.cbegin(),
-            rcu_robot_state.elbow_start.cend(), elbow_start.begin());
+            rcu_robot_state.elbow_start.cend(),
+            robot_state_.elbow_start.begin());
   std::copy(rcu_robot_state.tau_J.cbegin(), rcu_robot_state.tau_J.cend(),
-            tau_J.begin());
+            robot_state_.tau_J.begin());
   std::copy(rcu_robot_state.dtau_J.cbegin(), rcu_robot_state.dtau_J.cend(),
-            dtau_J.begin());
-  std::copy(rcu_robot_state.q.cbegin(), rcu_robot_state.q.cend(), q.begin());
-  std::copy(rcu_robot_state.dq.cbegin(), rcu_robot_state.dq.cend(), dq.begin());
+            robot_state_.dtau_J.begin());
+  std::copy(rcu_robot_state.q.cbegin(), rcu_robot_state.q.cend(),
+            robot_state_.q.begin());
+  std::copy(rcu_robot_state.dq.cbegin(), rcu_robot_state.dq.cend(),
+            robot_state_.dq.begin());
   std::copy(rcu_robot_state.q_d.cbegin(), rcu_robot_state.q_d.cend(),
-            q_d.begin());
+            robot_state_.q_d.begin());
   std::copy(rcu_robot_state.joint_contact.cbegin(),
-            rcu_robot_state.joint_contact.cend(), joint_contact.begin());
+            rcu_robot_state.joint_contact.cend(),
+            robot_state_.joint_contact.begin());
   std::copy(rcu_robot_state.cartesian_contact.cbegin(),
             rcu_robot_state.cartesian_contact.cend(),
-            cartesian_contact.begin());
+            robot_state_.cartesian_contact.begin());
   std::copy(rcu_robot_state.joint_collision.cbegin(),
-            rcu_robot_state.joint_collision.cend(), joint_collision.begin());
+            rcu_robot_state.joint_collision.cend(),
+            robot_state_.joint_collision.begin());
   std::copy(rcu_robot_state.cartesian_collision.cbegin(),
             rcu_robot_state.cartesian_collision.cend(),
-            cartesian_collision.begin());
+            robot_state_.cartesian_collision.begin());
   std::copy(rcu_robot_state.tau_ext_hat_filtered.cbegin(),
             rcu_robot_state.tau_ext_hat_filtered.cend(),
-            tau_ext_hat_filtered.begin());
+            robot_state_.tau_ext_hat_filtered.begin());
   std::copy(rcu_robot_state.O_F_ext_hat_K.cbegin(),
-            rcu_robot_state.O_F_ext_hat_K.cend(), O_F_ext_hat_K.begin());
+            rcu_robot_state.O_F_ext_hat_K.cend(),
+            robot_state_.O_F_ext_hat_K.begin());
   std::copy(rcu_robot_state.K_F_ext_hat_K.cbegin(),
-            rcu_robot_state.K_F_ext_hat_K.cend(), K_F_ext_hat_K.begin());
+            rcu_robot_state.K_F_ext_hat_K.cend(),
+            robot_state_.K_F_ext_hat_K.begin());
   return *this;
+}
+
+const franka::RobotState& CompleteRobotState::robotState() const noexcept {
+  return robot_state_;
 }
 
 const research_interface::RobotState& CompleteRobotState::rcuRobotState() const

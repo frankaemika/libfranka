@@ -110,7 +110,7 @@ bool Robot::Impl::update() {
 }
 
 const RobotState& Robot::Impl::robotState() const noexcept {
-  return robot_state_;
+  return robot_state_.robotState();
 }
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
