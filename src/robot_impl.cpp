@@ -4,6 +4,7 @@
 
 #include <Poco/Net/NetException.h>
 #include <cstring>
+#include <iostream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
@@ -257,6 +258,10 @@ void Robot::Impl::startMotionGenerator(
       motion_generator_mode =
           decltype(motion_generator_mode)::kCartesianVelocity;
       break;
+    default:
+      throw std::runtime_error(
+          "No matching research_interface::MotionGeneratorMode for the "
+          "research_interface::StartMotionGeneratorRequest::Type");
   }
 
   while (update()) {
