@@ -18,14 +18,13 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 }  // anonymous namespace
 
-RobotState::RobotState() {
+RobotState::RobotState() noexcept {
   std::memset(this, 0, sizeof(*this));
 }
 
 std::ostream& operator<<(std::ostream& ostream,
                          const franka::RobotState& robot_state) {
-  ostream << "{message_id: " << robot_state.message_id
-          << ", q_start: " << robot_state.q_start
+  ostream << "{q_start: " << robot_state.q_start
           << ", O_T_EE_start: " << robot_state.O_T_EE_start
           << ", elbow_start: " << robot_state.elbow_start
           << ", tau_J: " << robot_state.tau_J

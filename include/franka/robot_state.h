@@ -17,13 +17,7 @@ struct RobotState {
   /**
    * Creates an empty robot state.
    */
-  RobotState();
-
-  /**
-   * \f$message_id\f$
-   * Message Id for internal checks, to send with next command.
-   */
-  double message_id;
+  RobotState() noexcept;
 
   /**
    * \f$q_{start}\f$

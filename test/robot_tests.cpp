@@ -1,9 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <research_interface/types.h>
+#include <franka/robot.h>
 
-#include "franka/robot.h"
-#include "robot_impl.h"
 #include "mock_server.h"
 #include "helpers.h"
 
@@ -17,7 +15,7 @@ TEST(Robot, CannotConnectIfNoServerRunning) {
 
 TEST(Robot, CanPerformHandshake) {
   MockServer server;
-  server.start();
+  server.spinOnce();
 
   Robot robot("127.0.0.1");
   EXPECT_EQ(1, robot.serverVersion());
@@ -28,14 +26,14 @@ TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   server.onConnect([](const ConnectRequest&) {
            return ConnectReply(ConnectReply::Status::kIncompatibleLibraryVersion);
          })
-        .start();
+        .spinOnce();
 
   EXPECT_THROW(Robot robot("127.0.0.1"), IncompatibleVersionException);
 }
 
 TEST(Robot, RobotStateInitializedToZero) {
   MockServer server;
-  server.start();
+  server.spinOnce();
 
   Robot robot("127.0.0.1");
   const RobotState& received_robot_state = robot.robotState();
@@ -43,14 +41,14 @@ TEST(Robot, RobotStateInitializedToZero) {
 }
 
 TEST(Robot, CanReceiveRobotState) {
-  RobotState sent_robot_state;
+  research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
   MockServer server;
   server.onSendRobotState([&]() {
           return sent_robot_state;
         })
-        .start();
+        .spinOnce();
 
   Robot robot("127.0.0.1");
 

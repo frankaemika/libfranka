@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-#include "franka/robot_state.h"
+#include <franka/robot_state.h>
+
 #include "helpers.h"
 
 using namespace franka;
@@ -39,7 +40,6 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "tau_ext_hat_filtered");
   EXPECT_PRED2(stringContains, output, "O_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
-  EXPECT_PRED2(stringContains, output, "message_id");
 }
 
 TEST(RobotState, CanCopyConstruct) {

@@ -16,10 +16,11 @@ add_executable(run_all_tests
   robot_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
-
+  motion_generator_tests.cpp
   mock_server.cpp
   helpers.cpp
-)
+  )
+
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
 
