@@ -12,14 +12,12 @@ CompleteRobotState::CompleteRobotState() noexcept {
 CompleteRobotState& CompleteRobotState::operator=(
     const research_interface::RobotState& rcu_robot_state) noexcept {
   rcu_robot_state_ = rcu_robot_state;
-  std::copy(rcu_robot_state.q_start.cbegin(), rcu_robot_state.q_start.cend(),
-            robot_state_.q_start.begin());
-  std::copy(rcu_robot_state.O_T_EE_start.cbegin(),
-            rcu_robot_state.O_T_EE_start.cend(),
-            robot_state_.O_T_EE_start.begin());
-  std::copy(rcu_robot_state.elbow_start.cbegin(),
-            rcu_robot_state.elbow_start.cend(),
-            robot_state_.elbow_start.begin());
+  std::copy(rcu_robot_state.O_T_EE.cbegin(),
+            rcu_robot_state.O_T_EE.cend(),
+            robot_state_.O_T_EE.begin());
+  std::copy(rcu_robot_state.elbow.cbegin(),
+            rcu_robot_state.elbow.cend(),
+            robot_state_.elbow.begin());
   std::copy(rcu_robot_state.tau_J.cbegin(), rcu_robot_state.tau_J.cend(),
             robot_state_.tau_J.begin());
   std::copy(rcu_robot_state.dtau_J.cbegin(), rcu_robot_state.dtau_J.cend(),

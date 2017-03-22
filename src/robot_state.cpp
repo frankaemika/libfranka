@@ -24,9 +24,8 @@ RobotState::RobotState() noexcept {
 
 std::ostream& operator<<(std::ostream& ostream,
                          const franka::RobotState& robot_state) {
-  ostream << "{q_start: " << robot_state.q_start
-          << ", O_T_EE_start: " << robot_state.O_T_EE_start
-          << ", elbow_start: " << robot_state.elbow_start
+  ostream << "{O_T_EE: " << robot_state.O_T_EE
+          << ", elbow: " << robot_state.elbow
           << ", tau_J: " << robot_state.tau_J
           << ", dtau_J: " << robot_state.dtau_J << ", q: " << robot_state.q
           << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d

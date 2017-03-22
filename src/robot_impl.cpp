@@ -95,7 +95,6 @@ bool Robot::Impl::update() {
 
   if (motion_generator_running_) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
-    robot_command_.motion.timestamp += kCommandTimeStep;
 
     try {
       int bytes_sent = udp_socket_.sendTo(
