@@ -233,6 +233,7 @@ void randomRobotState(research_interface::RobotState& robot_state) {
   }
   robot_state.message_id = randomDouble();
   robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kIdle;
+  robot_state.controller_mode = research_interface::ControllerMode::kMotorPD;
 }
 
 void randomRobotCommand(research_interface::RobotCommand& robot_command) {
@@ -262,7 +263,7 @@ void randomRobotCommand(research_interface::RobotCommand& robot_command) {
   robot_command.message_id = randomDouble();
 }
 
-void testRobotCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected, const research_interface::MotionGeneratorCommand& actual) {
+void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected, const research_interface::MotionGeneratorCommand& actual) {
   for (size_t i = 0; i < expected.q_d.size(); i++) {
     EXPECT_EQ(expected.q_d[i], actual.q_d[i]);
   }
@@ -284,3 +285,4 @@ void testRobotCommandsAreEqual(const research_interface::MotionGeneratorCommand&
   EXPECT_EQ(expected.valid_elbow, actual.valid_elbow);
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
+

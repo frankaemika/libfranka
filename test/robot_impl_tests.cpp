@@ -105,7 +105,7 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
     })
     .onReceiveRobotCommand([&](const research_interface::RobotCommand& command) {
-      testRobotCommandsAreEqual(sent_command.motion, command.motion);
+      testMotionGeneratorCommandsAreEqual(sent_command.motion, command.motion);
     })
     .spinOnce();
 
