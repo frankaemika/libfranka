@@ -233,7 +233,6 @@ void randomRobotState(research_interface::RobotState& robot_state) {
   }
   robot_state.message_id = randomDouble();
   robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kIdle;
-  robot_state.external_controller = true;
 }
 
 void randomRobotCommand(research_interface::RobotCommand& robot_command) {
