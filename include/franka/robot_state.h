@@ -20,7 +20,7 @@ struct RobotState {
   RobotState() noexcept;
 
   /**
-   * \f$^OT_{EE,start}\f$
+   * \f$^OT_{EE}\f$
    * Motion generator's start pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
