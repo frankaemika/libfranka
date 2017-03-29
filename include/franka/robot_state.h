@@ -20,24 +20,18 @@ struct RobotState {
   RobotState() noexcept;
 
   /**
-   * \f$q_{start}\f$
-   * Motion generator's start pose in joint space. Unit: \f$[rad]\f$
-   */
-  std::array<double, 7> q_start;
-
-  /**
-   * \f$^OT_{EE,start}\f$
+   * \f$^OT_{EE}\f$
    * Motion generator's start pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE_start;  // NOLINT
+  std::array<double, 16> O_T_EE;  // NOLINT
 
   /**
-   * Elbow start position.
+   * Elbow pose.
    * Elbow is defined as the joint position of 3rd joint and the sign of the 4th
    * joint. Unit: \f$[rad]\f$
    */
-  std::array<double, 2> elbow_start;
+  std::array<double, 2> elbow;
 
   /**
    * \f$\tau_{J}\f$

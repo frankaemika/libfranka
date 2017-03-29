@@ -20,8 +20,8 @@ int main(int argc, char** argv) {
     double radius(0.3);
     double time(0.0);
     std::array<double, 16> initial_pose;
-    std::copy(robot.robotState().O_T_EE_start.cbegin(),
-              robot.robotState().O_T_EE_start.cend(), initial_pose.begin());
+    std::copy(robot.robotState().O_T_EE.cbegin(),
+              robot.robotState().O_T_EE.cend(), initial_pose.begin());
 
     while (robot.update()) {
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
