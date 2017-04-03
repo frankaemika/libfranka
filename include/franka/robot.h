@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/motion_generator.h>
 #include <franka/robot_state.h>
@@ -54,6 +55,18 @@ class Robot {
    * cleanly closed.
    */
   bool update();
+
+  void control(std::function<Torques(const RobotState&)> update_function);
+  void control(std::function<JointValues(const RobotState&)> motion_generator_update,
+                std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<JointVelocities(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<CartesianPose(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void read(std::function<void(const RobotState&)> update_function);
+
 
   /**
    * Returns last obtained robot state. Updated after a call to

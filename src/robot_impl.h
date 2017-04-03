@@ -28,10 +28,14 @@ class Robot::Impl {
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update();
 
+  research_interface::ControllerCommand& controllerCommand() noexcept;
   research_interface::MotionGeneratorCommand& motionCommand() noexcept;
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
+
+  void startController();
+  void stopController();
 
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type

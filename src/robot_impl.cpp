@@ -321,4 +321,16 @@ void Robot::Impl::handleStopMotionGeneratorReply(
   }
 }
 
+research_interface::ControllerCommand &Robot::Impl::controllerCommand() noexcept {
+  return robot_command_.control;
+}
+
+void Robot::Impl::startController() {
+
+}
+
+void Robot::Impl::stopController() {
+
+}
+
 }  // namespace franka
