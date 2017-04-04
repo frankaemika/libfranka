@@ -13,14 +13,14 @@ struct MotionGeneratorLoop : public ControlLoop {
       ControlCallback control_callback,
       MotionGeneratorCallback motion_callback)
     : ControlLoop(robot_impl, control_callback),
-    motion_callback_(motion_callback)
+    motion_callback_(std::move(motion_callback))
   {
     if (motion_callback_) {
       robot_impl_.startMotionGenerator(MotionTraits<T>::Type);
     }
   }
 
-  ~MotionGeneratorLoop() {
+  ~MotionGeneratorLoop() override {
     if (motion_callback_) {
       robot_impl_.stopMotionGenerator();
     }

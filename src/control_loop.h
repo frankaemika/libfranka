@@ -13,7 +13,7 @@ struct ControlLoop {
   ControlLoop(Robot::Impl& robot_impl,
       ControlCallback control_callback)
     : robot_impl_(robot_impl),
-    control_callback_(control_callback)
+    control_callback_(std::move(control_callback))
   {
     if (control_callback_) {
       setCurrentThreadToRealtime();

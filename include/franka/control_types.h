@@ -1,27 +1,29 @@
 #pragma once
 
 namespace franka {
-  class Torques {
 
-  };
+class Torques {
 
-  class JointValues {
+};
 
-  };
+class JointValues {
 
-  class JointVelocities {
+};
 
-  };
+class JointVelocities {
 
-  class CartesianPose {
+};
 
-  };
+class CartesianPose {
 
-  class CartesianVelocities {
+};
 
-  };
+class CartesianVelocities {
 
-  class Stop : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
+};
 
-  };
-}
+class Stop : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
+
+};
+
+}  // namespace franka
