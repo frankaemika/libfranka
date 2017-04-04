@@ -17,55 +17,53 @@ Robot::Impl& Robot::impl() noexcept {
   return *impl_;
 }
 
-bool Robot::update() {
-  return impl_->update();
-}
-
 Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-void Robot::control(std::function<Torques(const RobotState &)> update_function) {
-  ControlLoop loop(*impl_, update_function);
+void Robot::control(std::function<Torques(const RobotState &)> control_callback) {
+  ControlLoop loop(*impl_, control_callback);
   loop();
 }
 
-void Robot::control(std::function<JointValues(const RobotState &)> motion_generator_update,
-                    std::function<Torques(const RobotState &)> control_update) {
-  MotionGeneratorLoop<JointValues> loop(*impl_, control_update, motion_generator_update);
+void Robot::control(std::function<JointValues(const RobotState &)> motion_generator_callback,
+                    std::function<Torques(const RobotState &)> control_callback) {
+  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 
-void Robot::control(std::function<JointVelocities(const RobotState &)> motion_generator_update,
-                    std::function<Torques(const RobotState &)> control_update) {
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_update, motion_generator_update);
-  loop();
-
-}
-
-void Robot::control(std::function<CartesianPose(const RobotState &)> motion_generator_update,
-                    std::function<Torques(const RobotState &)> control_update) {
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_update, motion_generator_update);
+void Robot::control(std::function<JointVelocities(const RobotState &)> motion_generator_callback,
+                    std::function<Torques(const RobotState &)> control_callback) {
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 
 }
 
-void Robot::control(std::function<CartesianVelocities(const RobotState &)> motion_generator_update,
-                    std::function<Torques(const RobotState &)> control_update) {
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_update, motion_generator_update);
+void Robot::control(std::function<CartesianPose(const RobotState &)> motion_generator_callback,
+                    std::function<Torques(const RobotState &)> control_callback) {
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_callback, motion_generator_callback);
+  loop();
+
+}
+
+void Robot::control(std::function<CartesianVelocities(const RobotState &)> motion_generator_callback,
+                    std::function<Torques(const RobotState &)> control_callback) {
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 
-void Robot::read(std::function<bool(const RobotState &)> callback) {
+void Robot::read(std::function<bool(const RobotState &)> read_callback) {
   while (impl_->update()) {
-    if (!callback(impl_->robotState())) {
+    if (!read_callback(impl_->robotState())) {
       break;
     }
   }
 }
 
 RobotState Robot::readOnce() {
-  while (!impl_->update()) {}
+  if (!impl_->update()) {
+    throw NetworkException("libfranka: Disconnected.");
+  }
   return impl_->robotState();
 }
 

@@ -39,83 +39,101 @@ class Robot {
   ~Robot() noexcept;
 
   /**
-   * Blocks until new robot state arrives. Then it sends the current command
-   * over the UDP connection. When the function returns true, the
-   * reference from getRobotState() points to new data and the robot command was
-   * sent.
-   *
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw MotionGeneratorException if motion generation commands were
-   * rejected.
-   *
-   * @return True if a new robot state arrived and a robot command was sent,
-   * false if the connection is
-   * cleanly closed.
-   */
-  bool update();
-
-  /**
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.
    *
-   * @throw RealtimeException Realtime priority can not be set for the current thread.
-   * @throw ControlException An error occured.
+   * @param[in] control_callback Callback function for torque control.
+   *
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw ControlException if an error related to torque control resp. motion generation occured.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void control(std::function<Torques(const RobotState&)> update_function);
+  void control(std::function<Torques(const RobotState&)> control_callback);
 
   /**
    * Starts a control loop for a joint value motion generator, optionally with torque control.
    *
-   * Sets realtime priority for the current thread.
+   * Sets realtime priority for the current thread if torque control is used.
    *
-   * @throw RealtimeException Realtime priority can not be set for the current thread.
-   * @throw ControlException An error occured.
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw ControlException if an error related to torque control resp. motion generation occured.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void control(std::function<JointValues(const RobotState&)> motion_generator_update,
-                std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<JointValues(const RobotState&)> motion_generator_callback,
+                std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a control loop for a joint velocity motion generator, optionally with torque control.
    *
-   * Sets realtime priority for the current thread.
+   * Sets realtime priority for the current thread if torque control is used.
    *
-   * @throw RealtimeException Realtime priority can not be set for the current thread.
-   * @throw ControlException An error occured.
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw ControlException if an error related to torque control resp. motion generation occured.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void control(std::function<JointVelocities(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
+               std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a control loop for a Cartesian pose motion generator, optionally with torque control.
    *
-   * Sets realtime priority for the current thread.
+   * Sets realtime priority for the current thread if torque control is used.
    *
-   * @throw RealtimeException Realtime priority can not be set for the current thread.
-   * @throw ControlException An error occured.
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw ControlException if an error related to torque control resp. motion generation occured.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void control(std::function<CartesianPose(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+               std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator, optionally with torque control.
    *
-   * Sets realtime priority for the current thread.
+   * Sets realtime priority for the current thread if torque control is used.
    *
-   * @throw RealtimeException Realtime priority can not be set for the current thread.
-   * @throw ControlException An error occured.
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw ControlException if an error related to torque control resp. motion generation occured.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
+               std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a loop for reading the current robot state.
    *
-   * @throw ControlException An error occured.
+   * @param[in] read_callback Callback function for robot state reading.
+   *
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
    */
-  void read(std::function<bool(const RobotState&)> callback);
+  void read(std::function<bool(const RobotState&)> read_callback);
 
+  /**
+   * Waits for a robot state update and returns it.
+   *
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   *
+   * @return Current robot state.
+   */
   RobotState readOnce();
 
   /**
