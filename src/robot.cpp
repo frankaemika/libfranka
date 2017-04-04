@@ -3,6 +3,7 @@
 #include <typeinfo>
 
 #include "robot_impl.h"
+#include "motion_generator_loop.h"
 
 namespace franka {
 
@@ -46,43 +47,40 @@ JointVelocityMotionGenerator Robot::startJointVelocityMotionGenerator() {
 }
 
 void Robot::control(std::function<Torques(const RobotState &)> update_function) {
-  if(!update_function) {
-    throw std::invalid_argument("libfranka: empty update function");
-  }
-
-  impl_->startController();
-
-  while(impl_->update()) {
-    Torques t = update_function(impl_->robotState());
-    if(typeid(t) == typeid(Stop)) {
-      break;
-    }
-
-    auto& command = impl_->controllerCommand();
-    //command.tau_J_d = t;
-  }
-
-  impl_->stopController();
+  ControlLoop loop(*impl_, update_function);
+  loop();
 }
 
 void Robot::control(std::function<JointValues(const RobotState &)> motion_generator_update,
                     std::function<Torques(const RobotState &)> control_update) {
-
+  MotionGeneratorLoop<JointValues> loop(*impl_, control_update, motion_generator_update);
+  loop();
 }
+
 void Robot::control(std::function<JointVelocities(const RobotState &)> motion_generator_update,
                     std::function<Torques(const RobotState &)> control_update) {
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_update, motion_generator_update);
+  loop();
 
 }
+
 void Robot::control(std::function<CartesianPose(const RobotState &)> motion_generator_update,
                     std::function<Torques(const RobotState &)> control_update) {
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_update, motion_generator_update);
+  loop();
 
 }
+
 void Robot::control(std::function<CartesianVelocities(const RobotState &)> motion_generator_update,
                     std::function<Torques(const RobotState &)> control_update) {
-
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_update, motion_generator_update);
+  loop();
 }
-void Robot::read(std::function<void(const RobotState &)> update_function) {
 
+void Robot::read(std::function<void(const RobotState &)> update_function) {
+  while (impl_->update()) {
+    update_function(impl_->robotState());
+  }
 }
 
 }  // namespace franka

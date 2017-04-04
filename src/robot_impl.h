@@ -42,6 +42,12 @@ class Robot::Impl {
           motion_generator_type);
   void stopMotionGenerator();
 
+  template <research_interface::StartMotionGeneratorRequest::Type, typename T>
+  void control(std::function<T(const RobotState&)> control_callback, std::function<void(const T&, research_interface::MotionGeneratorCommand*)> conversion_callback);
+
+  template <typename T>
+  void control(std::function<T(const RobotState&)> control_callback, std::function<void(const T&, research_interface::ControllerCommand*)> conversion_callback);
+
  private:
   bool handleReplies();
 
