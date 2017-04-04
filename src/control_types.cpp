@@ -2,8 +2,8 @@
 
 namespace franka {
 
-Torques::Torques(std::array<double, 7> torques)
-  : tau_J(std::move(torques)) {
+Torques::Torques(const std::array<double, 7>& torques)  // NOLINT (modernize-pass-by-value)
+  : tau_J(torques) {
 }
 
 Torques::Torques(std::initializer_list<double> torques) {
@@ -13,8 +13,8 @@ Torques::Torques(std::initializer_list<double> torques) {
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
 
-JointValues::JointValues(std::array<double, 7> joint_values)
-  : q(std::move(joint_values)) {
+JointValues::JointValues(const std::array<double, 7>& joint_values)  // NOLINT (modernize-pass-by-value)
+  : q(joint_values) {
 }
 
 JointValues::JointValues(std::initializer_list<double> joint_values) {
@@ -24,8 +24,8 @@ JointValues::JointValues(std::initializer_list<double> joint_values) {
   std::copy(joint_values.begin(), joint_values.end(), q.begin());
 }
 
-JointVelocities::JointVelocities(std::array<double, 7> joint_velocities)
-  : dq(std::move(joint_velocities)) {
+JointVelocities::JointVelocities(const std::array<double, 7>& joint_velocities)  // NOLINT (modernize-pass-by-value)
+  : dq(joint_velocities) {
 }
 
 JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities) {
@@ -35,8 +35,8 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
 }
 
-CartesianPose::CartesianPose(std::array<double, 16> pose)
-  : O_T_EE(std::move(pose)) {
+CartesianPose::CartesianPose(const std::array<double, 16>& pose)  // NOLINT (modernize-pass-by-value)
+  : O_T_EE(pose) {
 }
 
 CartesianPose::CartesianPose(std::initializer_list<double> pose) {
@@ -46,8 +46,8 @@ CartesianPose::CartesianPose(std::initializer_list<double> pose) {
   std::copy(pose.begin(), pose.end(), O_T_EE.begin());
 }
 
-CartesianVelocities::CartesianVelocities(std::array<double, 6> velocities)
-  : O_dP_EE(std::move(velocities)) {
+CartesianVelocities::CartesianVelocities(const std::array<double, 6>& velocities)  // NOLINT (modernize-pass-by-value)
+  : O_dP_EE(velocities) {
 }
 
 CartesianVelocities::CartesianVelocities(std::initializer_list<double> velocities) {

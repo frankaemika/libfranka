@@ -12,7 +12,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(Robot::Impl& robot_impl,
   motion_callback_(std::move(motion_callback))
 {
   if (motion_callback_) {
-    robot_impl_.startMotionGenerator(MotionTraits<T>::Type);
+    robot_impl_.startMotionGenerator(MotionTraits<T>::kMotionGeneratorType);
   }
 }
 
