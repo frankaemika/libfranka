@@ -42,7 +42,9 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    robot.control([index = 0ul, &samples, &states](const franka::RobotState& robot_state) mutable -> franka::JointValues {
+    robot.control([
+      index = 0ul, &samples, &states
+    ](const franka::RobotState& robot_state) mutable->franka::JointValues {
       if (index >= samples.size()) {
         return franka::Stop;
       }

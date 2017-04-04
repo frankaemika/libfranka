@@ -13,11 +13,8 @@ int main(int argc, char** argv) {
     franka::Robot robot(argv[1]);
 
     robot.control([
-      time = 0.0,
-      time_max = 4.0,
-      v_max = 0.1,
-      angle = M_PI / 4.0
-    ](const franka::RobotState&) mutable -> franka::CartesianVelocities {
+      time = 0.0, time_max = 4.0, v_max = 0.1, angle = M_PI / 4.0
+    ](const franka::RobotState&) mutable->franka::CartesianVelocities {
       double cycle =
           std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double v =

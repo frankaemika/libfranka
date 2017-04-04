@@ -34,8 +34,12 @@ class Robot {
    * @throw ProtocolException if data received from the host is invalid
    *
    * @param[in] franka_address IP/hostname of FRANKA CONTROL
+   * @param[in] realtime_config is set to Enforce, an exception will be thrown
+   * if realtime priority cannot be set when required. Setting realtime_config
+   * to Ignore disables this behavior.
    */
-  explicit Robot(const std::string& franka_address);
+  explicit Robot(const std::string& franka_address,
+                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
   ~Robot() noexcept;
 
   /**
@@ -49,11 +53,14 @@ class Robot {
    * @throw ControlException if an error related to torque control resp. motion generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException Realtime priority can not be set for the current
+   * thread.
    */
   void control(std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a joint value motion generator, optionally with torque control.
+   * Starts a control loop for a joint value motion generator, optionally with
+   * torque control.
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
@@ -69,7 +76,8 @@ class Robot {
                 std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
-   * Starts a control loop for a joint velocity motion generator, optionally with torque control.
+   * Starts a control loop for a joint velocity motion generator, optionally
+   * with torque control.
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
@@ -85,7 +93,8 @@ class Robot {
                std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
-   * Starts a control loop for a Cartesian pose motion generator, optionally with torque control.
+   * Starts a control loop for a Cartesian pose motion generator, optionally
+   * with torque control.
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
@@ -101,7 +110,8 @@ class Robot {
                std::function<Torques(const RobotState&)> control_callback = std::function<Torques(const RobotState&)>());
 
   /**
-   * Starts a control loop for a Cartesian velocity motion generator, optionally with torque control.
+   * Starts a control loop for a Cartesian velocity motion generator, optionally
+   * with torque control.
    *
    * Sets realtime priority for the current thread if torque control is used.
    *

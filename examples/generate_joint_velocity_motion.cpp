@@ -12,9 +12,9 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    robot.control([time_max = 4.0,
-                   omega_max = 0.2,
-                   time = 0.0](const franka::RobotState&) mutable -> franka::JointVelocities {
+    robot.control([
+      time_max = 4.0, omega_max = 0.2, time = 0.0
+    ](const franka::RobotState&) mutable->franka::JointVelocities {
       double cycle = std::floor(
           std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double omega = cycle * omega_max / 2.0 *

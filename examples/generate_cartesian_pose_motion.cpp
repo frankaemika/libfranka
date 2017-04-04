@@ -13,9 +13,9 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    robot.control([initial_pose = robot.readOnce().O_T_EE,
-                   radius = 0.3,
-                   time = 0.0](const franka::RobotState&) mutable -> franka::CartesianPose {
+    robot.control([
+      initial_pose = robot.readOnce().O_T_EE, radius = 0.3, time = 0.0
+    ](const franka::RobotState&) mutable->franka::CartesianPose {
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
       double delta_x = radius * std::sin(angle);
       double delta_z = radius * (std::cos(angle) - 1);

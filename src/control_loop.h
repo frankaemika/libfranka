@@ -20,7 +20,8 @@ class ControlLoop {
   virtual bool spinOnce();
 
  private:
-  void convertTorques(const Torques& torques, research_interface::ControllerCommand* command);
+  void convertTorques(const Torques& torques,
+                      research_interface::ControllerCommand* command);
   void setCurrentThreadToRealtime();
 
  protected:

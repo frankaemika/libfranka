@@ -17,8 +17,10 @@ constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
-                  std::chrono::milliseconds timeout)
-    : motion_generator_running_{false},
+                  std::chrono::milliseconds timeout,
+                  RealtimeConfig realtime_config)
+    : realtime_config_{realtime_config},
+      motion_generator_running_{false},
       controller_running_{false} {
   Poco::Timespan poco_timeout(1000l * timeout.count());
   try {
@@ -122,12 +124,17 @@ bool Robot::Impl::motionGeneratorRunning() const noexcept {
   return motion_generator_running_;
 }
 
+RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
+  return realtime_config_;
+}
+
 research_interface::MotionGeneratorCommand&
 Robot::Impl::motionCommand() noexcept {
   return robot_command_.motion;
 }
 
-research_interface::ControllerCommand &Robot::Impl::controllerCommand() noexcept {
+research_interface::ControllerCommand&
+Robot::Impl::controllerCommand() noexcept {
   return robot_command_.control;
 }
 
@@ -348,11 +355,9 @@ void Robot::Impl::handleStartMotionGeneratorReply(
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
       break;
     case research_interface::StartMotionGeneratorReply::Status::kAborted:
-      throw ControlException(
-          "libfranka: motion generator command aborted!");
+      throw ControlException("libfranka: motion generator command aborted!");
     case research_interface::StartMotionGeneratorReply::Status::kRejected:
-      throw ControlException(
-          "libfranka: motion generator command rejected!");
+      throw ControlException("libfranka: motion generator command rejected!");
     default:
       throw ProtocolException(
           "libfranka: unexpected start motion generator reply!");
@@ -368,14 +373,16 @@ void Robot::Impl::handleStopMotionGeneratorReply(
   }
 }
 
-void Robot::Impl::handleStartControllerReply(const research_interface::StartControllerReply &reply) {
+void Robot::Impl::handleStartControllerReply(
+    const research_interface::StartControllerReply& reply) {
   if (reply.status !=
       research_interface::StartControllerReply::Status::kSuccess) {
     throw ProtocolException(
         "libfranka: unexpected stop motion generator reply!");
   }
 }
-void Robot::Impl::handleStopControllerReply(const research_interface::StopControllerReply &reply) {
+void Robot::Impl::handleStopControllerReply(
+    const research_interface::StopControllerReply& reply) {
   if (reply.status !=
       research_interface::StopControllerReply::Status::kSuccess) {
     throw ProtocolException(

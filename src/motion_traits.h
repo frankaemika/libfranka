@@ -6,8 +6,7 @@
 namespace franka {
 
 template <typename T>
-struct MotionTraits {
-};
+struct MotionTraits {};
 
 template <>
 struct MotionTraits<JointValues> {

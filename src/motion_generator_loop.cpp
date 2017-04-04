@@ -5,12 +5,12 @@
 namespace franka {
 
 template <typename T>
-MotionGeneratorLoop<T>::MotionGeneratorLoop(Robot::Impl& robot_impl,
+MotionGeneratorLoop<T>::MotionGeneratorLoop(
+    Robot::Impl& robot_impl,
     ControlCallback control_callback,
     MotionGeneratorCallback motion_callback)
-  : ControlLoop(robot_impl, control_callback),
-  motion_callback_(std::move(motion_callback))
-{
+    : ControlLoop(robot_impl, control_callback),
+      motion_callback_(std::move(motion_callback)) {
   if (motion_callback_) {
     robot_impl_.startMotionGenerator(MotionTraits<T>::kMotionGeneratorType);
   }
@@ -64,29 +64,36 @@ bool MotionGeneratorLoop<T>::spinOnce() {
   return ControlLoop::spinOnce();
 }
 
-template<>
-void MotionGeneratorLoop<JointValues>::convertMotion(const JointValues& motion, research_interface::MotionGeneratorCommand* command) {
+template <>
+void MotionGeneratorLoop<JointValues>::convertMotion(
+    const JointValues& motion,
+    research_interface::MotionGeneratorCommand* command) {
   command->q_d = motion.q;
 }
 
-template<>
-void MotionGeneratorLoop<JointVelocities>::convertMotion(const JointVelocities& motion, research_interface::MotionGeneratorCommand* command) {
+template <>
+void MotionGeneratorLoop<JointVelocities>::convertMotion(
+    const JointVelocities& motion,
+    research_interface::MotionGeneratorCommand* command) {
   command->dq_d = motion.dq;
 }
 
-template<>
-void MotionGeneratorLoop<CartesianPose>::convertMotion(const CartesianPose& motion, research_interface::MotionGeneratorCommand* command) {
+template <>
+void MotionGeneratorLoop<CartesianPose>::convertMotion(
+    const CartesianPose& motion,
+    research_interface::MotionGeneratorCommand* command) {
   if (!checkHomogeneousTransformation(motion.O_T_EE)) {
     throw ControlException(
-      "libfranka: Attempt to set invalid transformation in motion"
-      "generator. Has to be column major!"
-    );
+        "libfranka: Attempt to set invalid transformation in motion"
+        "generator. Has to be column major!");
   }
   command->O_T_EE_d = motion.O_T_EE;
 }
 
-template<>
-void MotionGeneratorLoop<CartesianVelocities>::convertMotion(const CartesianVelocities& motion, research_interface::MotionGeneratorCommand* command) {
+template <>
+void MotionGeneratorLoop<CartesianVelocities>::convertMotion(
+    const CartesianVelocities& motion,
+    research_interface::MotionGeneratorCommand* command) {
   command->O_dP_EE_d = motion.O_dP_EE;
 }
 

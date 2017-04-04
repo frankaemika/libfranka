@@ -13,8 +13,8 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    robot.control([initial_pose = robot.readOnce().q,
-                   time = 0.0](const franka::RobotState&) mutable -> franka::JointValues {
+    robot.control([ initial_pose = robot.readOnce().q, time = 0.0 ](
+                      const franka::RobotState&) mutable->franka::JointValues {
       double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
 
       time += 0.001;

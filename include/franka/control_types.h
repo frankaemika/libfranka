@@ -61,6 +61,7 @@ struct JointValues {
 
   /**
    * Desired joint angles in [rad].
+>>>>>>> Set realtime thread priority
    */
   std::array<double, 7> q{};
 
@@ -118,7 +119,8 @@ struct CartesianPose {
   CartesianPose(std::initializer_list<double> cartesian_pose); // NOLINT (google-explicit-constructor)
 
   /**
-   * Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that
+   * transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -147,7 +149,8 @@ struct CartesianVelocities {
   CartesianVelocities(std::initializer_list<double> cartesian_velocities); // NOLINT (google-explicit-constructor)
 
   /**
-   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in
+   * [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -166,5 +169,7 @@ struct StopType : Torques, JointValues, JointVelocities, CartesianPose, Cartesia
  * Used to signal the termination of a motion generation resp. control loop.
  */
 static constexpr StopType Stop = StopType();  // NOLINT (readability-identifier-naming)
+
+enum RealtimeConfig { kEnforce, kIgnore };
 
 }  // namespace franka

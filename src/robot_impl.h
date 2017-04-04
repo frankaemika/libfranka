@@ -21,7 +21,8 @@ class Robot::Impl {
 
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = research_interface::kCommandPort,
-                std::chrono::milliseconds timeout = kDefaultTimeout);
+                std::chrono::milliseconds timeout = kDefaultTimeout,
+                RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
   ~Impl() noexcept;
 
   void setRobotState(const research_interface::RobotState& robot_state);
@@ -32,6 +33,7 @@ class Robot::Impl {
   const RobotState& robotState() const noexcept;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
+  RealtimeConfig realtimeConfig() const noexcept;
 
   void startController();
   void stopController();
@@ -42,10 +44,16 @@ class Robot::Impl {
   void stopMotionGenerator();
 
   template <research_interface::StartMotionGeneratorRequest::Type, typename T>
-  void control(std::function<T(const RobotState&)> control_callback, std::function<void(const T&, research_interface::MotionGeneratorCommand*)> conversion_callback);
+  void control(
+      std::function<T(const RobotState&)> control_callback,
+      std::function<void(const T&, research_interface::MotionGeneratorCommand*)>
+          conversion_callback);
 
   template <typename T>
-  void control(std::function<T(const RobotState&)> control_callback, std::function<void(const T&, research_interface::ControllerCommand*)> conversion_callback);
+  void control(
+      std::function<T(const RobotState&)> control_callback,
+      std::function<void(const T&, research_interface::ControllerCommand*)>
+          conversion_callback);
 
  private:
   bool handleReplies();
@@ -64,9 +72,10 @@ class Robot::Impl {
   void handleStopControllerReply(
       const research_interface::StopControllerReply& reply);
 
-
   template <research_interface::Function F, typename T>
   T tcpReceiveObject();
+
+  const RealtimeConfig realtime_config_;
 
   uint16_t ri_version_;
   bool motion_generator_running_;
