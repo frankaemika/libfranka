@@ -230,7 +230,7 @@ void Robot::Impl::startMotionGenerator(
     research_interface::StartMotionGeneratorRequest::Type
         motion_generator_type) {
   if (motion_generator_running_) {
-    throw MotionGeneratorException(
+    throw ControlException(
         "libfranka: attempted to start multiple motion generators!");
   }
   std::memset(&robot_command_, 0, sizeof(robot_command_));
@@ -348,10 +348,10 @@ void Robot::Impl::handleStartMotionGeneratorReply(
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
       break;
     case research_interface::StartMotionGeneratorReply::Status::kAborted:
-      throw MotionGeneratorException(
+      throw ControlException(
           "libfranka: motion generator command aborted!");
     case research_interface::StartMotionGeneratorReply::Status::kRejected:
-      throw MotionGeneratorException(
+      throw ControlException(
           "libfranka: motion generator command rejected!");
     default:
       throw ProtocolException(

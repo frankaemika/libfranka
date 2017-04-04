@@ -11,16 +11,13 @@ int main(int argc, char** argv) {
   }
   try {
     franka::Robot robot(argv[1]);
-    std::cout << "Starting Cartesian velocity motion generator" << std::endl;
-    franka::CartesianVelocityMotionGenerator motion_generator =
-        robot.startCartesianVelocityMotionGenerator();
 
-    double time(0.0);
-    double time_max(4.0);
-    double v_max(0.1);
-    double angle(M_PI / 4);
-
-    while (robot.update()) {
+    robot.control([
+      time = 0.0,
+      time_max = 4.0,
+      v_max = 0.1,
+      angle = M_PI / 4.0
+    ](const franka::RobotState&) mutable -> franka::CartesianVelocities {
       double cycle =
           std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double v =
@@ -28,15 +25,14 @@ int main(int argc, char** argv) {
       double v_x = std::cos(angle) * v;
       double v_z = -std::sin(angle) * v;
 
-      motion_generator.setDesiredVelocity({{v_x, 0.0, v_z, 0.0, 0.0, 0.0}});
-
       time += 0.001;
       if (time > 2 * time_max) {
         std::cout << std::endl
                   << "Finished motion, shutting down example" << std::endl;
-        break;
+        return franka::Stop;
       }
-    }
+      return {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
+    });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

@@ -5,7 +5,6 @@
 
 #include <franka/control_types.h>
 #include <franka/exception.h>
-#include <franka/motion_generator.h>
 #include <franka/robot_state.h>
 
 /**
@@ -56,25 +55,68 @@ class Robot {
    */
   bool update();
 
+  /**
+   * Starts a control loop for torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @throw RealtimeException Realtime priority can not be set for the current thread.
+   * @throw ControlException An error occured.
+   */
   void control(std::function<Torques(const RobotState&)> update_function);
-  void control(std::function<JointValues(const RobotState&)> motion_generator_update,
-                std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
-  void control(std::function<JointVelocities(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
-  void control(std::function<CartesianPose(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
-  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_update,
-               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
-  void read(std::function<void(const RobotState&)> update_function);
-
 
   /**
-   * Returns last obtained robot state. Updated after a call to
-   * waitForRobotState().
+   * Starts a control loop for a joint value motion generator, optionally with torque control.
    *
-   * @return const reference to RobotState structure
+   * Sets realtime priority for the current thread.
+   *
+   * @throw RealtimeException Realtime priority can not be set for the current thread.
+   * @throw ControlException An error occured.
    */
-  const RobotState& robotState() const noexcept;
+  void control(std::function<JointValues(const RobotState&)> motion_generator_update,
+                std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+
+  /**
+   * Starts a control loop for a joint velocity motion generator, optionally with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @throw RealtimeException Realtime priority can not be set for the current thread.
+   * @throw ControlException An error occured.
+   */
+  void control(std::function<JointVelocities(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+
+  /**
+   * Starts a control loop for a Cartesian pose motion generator, optionally with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @throw RealtimeException Realtime priority can not be set for the current thread.
+   * @throw ControlException An error occured.
+   */
+  void control(std::function<CartesianPose(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+
+  /**
+   * Starts a control loop for a Cartesian velocity motion generator, optionally with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @throw RealtimeException Realtime priority can not be set for the current thread.
+   * @throw ControlException An error occured.
+   */
+  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_update,
+               std::function<Torques(const RobotState&)> control_update = std::function<Torques(const RobotState&)>());
+
+  /**
+   * Starts a loop for reading the current robot state.
+   *
+   * @throw ControlException An error occured.
+   */
+  void read(std::function<void(const RobotState&)> callback);
+
+  RobotState readOnce();
 
   /**
    * Returns the version reported by the connected server.
@@ -82,54 +124,6 @@ class Robot {
    * @return Version of the connected server.
    */
   ServerVersion serverVersion() const noexcept;
-
-  /**
-   * Tries to start and instantiate a motion generator for Cartesian
-   * Poses
-   *
-   * @throw MotionGeneratorException if another motion generator is
-   * already running
-   *
-   * @return A CartesianPoseMotionGenerator that allows to stream
-   * Cartesian pose commands to the robot
-   */
-  CartesianPoseMotionGenerator startCartesianPoseMotionGenerator();
-
-  /**
-   * Tries to start and instantiate a motion generator for Cartesian
-   * Velocities
-   *
-   * @throw MotionGeneratorException if another motion generator is
-   * already running
-   *
-   * @return A CartesianVelocityMotionGenerator that allows to stream
-   * Cartesian velocity commands to the robot
-   */
-  CartesianVelocityMotionGenerator startCartesianVelocityMotionGenerator();
-
-  /**
-   * Tries to start and instantiate a motion generator for joint
-   * poses
-   *
-   * @throw MotionGeneratorException if another motion generator is
-   * already running
-   *
-   * @return A JointPoseMotionGenerator that allows to stream
-   * joint pose commands to the robot
-   */
-  JointPoseMotionGenerator startJointPoseMotionGenerator();
-
-  /**
-   * Tries to start and instantiate a motion generator for joint
-   * velocities
-   *
-   * @throw MotionGeneratorException if another motion generator is
-   * already running
-   *
-   * @return A JointVelocityMotionGenerator that allows to stream
-   * joint velocity commands to the robot
-   */
-  JointVelocityMotionGenerator startJointVelocityMotionGenerator();
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;

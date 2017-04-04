@@ -8,8 +8,8 @@
 #include "helpers.h"
 
 using franka::RobotState;
+using franka::ControlException;
 using franka::NetworkException;
-using franka::MotionGeneratorException;
 using MotionGeneratorType = research_interface::StartMotionGeneratorRequest::Type;
 using namespace std::chrono_literals;
 
@@ -17,6 +17,34 @@ class Robot : public ::franka::Robot {
  public:
    using ::franka::Robot::Impl;
 };
+
+TEST(Robot, RobotStateInitializedToZero) {
+  MockServer server;
+  server.spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  const RobotState& received_robot_state = robot.robotState();
+  testRobotStateIsZero(received_robot_state);
+}
+
+TEST(Robot, CanReceiveRobotState) {
+  research_interface::RobotState sent_robot_state;
+  randomRobotState(sent_robot_state);
+
+  MockServer server;
+  server.onSendRobotState([&]() {
+          return sent_robot_state;
+        })
+        .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+
+  const RobotState& received_robot_state = robot.robotState();
+  testRobotStateIsZero(received_robot_state);
+
+  ASSERT_TRUE(robot.update());
+  testRobotStatesAreEqual(sent_robot_state, received_robot_state);
+}
 
 TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
   research_interface::RobotState sent_robot_state;
@@ -76,7 +104,7 @@ TEST(Robot, CanNotStartMultipleMotionGenerators) {
 
   Robot::Impl robot("127.0.0.1");
   robot.startMotionGenerator(MotionGeneratorType::kJointPosition);
-  EXPECT_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity), MotionGeneratorException);
+  EXPECT_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity), ControlException);
 }
 
 TEST(Robot, CanSendMotionGeneratorCommand) {
@@ -144,7 +172,7 @@ TEST(Robot, CanReceiveMotionGenerationError) {
     })
     .spinOnce(/* block until reply has been sent */ true);
 
-  EXPECT_THROW(robot.update(), MotionGeneratorException);
+  EXPECT_THROW(robot.update(), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 

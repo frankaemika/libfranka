@@ -30,7 +30,7 @@ void ControlLoop::operator()() {
 bool ControlLoop::spinOnce() {
   if (control_callback_) {
     Torques control_output = control_callback_(robot_impl_.robotState());
-    if (typeid(control_output) == typeid(Stop)) {
+    if (&control_output == &Stop) {
       return false;
     }
     convertTorques(control_output, &robot_impl_.controllerCommand());

@@ -9,12 +9,11 @@ int main(int argc, char** argv) {
 
   try {
     franka::Robot robot(argv[1]);
-
-    while (robot.update()) {
-      const franka::RobotState& robot_state = robot.robotState();
+    robot.read([](const franka::RobotState& robot_state) {
       std::cout << robot_state << std::endl;
-    }
-  } catch (franka::NetworkException const& e) {
+    });
+    std::cout << "Done." << std::endl;
+  } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;
     return -1;
   }

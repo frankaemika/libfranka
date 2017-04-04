@@ -21,29 +21,8 @@ bool Robot::update() {
   return impl_->update();
 }
 
-const RobotState& Robot::robotState() const noexcept {
-  return impl_->robotState();
-}
-
 Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
-}
-
-CartesianPoseMotionGenerator Robot::startCartesianPoseMotionGenerator() {
-  return CartesianPoseMotionGenerator(*this);
-}
-
-CartesianVelocityMotionGenerator
-Robot::startCartesianVelocityMotionGenerator() {
-  return CartesianVelocityMotionGenerator(*this);
-}
-
-JointPoseMotionGenerator Robot::startJointPoseMotionGenerator() {
-  return JointPoseMotionGenerator(*this);
-}
-
-JointVelocityMotionGenerator Robot::startJointVelocityMotionGenerator() {
-  return JointVelocityMotionGenerator(*this);
 }
 
 void Robot::control(std::function<Torques(const RobotState &)> update_function) {
@@ -77,10 +56,15 @@ void Robot::control(std::function<CartesianVelocities(const RobotState &)> motio
   loop();
 }
 
-void Robot::read(std::function<void(const RobotState &)> update_function) {
+void Robot::read(std::function<void(const RobotState &)> callback) {
   while (impl_->update()) {
-    update_function(impl_->robotState());
+    callback(impl_->robotState());
   }
+}
+
+RobotState Robot::readOnce() {
+  while (!impl_->update()) {}
+  return impl_->robotState();
 }
 
 }  // namespace franka

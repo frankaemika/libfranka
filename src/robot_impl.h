@@ -6,7 +6,6 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/StreamSocket.h>
 
-#include <franka/motion_generator.h>
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>

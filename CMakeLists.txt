@@ -54,7 +54,6 @@ add_library(franka SHARED
   src/control_loop.cpp
   src/motion_generator_loop.cpp
   src/control_types.cpp
-  src/motion_generator.cpp
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
