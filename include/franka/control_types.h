@@ -11,94 +11,160 @@
 namespace franka {
 
 /**
- * 
+ * Stores values for torque control.
  */
 struct Torques {
-  Torques(const std::array<double, 7>& torques); // NOLINT (google-explicit-constructor)
+  /**
+   * Creates a new Torques instance.
+   *
+   * @param[in] torques Desired torques in [Nm].
+   */
+  Torques(const std::array<double, 7>& torques) noexcept; // NOLINT (google-explicit-constructor)
 
   /**
-   * @throw std::invalid_argument Wrong size of torques.
+   * Creates a new Torques instance.
+   *
+   * @param[in] torques Desired torques in [Nm].
+   *
+   * @throw ControlException Invalid number of elements in torques.
    */
   Torques(std::initializer_list<double> torques); // NOLINT (google-explicit-constructor)
 
-  std::array<double, 7> tau_J;  // NOLINT (readability-identifier-naming)
+  /**
+   * Desired torques in [Nm].
+   */
+  std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  Torques() = default;
+  constexpr Torques() noexcept = default;
 };
 
+/**
+ * Stores values for joint position motion generation.
+ */
 struct JointValues {
-  JointValues(const std::array<double, 7>& joint_values); // NOLINT (google-explicit-constructor)
+  /**
+   * Creates a new JointValues instance.
+   *
+   * @param[in] joint_values Desired joint angles in [rad].
+   */
+  JointValues(const std::array<double, 7>& joint_values) noexcept; // NOLINT (google-explicit-constructor)
 
   /**
-   * @throw std::invalid_argument Wrong size of joint_values.
+   * Creates a new JointValues instance.
+   *
+   * @param[in] joint_values Desired joint angles in [rad].
+   *
+   * @throw ControlException Invalid number of elements in joint_values.
    */
   JointValues(std::initializer_list<double> joint_values); // NOLINT (google-explicit-constructor)
 
-  /*
-   * Desired joint angles in [rad]
+  /**
+   * Desired joint angles in [rad].
    */
-  std::array<double, 7> q;
+  std::array<double, 7> q{};
 
  protected:
-  JointValues() = default;
+  constexpr JointValues() noexcept = default;
 };
 
+/**
+ * Stores values for joint velocity motion generation.
+ */
 struct JointVelocities {
-  JointVelocities(const std::array<double, 7>& joint_velocities); // NOLINT (google-explicit-constructor)
+  /**
+   * Creates a new JointVelocities instance.
+   *
+   * @param[in] joint_velocities Desired joint velocities in [rad/s].
+   */
+  JointVelocities(const std::array<double, 7>& joint_velocities) noexcept; // NOLINT (google-explicit-constructor)
 
   /**
-   * @throw std::invalid_argument Wrong size of joint_velocities.
+   * Creates a new JointVelocities instance.
+   *
+   * @param[in] joint_velocities Desired joint velocities in [rad/s].
+   *
+   * @throw ControlException Invalid number of elements in joint_velocities.
    */
   JointVelocities(std::initializer_list<double> joint_velocities); // NOLINT (google-explicit-constructor)
 
-  /*
-   * Desired joint velocities in [rad/s]
+  /**
+   * Desired joint velocities in [rad/s].
    */
-  std::array<double, 7> dq;
+  std::array<double, 7> dq{};
 
  protected:
-  JointVelocities() = default;
+  constexpr JointVelocities() noexcept = default;
 };
 
+/**
+ * Stores values for Cartesian pose motion generation.
+ */
 struct CartesianPose {
-  CartesianPose(const std::array<double, 16>& pose); // NOLINT (google-explicit-constructor)
+  /**
+   * Creates a new CartesianPose instance.
+   *
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   */
+  CartesianPose(const std::array<double, 16>& cartesian_pose) noexcept; // NOLINT (google-explicit-constructor)
 
   /**
-   * @throw std::invalid_argument Wrong size of pose.
+   * Creates a new CartesianPose instance.
+   *
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   *
+   * @throw ControlException Invalid number of elements in cartesian_pose.
    */
-  CartesianPose(std::initializer_list<double> pose); // NOLINT (google-explicit-constructor)
+  CartesianPose(std::initializer_list<double> cartesian_pose); // NOLINT (google-explicit-constructor)
 
-  /*
-   * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$
+  /**
+   * Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
    */
-  std::array<double, 16> O_T_EE;  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  CartesianPose() = default;
+  constexpr CartesianPose() noexcept = default;
 };
 
+/**
+ * Stores values for Cartesian velocity motion generation.
+ */
 struct CartesianVelocities {
-  CartesianVelocities(const std::array<double, 6>& velocities); // NOLINT (google-explicit-constructor)
+  /**
+   * Creates a new CartesianVelocities instance.
+   *
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   */
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities); // NOLINT (google-explicit-constructor)
 
   /**
-   * @throw std::invalid_argument Wrong size of velocities.
+   * Creates a new CartesianVelocities instance.
+   *
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   *
+   * @throw ControlException Invalid number of elements in cartesian_pose.
    */
-  CartesianVelocities(std::initializer_list<double> velocities); // NOLINT (google-explicit-constructor)
+  CartesianVelocities(std::initializer_list<double> cartesian_velocities); // NOLINT (google-explicit-constructor)
 
-  /*
-   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}
+  /**
+   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
-  std::array<double, 6> O_dP_EE;  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  CartesianVelocities() = default;
+  constexpr CartesianVelocities() noexcept = default;
 };
 
+/**
+ * Used to signal the termination of a motion generation resp. control loop.
+ */
 struct StopType : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
-  StopType() = default;
+  constexpr StopType() noexcept = default;
 };
 
+/**
+ * Used to signal the termination of a motion generation resp. control loop.
+ */
 static constexpr StopType Stop = StopType();  // NOLINT (readability-identifier-naming)
 
 }  // namespace franka
