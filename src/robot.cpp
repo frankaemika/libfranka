@@ -24,36 +24,46 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-void Robot::control(std::function<Torques(const RobotState &)> control_callback) {
+void Robot::control(
+    std::function<Torques(const RobotState&)> control_callback) {
   ControlLoop loop(*impl_, control_callback);
   loop();
 }
 
-void Robot::control(std::function<JointValues(const RobotState &)> motion_generator_callback,
-                    std::function<Torques(const RobotState &)> control_callback) {
-  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback, motion_generator_callback);
+void Robot::control(
+    std::function<JointValues(const RobotState&)> motion_generator_callback,
+    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback,
+                                        motion_generator_callback);
   loop();
 }
 
-void Robot::control(std::function<JointVelocities(const RobotState &)> motion_generator_callback,
-                    std::function<Torques(const RobotState &)> control_callback) {
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback, motion_generator_callback);
+void Robot::control(
+    std::function<JointVelocities(const RobotState&)> motion_generator_callback,
+    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback,
+                                            motion_generator_callback);
   loop();
 }
 
-void Robot::control(std::function<CartesianPose(const RobotState &)> motion_generator_callback,
-                    std::function<Torques(const RobotState &)> control_callback) {
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_callback, motion_generator_callback);
+void Robot::control(
+    std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_callback,
+                                          motion_generator_callback);
   loop();
 }
 
-void Robot::control(std::function<CartesianVelocities(const RobotState &)> motion_generator_callback,
-                    std::function<Torques(const RobotState &)> control_callback) {
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_callback, motion_generator_callback);
+void Robot::control(
+    std::function<CartesianVelocities(const RobotState&)>
+        motion_generator_callback,
+    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_callback,
+                                                motion_generator_callback);
   loop();
 }
 
-void Robot::read(std::function<bool(const RobotState &)> read_callback) {
+void Robot::read(std::function<bool(const RobotState&)> read_callback) {
   while (impl_->update()) {
     if (!read_callback(impl_->robotState())) {
       break;

@@ -4,10 +4,12 @@
 #include <iostream>
 
 #ifdef _WIN32
-#include <win32.h>
+#include <Windows.h>
 #else
 #include <pthread.h>
 #endif
+
+using namespace std::string_literals;  // NOLINT
 
 namespace franka {
 
@@ -61,26 +63,23 @@ void ControlLoop::setCurrentThreadToRealtime() {
     size_t size = FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
             FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPSTR)&buffer, 0, NULL);
+        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        static_cast<LPSTR>(&buffer), 0, nullptr);
     return std::string(buffer, size);
   };
 
   if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
     if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
       throw RealTimeException(
-          std::string{
-              "libfranka: unable to set realtime priority for the process: "} +
+          "libfranka: unable to set realtime priority for the process: "s +
           get_last_windows_error());
-    } else {
-      return;
     }
+    return;
   }
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
     if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
       throw RealTimeException(
-          std::string{
-              "libfranka: unable to set realtime priority for the thread: "} +
+          "libfranka: unable to set realtime priority for the thread: "s +
           get_last_windows_error());
     }
   }
@@ -92,8 +91,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
     if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
       throw RealTimeException(
-          std::string{"libfranka: unable to set realtime scheduling: "} +
-          strerror(errno));
+          "libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }
   }
 #endif

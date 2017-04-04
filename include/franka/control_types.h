@@ -19,7 +19,8 @@ struct Torques {
    *
    * @param[in] torques Desired torques in [Nm].
    */
-  Torques(const std::array<double, 7>& torques) noexcept; // NOLINT (google-explicit-constructor)
+  Torques(const std::array<double, 7>&
+              torques) noexcept;  // NOLINT (google-explicit-constructor)
 
   /**
    * Creates a new Torques instance.
@@ -28,7 +29,8 @@ struct Torques {
    *
    * @throw ControlException Invalid number of elements in torques.
    */
-  Torques(std::initializer_list<double> torques); // NOLINT (google-explicit-constructor)
+  Torques(std::initializer_list<double>
+              torques);  // NOLINT (google-explicit-constructor)
 
   /**
    * Desired torques in [Nm].
@@ -48,7 +50,9 @@ struct JointValues {
    *
    * @param[in] joint_values Desired joint angles in [rad].
    */
-  JointValues(const std::array<double, 7>& joint_values) noexcept; // NOLINT (google-explicit-constructor)
+  JointValues(
+      const std::array<double, 7>&
+          joint_values) noexcept;  // NOLINT (google-explicit-constructor)
 
   /**
    * Creates a new JointValues instance.
@@ -57,11 +61,11 @@ struct JointValues {
    *
    * @throw ControlException Invalid number of elements in joint_values.
    */
-  JointValues(std::initializer_list<double> joint_values); // NOLINT (google-explicit-constructor)
+  JointValues(std::initializer_list<double>
+                  joint_values);  // NOLINT (google-explicit-constructor)
 
   /**
    * Desired joint angles in [rad].
->>>>>>> Set realtime thread priority
    */
   std::array<double, 7> q{};
 
@@ -78,7 +82,9 @@ struct JointVelocities {
    *
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
    */
-  JointVelocities(const std::array<double, 7>& joint_velocities) noexcept; // NOLINT (google-explicit-constructor)
+  JointVelocities(
+      const std::array<double, 7>&
+          joint_velocities) noexcept;  // NOLINT (google-explicit-constructor)
 
   /**
    * Creates a new JointVelocities instance.
@@ -87,7 +93,9 @@ struct JointVelocities {
    *
    * @throw ControlException Invalid number of elements in joint_velocities.
    */
-  JointVelocities(std::initializer_list<double> joint_velocities); // NOLINT (google-explicit-constructor)
+  JointVelocities(
+      std::initializer_list<double>
+          joint_velocities);  // NOLINT (google-explicit-constructor)
 
   /**
    * Desired joint velocities in [rad/s].
@@ -105,18 +113,25 @@ struct CartesianPose {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation
+   * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
+   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    */
-  CartesianPose(const std::array<double, 16>& cartesian_pose) noexcept; // NOLINT (google-explicit-constructor)
+  CartesianPose(
+      const std::array<double, 16>&
+          cartesian_pose) noexcept;  // NOLINT (google-explicit-constructor)
 
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation
+   * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
+   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    *
    * @throw ControlException Invalid number of elements in cartesian_pose.
    */
-  CartesianPose(std::initializer_list<double> cartesian_pose); // NOLINT (google-explicit-constructor)
+  CartesianPose(std::initializer_list<double>
+                    cartesian_pose);  // NOLINT (google-explicit-constructor)
 
   /**
    * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that
@@ -135,18 +150,26 @@ struct CartesianVelocities {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame
+   * {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in
+   * [rad/s], omegaz in [rad/s]}.
    */
-  CartesianVelocities(const std::array<double, 6>& cartesian_velocities); // NOLINT (google-explicit-constructor)
+  CartesianVelocities(
+      const std::array<double, 6>&
+          cartesian_velocities);  // NOLINT (google-explicit-constructor)
 
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame
+   * {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in
+   * [rad/s], omegaz in [rad/s]}.
    *
    * @throw ControlException Invalid number of elements in cartesian_pose.
    */
-  CartesianVelocities(std::initializer_list<double> cartesian_velocities); // NOLINT (google-explicit-constructor)
+  CartesianVelocities(
+      std::initializer_list<double>
+          cartesian_velocities);  // NOLINT (google-explicit-constructor)
 
   /**
    * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in
@@ -161,14 +184,19 @@ struct CartesianVelocities {
 /**
  * Used to signal the termination of a motion generation resp. control loop.
  */
-struct StopType : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
+struct StopType : Torques,
+                  JointValues,
+                  JointVelocities,
+                  CartesianPose,
+                  CartesianVelocities {
   constexpr StopType() noexcept = default;
 };
 
 /**
  * Used to signal the termination of a motion generation resp. control loop.
  */
-static constexpr StopType Stop = StopType();  // NOLINT (readability-identifier-naming)
+static constexpr StopType Stop =
+    StopType();  // NOLINT (readability-identifier-naming)
 
 enum RealtimeConfig { kEnforce, kIgnore };
 
