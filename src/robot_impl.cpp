@@ -18,7 +18,8 @@ constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
                   std::chrono::milliseconds timeout)
-    : motion_generator_running_{false} {
+    : motion_generator_running_{false},
+      controller_running_{false} {
   Poco::Timespan poco_timeout(1000l * timeout.count());
   try {
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
@@ -126,6 +127,10 @@ Robot::Impl::motionCommand() noexcept {
   return robot_command_.motion;
 }
 
+research_interface::ControllerCommand &Robot::Impl::controllerCommand() noexcept {
+  return robot_command_.control;
+}
+
 bool Robot::Impl::handleReplies() {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     size_t offset = read_buffer_.size();
@@ -155,6 +160,16 @@ bool Robot::Impl::handleReplies() {
       case research_interface::Function::kStopMotionGenerator:
         handleReply<research_interface::StopMotionGeneratorReply>(
             std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
+                      std::placeholders::_1));
+        break;
+      case research_interface::Function::kStartController:
+        handleReply<research_interface::StartControllerReply>(
+            std::bind(&Robot::Impl::handleStartControllerReply, this,
+                      std::placeholders::_1));
+        break;
+      case research_interface::Function::kStopController:
+        handleReply<research_interface::StopControllerReply>(
+            std::bind(&Robot::Impl::handleStopControllerReply, this,
                       std::placeholders::_1));
         break;
       default:
@@ -294,6 +309,38 @@ void Robot::Impl::stopMotionGenerator() {
   throw NetworkException("libfranka: connection closed by server.");
 }
 
+void Robot::Impl::startController() {
+  research_interface::StartControllerRequest request;
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  expected_replies_.insert(research_interface::Function::kStartController);
+
+  while (update()) {
+    if (robot_state_.rcuRobotState().controller_mode ==
+        research_interface::ControllerMode::kExternalController) {
+      controller_running_ = true;
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
+}
+
+void Robot::Impl::stopController() {
+  research_interface::StopControllerRequest request;
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  expected_replies_.insert(research_interface::Function::kStopController);
+
+  while (update()) {
+    if (robot_state_.rcuRobotState().controller_mode !=
+        research_interface::ControllerMode::kExternalController) {
+      controller_running_ = false;
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
+}
+
 void Robot::Impl::handleStartMotionGeneratorReply(
     const research_interface::StartMotionGeneratorReply& reply) {
   motion_generator_running_ = false;
@@ -321,16 +368,19 @@ void Robot::Impl::handleStopMotionGeneratorReply(
   }
 }
 
-research_interface::ControllerCommand &Robot::Impl::controllerCommand() noexcept {
-  return robot_command_.control;
+void Robot::Impl::handleStartControllerReply(const research_interface::StartControllerReply &reply) {
+  if (reply.status !=
+      research_interface::StartControllerReply::Status::kSuccess) {
+    throw ProtocolException(
+        "libfranka: unexpected stop motion generator reply!");
+  }
 }
-
-void Robot::Impl::startController() {
-
-}
-
-void Robot::Impl::stopController() {
-
+void Robot::Impl::handleStopControllerReply(const research_interface::StopControllerReply &reply) {
+  if (reply.status !=
+      research_interface::StopControllerReply::Status::kSuccess) {
+    throw ProtocolException(
+        "libfranka: unexpected stop motion generator reply!");
+  }
 }
 
 }  // namespace franka

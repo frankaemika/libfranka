@@ -54,12 +54,18 @@ class Robot::Impl {
       const research_interface::StartMotionGeneratorReply& reply);
   void handleStopMotionGeneratorReply(
       const research_interface::StopMotionGeneratorReply& reply);
+  void handleStartControllerReply(
+      const research_interface::StartControllerReply& reply);
+  void handleStopControllerReply(
+      const research_interface::StopControllerReply& reply);
+
 
   template <research_interface::Function F, typename T>
   T tcpReceiveObject();
 
   uint16_t ri_version_;
   bool motion_generator_running_;
+  bool controller_running_;
   research_interface::RobotCommand robot_command_;
   CompleteRobotState robot_state_;
   Poco::Net::StreamSocket tcp_socket_;
