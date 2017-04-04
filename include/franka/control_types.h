@@ -1,29 +1,38 @@
 #pragma once
 
+#include <array>
+#include <initializer_list>
+
 namespace franka {
 
-class Torques {
+struct Torques {
+  Torques(std::array<double, 7> torques);
+
+  /**
+   * @throw std::invalid_argument Wrong size of torques.
+   */
+  Torques(std::initializer_list<double> torques);
+
+  std::array<double, 7> tau_J;
+};
+
+struct JointValues {
 
 };
 
-class JointValues {
+struct JointVelocities {
 
 };
 
-class JointVelocities {
+struct CartesianPose {
 
 };
 
-class CartesianPose {
+struct CartesianVelocities {
 
 };
 
-class CartesianVelocities {
-
-};
-
-class Stop : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
-
+struct Stop : Torques, JointValues, JointVelocities, CartesianPose, CartesianVelocities {
 };
 
 }  // namespace franka

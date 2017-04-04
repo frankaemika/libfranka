@@ -45,7 +45,7 @@ class Robot {
    * reference from getRobotState() points to new data and the robot command was
    * sent.
    *
-   * @throw NetworkException if the connetion is lost, e.g. after a timeout.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw MotionGeneratorException if motion generation commands were
    * rejected.
