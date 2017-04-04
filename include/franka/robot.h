@@ -114,7 +114,7 @@ class Robot {
    *
    * @throw ControlException An error occured.
    */
-  void read(std::function<void(const RobotState&)> callback);
+  void read(std::function<bool(const RobotState&)> callback);
 
   RobotState readOnce();
 

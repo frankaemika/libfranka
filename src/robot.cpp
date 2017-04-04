@@ -56,9 +56,11 @@ void Robot::control(std::function<CartesianVelocities(const RobotState &)> motio
   loop();
 }
 
-void Robot::read(std::function<void(const RobotState &)> callback) {
+void Robot::read(std::function<bool(const RobotState &)> callback) {
   while (impl_->update()) {
-    callback(impl_->robotState());
+    if (!callback(impl_->robotState())) {
+      break;
+    }
   }
 }
 

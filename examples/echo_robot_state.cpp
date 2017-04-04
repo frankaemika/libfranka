@@ -9,8 +9,9 @@ int main(int argc, char** argv) {
 
   try {
     franka::Robot robot(argv[1]);
-    robot.read([](const franka::RobotState& robot_state) {
+    robot.read([count = 0ul](const franka::RobotState& robot_state) mutable {
       std::cout << robot_state << std::endl;
+      return count++ < 100;
     });
     std::cout << "Done." << std::endl;
   } catch (franka::Exception const& e) {
