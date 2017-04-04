@@ -51,6 +51,8 @@ add_subdirectory(lib/research-interface-common)
 ## Library
 add_library(franka SHARED
   src/complete_robot_state.cpp
+  src/control_loop.cpp
+  src/motion_generator_loop.cpp
   src/control_types.cpp
   src/motion_generator.cpp
   src/robot.cpp

@@ -6,58 +6,28 @@
 namespace franka {
 
 template <typename T>
-struct MotionGeneratorLoop : public ControlLoop {
+class MotionGeneratorLoop : public ControlLoop {
+ public:
   using MotionGeneratorCallback = std::function<T(const RobotState&)>;
 
   MotionGeneratorLoop(Robot::Impl& robot_impl,
       ControlCallback control_callback,
-      MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot_impl, control_callback),
-    motion_callback_(std::move(motion_callback))
-  {
-    if (motion_callback_) {
-      robot_impl_.startMotionGenerator(MotionTraits<T>::Type);
-    }
-  }
+      MotionGeneratorCallback motion_callback);
 
-  ~MotionGeneratorLoop() override {
-    if (motion_callback_) {
-      robot_impl_.stopMotionGenerator();
-    }
-  }
+  ~MotionGeneratorLoop() override;
 
  protected:
-  bool spinOnce() override {
-    if (motion_callback_) {
-      T motion_output = motion_callback_(robot_impl_.robotState());
-      if (typeid(motion_output) == typeid(Stop)) {
-        return false;
-      }
-      convertMotion(motion_output, &robot_impl_.motionCommand());
-    }
+  bool spinOnce() override;
 
-    return ControlLoop::spinOnce();
-  }
-
+ private:
   void convertMotion(const T& motion, research_interface::MotionGeneratorCommand* command);
 
   MotionGeneratorCallback motion_callback_;
 };
 
-template<>
-void MotionGeneratorLoop<JointValues>::convertMotion(const JointValues& motion, research_interface::MotionGeneratorCommand* command) {
-}
-
-template<>
-void MotionGeneratorLoop<JointVelocities>::convertMotion(const JointVelocities& motion, research_interface::MotionGeneratorCommand* command) {
-}
-
-template<>
-void MotionGeneratorLoop<CartesianPose>::convertMotion(const CartesianPose& motion, research_interface::MotionGeneratorCommand* command) {
-}
-
-template<>
-void MotionGeneratorLoop<CartesianVelocities>::convertMotion(const CartesianVelocities& motion, research_interface::MotionGeneratorCommand* command) {
-}
+template class MotionGeneratorLoop<JointValues>;
+template class MotionGeneratorLoop<JointVelocities>;
+template class MotionGeneratorLoop<CartesianPose>;
+template class MotionGeneratorLoop<CartesianVelocities>;
 
 }  // namespace franka

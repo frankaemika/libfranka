@@ -7,56 +7,26 @@
 
 namespace franka {
 
-struct ControlLoop {
+class ControlLoop {
+ public:
   using ControlCallback = std::function<Torques(const RobotState&)>;
 
-  ControlLoop(Robot::Impl& robot_impl,
-      ControlCallback control_callback)
-    : robot_impl_(robot_impl),
-    control_callback_(std::move(control_callback))
-  {
-    if (control_callback_) {
-      setCurrentThreadToRealtime();
-      robot_impl_.startController();
-    }
-  }
+  ControlLoop(Robot::Impl& robot_impl, ControlCallback control_callback);
+  virtual ~ControlLoop();
 
-  virtual ~ControlLoop() {
-    if (control_callback_) {
-      robot_impl_.stopController();
-    }
-  }
-
-  void operator()() {
-    while (robot_impl_.update()) {
-      if (!spinOnce()) {
-        break;
-      }
-    }
-  }
+  void operator()();
 
  protected:
-  virtual bool spinOnce() {
-    if (control_callback_) {
-      Torques control_output = control_callback_(robot_impl_.robotState());
-      if (typeid(control_output) == typeid(Stop)) {
-        return false;
-      }
-      convertTorques(control_output, &robot_impl_.controllerCommand());
-    }
+  virtual bool spinOnce();
 
-    return true;
-  }
+ private:
+  void convertTorques(const Torques& torques, research_interface::ControllerCommand* command);
+  void setCurrentThreadToRealtime();
 
-  void convertTorques(const Torques& torques, research_interface::ControllerCommand* command) {
-    // TODO
-  }
-
-  void setCurrentThreadToRealtime() {
-    // TODO
-  }
-
+ protected:
   Robot::Impl& robot_impl_;
+
+ private:
   ControlCallback control_callback_;
 };
 
