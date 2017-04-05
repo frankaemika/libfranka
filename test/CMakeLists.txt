@@ -17,7 +17,6 @@ add_executable(run_all_tests
   robot_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
-  motion_generator_tests.cpp
   mock_server.cpp
   helpers.cpp
 )
