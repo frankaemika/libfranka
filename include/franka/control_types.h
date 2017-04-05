@@ -4,16 +4,48 @@
 #include <initializer_list>
 
 /**
- * @file robot_state.h
- * Contains types for motion generation and torque control.
+ * @file control_types.h
+ * Contains helper types for returning values for motion generation
+ * and torque control.
  */
 
 namespace franka {
 
 /**
+ * Used to decide whether to enforce realtime mode for a control loop thread.
+ *
+ * @see franka::Robot::Robot
+ */
+enum RealtimeConfig { kEnforce, kIgnore };
+
+/**
+ * Helper type for control resp motion generation loops.
+ *
+ * Used to determine whether to terminate a loop after the control callback
+ * has returned.
+ */
+class IsStop {
+ public:
+  /**
+   * Determines whether to stop the control resp motion generation loop.
+   *
+   * @return True if the control loop should be stopped.
+   */
+  bool stop() const noexcept;
+ protected:
+  /**
+   * Creates a new instance with stop() = is_stop;
+   */
+  IsStop(bool is_stop = false) noexcept;
+
+ private:
+  bool is_stop_;
+};
+
+/**
  * Stores values for torque control.
  */
-class Torques {
+class Torques : public IsStop {
  public:
   /**
    * Creates a new Torques instance.
@@ -37,13 +69,13 @@ class Torques {
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  constexpr Torques() noexcept = default;
+  Torques() noexcept;
 };
 
 /**
  * Stores values for joint position motion generation.
  */
-class JointValues {
+class JointValues : public IsStop {
  public:
   /**
    * Creates a new JointValues instance.
@@ -67,13 +99,13 @@ class JointValues {
   std::array<double, 7> q{};
 
  protected:
-  constexpr JointValues() noexcept = default;
+  JointValues() noexcept;
 };
 
 /**
  * Stores values for joint velocity motion generation.
  */
-class JointVelocities {
+class JointVelocities : public IsStop {
  public:
   /**
    * Creates a new JointVelocities instance.
@@ -97,13 +129,13 @@ class JointVelocities {
   std::array<double, 7> dq{};
 
  protected:
-  constexpr JointVelocities() noexcept = default;
+  JointVelocities() noexcept;
 };
 
 /**
  * Stores values for Cartesian pose motion generation.
  */
-class CartesianPose {
+class CartesianPose : public IsStop {
  public:
   /**
    * Creates a new CartesianPose instance.
@@ -136,7 +168,7 @@ class CartesianPose {
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  constexpr CartesianPose() noexcept = default;
+  CartesianPose() noexcept;
 
  private:
   void checkHomogeneousTransformation();
@@ -157,7 +189,7 @@ class CartesianPose {
 /**
  * Stores values for Cartesian velocity motion generation.
  */
-class CartesianVelocities {
+class CartesianVelocities : public IsStop {
  public:
   /**
    * Creates a new CartesianVelocities instance.
@@ -186,29 +218,25 @@ class CartesianVelocities {
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
 
  protected:
-  constexpr CartesianVelocities() noexcept = default;
+  CartesianVelocities() noexcept;
 };
 
 /**
- * Used to signal the termination of a motion generation resp. control loop.
+ * @see franka::Stop
  */
-struct StopType : Torques,
-                  JointValues,
-                  JointVelocities,
-                  CartesianPose,
-                  CartesianVelocities {
-  constexpr StopType() noexcept = default;
+struct StopT final : Torques,
+                     JointValues,
+                     JointVelocities,
+                     CartesianVelocities,
+                     CartesianPose {
+  StopT() noexcept = default;
 };
 
 /**
- * Used to signal the termination of a motion generation resp. control loop.
+ * Used to signal the termination of a motion generation resp control loop.
+ *
+ * @see franka::Robot::control
  */
-static constexpr StopType Stop =  // NOLINT (readability-identifier-naming)
-    StopType();
-
-/**
- * Used to decide the realtime behavior of a control loop thread.
- */
-enum RealtimeConfig { kEnforce, kIgnore };
+static const StopT Stop{};  // NOLINT (readability-identifier-naming)
 
 }  // namespace franka

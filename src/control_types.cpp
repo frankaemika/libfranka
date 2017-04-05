@@ -5,6 +5,15 @@
 
 namespace franka {
 
+IsStop::IsStop(bool is_stop) noexcept : is_stop_(is_stop) {
+}
+
+bool IsStop::stop() const noexcept {
+  return is_stop_;
+}
+
+Torques::Torques() noexcept : IsStop(true) {}
+
 Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                      torques) noexcept
     : tau_J(torques) {}
@@ -15,6 +24,8 @@ Torques::Torques(std::initializer_list<double> torques) {
   }
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
+
+JointValues::JointValues() noexcept : IsStop(true) {}
 
 JointValues::JointValues(
     const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
@@ -28,6 +39,8 @@ JointValues::JointValues(std::initializer_list<double> joint_values) {
   std::copy(joint_values.begin(), joint_values.end(), q.begin());
 }
 
+JointVelocities::JointVelocities() noexcept : IsStop(true) {}
+
 JointVelocities::JointVelocities(
     const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
         joint_velocities) noexcept
@@ -40,6 +53,8 @@ JointVelocities::JointVelocities(
   }
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
 }
+
+CartesianPose::CartesianPose() noexcept : IsStop(true) {}
 
 CartesianPose::CartesianPose(
     const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
@@ -89,6 +104,8 @@ bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& tr
   }
   return true;
 }
+
+CartesianVelocities::CartesianVelocities() noexcept : IsStop(true) {}
 
 CartesianVelocities::CartesianVelocities(
     const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)

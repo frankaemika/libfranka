@@ -25,7 +25,7 @@ template <typename T>
 bool MotionGeneratorLoop<T>::spinOnce() {
   if (motion_callback_) {
     T motion_output = motion_callback_(robot_.robotState());
-    if (&motion_output == &Stop) {
+    if (motion_output.stop()) {
       return false;
     }
     convertMotion(motion_output, &robot_.motionGeneratorCommand());
