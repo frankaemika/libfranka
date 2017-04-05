@@ -9,7 +9,10 @@
 #include <pthread.h>
 #endif
 
-using namespace std::string_literals;  // NOLINT
+// `using std::string_literals::operator""s` produces a GCC warning that cannot
+// be disabled, so we have to use `using namespace ...`.
+// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
+using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
@@ -86,8 +89,8 @@ void ControlLoop::setCurrentThreadToRealtime() {
 #else
   int policy = SCHED_FIFO;
   struct sched_param thread_param;
-  constexpr int thread_priority = 20;
-  thread_param.sched_priority = thread_priority;
+  constexpr int kThreadPriority = 20;
+  thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
     if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
       throw RealTimeException(

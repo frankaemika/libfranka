@@ -24,7 +24,7 @@ struct RobotState {
    * Motion generator's start pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE{};  // NOLINT
+  std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Elbow pose.
@@ -37,13 +37,13 @@ struct RobotState {
    * \f$\tau_{J}\f$
    * Measured joint torque. Unit: \f$[Nm]\f$
    */
-  std::array<double, 7> tau_J{};  // NOLINT
+  std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$\dot{\tau_{J}}\f$
    * Derivative of measured joint torque. Unit: \f$[\frac{Nm}{s}]\f$
    */
-  std::array<double, 7> dtau_J{};  // NOLINT
+  std::array<double, 7> dtau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$q\f$
@@ -99,14 +99,16 @@ struct RobotState {
    * External wrench(force, torque) acting on end-effector relative to the base
    * frame scaled by a factor. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> O_F_ext_hat_K{};  // NOLINT
+  std::array<double, 6>
+      O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,ext}\f$
    * External wrench(force, torque) acting on end-effector relative to
    * end-effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
    */
-  std::array<double, 6> K_F_ext_hat_K{};  // NOLINT
+  std::array<double, 6>
+      K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 };
 
 /**

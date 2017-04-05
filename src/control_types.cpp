@@ -3,8 +3,8 @@
 
 namespace franka {
 
-Torques::Torques(const std::array<double, 7>&
-                     torques) noexcept  // NOLINT (modernize-pass-by-value)
+Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+                     torques) noexcept
     : tau_J(torques) {}
 
 Torques::Torques(std::initializer_list<double> torques) {
@@ -15,8 +15,8 @@ Torques::Torques(std::initializer_list<double> torques) {
 }
 
 JointValues::JointValues(
-    const std::array<double, 7>&
-        joint_values) noexcept  // NOLINT (modernize-pass-by-value)
+    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+        joint_values) noexcept
     : q(joint_values) {}
 
 JointValues::JointValues(std::initializer_list<double> joint_values) {
@@ -27,8 +27,8 @@ JointValues::JointValues(std::initializer_list<double> joint_values) {
 }
 
 JointVelocities::JointVelocities(
-    const std::array<double, 7>&
-        joint_velocities) noexcept  // NOLINT (modernize-pass-by-value)
+    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+        joint_velocities) noexcept
     : dq(joint_velocities) {}
 
 JointVelocities::JointVelocities(
@@ -40,8 +40,8 @@ JointVelocities::JointVelocities(
 }
 
 CartesianPose::CartesianPose(
-    const std::array<double, 16>&
-        cartesian_pose) noexcept  // NOLINT (modernize-pass-by-value)
+    const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
+        cartesian_pose) noexcept
     : O_T_EE(cartesian_pose) {}
 
 CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose) {
@@ -52,8 +52,8 @@ CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose) {
 }
 
 CartesianVelocities::CartesianVelocities(
-    const std::array<double, 6>&
-        cartesian_velocities)  // NOLINT (modernize-pass-by-value)
+    const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
+        cartesian_velocities)
     : O_dP_EE(cartesian_velocities) {}
 
 CartesianVelocities::CartesianVelocities(
