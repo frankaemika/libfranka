@@ -36,11 +36,11 @@ CheckOptions:
     value:  camelBack
 
 # Constants
-  - key:    readability-identifier-naming.GlobalConstantPrefix
+  - key:    readability-identifier-naming.ConstantPrefix
     value:  k
-  - key:    readability-identifier-naming.GlobalConstantCase
+  - key:    readability-identifier-naming.ConstantCase
     value:  CamelCase
-  - key:    readability-identifier-naming.LocalConstantPrefix
-    value:  k
-  - key:    readability-identifier-naming.LocalConstantCase
-    value:  CamelCase
+  - key:    readability-identifier-naming.ConstantMemberPrefix
+    value:  ''
+  - key:    readability-identifier-naming.ConstantMemberCase
+    value:  lower_case
