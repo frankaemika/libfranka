@@ -129,7 +129,7 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
 }
 
 research_interface::MotionGeneratorCommand&
-Robot::Impl::motionCommand() noexcept {
+Robot::Impl::motionGeneratorCommand() noexcept {
   return robot_command_.motion;
 }
 

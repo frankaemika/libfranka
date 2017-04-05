@@ -10,7 +10,7 @@ class MotionGeneratorLoop : public ControlLoop {
  public:
   using MotionGeneratorCallback = std::function<T(const RobotState&)>;
 
-  MotionGeneratorLoop(Robot::Impl& robot_impl,
+  MotionGeneratorLoop(RobotControl& robot,
                       ControlCallback control_callback,
                       MotionGeneratorCallback motion_callback);
 

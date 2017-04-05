@@ -126,7 +126,7 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   Robot::Impl robot("127.0.0.1");
   robot.startMotionGenerator(MotionGeneratorType::kCartesianPosition);
 
-  robot.motionCommand() = sent_command.motion;
+  robot.motionGeneratorCommand() = sent_command.motion;
 
   server
     .onSendRobotState([](research_interface::RobotState& robot_state) {

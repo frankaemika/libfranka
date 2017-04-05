@@ -11,10 +11,11 @@
 #include <research_interface/types.h>
 
 #include "complete_robot_state.h"
+#include "robot_control.h"
 
 namespace franka {
 
-class Robot::Impl {
+class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
   static constexpr double kCommandTimeStep{0.001};
@@ -26,22 +27,22 @@ class Robot::Impl {
   ~Impl() noexcept;
 
   void setRobotState(const research_interface::RobotState& robot_state);
-  bool update();
+  bool update() override;
 
-  research_interface::ControllerCommand& controllerCommand() noexcept;
-  research_interface::MotionGeneratorCommand& motionCommand() noexcept;
-  const RobotState& robotState() const noexcept;
+  research_interface::ControllerCommand& controllerCommand() noexcept override;
+  research_interface::MotionGeneratorCommand& motionGeneratorCommand() noexcept override;
+  const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
-  RealtimeConfig realtimeConfig() const noexcept;
+  RealtimeConfig realtimeConfig() const noexcept override;
 
-  void startController();
-  void stopController();
+  void startController() override;
+  void stopController() override;
 
   void startMotionGenerator(
       research_interface::StartMotionGeneratorRequest::Type
-          motion_generator_type);
-  void stopMotionGenerator();
+          motion_generator_type) override;
+  void stopMotionGenerator() override;
 
   template <research_interface::StartMotionGeneratorRequest::Type, typename T>
   void control(

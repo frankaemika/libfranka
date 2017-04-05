@@ -1,13 +1,14 @@
 #include "control_loop.h"
 
 #include <cstring>
-#include <iostream>
 
 #ifdef _WIN32
 #include <Windows.h>
 #else
 #include <pthread.h>
 #endif
+
+#include <franka/exception.h>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
@@ -16,23 +17,23 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-ControlLoop::ControlLoop(Robot::Impl& robot_impl,
+ControlLoop::ControlLoop(RobotControl& robot,
                          ControlCallback control_callback)
-    : robot_impl_(robot_impl), control_callback_(std::move(control_callback)) {
+    : robot_(robot), control_callback_(std::move(control_callback)) {
   if (control_callback_) {
     setCurrentThreadToRealtime();
-    robot_impl_.startController();
+    robot_.startController();
   }
 }
 
 ControlLoop::~ControlLoop() {
   if (control_callback_) {
-    robot_impl_.stopController();
+    robot_.stopController();
   }
 }
 
 void ControlLoop::operator()() {
-  while (robot_impl_.update()) {
+  while (robot_.update()) {
     if (!spinOnce()) {
       break;
     }
@@ -41,11 +42,11 @@ void ControlLoop::operator()() {
 
 bool ControlLoop::spinOnce() {
   if (control_callback_) {
-    Torques control_output = control_callback_(robot_impl_.robotState());
+    Torques control_output = control_callback_(robot_.robotState());
     if (&control_output == &Stop) {
       return false;
     }
-    convertTorques(control_output, &robot_impl_.controllerCommand());
+    convertTorques(control_output, &robot_.controllerCommand());
   }
 
   return true;
@@ -92,7 +93,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
   constexpr int kThreadPriority = 20;
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
-    if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
+    if (robot_.realtimeConfig() == RealtimeConfig::kEnforce) {
       throw RealTimeException(
           "libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }

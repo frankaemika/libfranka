@@ -3,7 +3,9 @@
 #include <functional>
 
 #include <franka/robot_state.h>
-#include "robot_impl.h"
+#include <franka/control_types.h>
+#include <research_interface/rbk_types.h>
+#include "robot_control.h"
 
 namespace franka {
 
@@ -11,7 +13,7 @@ class ControlLoop {
  public:
   using ControlCallback = std::function<Torques(const RobotState&)>;
 
-  ControlLoop(Robot::Impl& robot_impl, ControlCallback control_callback);
+  ControlLoop(RobotControl& robot, ControlCallback control_callback);
   virtual ~ControlLoop();
 
   void operator()();
@@ -25,7 +27,7 @@ class ControlLoop {
   void setCurrentThreadToRealtime();
 
  protected:
-  Robot::Impl& robot_impl_;
+  RobotControl& robot_;
 
  private:
   ControlCallback control_callback_;
