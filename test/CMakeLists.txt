@@ -3,7 +3,7 @@ set(GTEST_SOURCE_DIR ${THIRDPARTY_SOURCES_DIR}/googletest)
 set(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/googletest)
 set(GTEST_VERSION 1.8.0)
 set(GTEST_ARCHIVE_HASH 58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8)
-set(GTEST_LIBRARIES gtest gtest_main)
+set(GTEST_LIBRARIES gtest gmock gmock_main)
 
 include(SetupGoogleTest)
 
@@ -17,6 +17,7 @@ add_executable(run_all_tests
   robot_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
+  control_loop_tests.cpp
   mock_server.cpp
   helpers.cpp
 )
