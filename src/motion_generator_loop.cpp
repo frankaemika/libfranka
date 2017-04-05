@@ -1,7 +1,5 @@
 #include "motion_generator_loop.h"
 
-#include <cmath>
-
 namespace franka {
 
 template <typename T>
@@ -21,34 +19,6 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
   if (motion_callback_) {
     robot_impl_.stopMotionGenerator();
   }
-}
-
-template <>
-bool MotionGeneratorLoop<CartesianPose>::checkHomogeneousTransformation(
-    std::array<double, 16> transform) noexcept {
-  constexpr double kOrthonormalThreshold = 1e-6;
-
-  if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 ||
-      transform[15] != 1.0) {
-    return false;
-  }
-  for (size_t j = 0; j < 3; ++j) {  // i..column
-    if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) +
-                           std::pow(transform[j * 4 + 1], 2) +
-                           std::pow(transform[j * 4 + 2], 2)) -
-                 1.0) > kOrthonormalThreshold) {
-      return false;
-    }
-  }
-  for (size_t i = 0; i < 3; ++i) {  // j..row
-    if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) +
-                           std::pow(transform[1 * 4 + i], 2) +
-                           std::pow(transform[2 * 4 + i], 2)) -
-                 1.0) > kOrthonormalThreshold) {
-      return false;
-    }
-  }
-  return true;
 }
 
 template <typename T>
@@ -82,11 +52,6 @@ template <>
 void MotionGeneratorLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
     research_interface::MotionGeneratorCommand* command) {
-  if (!checkHomogeneousTransformation(motion.O_T_EE)) {
-    throw ControlException(
-        "libfranka: Attempt to set invalid transformation in motion"
-        "generator. Has to be column major!");
-  }
   command->O_T_EE_d = motion.O_T_EE;
 }
 

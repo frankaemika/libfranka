@@ -21,12 +21,12 @@ namespace franka {
 class Robot {
  public:
   /**
-   * Version of the server running on FRANKA.
+   * Version of the server running on FRANKA CONTROL.
    */
   using ServerVersion = uint16_t;
 
   /**
-   * Tries to establish a connection with the FRANKA robot.
+   * Establishes a connection with FRANKA CONTROL.
    *
    * @throw NetworkException if the connection is unsuccessful.
    * @throw IncompatibleVersionException if this library is not supported by
@@ -34,7 +34,7 @@ class Robot {
    * @throw ProtocolException if data received from the host is invalid
    *
    * @param[in] franka_address IP/hostname of FRANKA CONTROL
-   * @param[in] realtime_config is set to Enforce, an exception will be thrown
+   * @param[in] realtime_config if set to Enforce, an exception will be thrown
    * if realtime priority cannot be set when required. Setting realtime_config
    * to Ignore disables this behavior.
    */
@@ -55,8 +55,10 @@ class Robot {
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException Realtime priority can not be set for the current
-   * thread.
+   * @throw RealtimeException if realtime priority can not be set for the
+   * current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<Torques(const RobotState&)> control_callback);
 
@@ -70,12 +72,14 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
    * @throw ControlException if an error related to torque control resp. motion
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the
+   * current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(
       std::function<JointValues(const RobotState&)> motion_generator_callback,
@@ -92,12 +96,14 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
    * @throw ControlException if an error related to torque control resp. motion
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the
+   * current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<JointVelocities(const RobotState&)>
                    motion_generator_callback,
@@ -114,12 +120,14 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
    * @throw ControlException if an error related to torque control resp. motion
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the
+   * current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(
       std::function<CartesianPose(const RobotState&)> motion_generator_callback,
@@ -136,12 +144,14 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
    * @throw ControlException if an error related to torque control resp. motion
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the
+   * current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<CartesianVelocities(const RobotState&)>
                    motion_generator_callback,

@@ -13,7 +13,8 @@ namespace franka {
 /**
  * Stores values for torque control.
  */
-struct Torques {
+class Torques {
+ public:
   /**
    * Creates a new Torques instance.
    *
@@ -42,7 +43,8 @@ struct Torques {
 /**
  * Stores values for joint position motion generation.
  */
-struct JointValues {
+class JointValues {
+ public:
   /**
    * Creates a new JointValues instance.
    *
@@ -71,7 +73,8 @@ struct JointValues {
 /**
  * Stores values for joint velocity motion generation.
  */
-struct JointVelocities {
+class JointVelocities {
+ public:
   /**
    * Creates a new JointVelocities instance.
    *
@@ -100,15 +103,19 @@ struct JointVelocities {
 /**
  * Stores values for Cartesian pose motion generation.
  */
-struct CartesianPose {
+class CartesianPose {
+ public:
   /**
    * Creates a new CartesianPose instance.
+   *
+   * @throw ControlException if cartesian_pose is not a valid vectorized
+   *                         homogeneous transformation matrix (column-major).
    *
    * @param[in] cartesian_pose Desired vectorized homogeneous transformation
    * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
    * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    */
-  CartesianPose(const std::array<double, 16>& cartesian_pose) noexcept;
+  CartesianPose(const std::array<double, 16>& cartesian_pose);
 
   /**
    * Creates a new CartesianPose instance.
@@ -117,7 +124,8 @@ struct CartesianPose {
    * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
    * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    *
-   * @throw ControlException Invalid number of elements in cartesian_pose.
+   * @throw ControlException if cartesian_pose is not a valid vectorized
+   *                         homogeneous transformation matrix (column-major).
    */
   CartesianPose(std::initializer_list<double> cartesian_pose);
 
@@ -129,12 +137,28 @@ struct CartesianPose {
 
  protected:
   constexpr CartesianPose() noexcept = default;
+
+ private:
+  void checkHomogeneousTransformation();
+
+  /**
+   * Checks a a homogeneous transformation for validity.
+   *
+   * @param[in] transform Homogeneous transformation to be checked,
+   * passed as column major array.
+   *
+   * @return True if transformation has ortho-normal rotation matrix,
+   * the last row is [0 0 0 1] and the array defines a column major matrix.
+   */
+  static bool isHomogeneousTransformation(
+      const std::array<double, 16>& transform) noexcept;
 };
 
 /**
  * Stores values for Cartesian velocity motion generation.
  */
-struct CartesianVelocities {
+class CartesianVelocities {
+ public:
   /**
    * Creates a new CartesianVelocities instance.
    *
@@ -182,6 +206,9 @@ struct StopType : Torques,
 static constexpr StopType Stop =  // NOLINT (readability-identifier-naming)
     StopType();
 
+/**
+ * Used to decide the realtime behavior of a control loop thread.
+ */
 enum RealtimeConfig { kEnforce, kIgnore };
 
 }  // namespace franka

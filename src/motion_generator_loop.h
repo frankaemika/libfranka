@@ -16,18 +16,6 @@ class MotionGeneratorLoop : public ControlLoop {
 
   ~MotionGeneratorLoop() override;
 
-  /**
-   * Checks a cartesian pose command (a homogeneous transformation) for
-   * validity.
-   *
-   * @param[in] transform Homogeneous transformation to be checked,
-   * passed as column major array
-   * @return True if transformation has ortho-normal rotation matrix,
-   * the last row is [0 0 0 1] and the array defines a column major matrix
-   */
-  static bool checkHomogeneousTransformation(
-      std::array<double, 16> transform) noexcept;
-
  protected:
   bool spinOnce() override;
 
