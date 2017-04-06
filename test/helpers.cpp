@@ -286,3 +286,6 @@ void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGenerat
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
 
+void testControllerCommandsAreEqual(const research_interface::ControllerCommand& expected, const research_interface::ControllerCommand& actual) {
+  EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
+}

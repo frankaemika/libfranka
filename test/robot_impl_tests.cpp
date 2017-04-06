@@ -77,7 +77,7 @@ TEST(Robot, StopsIfControlConnectionClosed) {
 TEST(Robot, CanStartMotionGenerator) {
   MockServer server;
   server
-    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kJointVelocity, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -90,10 +90,25 @@ TEST(Robot, CanStartMotionGenerator) {
   EXPECT_NO_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity));
 }
 
+TEST(Robot, CanStartController) {
+  MockServer server;
+  server
+    .onStartController([](const research_interface::StartControllerRequest&) {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  EXPECT_NO_THROW(robot.startController());
+}
+
 TEST(Robot, CanNotStartMultipleMotionGenerators) {
   MockServer server;
   server
-    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kJointPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -107,6 +122,22 @@ TEST(Robot, CanNotStartMultipleMotionGenerators) {
   EXPECT_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity), ControlException);
 }
 
+TEST(Robot, CanNotStartMultipleControllers) {
+  MockServer server;
+  server
+    .onStartController([](const research_interface::StartControllerRequest&) {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startController();
+  EXPECT_THROW(robot.startController(), ControlException);
+}
+
 TEST(Robot, CanSendMotionGeneratorCommand) {
   research_interface::RobotCommand sent_command;
   randomRobotCommand(sent_command);
@@ -114,7 +145,7 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
 
   MockServer server;
   server
-    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -141,10 +172,42 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   EXPECT_TRUE(robot.motionGeneratorRunning());
 }
 
+TEST(Robot, CanSendControllerCommand) {
+  research_interface::RobotCommand sent_command;
+  randomRobotCommand(sent_command);
+
+  MockServer server;
+  server
+    .onStartController([](const research_interface::StartControllerRequest&) {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startController();
+
+  robot.controllerCommand() = sent_command.control;
+
+  server
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .onReceiveRobotCommand([&](const research_interface::RobotCommand& command) {
+      testControllerCommandsAreEqual(sent_command.control, command.control);
+    })
+    .spinOnce();
+
+  EXPECT_TRUE(robot.update());
+  EXPECT_TRUE(robot.controllerRunning());
+}
+
 TEST(Robot, CanReceiveMotionGenerationError) {
   MockServer server;
   server
-    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -176,10 +239,44 @@ TEST(Robot, CanReceiveMotionGenerationError) {
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
+TEST(Robot, CanReceiveControlError) {
+  MockServer server;
+  server
+    .onStartController([](const research_interface::StartControllerRequest&) {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startController();
+
+  server
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
+    .spinOnce();
+
+  EXPECT_TRUE(robot.update());
+
+  server
+    .sendReply<research_interface::StartControllerReply>([]() {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kRejected);
+    })
+    .spinOnce(/* block until reply has been sent */ true);
+
+  EXPECT_THROW(robot.update(), ControlException);
+  EXPECT_FALSE(robot.controllerRunning());
+}
+
 TEST(Robot, CanStopMotionGenerator) {
   MockServer server;
   server
-    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest request) {
+    .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianVelocity, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -202,7 +299,7 @@ TEST(Robot, CanStopMotionGenerator) {
   EXPECT_TRUE(robot.update());
 
   server
-    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest) {
+    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest&) {
       return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
     })
     .sendEmptyRobotState()
@@ -218,4 +315,47 @@ TEST(Robot, CanStopMotionGenerator) {
 
   EXPECT_TRUE(robot.update());
   EXPECT_FALSE(robot.motionGeneratorRunning());
+}
+
+TEST(Robot, CanStopController) {
+  MockServer server;
+  server
+    .onStartController([](const research_interface::StartControllerRequest&) {
+      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
+    })
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .spinOnce();
+
+  Robot::Impl robot("127.0.0.1");
+  robot.startController();
+
+  server
+    .onSendRobotState([](research_interface::RobotState& robot_state) {
+      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+    })
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
+    .spinOnce();
+
+  EXPECT_TRUE(robot.update());
+
+  server
+    .onStopController([](const research_interface::StopControllerRequest&) {
+      return research_interface::StopControllerReply(research_interface::StopControllerReply::Status::kSuccess);
+    })
+    .sendEmptyRobotState()
+    .spinOnce();
+
+  robot.stopController();
+
+  server
+    .sendEmptyRobotState()
+    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
+    })
+    .spinOnce();
+
+  EXPECT_TRUE(robot.update());
+  EXPECT_FALSE(robot.controllerRunning());
 }

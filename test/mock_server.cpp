@@ -50,8 +50,8 @@ MockServer& MockServer::onStopMotionGenerator(StopMotionGeneratorCallbackT on_st
   return waitForCommand<research_interface::StopMotionGeneratorRequest, research_interface::StopMotionGeneratorReply>(on_stop_motion_generator);
 }
 
-MockServer& MockServer::onStartController(StartControllerCallbackT on_start_motion_generator) {
-  return waitForCommand<research_interface::StartControllerRequest, research_interface::StartControllerReply>(on_start_motion_generator);
+MockServer& MockServer::onStartController(StartControllerCallbackT on_start_controller) {
+  return waitForCommand<research_interface::StartControllerRequest, research_interface::StartControllerReply>(on_start_controller);
 }
 
 MockServer& MockServer::onStopController(StopControllerCallbackT on_stop_motion_generator) {
