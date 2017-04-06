@@ -79,9 +79,13 @@ TEST(ControlLoop, SpinOnceWithCallback) {
 TEST(ControlLoop, SpinOnceWithStoppingCallback) {
   NiceMock<MockRobotControl> robot;
   RobotState robot_state;
-  ON_CALL(robot, robotStateMock()).WillByDefault(ReturnRef(robot_state));
+  ON_CALL(robot, robotStateMock())
+    .WillByDefault(ReturnRef(robot_state));
+  ON_CALL(robot, update())
+    .WillByDefault(Return(true));
 
   ControlLoop loop(robot, [](const RobotState&) { return Stop; });
 
-  EXPECT_FALSE(loop.spinOnce());
+  ASSERT_FALSE(loop.spinOnce());
+  loop();
 }

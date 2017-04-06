@@ -231,7 +231,8 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
               &control_callback,
               std::placeholders::_1),
     [](const RobotState&) { return Stop; });
-  EXPECT_FALSE(loop.spinOnce());
+  ASSERT_FALSE(loop.spinOnce());
+  loop();
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
@@ -240,6 +241,8 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
   MotionGeneratorCommand motion_command;
   ON_CALL(robot, motionGeneratorCommandMock())
     .WillByDefault(ReturnRef(motion_command));
+  ON_CALL(robot, update())
+    .WillByDefault(Return(true));
 
   RobotState robot_state;
   ON_CALL(robot, robotStateMock())
@@ -254,5 +257,6 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
     std::bind(&decltype(motion_callback)::invoke,
               &motion_callback,
               std::placeholders::_1));
-  EXPECT_FALSE(loop.spinOnce());
+  ASSERT_FALSE(loop.spinOnce());
+  loop();
 }

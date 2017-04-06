@@ -52,6 +52,7 @@ if(BUILD_COVERAGE)
     DEPENDS run_all_tests
     COMMENT "Generating code coverage"
   )
+  return()
 endif()
 
 ## Sanitizers
