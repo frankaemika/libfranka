@@ -35,6 +35,7 @@ class Robot::Impl : public RobotControl {
   const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
+  bool controllerRunning() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
   void startController() override;

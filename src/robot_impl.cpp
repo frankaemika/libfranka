@@ -96,7 +96,7 @@ bool Robot::Impl::update() {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
 
-  if (motion_generator_running_) {
+  if (motion_generator_running_ || controller_running_) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
 
     try {
@@ -122,6 +122,10 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
 
 bool Robot::Impl::motionGeneratorRunning() const noexcept {
   return motion_generator_running_;
+}
+
+bool Robot::Impl::controllerRunning() const noexcept {
+  return controller_running_;
 }
 
 RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
@@ -253,10 +257,6 @@ void Robot::Impl::startMotionGenerator(
   switch (motion_generator_reply.status) {
     case research_interface::StartMotionGeneratorReply::Status::kSuccess:
       break;
-    case research_interface::StartMotionGeneratorReply::Status::kNotConnected:
-      throw ProtocolException(
-          "libfranka: attempted to start motion generator, but not connected!");
-    case research_interface::StartMotionGeneratorReply::Status::kInvalidType:
     default:
       throw ProtocolException("libfranka: unexpected motion generator reply!");
   }
@@ -317,8 +317,24 @@ void Robot::Impl::stopMotionGenerator() {
 }
 
 void Robot::Impl::startController() {
+  if (controller_running_) {
+    throw ControlException(
+        "libfranka: attempted to start multiple controllers!");
+  }
+
   research_interface::StartControllerRequest request;
   tcp_socket_.sendBytes(&request, sizeof(request));
+
+  research_interface::StartControllerReply controller_reply =
+      tcpReceiveObject<research_interface::Function::kStartController,
+                       research_interface::StartControllerReply>();
+
+  switch (controller_reply.status) {
+    case research_interface::StartControllerReply::Status::kSuccess:
+      break;
+    default:
+      throw ProtocolException("libfranka: unexpected controller reply!");
+  }
 
   expected_replies_.insert(research_interface::Function::kStartController);
 
@@ -333,6 +349,10 @@ void Robot::Impl::startController() {
 }
 
 void Robot::Impl::stopController() {
+  if (!controller_running_) {
+    return;
+  }
+
   research_interface::StopControllerRequest request;
   tcp_socket_.sendBytes(&request, sizeof(request));
 
@@ -375,10 +395,14 @@ void Robot::Impl::handleStopMotionGeneratorReply(
 
 void Robot::Impl::handleStartControllerReply(
     const research_interface::StartControllerReply& reply) {
-  if (reply.status !=
-      research_interface::StartControllerReply::Status::kSuccess) {
-    throw ProtocolException(
-        "libfranka: unexpected stop motion generator reply!");
+  controller_running_ = false;
+  switch (reply.status) {
+    case research_interface::StartControllerReply::Status::kFinished:
+      break;
+    case research_interface::StartControllerReply::Status::kRejected:
+      throw ControlException("libfranka: control command rejected!");
+    default:
+      throw ProtocolException("libfranka: unexpected start controller reply!");
   }
 }
 void Robot::Impl::handleStopControllerReply(
