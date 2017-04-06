@@ -5,8 +5,7 @@
 
 namespace franka {
 
-IsStop::IsStop(bool is_stop) noexcept : is_stop_(is_stop) {
-}
+IsStop::IsStop(bool is_stop) noexcept : is_stop_(is_stop) {}
 
 bool IsStop::stop() const noexcept {
   return is_stop_;
@@ -14,9 +13,9 @@ bool IsStop::stop() const noexcept {
 
 Torques::Torques() noexcept : IsStop(true) {}
 
-Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                     torques) noexcept
-    : tau_J(torques) {}
+Torques::Torques(
+    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+    torques) noexcept : tau_J(torques) {}
 
 Torques::Torques(std::initializer_list<double> torques) {
   if (torques.size() != tau_J.size()) {
@@ -29,8 +28,7 @@ JointValues::JointValues() noexcept : IsStop(true) {}
 
 JointValues::JointValues(
     const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-        joint_values) noexcept
-    : q(joint_values) {}
+    joint_values) noexcept : q(joint_values) {}
 
 JointValues::JointValues(std::initializer_list<double> joint_values) {
   if (joint_values.size() != q.size()) {
@@ -43,8 +41,7 @@ JointVelocities::JointVelocities() noexcept : IsStop(true) {}
 
 JointVelocities::JointVelocities(
     const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-        joint_velocities) noexcept
-    : dq(joint_velocities) {}
+    joint_velocities) noexcept : dq(joint_velocities) {}
 
 JointVelocities::JointVelocities(
     std::initializer_list<double> joint_velocities) {
@@ -58,7 +55,7 @@ CartesianPose::CartesianPose() noexcept : IsStop(true) {}
 
 CartesianPose::CartesianPose(
     const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
-        cartesian_pose)
+    cartesian_pose)
     : O_T_EE(cartesian_pose) {
   checkHomogeneousTransformation();
 }
@@ -79,7 +76,8 @@ void CartesianPose::checkHomogeneousTransformation() {
   }
 }
 
-bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept {
+bool CartesianPose::isHomogeneousTransformation(
+    const std::array<double, 16>& transform) noexcept {
   constexpr double kOrthonormalThreshold = 1e-6;
 
   if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 ||
@@ -109,7 +107,7 @@ CartesianVelocities::CartesianVelocities() noexcept : IsStop(true) {}
 
 CartesianVelocities::CartesianVelocities(
     const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
-        cartesian_velocities)
+    cartesian_velocities)
     : O_dP_EE(cartesian_velocities) {}
 
 CartesianVelocities::CartesianVelocities(

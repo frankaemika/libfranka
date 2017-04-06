@@ -2,8 +2,8 @@
 
 #include <functional>
 
-#include <franka/robot_state.h>
 #include <franka/control_types.h>
+#include <franka/robot_state.h>
 #include <research_interface/rbk_types.h>
 #include "robot_control.h"
 

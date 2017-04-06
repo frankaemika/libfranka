@@ -30,7 +30,8 @@ class Robot::Impl : public RobotControl {
   bool update() override;
 
   research_interface::ControllerCommand& controllerCommand() noexcept override;
-  research_interface::MotionGeneratorCommand& motionGeneratorCommand() noexcept override;
+  research_interface::MotionGeneratorCommand&
+  motionGeneratorCommand() noexcept override;
   const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;

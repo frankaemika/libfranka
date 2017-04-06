@@ -17,8 +17,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-ControlLoop::ControlLoop(RobotControl& robot,
-                         ControlCallback control_callback)
+ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
     : robot_(robot), control_callback_(std::move(control_callback)) {
   if (control_callback_) {
     setCurrentThreadToRealtime();

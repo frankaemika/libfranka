@@ -32,6 +32,7 @@ class IsStop {
    * @return True if the control loop should be stopped.
    */
   bool stop() const noexcept;
+
  protected:
   /**
    * Creates a new instance with stop() = is_stop;
