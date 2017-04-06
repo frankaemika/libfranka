@@ -2,7 +2,7 @@
 
 #include <gmock/gmock.h>
 
-#include "motion_generator_loop.h"
+#include "control_loop.h"
 
 #include "mock_robot_control.h"
 
