@@ -55,12 +55,4 @@ struct RealtimeException : public Exception {
   using Exception::Exception;
 };
 
-/**
- * RealTimeException is thrown if realtime priority could not be set for the
- * current thread
- */
-struct RealTimeException : public Exception {
-  using Exception::Exception;
-};
-
 }  // namespace franka

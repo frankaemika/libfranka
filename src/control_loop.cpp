@@ -41,7 +41,7 @@ void ControlLoop::operator()() {
 
 bool ControlLoop::spinOnce() {
   if (control_callback_) {
-    Torques&& control_output = control_callback_(robot_.robotState());
+    Torques control_output = control_callback_(robot_.robotState());
     if (control_output.stop()) {
       return false;
     }
@@ -93,7 +93,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
     if (robot_.realtimeConfig() == RealtimeConfig::kEnforce) {
-      throw RealTimeException(
+      throw RealtimeException(
           "libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }
   }
