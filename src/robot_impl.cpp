@@ -351,7 +351,8 @@ void Robot::Impl::handleStartMotionGeneratorReply(
     case research_interface::StartMotionGeneratorReply::Status::kSuccess:
       // After sending Success, RCU will send another reply in the future,
       // e.g. Finished or Aborted.
-      expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
+      expected_replies_.insert(
+          research_interface::Function::kStartMotionGenerator);
       break;
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
       motion_generator_running_ = false;
