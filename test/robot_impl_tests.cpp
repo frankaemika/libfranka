@@ -239,40 +239,6 @@ TEST(Robot, CanReceiveMotionGenerationError) {
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
-TEST(Robot, CanReceiveControlError) {
-  MockServer server;
-  server
-    .onStartController([](const research_interface::StartControllerRequest&) {
-      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
-    })
-    .onSendRobotState([](research_interface::RobotState& robot_state) {
-      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
-    })
-    .spinOnce();
-
-  Robot::Impl robot("127.0.0.1");
-  robot.startController();
-
-  server
-    .onSendRobotState([](research_interface::RobotState& robot_state) {
-      robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
-    })
-    .onReceiveRobotCommand([](const research_interface::RobotCommand&) {
-    })
-    .spinOnce();
-
-  EXPECT_TRUE(robot.update());
-
-  server
-    .sendReply<research_interface::StartControllerReply>([]() {
-      return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kRejected);
-    })
-    .spinOnce(/* block until reply has been sent */ true);
-
-  EXPECT_THROW(robot.update(), ControlException);
-  EXPECT_FALSE(robot.controllerRunning());
-}
-
 TEST(Robot, CanStopMotionGenerator) {
   MockServer server;
   server

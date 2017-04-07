@@ -4,7 +4,6 @@
 
 #include <Poco/Net/NetException.h>
 #include <cstring>
-#include <iostream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
@@ -250,17 +249,6 @@ void Robot::Impl::startMotionGenerator(
       motion_generator_type);
   tcp_socket_.sendBytes(&request, sizeof(request));
 
-  research_interface::StartMotionGeneratorReply motion_generator_reply =
-      tcpReceiveObject<research_interface::Function::kStartMotionGenerator,
-                       research_interface::StartMotionGeneratorReply>();
-
-  switch (motion_generator_reply.status) {
-    case research_interface::StartMotionGeneratorReply::Status::kSuccess:
-      break;
-    default:
-      throw ProtocolException("libfranka: unexpected motion generator reply!");
-  }
-
   expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
 
   research_interface::MotionGeneratorMode motion_generator_mode;
@@ -325,17 +313,6 @@ void Robot::Impl::startController() {
   research_interface::StartControllerRequest request;
   tcp_socket_.sendBytes(&request, sizeof(request));
 
-  research_interface::StartControllerReply controller_reply =
-      tcpReceiveObject<research_interface::Function::kStartController,
-                       research_interface::StartControllerReply>();
-
-  switch (controller_reply.status) {
-    case research_interface::StartControllerReply::Status::kSuccess:
-      break;
-    default:
-      throw ProtocolException("libfranka: unexpected controller reply!");
-  }
-
   expected_replies_.insert(research_interface::Function::kStartController);
 
   while (update()) {
@@ -370,15 +347,23 @@ void Robot::Impl::stopController() {
 
 void Robot::Impl::handleStartMotionGeneratorReply(
     const research_interface::StartMotionGeneratorReply& reply) {
-  motion_generator_running_ = false;
   switch (reply.status) {
+    case research_interface::StartMotionGeneratorReply::Status::kSuccess:
+      // After sending Success, RCU will send another reply in the future,
+      // e.g. Finished or Aborted.
+      expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
+      break;
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
+      motion_generator_running_ = false;
       break;
     case research_interface::StartMotionGeneratorReply::Status::kAborted:
+      motion_generator_running_ = false;
       throw ControlException("libfranka: motion generator command aborted!");
     case research_interface::StartMotionGeneratorReply::Status::kRejected:
+      motion_generator_running_ = false;
       throw ControlException("libfranka: motion generator command rejected!");
     default:
+      motion_generator_running_ = false;
       throw ProtocolException(
           "libfranka: unexpected start motion generator reply!");
   }
@@ -395,13 +380,11 @@ void Robot::Impl::handleStopMotionGeneratorReply(
 
 void Robot::Impl::handleStartControllerReply(
     const research_interface::StartControllerReply& reply) {
-  controller_running_ = false;
   switch (reply.status) {
-    case research_interface::StartControllerReply::Status::kFinished:
+    case research_interface::StartControllerReply::Status::kSuccess:
       break;
-    case research_interface::StartControllerReply::Status::kRejected:
-      throw ControlException("libfranka: control command rejected!");
     default:
+      controller_running_ = false;
       throw ProtocolException("libfranka: unexpected start controller reply!");
   }
 }
