@@ -4,6 +4,7 @@
 #include <cassert>
 #include <chrono>
 #include <cstring>
+#include <functional>
 
 #include <Poco/Net/StreamSocket.h>
 #include <research_interface/types.h>
@@ -37,6 +38,8 @@ class Network {
   void* bufferData() noexcept;
   template <typename T>
   T readFromBuffer();
+  template <typename T>
+  bool handleReply(std::function<void(T)> handle);
 
  private:
   Poco::Net::StreamSocket tcp_socket_;
@@ -102,6 +105,18 @@ void Network::tcpSendRequest(const T& request) {
     throw NetworkException(std::string{"libfranka: FRANKA tcp error: "} +
                            e.what());
   }
+}
+
+template <typename T>
+bool Network::handleReply(std::function<void(T)> handle) {
+  if (bufferSize() < sizeof(T)) {
+    return false;
+  }
+
+  T reply = readFromBuffer<T>();
+
+  handle(reply);
+  return true;
 }
 
 }  // namespace franka

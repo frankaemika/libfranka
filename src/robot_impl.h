@@ -11,7 +11,7 @@
 #include <research_interface/types.h>
 
 #include "complete_robot_state.h"
-#include "network.h"
+#include "network/network.h"
 #include "robot_control.h"
 
 namespace franka {
@@ -64,9 +64,6 @@ class Robot::Impl : public RobotControl {
 
   void receiveRobotState(Poco::Net::SocketAddress* server_address);
 
-  template <typename T>
-  void handleReply(std::function<void(T)> handle);
-
   void handleStartMotionGeneratorReply(
       const research_interface::StartMotionGeneratorReply& reply);
   void handleStopMotionGeneratorReply(
@@ -94,7 +91,7 @@ class Robot::Impl : public RobotControl {
       return static_cast<size_t>(t);
     }
   };
-  std::unordered_set<research_interface::Function, EnumClassHash>
+  std::unordered_multiset<research_interface::Function, EnumClassHash>
       expected_replies_;
 };
 

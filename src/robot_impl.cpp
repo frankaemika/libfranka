@@ -112,44 +112,42 @@ bool Robot::Impl::handleReplies() {
     if (expected_replies_.find(function) == expected_replies_.end()) {
       throw ProtocolException("libfranka: unexpected reply!");
     }
+    bool handled = false;
     switch (function) {
       case research_interface::Function::kStartMotionGenerator:
-        handleReply<research_interface::StartMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
-                      std::placeholders::_1));
+        handled =
+            network_.handleReply<research_interface::StartMotionGeneratorReply>(
+                std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
+                          std::placeholders::_1));
         break;
       case research_interface::Function::kStopMotionGenerator:
-        handleReply<research_interface::StopMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
-                      std::placeholders::_1));
+        handled =
+            network_.handleReply<research_interface::StopMotionGeneratorReply>(
+                std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
+                          std::placeholders::_1));
         break;
       case research_interface::Function::kStartController:
-        handleReply<research_interface::StartControllerReply>(
-            std::bind(&Robot::Impl::handleStartControllerReply, this,
-                      std::placeholders::_1));
+        handled =
+            network_.handleReply<research_interface::StartControllerReply>(
+                std::bind(&Robot::Impl::handleStartControllerReply, this,
+                          std::placeholders::_1));
         break;
       case research_interface::Function::kStopController:
-        handleReply<research_interface::StopControllerReply>(
+        handled = network_.handleReply<research_interface::StopControllerReply>(
             std::bind(&Robot::Impl::handleStopControllerReply, this,
                       std::placeholders::_1));
         break;
       default:
         throw ProtocolException("libfranka: unsupported reply!");
     }
+    if (handled) {
+      auto iterator = expected_replies_.find(function);
+      if (iterator != expected_replies_.end()) {
+        expected_replies_.erase(iterator);
+      }
+    }
   }
   return true;
-}
-
-template <typename T>
-void Robot::Impl::handleReply(std::function<void(T)> handle) {
-  if (network_.bufferSize() < sizeof(T)) {
-    return;
-  }
-
-  T reply = network_.readFromBuffer<T>();
-
-  expected_replies_.erase(reply.function);
-  handle(reply);
 }
 
 void Robot::Impl::startMotionGenerator(
