@@ -78,6 +78,7 @@ TEST(RobotImpl, CanStartMotionGenerator) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kJointVelocity, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -93,7 +94,8 @@ TEST(RobotImpl, CanStartMotionGenerator) {
 TEST(RobotImpl, CanStartController) {
   MockServer server;
   server
-    .onStartController([](const research_interface::StartControllerRequest&) {
+    .onStartController([](const research_interface::StartControllerRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartController, request.function);
       return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
@@ -109,6 +111,7 @@ TEST(RobotImpl, CanNotStartMultipleMotionGenerators) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kJointPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -125,7 +128,8 @@ TEST(RobotImpl, CanNotStartMultipleMotionGenerators) {
 TEST(RobotImpl, CanNotStartMultipleControllers) {
   MockServer server;
   server
-    .onStartController([](const research_interface::StartControllerRequest&) {
+    .onStartController([](const research_interface::StartControllerRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartController, request.function);
       return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
@@ -146,6 +150,7 @@ TEST(RobotImpl, CanSendMotionGeneratorCommand) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -178,7 +183,8 @@ TEST(RobotImpl, CanSendControllerCommand) {
 
   MockServer server;
   server
-    .onStartController([](const research_interface::StartControllerRequest&) {
+    .onStartController([](const research_interface::StartControllerRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartController, request.function);
       return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
@@ -208,6 +214,7 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianPosition, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -243,6 +250,7 @@ TEST(RobotImpl, CanStopMotionGenerator) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGeneratorRequest::Type::kCartesianVelocity, request.type);
       return research_interface::StartMotionGeneratorReply(research_interface::StartMotionGeneratorReply::Status::kSuccess);
     })
@@ -265,7 +273,8 @@ TEST(RobotImpl, CanStopMotionGenerator) {
   EXPECT_TRUE(robot.update());
 
   server
-    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest&) {
+    .onStopMotionGenerator([](const research_interface::StopMotionGeneratorRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStopMotionGenerator, request.function);
       return research_interface::StopMotionGeneratorReply(research_interface::StopMotionGeneratorReply::Status::kSuccess);
     })
     .sendEmptyRobotState()
@@ -286,7 +295,8 @@ TEST(RobotImpl, CanStopMotionGenerator) {
 TEST(RobotImpl, CanStopController) {
   MockServer server;
   server
-    .onStartController([](const research_interface::StartControllerRequest&) {
+    .onStartController([](const research_interface::StartControllerRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStartController, request.function);
       return research_interface::StartControllerReply(research_interface::StartControllerReply::Status::kSuccess);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
@@ -308,7 +318,8 @@ TEST(RobotImpl, CanStopController) {
   EXPECT_TRUE(robot.update());
 
   server
-    .onStopController([](const research_interface::StopControllerRequest&) {
+    .onStopController([](const research_interface::StopControllerRequest& request) {
+      EXPECT_EQ(research_interface::Function::kStopController, request.function);
       return research_interface::StopControllerReply(research_interface::StopControllerReply::Status::kSuccess);
     })
     .sendEmptyRobotState()
