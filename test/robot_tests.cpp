@@ -10,7 +10,8 @@ using research_interface::ConnectRequest;
 using research_interface::ConnectReply;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
-  EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException);
+  EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException)
+    << "Shut down local robot service to run tests.";
 }
 
 TEST(Robot, CanPerformHandshake) {

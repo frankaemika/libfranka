@@ -20,8 +20,7 @@ int main(int argc, char** argv) {
       double delta_x = radius * std::sin(angle);
       double delta_z = radius * (std::cos(angle) - 1);
 
-      std::array<double, 16> new_pose;
-      std::copy(initial_pose.cbegin(), initial_pose.cend(), new_pose.begin());
+      std::array<double, 16> new_pose = initial_pose;
       new_pose[12] += delta_x;
       new_pose[14] += delta_z;
 
