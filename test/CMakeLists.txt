@@ -101,6 +101,7 @@ endforeach()
 find_program(VALGRIND_PROG valgrind)
 if(VALGRIND_PROG)
   add_test(NAME Valgrind
-    COMMAND ${VALGRIND_PROG} ./run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/valgrind.xml
+    COMMAND ${VALGRIND_PROG} --error-exitcode=1 --track-origins=yes --
+            ./run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/valgrind.xml
   )
 endif()
