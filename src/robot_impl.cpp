@@ -1,6 +1,5 @@
 #include "robot_impl.h"
 
-#include <Poco/Net/NetException.h>
 #include <cstring>
 #include <sstream>
 
@@ -303,6 +302,7 @@ void Robot::Impl::handleStartControllerReply(
       throw ProtocolException("libfranka: unexpected start controller reply!");
   }
 }
+
 void Robot::Impl::handleStopControllerReply(
     const research_interface::StopControllerReply& reply) {
   if (reply.status !=

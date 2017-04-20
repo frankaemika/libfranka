@@ -3,9 +3,6 @@
 #include <chrono>
 #include <unordered_set>
 
-#include <Poco/Net/DatagramSocket.h>
-#include <Poco/Net/StreamSocket.h>
-
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
@@ -61,8 +58,6 @@ class Robot::Impl : public RobotControl {
 
  private:
   bool handleReplies();
-
-  void receiveRobotState(Poco::Net::SocketAddress* server_address);
 
   void handleStartMotionGeneratorReply(
       const research_interface::StartMotionGeneratorReply& reply);

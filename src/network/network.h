@@ -98,13 +98,11 @@ T Network::tcpBlockingReceiveReply() {
 }
 
 template <typename T>
-void Network::tcpSendRequest(const T& request) {
-  try {
-    tcp_socket_.sendBytes(&request, sizeof(request));
-  } catch (Poco::Net::NetException const& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA tcp error: "} +
-                           e.what());
-  }
+void Network::tcpSendRequest(const T& request) try {
+  tcp_socket_.sendBytes(&request, sizeof(request));
+} catch (Poco::Net::NetException const& e) {
+  throw NetworkException(std::string{"libfranka: FRANKA tcp error: "} +
+                         e.what());
 }
 
 template <typename T>
