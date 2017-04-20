@@ -7,7 +7,7 @@
 
 #include <franka/exception.h>
 #include <research_interface/rbk_types.h>
-#include <research_interface/types.h>
+#include <research_interface/service_types.h>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
@@ -26,8 +26,8 @@ class Network {
 
   uint16_t udpPort() const noexcept;
 
-  template <research_interface::Function F, typename T>
-  T tcpBlockingReceiveReply();
+  template <typename T>
+  typename T::Response tcpBlockingReceiveResponse();
 
   void udpSendRobotCommand(const research_interface::RobotCommand& command);
 
@@ -37,7 +37,7 @@ class Network {
   bool tcpReadResponse(research_interface::Function* function);
 
   template <typename T>
-  bool handleReply(std::function<void(T)> handle);
+  bool handleResponse(std::function<void(const typename T::Response&)> handler);
 
  private:
   int tcpReceiveIntoBuffer();
@@ -57,27 +57,29 @@ void Network::tcpSendRequest(const T& request) try {
 }
 
 template <typename T>
-bool Network::handleReply(std::function<void(T)> handle) {
-  if (read_buffer_.size() < sizeof(T)) {
+bool Network::handleResponse(
+    std::function<void(const typename T::Response&)> handler) {
+  if (read_buffer_.size() < sizeof(typename T::Response)) {
     return false;
   }
 
-  T reply = *reinterpret_cast<T*>(read_buffer_.data());
+  typename T::Response response =
+      *reinterpret_cast<typename T::Response*>(read_buffer_.data());
 
-  size_t remaining_bytes = read_buffer_.size() - sizeof(reply);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)],
+  size_t remaining_bytes = read_buffer_.size() - sizeof(response);
+  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(response)],
                remaining_bytes);
   read_buffer_.resize(remaining_bytes);
 
-  handle(reply);
+  handler(response);
   return true;
 }
 
-template <research_interface::Function F, typename T>
-T Network::tcpBlockingReceiveReply() {
+template <typename T>
+typename T::Response Network::tcpBlockingReceiveResponse() {
   int bytes_read = 0;
   std::array<uint8_t, sizeof(T)> buffer;
-  constexpr int kBytesTotal = sizeof(T);
+  constexpr int kBytesTotal = sizeof(typename T::Response);
 
   try {
     while (bytes_read < kBytesTotal) {
@@ -86,21 +88,28 @@ T Network::tcpBlockingReceiveReply() {
       bytes_read += rv;
     }
 
-    if (*reinterpret_cast<research_interface::Function*>(buffer.data()) != F) {
+    if (*reinterpret_cast<research_interface::Function*>(buffer.data()) !=
+        T::kFunction) {
       throw ProtocolException(
           std::string{"libfranka: received reply of wrong type."});
     }
-    return *reinterpret_cast<const T*>(buffer.data());
+    return *reinterpret_cast<const typename T::Response*>(buffer.data());
   } catch (const Poco::TimeoutException& e) {
     if (bytes_read != 0) {
       throw ProtocolException(std::string{"libfranka: incorrect object size"});
     } else {
       throw NetworkException(
-          std::string{"libfranka: FRANKA connection timeout"});
+          std::string{"libfranka: FRANKA connection closed"});
     }
   } catch (const Poco::Exception& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
   }
+  if (*reinterpret_cast<research_interface::Function*>(buffer.data()) !=
+      T::kFunction) {
+    throw ProtocolException(
+        std::string{"libfranka: received response of wrong type."});
+  }
+  return *reinterpret_cast<const typename T::Response*>(buffer.data());
 }
 
 }  // namespace franka

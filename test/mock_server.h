@@ -7,16 +7,16 @@
 #include <queue>
 
 #include <franka/robot_state.h>
-#include <research_interface/types.h>
+#include <research_interface/service_types.h>
 #include <research_interface/rbk_types.h>
 
 class MockServer {
  public:
-  using ConnectCallbackT = std::function<research_interface::ConnectReply(const research_interface::ConnectRequest&)>;
-  using StartMotionGeneratorCallbackT = std::function<research_interface::StartMotionGeneratorReply(const research_interface::StartMotionGeneratorRequest&)>;
-  using StopMotionGeneratorCallbackT = std::function<research_interface::StopMotionGeneratorReply(const research_interface::StopMotionGeneratorRequest&)>;
-  using StartControllerCallbackT = std::function<research_interface::StartControllerReply(const research_interface::StartControllerRequest&)>;
-  using StopControllerCallbackT = std::function<research_interface::StopControllerReply(const research_interface::StopControllerRequest&)>;
+  using ConnectCallbackT = std::function<research_interface::Connect::Response(const research_interface::Connect::Request&)>;
+  using StartMotionGeneratorCallbackT = std::function<research_interface::StartMotionGenerator::Response(const research_interface::StartMotionGenerator::Request&)>;
+  using StopMotionGeneratorCallbackT = std::function<research_interface::StopMotionGenerator::Response(const research_interface::StopMotionGenerator::Request&)>;
+  using StartControllerCallbackT = std::function<research_interface::StartController::Response(const research_interface::StartController::Request&)>;
+  using StopControllerCallbackT = std::function<research_interface::StopController::Response(const research_interface::StopController::Request&)>;
   using SendRobotStateAlternativeCallbackT = std::function<void(research_interface::RobotState&)>;
   using SendRobotStateCallbackT = std::function<research_interface::RobotState()>;
   using ReceiveRobotCommandCallbackT = std::function<void(const research_interface::RobotCommand&)>;
@@ -26,8 +26,8 @@ class MockServer {
 
   MockServer& sendEmptyRobotState();
 
-  template <typename TReply>
-  MockServer& sendReply(std::function<TReply()> create_reply);
+  template <typename TResponse>
+  MockServer& sendResponse(std::function<TResponse()> create_response);
 
   MockServer& onConnect(ConnectCallbackT on_connect);
   MockServer& onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator);
@@ -49,10 +49,10 @@ class MockServer {
 
   void serverThread();
 
-  template <typename TRequest, typename TReply>
-  MockServer& waitForCommand(std::function<TReply(const TRequest&)> callback);
-  template <typename TRequest, typename TReply>
-  void handleCommand(Socket& tcp_socket, std::function<TReply(const TRequest&)> callback);
+  template <typename T>
+  MockServer& waitForCommand(std::function<typename T::Response(const typename T::Request&)> callback);
+  template <typename T>
+  void handleCommand(Socket& tcp_socket, std::function<typename T::Response(const typename T::Request&)> callback);
 
   std::condition_variable cv_;
   std::mutex mutex_;
@@ -65,14 +65,14 @@ class MockServer {
   std::queue<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
 };
 
-template <typename TReply>
-MockServer& MockServer::sendReply(std::function<TReply()> create_reply) {
+template <typename TResponse>
+MockServer& MockServer::sendResponse(std::function<TResponse()> create_response) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("sendReply<"s + typeid(TReply).name() + ">" , [=](Socket& tcp_socket, Socket&) {
-    TReply reply = create_reply();
-    tcp_socket.sendBytes(&reply, sizeof(reply));
+  commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">" , [=](Socket& tcp_socket, Socket&) {
+    TResponse response = create_response();
+    tcp_socket.sendBytes(&response, sizeof(response));
   });
   return *this;
 }

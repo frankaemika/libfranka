@@ -43,19 +43,19 @@ MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
 }
 
 MockServer& MockServer::onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator) {
-  return waitForCommand<research_interface::StartMotionGeneratorRequest, research_interface::StartMotionGeneratorReply>(on_start_motion_generator);
+  return waitForCommand<research_interface::StartMotionGenerator>(on_start_motion_generator);
 }
 
 MockServer& MockServer::onStopMotionGenerator(StopMotionGeneratorCallbackT on_stop_motion_generator) {
-  return waitForCommand<research_interface::StopMotionGeneratorRequest, research_interface::StopMotionGeneratorReply>(on_stop_motion_generator);
+  return waitForCommand<research_interface::StopMotionGenerator>(on_stop_motion_generator);
 }
 
 MockServer& MockServer::onStartController(StartControllerCallbackT on_start_controller) {
-  return waitForCommand<research_interface::StartControllerRequest, research_interface::StartControllerReply>(on_start_controller);
+  return waitForCommand<research_interface::StartController>(on_start_controller);
 }
 
 MockServer& MockServer::onStopController(StopControllerCallbackT on_stop_motion_generator) {
-  return waitForCommand<research_interface::StopControllerRequest, research_interface::StopControllerReply>(on_stop_motion_generator);
+  return waitForCommand<research_interface::StopController>(on_stop_motion_generator);
 }
 
 MockServer& MockServer::sendEmptyRobotState() {
@@ -129,11 +129,11 @@ void MockServer::serverThread() {
   };
 
   uint16_t udp_port;
-  handleCommand<research_interface::ConnectRequest, research_interface::ConnectReply>(tcp_socket_wrapper, [&,this](const research_interface::ConnectRequest& request) {
+  handleCommand<research_interface::Connect>(tcp_socket_wrapper, [&,this](const research_interface::Connect::Request& request) {
     udp_port = request.udp_port;
     return on_connect_
            ? on_connect_(request)
-           : research_interface::ConnectReply(research_interface::ConnectReply::Status::kSuccess);
+           : research_interface::Connect::Response(research_interface::Connect::Status::kSuccess);
   });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});
@@ -171,23 +171,23 @@ void MockServer::serverThread() {
   }
 }
 
-template <typename TRequest, typename TReply>
-MockServer& MockServer::waitForCommand(std::function<TReply(const TRequest&)> callback) {
+template <typename T>
+MockServer& MockServer::waitForCommand(std::function<typename T::Response(const typename T::Request&)> callback) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);
-  std::string name = "waitForCommand<"s + typeid(TRequest).name() + ", " + typeid(TReply).name();
+  std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " + typeid(typename T::Response).name();
   commands_.emplace(name, [this,callback](Socket& tcp_socket, Socket&) {
-    handleCommand<TRequest, TReply>(tcp_socket, callback);
+    handleCommand<T>(tcp_socket, callback);
   });
   return *this;
 }
 
-template <typename TRequest, typename TReply>
-void MockServer::handleCommand(Socket& tcp_socket, std::function<TReply(const TRequest&)> callback) {
-  std::array<uint8_t, sizeof(TRequest)> buffer;
+template <typename T>
+void MockServer::handleCommand(Socket& tcp_socket, std::function<typename T::Response(const typename T::Request&)> callback) {
+  std::array<uint8_t, sizeof(typename T::Request)> buffer;
   tcp_socket.receiveBytes(buffer.data(), buffer.size());
-  TRequest request(*reinterpret_cast<TRequest*>(buffer.data()));
-  TReply reply = callback(request);
-  tcp_socket.sendBytes(&reply, sizeof(reply));
+  typename T::Request request(*reinterpret_cast<typename T::Request*>(buffer.data()));
+  typename T::Response response = callback(request);
+  tcp_socket.sendBytes(&response, sizeof(response));
 }

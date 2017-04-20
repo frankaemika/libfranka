@@ -1,4 +1,5 @@
 #include "motion_generator_loop.h"
+#include "motion_generator_traits.h"
 
 namespace franka {
 
@@ -10,7 +11,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(
     : ControlLoop(robot, control_callback),
       motion_callback_(std::move(motion_callback)) {
   if (motion_callback_) {
-    robot.startMotionGenerator(MotionTraits<T>::kMotionGeneratorType);
+    robot.startMotionGenerator(MotionGeneratorTraits<T>::kMotionGeneratorMode);
   }
 }
 

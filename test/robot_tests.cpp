@@ -18,8 +18,7 @@ using franka::Torques;
 using franka::NetworkException;
 using franka::IncompatibleVersionException;
 
-using research_interface::ConnectRequest;
-using research_interface::ConnectReply;
+using research_interface::Connect;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException)
@@ -36,8 +35,8 @@ TEST(Robot, CanPerformHandshake) {
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   MockServer server;
-  server.onConnect([](const ConnectRequest&) {
-           return ConnectReply(ConnectReply::Status::kIncompatibleLibraryVersion);
+  server.onConnect([](const Connect::Request&) {
+           return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
          })
         .spinOnce();
 
