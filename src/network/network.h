@@ -1,17 +1,17 @@
 #pragma once
-#include <Poco/Net/DatagramSocket.h>
-#include <Poco/Net/NetException.h>
-#include <cassert>
+
 #include <chrono>
 #include <cstring>
 #include <functional>
 
+#include <Poco/Net/DatagramSocket.h>
+#include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
-#include <research_interface/types.h>
+
+#include <franka/exception.h>
 
 #include <research_interface/rbk_types.h>
-
-#include "franka/exception.h"
+#include <research_interface/types.h>
 
 namespace franka {
 
@@ -37,8 +37,6 @@ class Network {
   size_t bufferSize() const noexcept;
   void* bufferData() noexcept;
   template <typename T>
-  T readFromBuffer();
-  template <typename T>
   bool handleReply(std::function<void(T)> handle);
 
  private:
@@ -48,20 +46,6 @@ class Network {
   Poco::Net::SocketAddress udp_server_address_;
   std::vector<uint8_t> read_buffer_;
 };
-
-template <typename T>
-T Network::readFromBuffer() {
-  assert(read_buffer_.size() >= sizeof(T));
-
-  T reply = *reinterpret_cast<T*>(read_buffer_.data());
-
-  size_t remaining_bytes = read_buffer_.size() - sizeof(reply);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)],
-               remaining_bytes);
-  read_buffer_.resize(remaining_bytes);
-
-  return reply;
-}
 
 template <research_interface::Function F, typename T>
 T Network::tcpBlockingReceiveReply() {
@@ -111,7 +95,12 @@ bool Network::handleReply(std::function<void(T)> handle) {
     return false;
   }
 
-  T reply = readFromBuffer<T>();
+  T reply = *reinterpret_cast<T*>(read_buffer_.data());
+
+  size_t remaining_bytes = read_buffer_.size() - sizeof(reply);
+  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)],
+               remaining_bytes);
+  read_buffer_.resize(remaining_bytes);
 
   handle(reply);
   return true;
