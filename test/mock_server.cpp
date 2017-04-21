@@ -8,7 +8,7 @@
 #include <Poco/Net/StreamSocket.h>
 #include <gtest/gtest.h>
 
-MockServer::MockServer() : shutdown_{false}, continue_{false}, initialized_{false} {
+MockServer::MockServer() : block_{false}, shutdown_{false}, continue_{false}, initialized_{false} {
   std::unique_lock<std::mutex> lock(mutex_);
   server_thread_ = std::thread(&MockServer::serverThread, this);
 
@@ -92,12 +92,13 @@ MockServer& MockServer::onReceiveRobotCommand(
   return *this;
 }
 
-void MockServer::spinOnce(bool block) {
+void MockServer::spinOnce() {
   std::unique_lock<std::mutex> lock(mutex_);
   continue_ = true;
   cv_.notify_one();
-  if (block) {
+  if (block_) {
     cv_.wait(lock, [this]() { return !continue_; });
+    block_ = false;
   }
 }
 
@@ -157,18 +158,19 @@ void MockServer::serverThread() {
       commands_.pop();
     }
 
-    ASSERT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) << "UDP socket still has data";
-
-    if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
-      // Received something on the TCP socket.
-      // Test that the Robot closed the connection.
-      std::array<uint8_t, 16> buffer;
-
-      int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
-      ASSERT_EQ(0, rv) << "TCP socket still has data";
-    }
-
     continue_ = false;
     cv_.notify_one();
+  }
+
+  EXPECT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ))
+      << "UDP socket still has data";
+
+  if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
+    // Received something on the TCP socket.
+    // Test that the Robot closed the connection.
+    std::array<uint8_t, 16> buffer;
+
+    int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
+    EXPECT_EQ(0, rv) << "TCP socket still has data";
   }
 }

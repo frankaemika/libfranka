@@ -76,7 +76,7 @@ class MockServer {
     return *this;
   }
 
-  void spinOnce(bool block = false);
+  void spinOnce();
 
  private:
   void serverThread();
@@ -84,6 +84,7 @@ class MockServer {
   std::condition_variable cv_;
   std::mutex mutex_;
   std::thread server_thread_;
+  bool block_;
   bool shutdown_;
   bool continue_;
   bool initialized_;
@@ -97,6 +98,7 @@ MockServer& MockServer::sendResponse(std::function<TResponse()> create_response)
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);
+  block_ = true;
   commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
                     [=](Socket& tcp_socket, Socket&) {
                       TResponse response = create_response();

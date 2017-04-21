@@ -250,7 +250,7 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
         return research_interface::StartMotionGenerator::Response(
             research_interface::StartMotionGenerator::Status::kRejected);
       })
-      .spinOnce(/* block until response has been sent */ true);
+      .spinOnce();
 
   EXPECT_THROW(robot.update(), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
