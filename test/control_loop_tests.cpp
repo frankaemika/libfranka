@@ -86,6 +86,8 @@ TEST(ControlLoop, SpinOnceWithStoppingCallback) {
 
   ControlLoop loop(robot, [](const RobotState&) { return Stop; });
 
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
   ASSERT_FALSE(loop.spinOnce());
   loop();
 }

@@ -224,6 +224,9 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
               &control_callback,
               std::placeholders::_1),
     [](const RobotState&) { return Stop; });
+
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
   ASSERT_FALSE(loop.spinOnce());
   loop();
 }
@@ -249,6 +252,9 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
     std::bind(&decltype(motion_callback)::invoke,
               &motion_callback,
               std::placeholders::_1));
+
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
   ASSERT_FALSE(loop.spinOnce());
   loop();
 }

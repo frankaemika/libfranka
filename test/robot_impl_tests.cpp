@@ -42,7 +42,7 @@ TEST(Robot, CanReceiveRobotState) {
   const RobotState& received_robot_state = robot.robotState();
   testRobotStateIsZero(received_robot_state);
 
-  ASSERT_TRUE(robot.update());
+  EXPECT_TRUE(robot.update());
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
 }
 
@@ -55,7 +55,7 @@ TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
 
   Robot::Impl robot("127.0.0.1", research_interface::kCommandPort, 1ms);
 
-  ASSERT_THROW(robot.update(), NetworkException);
+  EXPECT_THROW(robot.update(), NetworkException);
 }
 
 TEST(Robot, StopsIfControlConnectionClosed) {
