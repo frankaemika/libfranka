@@ -5,6 +5,8 @@
 
 namespace franka {
 
+IsStop::IsStop() noexcept : IsStop(false) {}
+
 IsStop::IsStop(bool is_stop) noexcept : is_stop_(is_stop) {}
 
 bool IsStop::stop() const noexcept {

@@ -24,7 +24,7 @@ class ControlLoop {
  private:
   void convertTorques(const Torques& torques,
                       research_interface::ControllerCommand* command);
-  void setCurrentThreadToRealtime();
+  void setCurrentThreadToRealtime(RealtimeConfig config);
 
  protected:
   RobotControl& robot_;

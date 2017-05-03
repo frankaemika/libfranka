@@ -27,7 +27,7 @@ enum RealtimeConfig { kEnforce, kIgnore };
 class IsStop {
  public:
   /**
-   * Determines whether to stop the control resp motion generation loop.
+   * Determines whether to stop the control and motion generation loops.
    *
    * @return True if the control loop should be stopped.
    */
@@ -35,9 +35,13 @@ class IsStop {
 
  protected:
   /**
+   * Creates a new instance with stop() = false;
+   */
+  IsStop() noexcept;
+  /**
    * Creates a new instance with stop() = is_stop;
    */
-  IsStop(bool is_stop = false) noexcept;
+  IsStop(bool is_stop) noexcept;
 
  private:
   bool is_stop_;

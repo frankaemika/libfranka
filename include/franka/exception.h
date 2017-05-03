@@ -42,7 +42,7 @@ struct IncompatibleVersionException : public Exception {
 
 /**
  * ControlException is thrown if an error occurs during motion generation
- * resp. torque control.
+ * or torque control.
  */
 struct ControlException : public Exception {
   using Exception::Exception;

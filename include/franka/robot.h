@@ -49,8 +49,8 @@ class Robot {
    *
    * @param[in] control_callback Callback function for torque control.
    *
-   * @throw ControlException if an error related to torque control resp. motion
-   * generation occured.
+   * @throw ControlException if an error related to torque control or motion
+   * generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the
@@ -70,8 +70,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw ControlException if an error related to torque control resp. motion
-   * generation occured.
+   * @throw ControlException if an error related to torque control or motion
+   * generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the
@@ -94,8 +94,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw ControlException if an error related to torque control resp. motion
-   * generation occured.
+   * @throw ControlException if an error related to torque control or motion
+   * generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the
@@ -118,8 +118,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw ControlException if an error related to torque control resp. motion
-   * generation occured.
+   * @throw ControlException if an error related to torque control or motion
+   * generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the
@@ -142,8 +142,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
    *
-   * @throw ControlException if an error related to torque control resp. motion
-   * generation occured.
+   * @throw ControlException if an error related to torque control or motion
+   * generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the

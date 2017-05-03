@@ -20,7 +20,7 @@ namespace franka {
 ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
     : robot_(robot), control_callback_(std::move(control_callback)) {
   if (control_callback_) {
-    setCurrentThreadToRealtime();
+    setCurrentThreadToRealtime(robot_.realtimeConfig());
     robot_.startController();
   }
 }
@@ -57,7 +57,7 @@ void ControlLoop::convertTorques(
   command->tau_J_d = torques.tau_J;
 }
 
-void ControlLoop::setCurrentThreadToRealtime() {
+void ControlLoop::setCurrentThreadToRealtime(RealtimeConfig config) {
 #ifdef _WIN32
   // TODO: test on WINDOWS
   auto get_last_windows_error = []() -> std::string {
@@ -72,7 +72,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
   };
 
   if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
-    if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
+    if (config == RealtimeConfig::kEnforce) {
       throw RealTimeException(
           "libfranka: unable to set realtime priority for the process: "s +
           get_last_windows_error());
@@ -80,7 +80,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
     return;
   }
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
-    if (robot_impl_.realtimeConfig() == RealtimeConfig::kEnforce) {
+    if (config == RealtimeConfig::kEnforce) {
       throw RealTimeException(
           "libfranka: unable to set realtime priority for the thread: "s +
           get_last_windows_error());
@@ -92,7 +92,7 @@ void ControlLoop::setCurrentThreadToRealtime() {
   constexpr int kThreadPriority = 20;
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
-    if (robot_.realtimeConfig() == RealtimeConfig::kEnforce) {
+    if (config == RealtimeConfig::kEnforce) {
       throw RealtimeException(
           "libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }
