@@ -42,15 +42,15 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    robot.control([
-      index = 0ul, &samples, &states
-    ](const franka::RobotState& robot_state) mutable->franka::JointValues {
-      if (index >= samples.size()) {
-        return franka::Stop;
-      }
-      states.push_back(robot_state);
-      return samples[index++];
-    });
+    size_t index = 0;
+    robot.control(
+        [&](const franka::RobotState& robot_state) -> franka::JointValues {
+          if (index >= samples.size()) {
+            return franka::Stop;
+          }
+          states.push_back(robot_state);
+          return samples[index++];
+        });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
   } catch (const franka::Exception& e) {
