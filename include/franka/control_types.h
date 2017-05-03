@@ -19,10 +19,11 @@ namespace franka {
 enum RealtimeConfig { kEnforce, kIgnore };
 
 /**
- * Helper type for control resp motion generation loops.
+ * Helper type for control and motion generation loops.
  *
  * Used to determine whether to terminate a loop after the control callback
  * has returned.
+ * @see @em franka::Stop variable in control_types.h
  */
 class IsStop {
  public:
@@ -227,7 +228,10 @@ class CartesianVelocities : public IsStop {
 };
 
 /**
- * @see franka::Stop
+ * A static instance of this class @em franka::Stop is used to signal the termination
+ * of motion generation and control loops.
+ *
+ * @see franka::Robot::control
  */
 struct StopT final : Torques,
                      JointValues,
@@ -238,7 +242,7 @@ struct StopT final : Torques,
 };
 
 /**
- * Used to signal the termination of a motion generation resp control loop.
+ * Used to signal the termination of motion generation and control loops.
  *
  * @see franka::Robot::control
  */
