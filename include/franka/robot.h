@@ -49,8 +49,6 @@ class Robot {
    *
    * @param[in] control_callback Callback function for torque control.
    *
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
    * @throw ControlException if an error related to torque control resp. motion
    * generation occured.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
