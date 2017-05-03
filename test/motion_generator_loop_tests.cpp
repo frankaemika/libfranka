@@ -8,6 +8,8 @@
 #include "mock_robot_control.h"
 
 using ::testing::AtLeast;
+using ::testing::Eq;
+using ::testing::Field;
 using ::testing::InSequence;
 using ::testing::Return;
 using ::testing::ReturnRef;
@@ -55,6 +57,7 @@ class MotionGeneratorLoops : public ::testing::Test {
   T createMotion();
   std::function<T(const RobotState&)> getCallback();
   bool isSameMotion(const T& motion, const MotionGeneratorCommand& motion_command);
+  auto getField(const T& values);
 };
 
 template <>
@@ -63,8 +66,8 @@ JointValues MotionGeneratorLoops<JointValues>::createMotion() {
 }
 
 template <>
-bool MotionGeneratorLoops<JointValues>::isSameMotion(const JointValues& joint_values, const MotionGeneratorCommand& motion_command) {
-  return joint_values.q == motion_command.q_d;
+auto MotionGeneratorLoops<JointValues>::getField(const JointValues& values) {
+  return Field(&research_interface::MotionGeneratorCommand::q_d, Eq(values.q));
 }
 
 template <>
@@ -73,8 +76,8 @@ JointVelocities MotionGeneratorLoops<JointVelocities>::createMotion() {
 }
 
 template <>
-bool MotionGeneratorLoops<JointVelocities>::isSameMotion(const JointVelocities& joint_velocities, const MotionGeneratorCommand& motion_command) {
-  return joint_velocities.dq == motion_command.dq_d;
+auto MotionGeneratorLoops<JointVelocities>::getField(const JointVelocities& velocities) {
+  return Field(&research_interface::MotionGeneratorCommand::dq_d, Eq(velocities.dq));
 }
 
 template <>
@@ -83,8 +86,8 @@ CartesianPose MotionGeneratorLoops<CartesianPose>::createMotion() {
 }
 
 template <>
-bool MotionGeneratorLoops<CartesianPose>::isSameMotion(const CartesianPose& pose, const MotionGeneratorCommand& motion_command) {
-  return pose.O_T_EE == motion_command.O_T_EE_d;
+auto MotionGeneratorLoops<CartesianPose>::getField(const CartesianPose& pose) {
+  return Field(&research_interface::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE));
 }
 
 template <>
@@ -93,8 +96,8 @@ CartesianVelocities MotionGeneratorLoops<CartesianVelocities>::createMotion() {
 }
 
 template <>
-bool MotionGeneratorLoops<CartesianVelocities>::isSameMotion(const CartesianVelocities& cartesian_velocities, const MotionGeneratorCommand& motion_command) {
-  return cartesian_velocities.O_dP_EE == motion_command.O_dP_EE_d;
+auto MotionGeneratorLoops<CartesianVelocities>::getField(const CartesianVelocities& cartesian_velocities) {
+  return Field(&research_interface::MotionGeneratorCommand::O_dP_EE_d, Eq(cartesian_velocities.O_dP_EE));
 }
 
 using MotionTypes = ::testing::Types<JointValues,
@@ -154,14 +157,13 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionCallback) {
   NiceMock<MockRobotControl> robot;
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
 
+  auto motion = this->createMotion();
+
   RobotState robot_state;
   EXPECT_CALL(robot, robotStateMock())
     .WillOnce(ReturnRef(robot_state));
-  MotionGeneratorCommand motion_command;
-  EXPECT_CALL(robot, motionGeneratorCommandMock())
-    .WillOnce(ReturnRef(motion_command));
+  EXPECT_CALL(robot, motionGeneratorCommandMock(this->getField(motion)));
 
-  auto motion = this->createMotion();
   EXPECT_CALL(motion_callback, invoke(_))
     .WillOnce(Return(motion));
 
@@ -171,8 +173,6 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionCallback) {
               &motion_callback,
               std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
-
-  EXPECT_TRUE(this->isSameMotion(motion, motion_command));
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithBothCallbacks) {
@@ -180,21 +180,18 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithBothCallbacks) {
   MockControlCallback control_callback;
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
 
+  Torques torques({0, 1, 2, 3, 4, 5, 6});
+  auto motion = this->createMotion();
+
   RobotState robot_state;
   EXPECT_CALL(robot, robotStateMock())
     .Times(AtLeast(1))
     .WillRepeatedly(ReturnRef(robot_state));
-  ControllerCommand controller_command;
-  EXPECT_CALL(robot, controllerCommandMock())
-    .WillOnce(ReturnRef(controller_command));
-  MotionGeneratorCommand motion_command;
-  EXPECT_CALL(robot, motionGeneratorCommandMock())
-    .WillOnce(ReturnRef(motion_command));
+  EXPECT_CALL(robot, motionGeneratorCommandMock(this->getField(motion)));
+  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d, Eq(torques.tau_J))));
 
-  Torques torques({0, 1, 2, 3, 4, 5, 6});
   EXPECT_CALL(control_callback, invoke(_))
     .WillOnce(Return(torques));
-  auto motion = this->createMotion();
   EXPECT_CALL(motion_callback, invoke(_))
     .WillOnce(Return(motion));
 
@@ -206,17 +203,13 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithBothCallbacks) {
               &motion_callback,
               std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
-
-  EXPECT_EQ(torques.tau_J, controller_command.tau_J_d);
-  EXPECT_TRUE(this->isSameMotion(motion, motion_command));
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
   NiceMock<MockRobotControl> robot;
 
-  ControllerCommand controller_command;
-  ON_CALL(robot, controllerCommandMock())
-    .WillByDefault(ReturnRef(controller_command));
+  ON_CALL(robot, controllerCommandMock(_))
+    .WillByDefault(Return());
 
   RobotState robot_state;
   ON_CALL(robot, robotStateMock())
@@ -238,9 +231,8 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
   NiceMock<MockRobotControl> robot;
 
-  MotionGeneratorCommand motion_command;
-  ON_CALL(robot, motionGeneratorCommandMock())
-    .WillByDefault(ReturnRef(motion_command));
+  ON_CALL(robot, motionGeneratorCommandMock(_))
+    .WillByDefault(Return());
   ON_CALL(robot, update())
     .WillByDefault(Return(true));
 

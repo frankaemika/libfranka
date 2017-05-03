@@ -19,10 +19,11 @@ class RobotControl {
   virtual bool update() = 0;
 
   virtual const RobotState& robotState() const noexcept = 0;
-  virtual research_interface::ControllerCommand&
-  controllerCommand() noexcept = 0;
-  virtual research_interface::MotionGeneratorCommand&
-  motionGeneratorCommand() noexcept = 0;
+  virtual void controllerCommand(const research_interface::ControllerCommand&
+                                     controller_command) noexcept = 0;
+  virtual void motionGeneratorCommand(
+      const research_interface::MotionGeneratorCommand&
+          motion_generator_command) noexcept = 0;
   virtual RealtimeConfig realtimeConfig() const noexcept = 0;
 };
 

@@ -7,6 +7,8 @@
 #include "mock_robot_control.h"
 
 using ::testing::InSequence;
+using ::testing::Eq;
+using ::testing::Field;
 using ::testing::Return;
 using ::testing::ReturnRef;
 using ::testing::NiceMock;
@@ -61,19 +63,17 @@ TEST(ControlLoop, SpinOnceWithCallback) {
   NiceMock<MockRobotControl> robot;
   MockControlCallback control_callback;
 
+  Torques torques({0, 1, 2, 3, 4, 5, 6});
+
   RobotState robot_state;
   EXPECT_CALL(robot, robotStateMock()).WillOnce(ReturnRef(robot_state));
-  ControllerCommand controller_command;
-  EXPECT_CALL(robot, controllerCommandMock()).WillOnce(ReturnRef(controller_command));
+  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d, Eq(torques.tau_J))));
 
-  Torques torques({0, 1, 2, 3, 4, 5, 6});
   EXPECT_CALL(control_callback, invoke(_))
     .WillOnce(Return(torques));
 
   ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
-
-  EXPECT_EQ(torques.tau_J, controller_command.tau_J_d);
 }
 
 TEST(ControlLoop, SpinOnceWithStoppingCallback) {

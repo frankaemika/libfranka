@@ -28,7 +28,9 @@ bool MotionGeneratorLoop<T>::spinOnce() {
     if (motion_output.stop()) {
       return false;
     }
-    convertMotion(motion_output, &robot_.motionGeneratorCommand());
+    research_interface::MotionGeneratorCommand command{};
+    convertMotion(motion_output, &command);
+    robot_.motionGeneratorCommand(command);
   }
 
   return ControlLoop::spinOnce();

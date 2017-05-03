@@ -13,18 +13,18 @@ class MockRobotControl : public franka::RobotControl {
   MOCK_METHOD0(update, bool());
 
   MOCK_CONST_METHOD0(robotStateMock, const franka::RobotState&());
-  MOCK_METHOD0(controllerCommandMock, research_interface::ControllerCommand&());
-  MOCK_METHOD0(motionGeneratorCommandMock, research_interface::MotionGeneratorCommand&());
+  MOCK_METHOD1(controllerCommandMock, void(const research_interface::ControllerCommand&));
+  MOCK_METHOD1(motionGeneratorCommandMock, void(const research_interface::MotionGeneratorCommand&));
 
   // Workaround because Google Mock does not support noexcept.
   const franka::RobotState& robotState() const noexcept override {
     return robotStateMock();
   }
-  research_interface::ControllerCommand& controllerCommand() noexcept override {
-    return controllerCommandMock();
+  void controllerCommand(const research_interface::ControllerCommand& command) noexcept override {
+    controllerCommandMock(command);
   }
-  research_interface::MotionGeneratorCommand& motionGeneratorCommand() noexcept override {
-    return motionGeneratorCommandMock();
+  void motionGeneratorCommand(const research_interface::MotionGeneratorCommand& command) noexcept override {
+    motionGeneratorCommandMock(command);
   }
   franka::RealtimeConfig realtimeConfig() const noexcept override {
     return franka::RealtimeConfig::kIgnore;

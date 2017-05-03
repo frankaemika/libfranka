@@ -45,16 +45,12 @@ bool ControlLoop::spinOnce() {
     if (control_output.stop()) {
       return false;
     }
-    convertTorques(control_output, &robot_.controllerCommand());
+    research_interface::ControllerCommand command{};
+    command.tau_J_d = control_output.tau_J;
+    robot_.controllerCommand(command);
   }
 
   return true;
-}
-
-void ControlLoop::convertTorques(
-    const Torques& torques,
-    research_interface::ControllerCommand* command) {
-  command->tau_J_d = torques.tau_J;
 }
 
 void ControlLoop::setCurrentThreadToRealtime(RealtimeConfig config) {

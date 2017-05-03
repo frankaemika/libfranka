@@ -228,7 +228,8 @@ class CartesianVelocities : public IsStop {
 };
 
 /**
- * A static instance of this class @em franka::Stop is used to signal the termination
+ * A static instance of this class @em franka::Stop is used to signal the
+ * termination
  * of motion generation and control loops.
  *
  * @see franka::Robot::control

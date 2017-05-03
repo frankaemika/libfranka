@@ -131,14 +131,15 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
-research_interface::MotionGeneratorCommand&
-Robot::Impl::motionGeneratorCommand() noexcept {
-  return robot_command_.motion;
+void Robot::Impl::controllerCommand(
+    const research_interface::ControllerCommand& controller_command) noexcept {
+  robot_command_.control = controller_command;
 }
 
-research_interface::ControllerCommand&
-Robot::Impl::controllerCommand() noexcept {
-  return robot_command_.control;
+void Robot::Impl::motionGeneratorCommand(
+    const research_interface::MotionGeneratorCommand&
+        motion_generator_command) noexcept {
+  robot_command_.motion = motion_generator_command;
 }
 
 bool Robot::Impl::handleReplies() {
