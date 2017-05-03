@@ -28,15 +28,15 @@ class Robot {
   /**
    * Establishes a connection with FRANKA CONTROL.
    *
-   * @throw NetworkException if the connection is unsuccessful.
-   * @throw IncompatibleVersionException if this library is not supported by
-   * FRANKA CONTROL
-   * @throw ProtocolException if data received from the host is invalid
-   *
    * @param[in] franka_address IP/hostname of FRANKA CONTROL
    * @param[in] realtime_config if set to Enforce, an exception will be thrown
    * if realtime priority cannot be set when required. Setting realtime_config
    * to Ignore disables this behavior.
+   *
+   * @throw NetworkException if the connection is unsuccessful.
+   * @throw IncompatibleVersionException if this library is not supported by
+   * FRANKA CONTROL.
+   * @throw ProtocolException if data received from the host is invalid.
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
@@ -66,9 +66,9 @@ class Robot {
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
-   * @param[in] control_callback Callback function for torque control.
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
+   * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion
    * generation occurred.
@@ -90,9 +90,9 @@ class Robot {
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
-   * @param[in] control_callback Callback function for torque control.
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
+   * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion
    * generation occurred.
@@ -114,9 +114,9 @@ class Robot {
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
-   * @param[in] control_callback Callback function for torque control.
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
+   * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion
    * generation occurred.
@@ -138,9 +138,9 @@ class Robot {
    *
    * Sets realtime priority for the current thread if torque control is used.
    *
-   * @param[in] control_callback Callback function for torque control.
    * @param[in] motion_generator_callback Callback function for motion
    * generation.
+   * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion
    * generation occurred.
@@ -173,6 +173,8 @@ class Robot {
    * @throw ProtocolException if received data has invalid format.
    *
    * @return Current robot state.
+   *
+   * @see Robot::read for a way to repeatedly receive the robot state.
    */
   RobotState readOnce();
 
@@ -191,7 +193,7 @@ class Robot {
   /**
    * Gets the robot implementation.
    *
-   * @return Robot implementation
+   * @return Robot implementation.
    */
   Impl& impl() noexcept;
 
