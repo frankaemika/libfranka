@@ -1,4 +1,5 @@
 #include "network.h"
+#include "poco_socket.h"
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
@@ -6,49 +7,36 @@ namespace franka {
 
 Network::Network(const std::string& franka_address,
                  uint16_t franka_port,
-                 std::chrono::milliseconds timeout) try {
-  Poco::Timespan poco_timeout(1000l * timeout.count());
-  tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
-  tcp_socket_.setBlocking(true);
-  tcp_socket_.setSendTimeout(poco_timeout);
-  tcp_socket_.setReceiveTimeout(poco_timeout);
+                 std::chrono::milliseconds timeout,
+                 std::unique_ptr<TcpSocket> tcp_socket,
+                 std::unique_ptr<UdpSocket> udp_socket) :
+  tcp_socket_(std::move(tcp_socket)),
+  udp_socket_(std::move(udp_socket)) {
+    tcp_socket_->connect(franka_address, franka_port, timeout);
+    tcp_socket_->setBlocking(true);
+    tcp_socket_->setSendTimeout(timeout);
+    tcp_socket_->setReceiveTimeout(timeout);
 
-  udp_socket_.setReceiveTimeout(poco_timeout);
-  udp_socket_.bind({"0.0.0.0", 0});
-} catch (Poco::Net::NetException const& e) {
-  throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
-} catch (Poco::TimeoutException const& e) {
-  throw NetworkException("libfranka: FRANKA connection timeout");
-} catch (Poco::Exception const& e) {
-  throw NetworkException("libfranka: "s + e.what());
-}
-
-Network::~Network() noexcept try { tcp_socket_.shutdown(); } catch (...) {
+    udp_socket_->setReceiveTimeout(timeout);
+    udp_socket_->bind("0.0.0.0", 0);
 }
 
 int Network::udpSendRobotCommand(
-    const research_interface::RobotCommand& command) try {
-  return udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
-} catch (Poco::Net::NetException const& e) {
-  throw NetworkException("libfranka: robot command send: "s + e.what());
+    const research_interface::RobotCommand& command) {
+  return udp_socket_->sendTo(&command, sizeof(command));
 }
 
-research_interface::RobotState Network::udpReadRobotState() try {
+research_interface::RobotState Network::udpReadRobotState() {
   std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
-  int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(),
-                                               udp_server_address_);
+  int bytes_received = udp_socket_->receiveFrom(buffer.data(), buffer.size());
   if (bytes_received != buffer.size()) {
     throw ProtocolException("libfranka: incorrect object size");
   }
   return *reinterpret_cast<research_interface::RobotState*>(buffer.data());
-} catch (const Poco::TimeoutException& e) {
-  throw NetworkException("libfranka: robot state read timeout");
-} catch (const Poco::Net::NetException& e) {
-  throw NetworkException("libfranka: robot state read: "s + e.what());
 }
 
 uint16_t Network::udpPort() const {
-  return udp_socket_.address().port();
+  return udp_socket_->port();
 }
 
 size_t Network::bufferSize() const noexcept {
@@ -59,19 +47,18 @@ void* Network::bufferData() noexcept {
   return read_buffer_.data();
 }
 
-bool Network::tcpPollRead() try {
-  return tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ);
-} catch (Poco::Exception const& e) {
-  throw NetworkException("libfranka: "s + e.what());
+bool Network::tcpPollRead() {
+  return tcp_socket_->poll();
 }
 
 int Network::tcpReceiveIntoBuffer() try {
   size_t offset = read_buffer_.size();
-  read_buffer_.resize(offset + tcp_socket_.available());
-  return tcp_socket_.receiveBytes(&read_buffer_[offset],
-                                  tcp_socket_.available());
-} catch (const Poco::Net::NetException& e) {
-  throw NetworkException("libfranka: control connection read: "s + e.what());
+  read_buffer_.resize(offset + tcp_socket_->available());
+  return tcp_socket_->receiveBytes(&read_buffer_[offset],
+                                  tcp_socket_->available());
+} catch (TimeoutException const& e) {
+  throw NetworkException("libfranka: FRANKA connection timeout");
 }
+
 
 }  // namespace franka

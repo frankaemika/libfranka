@@ -1,4 +1,5 @@
 #include "robot_impl.h"
+#include "network/poco_socket.h"
 
 #include <cstring>
 #include <sstream>
@@ -17,7 +18,9 @@ Robot::Impl::Impl(const std::string& franka_address,
                   std::chrono::milliseconds timeout,
                   RealtimeConfig realtime_config)
     : realtime_config_{realtime_config},
-      network_{franka_address, franka_port, timeout},
+      network_{franka_address, franka_port, timeout,
+               std::unique_ptr<TcpSocket>(new PocoTcpSocket()),
+               std::unique_ptr<UdpSocket>(new PocoUdpSocket())},
       motion_generator_running_{false},
       controller_running_{false} {
   research_interface::ConnectRequest connect_request(network_.udpPort());
