@@ -14,7 +14,7 @@ namespace franka {
 /**
  * Used to decide whether to enforce realtime mode for a control loop thread.
  *
- * @see franka::Robot::Robot
+ * @see Robot::Robot
  */
 enum RealtimeConfig { kEnforce, kIgnore };
 
@@ -229,10 +229,9 @@ class CartesianVelocities : public IsStop {
 
 /**
  * A static instance of this class @em franka::Stop is used to signal the
- * termination
- * of motion generation and control loops.
+ * termination of motion generation and control loops.
  *
- * @see franka::Robot::control
+ * @see Robot::control
  */
 struct StopT final : Torques,
                      JointValues,
@@ -245,7 +244,7 @@ struct StopT final : Torques,
 /**
  * Used to signal the termination of motion generation and control loops.
  *
- * @see franka::Robot::control
+ * @see Robot::control
  */
 static const StopT Stop{};  // NOLINT (readability-identifier-naming)
 
