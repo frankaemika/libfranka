@@ -26,11 +26,6 @@ class ControlLoop : public franka::ControlLoop {
   using franka::ControlLoop::spinOnce;
 };
 
-class MockControlCallback {
- public:
-  MOCK_METHOD1(invoke, Torques(const RobotState&));
-};
-
 TEST(ControlLoop, CanConstructWithoutCallback) {
   MockRobotControl robot;
   EXPECT_CALL(robot, startController()).Times(0);
@@ -60,6 +55,10 @@ TEST(ControlLoop, SpinOnceWithoutCallback) {
 }
 
 TEST(ControlLoop, SpinOnceWithCallback) {
+  struct MockControlCallback {
+    MOCK_METHOD1(invoke, Torques(const RobotState&));
+  };
+
   NiceMock<MockRobotControl> robot;
   MockControlCallback control_callback;
 

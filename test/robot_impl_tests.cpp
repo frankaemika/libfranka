@@ -18,7 +18,7 @@ class Robot : public ::franka::Robot {
    using ::franka::Robot::Impl;
 };
 
-TEST(Robot, RobotStateInitializedToZero) {
+TEST(RobotImpl, RobotStateInitializedToZero) {
   MockServer server;
   server.spinOnce();
 
@@ -27,7 +27,7 @@ TEST(Robot, RobotStateInitializedToZero) {
   testRobotStateIsZero(received_robot_state);
 }
 
-TEST(Robot, CanReceiveRobotState) {
+TEST(RobotImpl, CanReceiveRobotState) {
   research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
@@ -46,7 +46,7 @@ TEST(Robot, CanReceiveRobotState) {
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
 }
 
-TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
+TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
   research_interface::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
@@ -58,7 +58,7 @@ TEST(Robot, ThrowsTimeoutIfNoRobotStateArrives) {
   EXPECT_THROW(robot.update(), NetworkException);
 }
 
-TEST(Robot, StopsIfControlConnectionClosed) {
+TEST(RobotImpl, StopsIfControlConnectionClosed) {
   std::unique_ptr<Robot::Impl> robot;
   {
     MockServer server;
@@ -74,7 +74,7 @@ TEST(Robot, StopsIfControlConnectionClosed) {
   EXPECT_FALSE(robot->update());
 }
 
-TEST(Robot, CanStartMotionGenerator) {
+TEST(RobotImpl, CanStartMotionGenerator) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
@@ -90,7 +90,7 @@ TEST(Robot, CanStartMotionGenerator) {
   EXPECT_NO_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity));
 }
 
-TEST(Robot, CanStartController) {
+TEST(RobotImpl, CanStartController) {
   MockServer server;
   server
     .onStartController([](const research_interface::StartControllerRequest&) {
@@ -105,7 +105,7 @@ TEST(Robot, CanStartController) {
   EXPECT_NO_THROW(robot.startController());
 }
 
-TEST(Robot, CanNotStartMultipleMotionGenerators) {
+TEST(RobotImpl, CanNotStartMultipleMotionGenerators) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
@@ -122,7 +122,7 @@ TEST(Robot, CanNotStartMultipleMotionGenerators) {
   EXPECT_THROW(robot.startMotionGenerator(MotionGeneratorType::kJointVelocity), ControlException);
 }
 
-TEST(Robot, CanNotStartMultipleControllers) {
+TEST(RobotImpl, CanNotStartMultipleControllers) {
   MockServer server;
   server
     .onStartController([](const research_interface::StartControllerRequest&) {
@@ -138,7 +138,7 @@ TEST(Robot, CanNotStartMultipleControllers) {
   EXPECT_THROW(robot.startController(), ControlException);
 }
 
-TEST(Robot, CanSendMotionGeneratorCommand) {
+TEST(RobotImpl, CanSendMotionGeneratorCommand) {
   research_interface::RobotCommand sent_command;
   randomRobotCommand(sent_command);
   sent_command.motion.motion_generation_finished = false;
@@ -172,7 +172,7 @@ TEST(Robot, CanSendMotionGeneratorCommand) {
   EXPECT_TRUE(robot.motionGeneratorRunning());
 }
 
-TEST(Robot, CanSendControllerCommand) {
+TEST(RobotImpl, CanSendControllerCommand) {
   research_interface::RobotCommand sent_command;
   randomRobotCommand(sent_command);
 
@@ -204,7 +204,7 @@ TEST(Robot, CanSendControllerCommand) {
   EXPECT_TRUE(robot.controllerRunning());
 }
 
-TEST(Robot, CanReceiveMotionGenerationError) {
+TEST(RobotImpl, CanReceiveMotionGenerationError) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
@@ -239,7 +239,7 @@ TEST(Robot, CanReceiveMotionGenerationError) {
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
-TEST(Robot, CanStopMotionGenerator) {
+TEST(RobotImpl, CanStopMotionGenerator) {
   MockServer server;
   server
     .onStartMotionGenerator([](const research_interface::StartMotionGeneratorRequest& request) {
@@ -283,7 +283,7 @@ TEST(Robot, CanStopMotionGenerator) {
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
-TEST(Robot, CanStopController) {
+TEST(RobotImpl, CanStopController) {
   MockServer server;
   server
     .onStartController([](const research_interface::StartControllerRequest&) {
