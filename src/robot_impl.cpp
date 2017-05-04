@@ -4,12 +4,11 @@
 
 #include <Poco/Net/NetException.h>
 #include <cstring>
-#include <iostream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
-using namespace std::string_literals;  // NOLINT
+using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
@@ -17,8 +16,11 @@ constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
-                  std::chrono::milliseconds timeout)
-    : motion_generator_running_{false} {
+                  std::chrono::milliseconds timeout,
+                  RealtimeConfig realtime_config)
+    : realtime_config_{realtime_config},
+      motion_generator_running_{false},
+      controller_running_{false} {
   Poco::Timespan poco_timeout(1000l * timeout.count());
   try {
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
@@ -93,7 +95,7 @@ bool Robot::Impl::update() {
     throw NetworkException("libfranka: robot state read: "s + e.what());
   }
 
-  if (motion_generator_running_) {
+  if (motion_generator_running_ || controller_running_) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
 
     try {
@@ -121,9 +123,23 @@ bool Robot::Impl::motionGeneratorRunning() const noexcept {
   return motion_generator_running_;
 }
 
-research_interface::MotionGeneratorCommand&
-Robot::Impl::motionCommand() noexcept {
-  return robot_command_.motion;
+bool Robot::Impl::controllerRunning() const noexcept {
+  return controller_running_;
+}
+
+RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
+  return realtime_config_;
+}
+
+void Robot::Impl::controllerCommand(
+    const research_interface::ControllerCommand& controller_command) noexcept {
+  robot_command_.control = controller_command;
+}
+
+void Robot::Impl::motionGeneratorCommand(
+    const research_interface::MotionGeneratorCommand&
+        motion_generator_command) noexcept {
+  robot_command_.motion = motion_generator_command;
 }
 
 bool Robot::Impl::handleReplies() {
@@ -155,6 +171,16 @@ bool Robot::Impl::handleReplies() {
       case research_interface::Function::kStopMotionGenerator:
         handleReply<research_interface::StopMotionGeneratorReply>(
             std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
+                      std::placeholders::_1));
+        break;
+      case research_interface::Function::kStartController:
+        handleReply<research_interface::StartControllerReply>(
+            std::bind(&Robot::Impl::handleStartControllerReply, this,
+                      std::placeholders::_1));
+        break;
+      case research_interface::Function::kStopController:
+        handleReply<research_interface::StopControllerReply>(
+            std::bind(&Robot::Impl::handleStopControllerReply, this,
                       std::placeholders::_1));
         break;
       default:
@@ -215,7 +241,7 @@ void Robot::Impl::startMotionGenerator(
     research_interface::StartMotionGeneratorRequest::Type
         motion_generator_type) {
   if (motion_generator_running_) {
-    throw MotionGeneratorException(
+    throw ControlException(
         "libfranka: attempted to start multiple motion generators!");
   }
   std::memset(&robot_command_, 0, sizeof(robot_command_));
@@ -223,21 +249,6 @@ void Robot::Impl::startMotionGenerator(
   research_interface::StartMotionGeneratorRequest request(
       motion_generator_type);
   tcp_socket_.sendBytes(&request, sizeof(request));
-
-  research_interface::StartMotionGeneratorReply motion_generator_reply =
-      tcpReceiveObject<research_interface::Function::kStartMotionGenerator,
-                       research_interface::StartMotionGeneratorReply>();
-
-  switch (motion_generator_reply.status) {
-    case research_interface::StartMotionGeneratorReply::Status::kSuccess:
-      break;
-    case research_interface::StartMotionGeneratorReply::Status::kNotConnected:
-      throw ProtocolException(
-          "libfranka: attempted to start motion generator, but not connected!");
-    case research_interface::StartMotionGeneratorReply::Status::kInvalidType:
-    default:
-      throw ProtocolException("libfranka: unexpected motion generator reply!");
-  }
 
   expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
 
@@ -294,19 +305,67 @@ void Robot::Impl::stopMotionGenerator() {
   throw NetworkException("libfranka: connection closed by server.");
 }
 
+void Robot::Impl::startController() {
+  if (controller_running_) {
+    throw ControlException(
+        "libfranka: attempted to start multiple controllers!");
+  }
+
+  research_interface::StartControllerRequest request;
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  expected_replies_.insert(research_interface::Function::kStartController);
+
+  while (update()) {
+    if (robot_state_.rcuRobotState().controller_mode ==
+        research_interface::ControllerMode::kExternalController) {
+      controller_running_ = true;
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
+}
+
+void Robot::Impl::stopController() {
+  if (!controller_running_) {
+    return;
+  }
+
+  research_interface::StopControllerRequest request;
+  tcp_socket_.sendBytes(&request, sizeof(request));
+
+  expected_replies_.insert(research_interface::Function::kStopController);
+
+  while (update()) {
+    if (robot_state_.rcuRobotState().controller_mode !=
+        research_interface::ControllerMode::kExternalController) {
+      controller_running_ = false;
+      return;
+    }
+  }
+  throw NetworkException("libfranka: connection closed by server.");
+}
+
 void Robot::Impl::handleStartMotionGeneratorReply(
     const research_interface::StartMotionGeneratorReply& reply) {
-  motion_generator_running_ = false;
   switch (reply.status) {
+    case research_interface::StartMotionGeneratorReply::Status::kSuccess:
+      // After sending Success, RCU will send another reply in the future,
+      // e.g. Finished or Aborted.
+      expected_replies_.insert(
+          research_interface::Function::kStartMotionGenerator);
+      break;
     case research_interface::StartMotionGeneratorReply::Status::kFinished:
+      motion_generator_running_ = false;
       break;
     case research_interface::StartMotionGeneratorReply::Status::kAborted:
-      throw MotionGeneratorException(
-          "libfranka: motion generator command aborted!");
+      motion_generator_running_ = false;
+      throw ControlException("libfranka: motion generator command aborted!");
     case research_interface::StartMotionGeneratorReply::Status::kRejected:
-      throw MotionGeneratorException(
-          "libfranka: motion generator command rejected!");
+      motion_generator_running_ = false;
+      throw ControlException("libfranka: motion generator command rejected!");
     default:
+      motion_generator_running_ = false;
       throw ProtocolException(
           "libfranka: unexpected start motion generator reply!");
   }
@@ -316,6 +375,25 @@ void Robot::Impl::handleStopMotionGeneratorReply(
     const research_interface::StopMotionGeneratorReply& reply) {
   if (reply.status !=
       research_interface::StopMotionGeneratorReply::Status::kSuccess) {
+    throw ProtocolException(
+        "libfranka: unexpected stop motion generator reply!");
+  }
+}
+
+void Robot::Impl::handleStartControllerReply(
+    const research_interface::StartControllerReply& reply) {
+  switch (reply.status) {
+    case research_interface::StartControllerReply::Status::kSuccess:
+      break;
+    default:
+      controller_running_ = false;
+      throw ProtocolException("libfranka: unexpected start controller reply!");
+  }
+}
+void Robot::Impl::handleStopControllerReply(
+    const research_interface::StopControllerReply& reply) {
+  if (reply.status !=
+      research_interface::StopControllerReply::Status::kSuccess) {
     throw ProtocolException(
         "libfranka: unexpected stop motion generator reply!");
   }

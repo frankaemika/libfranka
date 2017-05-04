@@ -11,3 +11,4 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
 
 void randomRobotCommand(research_interface::RobotCommand& command);
 void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected, const research_interface::MotionGeneratorCommand& actual);
+void testControllerCommandsAreEqual(const research_interface::ControllerCommand& expected, const research_interface::ControllerCommand& actual);

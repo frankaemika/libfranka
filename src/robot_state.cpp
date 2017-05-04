@@ -18,10 +18,6 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 }  // anonymous namespace
 
-RobotState::RobotState() noexcept {
-  std::memset(this, 0, sizeof(*this));
-}
-
 std::ostream& operator<<(std::ostream& ostream,
                          const franka::RobotState& robot_state) {
   ostream << "{O_T_EE: " << robot_state.O_T_EE

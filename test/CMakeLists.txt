@@ -3,7 +3,7 @@ set(GTEST_SOURCE_DIR ${THIRDPARTY_SOURCES_DIR}/googletest)
 set(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/googletest)
 set(GTEST_VERSION 1.8.0)
 set(GTEST_ARCHIVE_HASH 58a6f4277ca2bc8565222b3bbd58a177609e9c488e8a72649359ba51450db7d8)
-set(GTEST_LIBRARIES gtest gtest_main)
+set(GTEST_LIBRARIES gtest gmock gmock_main)
 
 include(SetupGoogleTest)
 
@@ -13,13 +13,15 @@ set(TEST_DEPENDENCIES franka research-interface-common ${GTEST_LIBRARIES})
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
 add_executable(run_all_tests
+  control_types_tests.cpp
   robot_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
-  motion_generator_tests.cpp
+  control_loop_tests.cpp
+  motion_generator_loop_tests.cpp
   mock_server.cpp
   helpers.cpp
-  )
+)
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
@@ -50,6 +52,7 @@ if(BUILD_COVERAGE)
     DEPENDS run_all_tests
     COMMENT "Generating code coverage"
   )
+  return()
 endif()
 
 ## Sanitizers

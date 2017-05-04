@@ -41,10 +41,17 @@ struct IncompatibleVersionException : public Exception {
 };
 
 /**
- * MotionGeneratorException is thrown in case of attempting to start a
- * motion generator while another motion generator is already running
+ * ControlException is thrown if an error occurs during motion generation
+ * or torque control.
  */
-struct MotionGeneratorException : public Exception {
+struct ControlException : public Exception {
+  using Exception::Exception;
+};
+
+/**
+ * RealtimeException is thrown if realtime priority can not be set.
+ */
+struct RealtimeException : public Exception {
   using Exception::Exception;
 };
 

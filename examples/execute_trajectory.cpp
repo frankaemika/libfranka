@@ -41,30 +41,27 @@ int main(int argc, char** argv) {
   std::vector<franka::RobotState> states;
   try {
     franka::Robot robot(argv[1]);
-    robot.update();
-    std::cout << "Starting joint pose motion generator" << std::endl;
-    franka::JointPoseMotionGenerator motion_generator =
-        robot.startJointPoseMotionGenerator();
 
-    for (std::array<double, 7>& q : samples) {
-      if (!robot.update()) {
-        std::cout << "Connection lost" << std::endl;
-        break;
-      }
-      motion_generator.setDesiredPose(q);
-      states.push_back(robot.robotState());
-    }
-  } catch (franka::NetworkException const& e) {
+    size_t index = 0;
+    robot.control(
+        [&](const franka::RobotState& robot_state) -> franka::JointValues {
+          if (index >= samples.size()) {
+            return franka::Stop;
+          }
+          states.push_back(robot_state);
+          return samples[index++];
+        });
+  } catch (const franka::ControlException& e) {
+    std::cout << e.what() << std::endl;
+  } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
-  } catch (franka::MotionGeneratorException const& e) {
-    std::cout << e.what() << std::endl;
   }
 
   std::cout << "Logging results to file: " << argv[3] << std::endl;
   std::fstream output_stream;
   output_stream.open(argv[3], std::fstream::out);
-  for (unsigned int s = 0; s < states.size(); s++) {
+  for (size_t s = 0; s < states.size(); s++) {
     output_stream << "Sample: #" << s << std::endl;
     output_stream << "q_d: \t" << samples[s] << std::endl;
     output_stream << "Robot state:" << std::endl;
