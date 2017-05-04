@@ -190,13 +190,6 @@ class Robot {
 
   class Impl;
 
-  /**
-   * Gets the robot implementation.
-   *
-   * @return Robot implementation.
-   */
-  Impl& impl() noexcept;
-
  private:
   std::unique_ptr<Impl> impl_;
 };

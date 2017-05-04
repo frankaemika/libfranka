@@ -14,10 +14,6 @@ Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config)
 // Has to be declared here, as the Impl type is incomplete in the header
 Robot::~Robot() noexcept = default;
 
-Robot::Impl& Robot::impl() noexcept {
-  return *impl_;
-}
-
 Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
