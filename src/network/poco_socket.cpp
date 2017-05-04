@@ -10,12 +10,12 @@ void PocoTcpSocket::setReceiveTimeout(std::chrono::milliseconds timeout) {
   tcp_socket_.setReceiveTimeout(Poco::Timespan{1000l * timeout.count()});
 }
 
-void PocoTcpSocket::connect(const std::string &franka_address,
+void PocoTcpSocket::connect(const std::string& franka_address,
                             uint16_t franka_port,
                             std::chrono::milliseconds timeout) {
   try {
-  tcp_socket_.connect({franka_address, franka_port},
-                      Poco::Timespan{1000l * timeout.count()});
+    tcp_socket_.connect({franka_address, franka_port},
+                        Poco::Timespan{1000l * timeout.count()});
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
@@ -57,7 +57,7 @@ int PocoTcpSocket::available() {
   }
 }
 
-int PocoTcpSocket::receiveBytes(void *data, size_t size) {
+int PocoTcpSocket::receiveBytes(void* data, size_t size) {
   try {
     return tcp_socket_.receiveBytes(data, size);
   } catch (Poco::TimeoutException const& e) {
@@ -67,7 +67,7 @@ int PocoTcpSocket::receiveBytes(void *data, size_t size) {
   }
 }
 
-int PocoTcpSocket::sendBytes(const void *data, size_t size) {
+int PocoTcpSocket::sendBytes(const void* data, size_t size) {
   try {
     return tcp_socket_.sendBytes(data, size);
   } catch (Poco::Exception const& e) {
@@ -83,13 +83,15 @@ PocoTcpSocket::~PocoTcpSocket() {
 
 void PocoUdpSocket::setReceiveTimeout(std::chrono::milliseconds timeout) {
   try {
-    return udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * timeout.count()});
+    return udp_socket_.setReceiveTimeout(
+        Poco::Timespan{1000l * timeout.count()});
   } catch (Poco::Exception const& e) {
     throw NetworkException("libfranka: "s + e.what());
   }
 }
 
-void PocoUdpSocket::bind(const std::string &franka_address, uint16_t franka_port) {
+void PocoUdpSocket::bind(const std::string& franka_address,
+                         uint16_t franka_port) {
   try {
     return udp_socket_.bind({franka_address, franka_port});
   } catch (Poco::Exception const& e) {
@@ -97,7 +99,7 @@ void PocoUdpSocket::bind(const std::string &franka_address, uint16_t franka_port
   }
 }
 
-int PocoUdpSocket::sendTo(const void *data, size_t size) {
+int PocoUdpSocket::sendTo(const void* data, size_t size) {
   try {
     return udp_socket_.sendTo(data, size, udp_server_address_);
   } catch (Poco::Exception const& e) {
@@ -105,7 +107,7 @@ int PocoUdpSocket::sendTo(const void *data, size_t size) {
   }
 }
 
-int PocoUdpSocket::receiveFrom(void *data, size_t size) {
+int PocoUdpSocket::receiveFrom(void* data, size_t size) {
   try {
     return udp_socket_.receiveFrom(data, size, udp_server_address_);
   } catch (Poco::Exception const& e) {
@@ -121,4 +123,4 @@ uint16_t PocoUdpSocket::port() {
   }
 }
 
-} // namespace franka
+}  // namespace franka
