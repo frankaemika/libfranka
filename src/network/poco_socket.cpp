@@ -19,7 +19,7 @@ void PocoTcpSocket::connect(const std::string& franka_address,
   } catch (Poco::Net::NetException const& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (Poco::TimeoutException const& e) {
-    throw TimeoutException("libfranka: FRANKA connection timeout"s);
+    throw NetworkException("libfranka: FRANKA connection timeout"s);
   } catch (Poco::Exception const& e) {
     throw NetworkException("libfranka: "s + e.what());
   }
@@ -61,7 +61,7 @@ int PocoTcpSocket::receiveBytes(void* data, size_t size) {
   try {
     return tcp_socket_.receiveBytes(data, size);
   } catch (Poco::TimeoutException const& e) {
-    throw TimeoutException("libfranka: FRANKA connection timeout"s);
+    throw NetworkException("libfranka: FRANKA connection timeout"s);
   } catch (Poco::Exception const& e) {
     throw NetworkException("libfranka: tcp receive bytes: "s + e.what());
   }

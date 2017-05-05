@@ -1,7 +1,5 @@
 #include "robot_impl.h"
-#include "network/poco_socket.h"
 
-#include <cstring>
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -16,11 +14,12 @@ constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
                   std::chrono::milliseconds timeout,
-                  RealtimeConfig realtime_config)
+                  RealtimeConfig realtime_config,
+                  std::unique_ptr<TcpSocket> tcp_socket,
+                  std::unique_ptr<UdpSocket> udp_socket)
     : realtime_config_{realtime_config},
-      network_{franka_address, franka_port, timeout,
-               std::unique_ptr<TcpSocket>(new PocoTcpSocket()),
-               std::unique_ptr<UdpSocket>(new PocoUdpSocket())},
+      network_{franka_address, franka_port, timeout, std::move(tcp_socket),
+               std::move(udp_socket)},
       motion_generator_running_{false},
       controller_running_{false} {
   research_interface::ConnectRequest connect_request(network_.udpPort());

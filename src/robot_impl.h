@@ -9,6 +9,7 @@
 
 #include "complete_robot_state.h"
 #include "network/network.h"
+#include "network/poco_socket.h"
 #include "robot_control.h"
 
 namespace franka {
@@ -21,7 +22,11 @@ class Robot::Impl : public RobotControl {
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = research_interface::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout,
-                RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+                RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
+                std::unique_ptr<TcpSocket> tcp_socket =
+                    std::unique_ptr<TcpSocket>(new PocoTcpSocket()),
+                std::unique_ptr<UdpSocket> udp_socket =
+                    std::unique_ptr<UdpSocket>(new PocoUdpSocket()));
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update() override;
