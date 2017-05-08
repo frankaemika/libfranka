@@ -1,12 +1,12 @@
 #pragma once
 
 #include <chrono>
-#include <unordered_set>
 
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
 
+#include "command_handler.h"
 #include "complete_robot_state.h"
 #include "network/network.h"
 #include "network/poco_socket.h"
@@ -14,7 +14,7 @@
 
 namespace franka {
 
-class Robot::Impl : public RobotControl {
+class Robot::Impl : public RobotControl, public CommandHandler {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
   static constexpr double kCommandTimeStep{0.001};
@@ -22,11 +22,7 @@ class Robot::Impl : public RobotControl {
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = research_interface::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout,
-                RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
-                std::unique_ptr<TcpSocket> tcp_socket =
-                    std::unique_ptr<TcpSocket>(new PocoTcpSocket()),
-                std::unique_ptr<UdpSocket> udp_socket =
-                    std::unique_ptr<UdpSocket>(new PocoUdpSocket()));
+                RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update() override;
@@ -61,38 +57,24 @@ class Robot::Impl : public RobotControl {
       std::function<void(const T&, research_interface::ControllerCommand*)>
           conversion_callback);
 
- private:
-  bool handleReplies();
-
   void handleStartMotionGeneratorReply(
-      const research_interface::StartMotionGeneratorReply& reply);
+      const research_interface::StartMotionGeneratorReply& reply) override;
   void handleStopMotionGeneratorReply(
-      const research_interface::StopMotionGeneratorReply& reply);
+      const research_interface::StopMotionGeneratorReply& reply) override;
   void handleStartControllerReply(
-      const research_interface::StartControllerReply& reply);
+      const research_interface::StartControllerReply& reply) override;
   void handleStopControllerReply(
-      const research_interface::StopControllerReply& reply);
+      const research_interface::StopControllerReply& reply) override;
 
+ private:
   const RealtimeConfig realtime_config_;
 
   Network network_;
 
-  uint16_t ri_version_;
   bool motion_generator_running_;
   bool controller_running_;
   research_interface::RobotCommand robot_command_;
   CompleteRobotState robot_state_;
-
-  // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
-  // taken from http://stackoverflow.com/a/24847480/249642
-  struct EnumClassHash {
-    template <typename T>
-    size_t operator()(T t) const {
-      return static_cast<size_t>(t);
-    }
-  };
-  std::unordered_multiset<research_interface::Function, EnumClassHash>
-      expected_replies_;
 };
 
 }  // namespace franka
