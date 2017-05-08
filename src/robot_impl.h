@@ -6,15 +6,13 @@
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
 
-#include "command_handler.h"
 #include "complete_robot_state.h"
-#include "network/network.h"
-#include "network/poco_socket.h"
+#include "network.h"
 #include "robot_control.h"
 
 namespace franka {
 
-class Robot::Impl : public RobotControl, public CommandHandler {
+class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
   static constexpr double kCommandTimeStep{0.001};
@@ -58,23 +56,35 @@ class Robot::Impl : public RobotControl, public CommandHandler {
           conversion_callback);
 
   void handleStartMotionGeneratorReply(
-      const research_interface::StartMotionGeneratorReply& reply) override;
+      const research_interface::StartMotionGeneratorReply& reply);
   void handleStopMotionGeneratorReply(
-      const research_interface::StopMotionGeneratorReply& reply) override;
+      const research_interface::StopMotionGeneratorReply& reply);
   void handleStartControllerReply(
-      const research_interface::StartControllerReply& reply) override;
+      const research_interface::StartControllerReply& reply);
   void handleStopControllerReply(
-      const research_interface::StopControllerReply& reply) override;
+      const research_interface::StopControllerReply& reply);
 
  private:
   const RealtimeConfig realtime_config_;
 
   Network network_;
 
+  uint16_t ri_version_;
   bool motion_generator_running_;
   bool controller_running_;
   research_interface::RobotCommand robot_command_;
   CompleteRobotState robot_state_;
+
+  // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
+  // taken from http://stackoverflow.com/a/24847480/249642
+  struct EnumClassHash {
+    template <typename T>
+    size_t operator()(T t) const {
+      return static_cast<size_t>(t);
+    }
+  };
+  std::unordered_multiset<research_interface::Function, EnumClassHash>
+      expected_replies_;
 };
 
 }  // namespace franka

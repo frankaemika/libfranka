@@ -71,7 +71,7 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
     EXPECT_TRUE(robot->update());
   }
 
-  EXPECT_FALSE(robot->update());
+  EXPECT_THROW(robot->update(), NetworkException);
 }
 
 TEST(RobotImpl, CanStartMotionGenerator) {
