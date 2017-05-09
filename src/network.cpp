@@ -64,7 +64,7 @@ int Network::tcpReceiveIntoBuffer() try {
   throw NetworkException("libfranka: "s + e.what());
 }
 
-bool Network::tcpReadResponse(research_interface::Function *function) try {
+bool Network::tcpReadResponse(research_interface::Function* function) try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     int rv = tcpReceiveIntoBuffer();
 

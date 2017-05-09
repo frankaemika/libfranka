@@ -34,7 +34,7 @@ class Network {
   template <typename T>
   void tcpSendRequest(const T& request);
 
-  bool tcpReadResponse(research_interface::Function *function);
+  bool tcpReadResponse(research_interface::Function* function);
 
   template <typename T>
   bool handleReply(std::function<void(T)> handle);
