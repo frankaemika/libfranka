@@ -85,7 +85,7 @@ class Robot::Impl : public RobotControl {
     }
   };
   std::unordered_multiset<research_interface::Function, EnumClassHash>
-      expected_replies_;
+      expected_responses_;
 };
 
 }  // namespace franka

@@ -91,7 +91,7 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
     if (*reinterpret_cast<research_interface::Function*>(buffer.data()) !=
         T::kFunction) {
       throw ProtocolException(
-          std::string{"libfranka: received reply of wrong type."});
+          std::string{"libfranka: received response of wrong type."});
     }
     return *reinterpret_cast<const typename T::Response*>(buffer.data());
   } catch (const Poco::TimeoutException& e) {

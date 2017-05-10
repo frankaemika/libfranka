@@ -45,8 +45,8 @@ Robot::Impl::Impl(const std::string& franka_address,
 bool Robot::Impl::update() {
   research_interface::Function function;
   if (network_.tcpReadResponse(&function)) {
-    if (expected_replies_.find(function) == expected_replies_.end()) {
-      throw ProtocolException("libfranka: unexpected reply!");
+    if (expected_responses_.find(function) == expected_responses_.end()) {
+      throw ProtocolException("libfranka: unexpected response!");
     }
 
     bool handled = false;
@@ -74,13 +74,13 @@ bool Robot::Impl::update() {
                       std::placeholders::_1));
         break;
       default:
-        throw ProtocolException("libfranka: unsupported reply!");
+        throw ProtocolException("libfranka: unsupported response!");
     }
 
     if (handled) {
-      auto iterator = expected_replies_.find(function);
-      if (iterator != expected_replies_.end()) {
-        expected_replies_.erase(iterator);
+      auto iterator = expected_responses_.find(function);
+      if (iterator != expected_responses_.end()) {
+        expected_responses_.erase(iterator);
       }
     }
   }
@@ -137,7 +137,8 @@ void Robot::Impl::startMotionGenerator(
   research_interface::StartMotionGenerator::Request request(mode);
   network_.tcpSendRequest(request);
 
-  expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
+  expected_responses_.insert(
+      research_interface::Function::kStartMotionGenerator);
 
   research_interface::MotionGeneratorMode motion_generator_mode;
   switch (mode) {
@@ -179,7 +180,8 @@ void Robot::Impl::stopMotionGenerator() {
   research_interface::StopMotionGenerator::Request request;
   network_.tcpSendRequest(request);
 
-  expected_replies_.insert(research_interface::Function::kStopMotionGenerator);
+  expected_responses_.insert(
+      research_interface::Function::kStopMotionGenerator);
 
   robot_command_.motion.motion_generation_finished = true;
   while (update()) {
@@ -201,7 +203,7 @@ void Robot::Impl::startController() {
   research_interface::StartController::Request request;
   network_.tcpSendRequest(request);
 
-  expected_replies_.insert(research_interface::Function::kStartController);
+  expected_responses_.insert(research_interface::Function::kStartController);
 
   while (update()) {
     if (robot_state_.rcuRobotState().controller_mode ==
@@ -221,7 +223,7 @@ void Robot::Impl::stopController() {
   research_interface::StopController::Request request;
   network_.tcpSendRequest(request);
 
-  expected_replies_.insert(research_interface::Function::kStopController);
+  expected_responses_.insert(research_interface::Function::kStopController);
 
   while (update()) {
     if (robot_state_.rcuRobotState().controller_mode !=
@@ -239,7 +241,7 @@ void Robot::Impl::handleStartMotionGeneratorResponse(
     case research_interface::StartMotionGenerator::Status::kSuccess:
       // After sending Success, RCU will send another response in the future,
       // e.g. Finished or Aborted.
-      expected_replies_.insert(
+      expected_responses_.insert(
           research_interface::Function::kStartMotionGenerator);
       break;
     case research_interface::StartMotionGenerator::Status::kFinished:
