@@ -104,11 +104,6 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
   } catch (const Poco::Exception& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
   }
-  if (*reinterpret_cast<research_interface::Function*>(buffer.data()) !=
-      T::kFunction) {
-    throw ProtocolException(
-        std::string{"libfranka: received response of wrong type."});
-  }
   return *reinterpret_cast<const typename T::Response*>(buffer.data());
 }
 
