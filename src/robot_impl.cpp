@@ -92,10 +92,7 @@ bool Robot::Impl::update() {
   if (motion_generator_running_ || controller_running_) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
 
-    int bytes_sent = network_.udpSendRobotCommand(robot_command_);
-    if (bytes_sent != sizeof(robot_command_)) {
-      throw NetworkException("libfranka: robot command send error");
-    }
+    network_.udpSendRobotCommand(robot_command_);
   }
   return true;
 }

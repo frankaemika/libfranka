@@ -29,7 +29,7 @@ class Network {
   template <research_interface::Function F, typename T>
   T tcpBlockingReceiveReply();
 
-  int udpSendRobotCommand(const research_interface::RobotCommand& command);
+  void udpSendRobotCommand(const research_interface::RobotCommand& command);
 
   template <typename T>
   void tcpSendRequest(const T& request);

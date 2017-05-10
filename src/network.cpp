@@ -36,9 +36,12 @@ uint16_t Network::udpPort() const noexcept {
   return udp_socket_.address().port();
 }
 
-int Network::udpSendRobotCommand(
+void Network::udpSendRobotCommand(
     const research_interface::RobotCommand& command) try {
-  return udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
+  int bytes_sent = udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
+  if (bytes_sent != sizeof(command)) {
+    throw NetworkException("libfranka: robot command send error");
+  }
 } catch (const Poco::Exception& e) {
   throw NetworkException("libfranka: udp send: "s + e.what());
 }
