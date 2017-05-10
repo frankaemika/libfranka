@@ -87,13 +87,6 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
       int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left);
       bytes_read += rv;
     }
-
-    if (*reinterpret_cast<research_interface::Function*>(buffer.data()) !=
-        T::kFunction) {
-      throw ProtocolException(
-          std::string{"libfranka: received response of wrong type."});
-    }
-    return *reinterpret_cast<const typename T::Response*>(buffer.data());
   } catch (const Poco::TimeoutException& e) {
     if (bytes_read != 0) {
       throw ProtocolException(std::string{"libfranka: incorrect object size"});
@@ -104,7 +97,13 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
   } catch (const Poco::Exception& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
   }
-  return *reinterpret_cast<const typename T::Response*>(buffer.data());
+  typename T::Response const* response =
+      reinterpret_cast<const typename T::Response*>(buffer.data());
+  if (response->function != T::kFunction) {
+    throw ProtocolException(
+        std::string{"libfranka: received response of wrong type."});
+  }
+  return *response;
 }
 
 }  // namespace franka
