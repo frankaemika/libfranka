@@ -15,14 +15,12 @@ namespace franka {
 class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
-  static constexpr double kCommandTimeStep{0.001};
 
   explicit Impl(const std::string& franka_address,
                 uint16_t franka_port = research_interface::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
-  void setRobotState(const research_interface::RobotState& robot_state);
   bool update() override;
 
   void controllerCommand(const research_interface::ControllerCommand&
