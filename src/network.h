@@ -99,7 +99,7 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
       throw ProtocolException(std::string{"libfranka: incorrect object size"});
     } else {
       throw NetworkException(
-          std::string{"libfranka: FRANKA connection closed"});
+          std::string{"libfranka: FRANKA connection timeout"});
     }
   } catch (const Poco::Exception& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
