@@ -1,16 +1,13 @@
 #pragma once
 
 #include <chrono>
-#include <unordered_set>
-
-#include <Poco/Net/DatagramSocket.h>
-#include <Poco/Net/StreamSocket.h>
 
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
 #include <research_interface/types.h>
 
 #include "complete_robot_state.h"
+#include "network.h"
 #include "robot_control.h"
 
 namespace franka {
@@ -24,7 +21,6 @@ class Robot::Impl : public RobotControl {
                 uint16_t franka_port = research_interface::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
-  ~Impl() noexcept;
 
   void setRobotState(const research_interface::RobotState& robot_state);
   bool update() override;
@@ -59,14 +55,6 @@ class Robot::Impl : public RobotControl {
       std::function<void(const T&, research_interface::ControllerCommand*)>
           conversion_callback);
 
- private:
-  bool handleReplies();
-
-  void receiveRobotState(Poco::Net::SocketAddress* server_address);
-
-  template <typename T>
-  void handleReply(std::function<void(T)> handle);
-
   void handleStartMotionGeneratorReply(
       const research_interface::StartMotionGeneratorReply& reply);
   void handleStopMotionGeneratorReply(
@@ -76,20 +64,17 @@ class Robot::Impl : public RobotControl {
   void handleStopControllerReply(
       const research_interface::StopControllerReply& reply);
 
-  template <research_interface::Function F, typename T>
-  T tcpReceiveObject();
-
+ private:
   const RealtimeConfig realtime_config_;
+
+  Network network_;
 
   uint16_t ri_version_;
   bool motion_generator_running_;
   bool controller_running_;
   research_interface::RobotCommand robot_command_;
   CompleteRobotState robot_state_;
-  Poco::Net::StreamSocket tcp_socket_;
-  Poco::Net::DatagramSocket udp_socket_;
 
-  std::vector<uint8_t> read_buffer_;
   // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
   // taken from http://stackoverflow.com/a/24847480/249642
   struct EnumClassHash {
@@ -98,7 +83,7 @@ class Robot::Impl : public RobotControl {
       return static_cast<size_t>(t);
     }
   };
-  std::unordered_set<research_interface::Function, EnumClassHash>
+  std::unordered_multiset<research_interface::Function, EnumClassHash>
       expected_replies_;
 };
 

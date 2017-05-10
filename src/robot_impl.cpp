@@ -1,9 +1,7 @@
 #include "robot_impl.h"
 
-#include <sstream>
-
-#include <Poco/Net/NetException.h>
 #include <cstring>
+#include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
 // be disabled, so we have to use `using namespace ...`.
@@ -19,94 +17,82 @@ Robot::Impl::Impl(const std::string& franka_address,
                   std::chrono::milliseconds timeout,
                   RealtimeConfig realtime_config)
     : realtime_config_{realtime_config},
+      network_{franka_address, franka_port, timeout},
       motion_generator_running_{false},
       controller_running_{false} {
-  Poco::Timespan poco_timeout(1000l * timeout.count());
-  try {
-    tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
-    tcp_socket_.setBlocking(true);
-    tcp_socket_.setSendTimeout(poco_timeout);
-    tcp_socket_.setReceiveTimeout(poco_timeout);
+  research_interface::ConnectRequest connect_request(network_.udpPort());
+  network_.tcpSendRequest(connect_request);
 
-    udp_socket_.setReceiveTimeout(poco_timeout);
-    udp_socket_.bind({"0.0.0.0", 0});
-
-    research_interface::ConnectRequest connect_request(
-        udp_socket_.address().port());
-
-    tcp_socket_.sendBytes(&connect_request, sizeof(connect_request));
-
-    research_interface::ConnectReply connect_reply =
-        tcpReceiveObject<research_interface::Function::kConnect,
-                         research_interface::ConnectReply>();
-    switch (connect_reply.status) {
-      case research_interface::ConnectReply::Status::
-          kIncompatibleLibraryVersion: {
-        std::stringstream message;
-        message << "libfranka: incompatible library version. " << std::endl
-                << "Server version: " << connect_reply.version << std::endl
-                << "Library version: " << research_interface::kVersion;
-        throw IncompatibleVersionException(message.str());
-      }
-      case research_interface::ConnectReply::Status::kSuccess:
-        ri_version_ = connect_reply.version;
-        break;
-      default:
-        throw ProtocolException("libfranka: protocol error");
+  research_interface::ConnectReply connect_reply =
+      network_.tcpBlockingReceiveReply<research_interface::Function::kConnect,
+                                       research_interface::ConnectReply>();
+  switch (connect_reply.status) {
+    case research_interface::ConnectReply::Status::
+        kIncompatibleLibraryVersion: {
+      std::stringstream message;
+      message << "libfranka: incompatible library version. " << std::endl
+              << "Server version: " << connect_reply.version << std::endl
+              << "Library version: " << research_interface::kVersion;
+      throw IncompatibleVersionException(message.str());
     }
-  } catch (Poco::Net::NetException const& e) {
-    throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
-  } catch (Poco::TimeoutException const& e) {
-    throw NetworkException("libfranka: FRANKA connection timeout");
-  } catch (Poco::Exception const& e) {
-    throw NetworkException("libfranka: "s + e.what());
-  }
-}
-
-Robot::Impl::~Impl() noexcept {
-  try {
-    tcp_socket_.shutdown();
-  } catch (...) {
+    case research_interface::ConnectReply::Status::kSuccess:
+      ri_version_ = connect_reply.version;
+      break;
+    default:
+      throw ProtocolException("libfranka: protocol error");
   }
 }
 
 bool Robot::Impl::update() {
-  try {
-    if (!handleReplies()) {
-      return false;  // server sent EOF
+  research_interface::Function function;
+  if (network_.tcpReadResponse(&function)) {
+    if (expected_replies_.find(function) == expected_replies_.end()) {
+      throw ProtocolException("libfranka: unexpected reply!");
     }
-  } catch (const Poco::Net::NetException& e) {
-    throw NetworkException("libfranka: control connection read: "s + e.what());
+
+    bool handled = false;
+    switch (function) {
+      case research_interface::Function::kStartMotionGenerator:
+        handled =
+            network_.handleReply<research_interface::StartMotionGeneratorReply>(
+                std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
+                          std::placeholders::_1));
+        break;
+      case research_interface::Function::kStopMotionGenerator:
+        handled =
+            network_.handleReply<research_interface::StopMotionGeneratorReply>(
+                std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
+                          std::placeholders::_1));
+        break;
+      case research_interface::Function::kStartController:
+        handled =
+            network_.handleReply<research_interface::StartControllerReply>(
+                std::bind(&Robot::Impl::handleStartControllerReply, this,
+                          std::placeholders::_1));
+        break;
+      case research_interface::Function::kStopController:
+        handled = network_.handleReply<research_interface::StopControllerReply>(
+            std::bind(&Robot::Impl::handleStopControllerReply, this,
+                      std::placeholders::_1));
+        break;
+      default:
+        throw ProtocolException("libfranka: unsupported reply!");
+    }
+
+    if (handled) {
+      auto iterator = expected_replies_.find(function);
+      if (iterator != expected_replies_.end()) {
+        expected_replies_.erase(iterator);
+      }
+    }
   }
 
-  Poco::Net::SocketAddress server_address;
-  try {
-    std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
-    int bytes_received =
-        udp_socket_.receiveFrom(buffer.data(), buffer.size(), server_address);
-    if (bytes_received != buffer.size()) {
-      throw ProtocolException("libfranka: incorrect object size");
-    }
-    robot_state_ =
-        *reinterpret_cast<research_interface::RobotState*>(buffer.data());
-  } catch (const Poco::TimeoutException& e) {
-    throw NetworkException("libfranka: robot state read timeout");
-  } catch (const Poco::Net::NetException& e) {
-    throw NetworkException("libfranka: robot state read: "s + e.what());
-  }
+  robot_state_ = network_.udpReadRobotState();
 
   if (motion_generator_running_ || controller_running_) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
 
-    try {
-      int bytes_sent = udp_socket_.sendTo(
-          &robot_command_, sizeof(robot_command_), server_address);
-      if (bytes_sent != sizeof(robot_command_)) {
-        throw NetworkException("libfranka: robot command send error");
-      }
-    } catch (Poco::Net::NetException const& e) {
-      throw NetworkException("libfranka: robot command send: "s + e.what());
-    }
+    network_.udpSendRobotCommand(robot_command_);
   }
   return true;
 }
@@ -142,101 +128,6 @@ void Robot::Impl::motionGeneratorCommand(
   robot_command_.motion = motion_generator_command;
 }
 
-bool Robot::Impl::handleReplies() {
-  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-    size_t offset = read_buffer_.size();
-    read_buffer_.resize(offset + tcp_socket_.available());
-    int rv = tcp_socket_.receiveBytes(&read_buffer_[offset],
-                                      tcp_socket_.available());
-    if (rv == 0) {
-      return false;
-    }
-
-    if (read_buffer_.size() < sizeof(research_interface::Function)) {
-      return true;
-    }
-
-    research_interface::Function function =
-        *reinterpret_cast<research_interface::Function*>(read_buffer_.data());
-
-    if (expected_replies_.find(function) == expected_replies_.end()) {
-      throw ProtocolException("libfranka: unexpected reply!");
-    }
-    switch (function) {
-      case research_interface::Function::kStartMotionGenerator:
-        handleReply<research_interface::StartMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStartMotionGeneratorReply, this,
-                      std::placeholders::_1));
-        break;
-      case research_interface::Function::kStopMotionGenerator:
-        handleReply<research_interface::StopMotionGeneratorReply>(
-            std::bind(&Robot::Impl::handleStopMotionGeneratorReply, this,
-                      std::placeholders::_1));
-        break;
-      case research_interface::Function::kStartController:
-        handleReply<research_interface::StartControllerReply>(
-            std::bind(&Robot::Impl::handleStartControllerReply, this,
-                      std::placeholders::_1));
-        break;
-      case research_interface::Function::kStopController:
-        handleReply<research_interface::StopControllerReply>(
-            std::bind(&Robot::Impl::handleStopControllerReply, this,
-                      std::placeholders::_1));
-        break;
-      default:
-        throw ProtocolException("libfranka: unsupported reply!");
-    }
-  }
-  return true;
-}
-
-template <typename T>
-void Robot::Impl::handleReply(std::function<void(T)> handle) {
-  if (read_buffer_.size() < sizeof(T)) {
-    return;
-  }
-
-  T reply = *reinterpret_cast<T*>(read_buffer_.data());
-
-  size_t remaining_bytes = read_buffer_.size() - sizeof(reply);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(reply)],
-               remaining_bytes);
-  read_buffer_.resize(remaining_bytes);
-
-  expected_replies_.erase(reply.function);
-  handle(reply);
-}
-
-template <research_interface::Function F, typename T>
-T Robot::Impl::tcpReceiveObject() {
-  int bytes_read = 0;
-  try {
-    std::array<uint8_t, sizeof(T)> buffer;
-    constexpr int kBytesTotal = sizeof(T);
-
-    while (bytes_read < kBytesTotal) {
-      int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left);
-      if (rv == 0) {
-        throw NetworkException("libfranka: FRANKA connection closed");
-      }
-      bytes_read += rv;
-    }
-    if (*reinterpret_cast<research_interface::Function*>(buffer.data()) != F) {
-      throw ProtocolException("libfranka: received reply of wrong type.");
-    }
-    return *reinterpret_cast<const T*>(buffer.data());
-  } catch (Poco::Net::NetException const& e) {
-    throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
-  } catch (Poco::TimeoutException const& e) {
-    if (bytes_read != 0) {
-      throw ProtocolException("libfranka: incorrect object size");
-    } else {
-      throw NetworkException("libfranka: FRANKA connection timeout");
-    }
-  }
-}
-
 void Robot::Impl::startMotionGenerator(
     research_interface::StartMotionGeneratorRequest::Type
         motion_generator_type) {
@@ -248,7 +139,7 @@ void Robot::Impl::startMotionGenerator(
 
   research_interface::StartMotionGeneratorRequest request(
       motion_generator_type);
-  tcp_socket_.sendBytes(&request, sizeof(request));
+  network_.tcpSendRequest(request);
 
   expected_replies_.insert(research_interface::Function::kStartMotionGenerator);
 
@@ -290,7 +181,7 @@ void Robot::Impl::stopMotionGenerator() {
   }
 
   research_interface::StopMotionGeneratorRequest request;
-  tcp_socket_.sendBytes(&request, sizeof(request));
+  network_.tcpSendRequest(request);
 
   expected_replies_.insert(research_interface::Function::kStopMotionGenerator);
 
@@ -312,7 +203,7 @@ void Robot::Impl::startController() {
   }
 
   research_interface::StartControllerRequest request;
-  tcp_socket_.sendBytes(&request, sizeof(request));
+  network_.tcpSendRequest(request);
 
   expected_replies_.insert(research_interface::Function::kStartController);
 
@@ -332,7 +223,7 @@ void Robot::Impl::stopController() {
   }
 
   research_interface::StopControllerRequest request;
-  tcp_socket_.sendBytes(&request, sizeof(request));
+  network_.tcpSendRequest(request);
 
   expected_replies_.insert(research_interface::Function::kStopController);
 
@@ -390,6 +281,7 @@ void Robot::Impl::handleStartControllerReply(
       throw ProtocolException("libfranka: unexpected start controller reply!");
   }
 }
+
 void Robot::Impl::handleStopControllerReply(
     const research_interface::StopControllerReply& reply) {
   if (reply.status !=

@@ -32,10 +32,8 @@ ControlLoop::~ControlLoop() {
 }
 
 void ControlLoop::operator()() {
-  while (robot_.update()) {
-    if (!spinOnce()) {
-      break;
-    }
+  while (spinOnce()) {
+    robot_.update();
   }
 }
 
