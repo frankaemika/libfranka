@@ -3,7 +3,7 @@
 #include <gmock/gmock.h>
 
 #include "motion_generator_loop.h"
-#include "motion_traits.h"
+#include "motion_generator_traits.h"
 
 #include "mock_robot_control.h"
 
@@ -52,7 +52,7 @@ class MotionGeneratorLoops : public ::testing::Test {
   using MotionGeneratorCallback = typename Loop::MotionGeneratorCallback;
   using ControlCallback = typename Loop::ControlCallback;
 
-  research_interface::StartMotionGeneratorRequest::Type kMotionGeneratorType = franka::MotionTraits<T>::kMotionGeneratorType;
+  research_interface::StartMotionGenerator::MotionGeneratorMode kMotionGeneratorMode = franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
 
   T createMotion();
   std::function<T(const RobotState&)> getCallback();
@@ -120,7 +120,7 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionCallback) {
   MockRobotControl robot;
   {
     InSequence _;
-    EXPECT_CALL(robot, startMotionGenerator(this->kMotionGeneratorType));
+    EXPECT_CALL(robot, startMotionGenerator(this->kMotionGeneratorMode));
     EXPECT_CALL(robot, stopMotionGenerator());
   }
 
@@ -134,7 +134,7 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithBothCallbacks) {
   {
     InSequence _;
     EXPECT_CALL(robot, startController());
-    EXPECT_CALL(robot, startMotionGenerator(this->kMotionGeneratorType));
+    EXPECT_CALL(robot, startMotionGenerator(this->kMotionGeneratorMode));
     EXPECT_CALL(robot, stopMotionGenerator());
     EXPECT_CALL(robot, stopController());
   }

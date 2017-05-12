@@ -66,8 +66,17 @@ set_target_properties(franka PROPERTIES
   SOVERSION ${libfranka_VERSION_MAJOR}
 )
 
-file(GLOB_RECURSE SOURCES src/*.cpp examples/*.cpp)
-file(GLOB_RECURSE HEADERS include/*.h src/*.h examples/*.h)
+file(GLOB_RECURSE SOURCES
+  src/*.cpp
+  examples/*.cpp
+  lib/research-interface-common/*.cpp
+)
+file(GLOB_RECURSE HEADERS
+  include/*.h
+  src/*.h
+  examples/*.h
+  lib/research-interface-common/*.h
+)
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>

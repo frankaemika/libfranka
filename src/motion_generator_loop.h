@@ -1,7 +1,6 @@
 #pragma once
 
 #include "control_loop.h"
-#include "motion_traits.h"
 
 namespace franka {
 

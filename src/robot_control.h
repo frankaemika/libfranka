@@ -3,7 +3,7 @@
 #include <franka/control_types.h>
 #include <franka/robot_state.h>
 #include <research_interface/rbk_types.h>
-#include <research_interface/types.h>
+#include <research_interface/service_types.h>
 
 namespace franka {
 
@@ -13,7 +13,7 @@ class RobotControl {
   virtual void stopController() = 0;
 
   virtual void startMotionGenerator(
-      research_interface::StartMotionGeneratorRequest::Type type) = 0;
+      research_interface::StartMotionGenerator::MotionGeneratorMode mode) = 0;
   virtual void stopMotionGenerator() = 0;
 
   virtual bool update() = 0;
