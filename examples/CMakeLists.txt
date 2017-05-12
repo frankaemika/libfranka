@@ -20,6 +20,7 @@ set(EXAMPLES
   generate_joint_pose_motion
   generate_joint_velocity_motion
   execute_trajectory
+  use_model_library
 )
 
 foreach(example ${EXAMPLES})
