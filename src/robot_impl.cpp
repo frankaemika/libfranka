@@ -11,6 +11,32 @@ namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
+std::string robotVersionToString(
+    research_interface::RobotVersion robot_version) {
+  std::stringstream robot_version_string;
+  switch (robot_version.type) {
+    case research_interface::RobotType::FEA_01_01_identified:
+      robot_version_string << "FEA_01_01_identified";
+      break;
+    default:
+      throw ModelException("Unknown robot type"s);
+  }
+
+  robot_version_string << "_";
+
+  switch (robot_version.id) {
+    case research_interface::RobotId::NONE:
+      break;
+    default:
+      throw ModelException("Unknown robot id"s);
+  }
+
+  robot_version_string << "v" << robot_version.version_major << "."
+                       << robot_version.version_minor << "."
+                       << robot_version.version_patch;
+  return robot_version_string.str();
+}
+
 Robot::Impl::Impl(const std::string& franka_address,
                   uint16_t franka_port,
                   std::chrono::milliseconds timeout,
@@ -33,9 +59,11 @@ Robot::Impl::Impl(const std::string& franka_address,
               << "Library version: " << research_interface::kVersion;
       throw IncompatibleVersionException(message.str());
     }
-    case research_interface::Connect::Status::kSuccess:
+    case research_interface::Connect::Status::kSuccess: {
       ri_version_ = connect_response.version;
+      robot_version_ = robotVersionToString(connect_response.robot_version);
       break;
+    }
     default:
       throw ProtocolException("libfranka: protocol error");
   }
@@ -289,6 +317,10 @@ void Robot::Impl::handleStopControllerResponse(
     throw ProtocolException(
         "libfranka: unexpected stop motion generator response!");
   }
+}
+
+std::string Robot::Impl::robotVersion() const noexcept {
+  return robot_version_;
 }
 
 }  // namespace franka

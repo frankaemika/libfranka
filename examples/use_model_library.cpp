@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     franka::RobotState state = robot.readOnce();
 
     franka::Model model(robot);
-    std::cout << model.jointPose(8, state) << std::endl;
+    std::cout << model.eePose(state) << std::endl;
   } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;
     return -1;

@@ -29,6 +29,7 @@ class Robot::Impl : public RobotControl {
                                   motion_generator_command) noexcept override;
   const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
+  std::string robotVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
@@ -68,6 +69,8 @@ class Robot::Impl : public RobotControl {
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
+  std::string robot_version_;
+
   bool motion_generator_running_;
   bool controller_running_;
 

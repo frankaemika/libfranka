@@ -185,6 +185,13 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
+  /**
+ * Returns the robot version as reported by the connected server.
+ *
+ * @return Version of the robot to which the server is connected.
+ */
+  std::string robotVersion() const noexcept;
+
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 
