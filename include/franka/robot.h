@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include <franka/command_types.h>
 #include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/robot_state.h>
@@ -15,8 +16,8 @@
 namespace franka {
 
 /**
- * Maintains a connection to FRANKA CONTROL and provides the current
- * robot state.
+ * Maintains a connection to FRANKA CONTROL, provides the current robot state,
+ * and allows to execute commands, motions, and torque control.
  */
 class Robot {
  public:
@@ -41,6 +42,13 @@ class Robot {
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
   ~Robot() noexcept;
+
+  /**
+   * @name Motion generation and torque control
+   * The callbacks given to the control functions are called with a fixed
+   * frequency of 1 [KHz].
+   * @{
+   */
 
   /**
    * Starts a control loop for torque control.
@@ -155,6 +163,9 @@ class Robot {
                    motion_generator_callback,
                std::function<Torques(const RobotState&)> control_callback =
                    std::function<Torques(const RobotState&)>());
+  /**
+   * @}
+   */
 
   /**
    * Starts a loop for reading the current robot state.
@@ -177,6 +188,71 @@ class Robot {
    * @see Robot::read for a way to repeatedly receive the robot state.
    */
   RobotState readOnce();
+
+  /**
+   * @name Commands
+   * Commands are executed by communicating with FRANKA CONTROL over the network.
+   * These functions should therefore not be called from within control or
+   * motion generator loops.
+   * @{
+   */
+
+  /**
+   * Returns the Cartesian limits.
+   *
+   * @throw CommandException if an error occured.
+   *
+   * @return Cartesian limits.
+   */
+  CartesianLimits getCartesianLimits();
+
+  /**
+   * Sets the controller mode.
+   *
+   * @throw CommandException if an error occured.
+   *
+   * @param[in] controller_mode Controller mode.
+   */
+  void setControllerMode(ControllerMode controller_mode);
+
+  void setCollisionBehavior();
+
+  void setJointImpedance();
+
+  void setCartesianImpedance();
+
+  void setGuidingMode();
+
+  void setEEToK();
+
+  /**
+   * Sets the flange-to-end-effector transform \f$^FT_{EE}\f$.
+   * The transform is represented as a 4x4 matrix in column-major format.
+   *
+   * @throw CommandException if an error occured.
+   *
+   * @param[in] F_T_EE Flange-to-EE transform matrix, column-major.
+   */
+  void setFToEE(const std::array<double, 16>& F_T_EE);
+
+  void setLoad();
+
+  void setTimeScalingFactor(double factor);
+
+  /**
+   * Runs automatic error recovery on FRANKA.
+   *
+   * @throw CommandException if an error occured.
+   *
+   * Automatic error recovery e.g. resets FRANKA after a collision occurred.
+   */
+  void automaticErrorRecovery();
+
+  void resetExternalTorqueAndForceMaxima();
+
+  /**
+   * @}
+   */
 
   /**
    * Returns the version reported by the connected server.
