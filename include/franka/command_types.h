@@ -20,9 +20,35 @@ enum ControllerMode {
 };
 
 /**
- * Helper type for holding Cartesian limits.
+ * Parameters of a cubiod used as virtual wall.
+ *
+ * @see Robot::getVirtualWall
  */
-struct CartesianLimits {
+struct VirtualWallCubiod {
+  /**
+   * ID of the virtual wall.
+   */
+  int32_t id;
+
+  /**
+   * Minimum corner point of the cuboid in p_frame in \f$[m]\f$.
+   */
+  std::array<double, 3> p_min;
+
+  /**
+   * Maximum corner point of the cuboid in p_frame in \f$[m]\f$.
+   */
+  std::array<double, 3> p_max;
+
+  /**
+   * 4x4 transformation matrix, column-major.
+   */
+  std::array<double, 16> p_frame;
+
+  /**
+   * True if this Cartesian limit is active, false otherwise.
+   */
+  bool active;
 };
 
 }  // namespace franka
