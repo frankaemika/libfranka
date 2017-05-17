@@ -94,6 +94,8 @@ void Robot::setControllerMode(ControllerMode controller_mode) {
     case ControllerMode::kCartesianImpedance:
       mode = decltype(mode)::kCartesianImpedance;
       break;
+    default:
+      throw std::invalid_argument("Invalid controller mode given.");
   }
   impl_->executeCommand<research_interface::SetControllerMode>(mode);
 }
