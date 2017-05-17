@@ -4,6 +4,7 @@
 
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
+#include <research_interface/service_traits.h>
 #include <research_interface/service_types.h>
 
 #include "complete_robot_state.h"
@@ -82,5 +83,52 @@ class Robot::Impl : public RobotControl {
   std::unordered_multiset<research_interface::Function, EnumClassHash>
       expected_responses_;
 };
+
+template <typename T, typename... TArgs>
+void Robot::Impl::executeCommand(TArgs... args) {
+  typename T::Request request(std::forward<TArgs>(args)...);
+  network_.tcpSendRequest(request);
+
+  typename T::Response response = network_.tcpBlockingReceiveResponse<T>();
+
+  switch (response.status) {
+    case T::Status::kSuccess:
+      break;
+    case T::Status::kAborted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command aborted!");
+    case T::Status::kRejected:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command rejected!");
+    case T::Status::kPreempted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command preempted!");
+  }
+}
+
+template <> inline
+void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
+                                 int32_t,
+                                 VirtualWallCubiod*>(
+    int32_t id,
+    VirtualWallCubiod* virtual_wall_cubiod) {
+  research_interface::GetCartesianLimit::Request request(id);
+  network_.tcpSendRequest(request);
+
+  research_interface::GetCartesianLimit::Response response =
+      network_
+          .tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
+  virtual_wall_cubiod->p_frame = response.object_frame;
+  virtual_wall_cubiod->p_max = response.object_p_max;
+  virtual_wall_cubiod->p_min = response.object_p_min;
+  virtual_wall_cubiod->active = response.object_activation;
+  virtual_wall_cubiod->id = id;
+}
 
 }  // namespace franka
