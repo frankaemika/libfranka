@@ -41,6 +41,9 @@ class Robot::Impl : public RobotControl {
       override;
   void stopMotionGenerator() override;
 
+  template <typename T, typename... TArgs>
+  void executeCommand(TArgs...);
+
   template <research_interface::StartMotionGenerator::MotionGeneratorMode,
             typename T>
   void control(
@@ -55,14 +58,8 @@ class Robot::Impl : public RobotControl {
           conversion_callback);
 
  private:
-  void handleStartMotionGeneratorResponse(
-      const research_interface::StartMotionGenerator::Response& response);
-  void handleStopMotionGeneratorResponse(
-      const research_interface::StopMotionGenerator::Response& response);
-  void handleStartControllerResponse(
-      const research_interface::StartController::Response& response);
-  void handleStopControllerResponse(
-      const research_interface::StopController::Response& response);
+  template <typename T>
+  bool handleCommandResponse(const typename T::Response& response);
 
   Network network_;
 
