@@ -43,7 +43,7 @@ class Robot::Impl : public RobotControl {
   void stopMotionGenerator() override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs...);
+  void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
 
   template <research_interface::StartMotionGenerator::MotionGeneratorMode,
             typename T>
@@ -112,10 +112,10 @@ void Robot::Impl::executeCommand(TArgs... args) {
   }
 }
 
-template <> inline
-void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
-                                 int32_t,
-                                 VirtualWallCubiod*>(
+template <>
+inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
+                                        int32_t,
+                                        VirtualWallCubiod*>(
     int32_t id,
     VirtualWallCubiod* virtual_wall_cubiod) {
   research_interface::GetCartesianLimit::Request request(id);
