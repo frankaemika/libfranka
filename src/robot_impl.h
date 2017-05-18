@@ -115,20 +115,20 @@ void Robot::Impl::executeCommand(TArgs... args) {
 template <>
 inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
                                         int32_t,
-                                        VirtualWallCubiod*>(
+                                        VirtualWallCuboid*>(
     int32_t id,
-    VirtualWallCubiod* virtual_wall_cubiod) {
+    VirtualWallCuboid* virtual_wall_cuboid) {
   research_interface::GetCartesianLimit::Request request(id);
   network_.tcpSendRequest(request);
 
   research_interface::GetCartesianLimit::Response response =
       network_
           .tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
-  virtual_wall_cubiod->p_frame = response.object_frame;
-  virtual_wall_cubiod->p_max = response.object_p_max;
-  virtual_wall_cubiod->p_min = response.object_p_min;
-  virtual_wall_cubiod->active = response.object_activation;
-  virtual_wall_cubiod->id = id;
+  virtual_wall_cuboid->p_frame = response.object_frame;
+  virtual_wall_cuboid->p_max = response.object_p_max;
+  virtual_wall_cuboid->p_min = response.object_p_min;
+  virtual_wall_cuboid->active = response.object_activation;
+  virtual_wall_cuboid->id = id;
 }
 
 }  // namespace franka

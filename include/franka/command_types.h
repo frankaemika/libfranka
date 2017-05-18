@@ -20,11 +20,11 @@ enum ControllerMode {
 };
 
 /**
- * Parameters of a cubiod used as virtual wall.
+ * Parameters of a cuboid used as virtual wall.
  *
  * @see Robot::getVirtualWall
  */
-struct VirtualWallCubiod {
+struct VirtualWallCuboid {
   /**
    * ID of the virtual wall.
    */

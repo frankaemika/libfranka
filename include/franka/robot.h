@@ -216,7 +216,7 @@ class Robot {
    *
    * @throw CommandException if an error occured.
    */
-  VirtualWallCubiod getVirtualWall(int32_t id);
+  VirtualWallCuboid getVirtualWall(int32_t id);
 
   /**
    * Switches the current controller.

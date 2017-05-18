@@ -72,8 +72,8 @@ RobotState Robot::readOnce() {
   return impl_->robotState();
 }
 
-VirtualWallCubiod Robot::getVirtualWall(int32_t id) {
-  VirtualWallCubiod virtual_wall;
+VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
+  VirtualWallCuboid virtual_wall;
   impl_->executeCommand<research_interface::GetCartesianLimit>(id,
                                                                &virtual_wall);
   return virtual_wall;
