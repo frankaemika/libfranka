@@ -18,9 +18,9 @@ struct Exception : public std::runtime_error {
 };
 
 /**
- * ModelException is thrown when unsupported robot model is used.
+ * ModelLibraryException is thrown when unsupported robot model is used.
  */
-struct ModelException : public Exception {
+struct ModelLibraryException : public Exception {
   using Exception::Exception;
 };
 

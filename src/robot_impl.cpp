@@ -19,7 +19,7 @@ std::string robotVersionToString(
       robot_version_string << "FEA_01_01_identified";
       break;
     default:
-      throw ModelException("Unknown robot type"s);
+      throw ModelLibraryException("Unknown robot type"s);
   }
 
   robot_version_string << "_";
@@ -28,7 +28,7 @@ std::string robotVersionToString(
     case research_interface::RobotId::NONE:
       break;
     default:
-      throw ModelException("Unknown robot id"s);
+      throw ModelLibraryException("Unknown robot id"s);
   }
 
   robot_version_string << "v" << robot_version.version_major << "."

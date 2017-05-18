@@ -1,6 +1,7 @@
+#include <sstream>
+
 #include <franka/model.h>
 #include <research_interface/service_types.h>
-#include <sstream>
 
 #include "libfcimodels.h"
 
@@ -9,10 +10,6 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 franka::Model::Model(franka::Robot& robot) {
   try {
     library_.load(std::string{"libfcimodels"} + Poco::SharedLibrary::suffix());
-
-    auto initialize = reinterpret_cast<decltype(&libfcimodels_initialize)>(
-        library_.getSymbol("libfcimodels_initialize"));
-    initialize();
 
     M_NE_file_pointer_ = library_.getSymbol("M_NE_file");
     O_T_J1_file_pointer_ = library_.getSymbol("O_T_J1_file");
@@ -36,17 +33,28 @@ franka::Model::Model(franka::Robot& robot) {
                          << "." << versionPatch();
 
     if (loaded_robot_version.str() != robot.robotVersion()) {
-      throw ModelException("Robot version mismatch - loaded: "s +
-                           loaded_robot_version.str() + ", expected: " +
-                           robot.robotVersion());
+      throw ModelLibraryException("Robot version mismatch - loaded: "s +
+                                  loaded_robot_version.str() + ", expected: " +
+                                  robot.robotVersion());
     }
   } catch (const Poco::LibraryAlreadyLoadedException& e) {
-    throw ModelException("libfranka: model library already loaded"s);
+    throw ModelLibraryException("libfranka: model library already loaded"s);
   } catch (const Poco::LibraryLoadException& e) {
-    throw ModelException("libfranka: cannot load model library: "s + e.what());
+    throw ModelLibraryException("libfranka: cannot load model library: "s +
+                                e.what());
+  } catch (const Poco::NotFoundException& e) {
+    throw ModelLibraryException("libfranka: symbol cannot be found: "s +
+                                e.what());
   } catch (const Poco::Exception& e) {
-    throw ModelException("libfranka: error while loading library: "s +
-                         e.what());
+    throw ModelLibraryException("libfranka: error while loading library: "s +
+                                e.what());
+  }
+}
+
+franka::Model::~Model() {
+  try {
+    library_.unload();
+  } catch (...) {
   }
 }
 
@@ -130,24 +138,23 @@ std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
     const std::array<double, 7> load_inertia,
     double load_mass,
-    std::array<double, 3> F_T_Cload) {
+    std::array<double, 3> F_x_Cload) {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&c_NE_file)>(c_NE_file_pointer_);
   function(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
-           load_mass, F_T_Cload.data(), output.data());
+           load_mass, F_x_Cload.data(), output.data());
 
   return output;
 }
-
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
     double load_mass,
-    std::array<double, 3> F_T_Cload,
+    std::array<double, 3> F_x_Cload,
     std::array<double, 3> gravity_earth) {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&g_NE_file)>(g_NE_file_pointer_);
   function(robot_state.q.data(), gravity_earth.data(), load_mass,
-           F_T_Cload.data(), output.data());
+           F_x_Cload.data(), output.data());
 
   return output;
 }

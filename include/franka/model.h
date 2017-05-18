@@ -1,10 +1,10 @@
 #pragma once
 
-#include <Poco/SharedLibrary.h>
 #include <array>
 
+#include <Poco/SharedLibrary.h>
+
 #include <franka/robot.h>
-#include "../../src/libfcimodels.h"
 
 /**
  * @file model.h
@@ -21,10 +21,12 @@ class Model {
   /**
    * Creates a new model instance given a connected robot.
    * @param robot connected robot instance.
-   * @throw ModelException if the model library cannot be loaded, or if the
+   * @throw ModelLibraryException if the model library cannot be loaded, or if
+   * the
    * versions do not match.
    */
   Model(franka::Robot& robot);
+  ~Model();
 
   /**
    * Gets the 4x4 pose matrix for the given joint.
@@ -78,7 +80,7 @@ class Model {
  * @param load_inertia Inertia of the load, relative to center of mass. Unit:
  * \f$[kg \times m^2]\f$
  * @param load_mass Weight of the load. Unit: \f$[kg]\f$
- * @param F_T_Cload Translation from flange to center of mass of load. Unit:
+ * @param F_x_Cload Translation from flange to center of mass of load. Unit:
  * \f$[m]\f$
  *
  * @return Coriolis Force vector
@@ -86,12 +88,12 @@ class Model {
   std::array<double, 7> coriolis(const franka::RobotState& robot_state,
                                  const std::array<double, 7> load_inertia,
                                  double load_mass,
-                                 std::array<double, 3> F_T_Cload);
+                                 std::array<double, 3> F_x_Cload);
   /**
   * Calculates the gravity vector. Unit: \f$[Nm]\f$
   * @param robot_state state from which the pose should be calculated.
   * @param load_mass Weight of the load. Unit: \f$[kg]\f$
-  * @param F_T_Cload Translation from flange to center of mass of load. Unit:
+  * @param F_x_Cload Translation from flange to center of mass of load. Unit:
   * \f$[m]\f$
   * @param gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$
   *
@@ -99,7 +101,7 @@ class Model {
   */
   std::array<double, 7> gravity(const franka::RobotState& robot_state,
                                 double load_mass,
-                                std::array<double, 3> F_T_Cload,
+                                std::array<double, 3> F_x_Cload,
                                 std::array<double, 3> gravity_earth);
 
  private:
