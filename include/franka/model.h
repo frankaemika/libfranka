@@ -8,10 +8,15 @@
 
 /**
  * @file model.h
- * Contains the Model class.
+ * Contains the Model class and the joint enum.
  */
 
 namespace franka {
+
+/**
+ * Enumerates the seven Franka's joints, the Flange and the End Effector.
+ */
+enum Joint : uint8_t { J0, J1, J2, J3, J4, J5, J6, FLANGE, EE };
 
 /**
  * Calculates poses of joints and dynamic properties of the robot.
@@ -36,26 +41,9 @@ class Model {
    *
    * @return 4x4 pose matrix
    */
-  std::array<double, 16> jointPose(int joint,
-                                   const franka::RobotState& robot_state);
-
-  /**
-   * Gets the 4x4 pose matrix for the flange.
-   * Pose is represented as a 4x4 matrix in column-major format.
-   * @param robot_state state from which the pose should be calculated.
-   *
-   * @return 4x4 pose matrix
-   */
-  std::array<double, 16> flangePose(const franka::RobotState& robot_state);
-
-  /**
-   * Gets the 4x4 pose matrix for the end effector.
-   * Pose is represented as a 4x4 matrix in column-major format.
-   * @param robot_state state from which the pose should be calculated.
-   *
-   * @return 4x4 pose matrix
-   */
-  std::array<double, 16> eePose(const franka::RobotState& robot_state);
+  std::array<double, 16> jointPose(Joint joint,
+                                   const franka::RobotState& robot_state) const
+      noexcept;
 
   /**
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$
@@ -71,7 +59,7 @@ class Model {
   std::array<double, 49> mass(const franka::RobotState& robot_state,
                               const std::array<double, 7> load_inertia,
                               double load_mass,
-                              std::array<double, 3> F_T_Cload);
+                              std::array<double, 3> F_T_Cload) const noexcept;
 
   /**
  * Calculates the Coriolis Force vector (state-space equation): \f$ c= C \times
@@ -88,7 +76,8 @@ class Model {
   std::array<double, 7> coriolis(const franka::RobotState& robot_state,
                                  const std::array<double, 7> load_inertia,
                                  double load_mass,
-                                 std::array<double, 3> F_x_Cload);
+                                 std::array<double, 3> F_x_Cload) const
+      noexcept;
   /**
   * Calculates the gravity vector. Unit: \f$[Nm]\f$
   * @param robot_state state from which the pose should be calculated.
@@ -102,7 +91,8 @@ class Model {
   std::array<double, 7> gravity(const franka::RobotState& robot_state,
                                 double load_mass,
                                 std::array<double, 3> F_x_Cload,
-                                std::array<double, 3> gravity_earth);
+                                std::array<double, 3> gravity_earth) const
+      noexcept;
 
  private:
   Poco::SharedLibrary library_;

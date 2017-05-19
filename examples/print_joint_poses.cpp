@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./use_model_library <robot-hostname>" << std::endl;
+    std::cerr << "Usage: ./print_joint_poses <robot-hostname>" << std::endl;
     return -1;
   }
 
@@ -25,7 +25,10 @@ int main(int argc, char** argv) {
     franka::RobotState state = robot.readOnce();
 
     franka::Model model(robot);
-    std::cout << model.eePose(state) << std::endl;
+    for (franka::Joint joint = franka::Joint::J0; joint <= franka::Joint::EE;
+         joint = franka::Joint(joint + 1)) {
+      std::cout << model.jointPose(joint, state) << std::endl;
+    }
   } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;
     return -1;

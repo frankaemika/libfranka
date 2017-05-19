@@ -12,8 +12,8 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    double time_max = 4.0;
-    double v_max = 0.1;
+    double time_max = 1.0;
+    double v_max = 0.01;
     double angle = M_PI / 4.0;
     double time = 0.0;
     robot.control(

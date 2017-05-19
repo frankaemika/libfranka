@@ -59,8 +59,8 @@ franka::Model::~Model() {
 }
 
 std::array<double, 16> franka::Model::jointPose(
-    int joint,
-    const franka::RobotState& robot_state) {
+    Joint joint,
+    const franka::RobotState& robot_state) const noexcept {
   std::array<double, 16> output;
 
   std::array<double, 7>::const_pointer q = robot_state.q.data();
@@ -68,39 +68,39 @@ std::array<double, 16> franka::Model::jointPose(
       robot_state.O_T_EE.data();
 
   switch (joint) {
-    case 0:
+    case Joint::J0:
       reinterpret_cast<decltype(&O_T_J1_file)>(O_T_J1_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 1:
+    case Joint::J1:
       reinterpret_cast<decltype(&O_T_J2_file)>(O_T_J2_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 2:
+    case Joint::J2:
       reinterpret_cast<decltype(&O_T_J3_file)>(O_T_J3_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 3:
+    case Joint::J3:
       reinterpret_cast<decltype(&O_T_J4_file)>(O_T_J4_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 4:
+    case Joint::J4:
       reinterpret_cast<decltype(&O_T_J5_file)>(O_T_J5_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 5:
+    case Joint::J5:
       reinterpret_cast<decltype(&O_T_J6_file)>(O_T_J6_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 6:
+    case Joint::J6:
       reinterpret_cast<decltype(&O_T_J7_file)>(O_T_J7_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 7:
+    case Joint::FLANGE:
       reinterpret_cast<decltype(&O_T_J8_file)>(O_T_J8_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case 8:
+    case Joint::EE:
       reinterpret_cast<decltype(&O_T_J9_file)>(O_T_J9_file_pointer_)(
           q, end_effector, output.data());
       break;
@@ -111,21 +111,11 @@ std::array<double, 16> franka::Model::jointPose(
   return output;
 }
 
-std::array<double, 16> franka::Model::flangePose(
-    const franka::RobotState& robot_state) {
-  return jointPose(7, robot_state);
-}
-
-std::array<double, 16> franka::Model::eePose(
-    const franka::RobotState& robot_state) {
-  return jointPose(8, robot_state);
-}
-
 std::array<double, 49> franka::Model::mass(
     const franka::RobotState& robot_state,
     const std::array<double, 7> load_inertia,
     double load_mass,
-    std::array<double, 3> F_T_Cload) {
+    std::array<double, 3> F_T_Cload) const noexcept {
   std::array<double, 49> output;
   auto function = reinterpret_cast<decltype(&M_NE_file)>(M_NE_file_pointer_);
   function(robot_state.q.data(), load_inertia.data(), load_mass,
@@ -138,7 +128,7 @@ std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
     const std::array<double, 7> load_inertia,
     double load_mass,
-    std::array<double, 3> F_x_Cload) {
+    std::array<double, 3> F_x_Cload) const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&c_NE_file)>(c_NE_file_pointer_);
   function(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
@@ -150,7 +140,7 @@ std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
     double load_mass,
     std::array<double, 3> F_x_Cload,
-    std::array<double, 3> gravity_earth) {
+    std::array<double, 3> gravity_earth) const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&g_NE_file)>(g_NE_file_pointer_);
   function(robot_state.q.data(), gravity_earth.data(), load_mass,
