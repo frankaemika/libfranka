@@ -42,8 +42,7 @@ class Model {
    * @return 4x4 pose matrix
    */
   std::array<double, 16> jointPose(Joint joint,
-                                   const franka::RobotState& robot_state) const
-      noexcept;
+                                   const franka::RobotState& robot_state) const;
 
   /**
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$

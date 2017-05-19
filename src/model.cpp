@@ -60,7 +60,7 @@ franka::Model::~Model() {
 
 std::array<double, 16> franka::Model::jointPose(
     Joint joint,
-    const franka::RobotState& robot_state) const noexcept {
+    const franka::RobotState& robot_state) const {
   std::array<double, 16> output;
 
   std::array<double, 7>::const_pointer q = robot_state.q.data();
