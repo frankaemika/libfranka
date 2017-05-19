@@ -15,11 +15,13 @@ int main(int argc, char** argv) {
     // Set additional parameters always before the control loop, NEVER in the
     // control loop
     // Set the cartesian impedance:
-    std::array<double, 6> K_x{1500, 1500, 1500, 150, 150, 150};
+    std::array<double, 6> K_x{// NOLINT (readability-named-parameter)
+                              1500, 1500, 1500, 150, 150, 150};
     robot.setCartesianImpedance(K_x);
 
     // Set the joint impedance:
-    std::array<double, 7> K_theta{3000, 3000, 3000, 2500, 2500, 2000, 2000};
+    std::array<double, 7> K_theta{// NOLINT (readability-named-parameter)
+                                  3000, 3000, 3000, 2500, 2500, 2000, 2000};
     robot.setJointImpedance(K_theta);
 
     // Set the collision behavior:
@@ -48,7 +50,8 @@ int main(int argc, char** argv) {
 
     // Set a dynamic load:
     double load_mass = 0.1;
-    std::array<double, 3> F_x_Cload{0.0, 0.0, 0.0};
+    std::array<double, 3> F_x_Cload{// NOLINT (readability-named-parameter)
+                                    0.0, 0.0, 0.0};
     std::array<double, 9> load_inertia{0.01, 0.0, 0.0, 0.0, 0.01,
                                        0.0,  0.0, 0.0, 0.01};
     robot.setLoad(load_mass, F_x_Cload, load_inertia);

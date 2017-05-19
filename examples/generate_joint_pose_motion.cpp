@@ -17,9 +17,10 @@ int main(int argc, char** argv) {
     // control loop
     // Set a dynamic load:
     double load_mass = 0.1;
-    std::array<double, 3> F_x_Cload{0.0, 0.0, 0.0};
-    std::array<double, 9> load_inertia{0.01, 0.0, 0.0, 0.0, 0.01,
-                                       0.0,  0.0, 0.0, 0.01};
+    std::array<double, 3> F_x_Cload = {// NOLINT (readability-named-parameter)
+                                       0.0, 0.0, 0.0};
+    std::array<double, 9> load_inertia = {0.01, 0.0, 0.0, 0.0, 0.01,
+                                          0.0,  0.0, 0.0, 0.01};
     robot.setLoad(load_mass, F_x_Cload, load_inertia);
 
     auto initial_pose = robot.readOnce().q;
