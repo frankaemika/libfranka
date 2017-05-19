@@ -16,7 +16,17 @@ namespace franka {
 /**
  * Enumerates the seven Franka's joints, the Flange and the End Effector.
  */
-enum Joint : uint8_t { kJ0, kJ1, kJ2, kJ3, kJ4, kJ5, kJ6, kFlange, kEndEffector };
+enum Joint : uint8_t {
+  kJ0,
+  kJ1,
+  kJ2,
+  kJ3,
+  kJ4,
+  kJ5,
+  kJ6,
+  kFlange,
+  kEndEffector
+};
 
 /**
  * Calculates poses of joints and dynamic properties of the robot.
