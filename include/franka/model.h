@@ -2,8 +2,6 @@
 
 #include <array>
 
-#include <Poco/SharedLibrary.h>
-
 #include <franka/robot.h>
 
 /**
@@ -28,6 +26,8 @@ enum Joint : uint8_t {
   kEndEffector
 };
 
+class LibraryLoader;
+
 /**
  * Calculates poses of joints and dynamic properties of the robot.
  */
@@ -43,6 +43,9 @@ class Model {
    */
   Model(franka::Robot& robot);
 
+  /**
+   * Unloads the model library.
+   */
   ~Model() noexcept;
 
   /**
@@ -116,7 +119,7 @@ class Model {
                                     {0., 0., -9.81}}) const noexcept;
 
  private:
-  Poco::SharedLibrary library_;
+  std::unique_ptr<LibraryLoader> library_;
 
   void* mass_function_;
   void* joint0_function_;

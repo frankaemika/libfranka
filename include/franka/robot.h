@@ -40,6 +40,9 @@ class Robot {
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+  /**
+   * Closes the connection.
+   */
   ~Robot() noexcept;
 
   /**

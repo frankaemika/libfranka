@@ -4,42 +4,32 @@
 #include <research_interface/service_types.h>
 
 #include "libfcimodels.h"
+#include "library_loader.h"
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
-franka::Model::Model(
-    franka::Robot&) try {  // NOLINT (readability-named-parameter)
-  library_.load("libfcimodels"s + Poco::SharedLibrary::suffix());
+namespace franka {
 
-  mass_function_ = library_.getSymbol("M_NE_file");
-  joint0_function_ = library_.getSymbol("O_T_J1_file");
-  joint1_function_ = library_.getSymbol("O_T_J2_file");
-  joint2_function_ = library_.getSymbol("O_T_J3_file");
-  joint3_function_ = library_.getSymbol("O_T_J4_file");
-  joint4_function_ = library_.getSymbol("O_T_J5_file");
-  joint5_function_ = library_.getSymbol("O_T_J6_file");
-  joint6_function_ = library_.getSymbol("O_T_J7_file");
-  flange_function_ = library_.getSymbol("O_T_J8_file");
-  ee_function_ = library_.getSymbol("O_T_J9_file");
-  coriolis_function_ = library_.getSymbol("c_NE_file");
-  gravity_function_ = library_.getSymbol("g_NE_file");
-} catch (const Poco::LibraryAlreadyLoadedException& e) {
-  throw ModelLibraryException("libfranka: model library already loaded"s);
-} catch (const Poco::LibraryLoadException& e) {
-  throw ModelLibraryException("libfranka: cannot load model library: "s +
-                              e.what());
-} catch (const Poco::NotFoundException& e) {
-  throw ModelLibraryException("libfranka: symbol cannot be found: "s +
-                              e.what());
-} catch (const Poco::Exception& e) {
-  throw ModelLibraryException("libfranka: error while loading library: "s +
-                              e.what());
-}
+Model::Model(franka::Robot& robot)
+    : library_{new LibraryLoader("libfcimodels")},
+      mass_function_{library_->getSymbol("M_NE_file")},
+      joint0_function_{library_->getSymbol("O_T_J1_file")},
+      joint1_function_{library_->getSymbol("O_T_J2_file")},
+      joint2_function_{library_->getSymbol("O_T_J3_file")},
+      joint3_function_{library_->getSymbol("O_T_J4_file")},
+      joint4_function_{library_->getSymbol("O_T_J5_file")},
+      joint5_function_{library_->getSymbol("O_T_J6_file")},
+      joint6_function_{library_->getSymbol("O_T_J7_file")},
+      flange_function_{library_->getSymbol("O_T_J8_file")},
+      ee_function_{library_->getSymbol("O_T_J9_file")},
+      coriolis_function_{library_->getSymbol("c_NE_file")},
+      gravity_function_{library_->getSymbol("g_NE_file")} {}
 
-franka::Model::~Model() noexcept try { library_.unload(); } catch (...) {
-}
+// Has to be declared here, as the LibraryLoader type is incomplete in the
+// header
+Model::~Model() noexcept = default;
 
-std::array<double, 16> franka::Model::jointPose(
+std::array<double, 16> Model::jointPose(
     Joint joint,
     const franka::RobotState& robot_state) const {
   std::array<double, 16> output;
@@ -130,3 +120,5 @@ std::array<double, 7> franka::Model::gravity(
 
   return output;
 }
+
+}  // namespace franka

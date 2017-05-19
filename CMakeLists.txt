@@ -59,6 +59,7 @@ add_library(franka SHARED
   src/robot_state.cpp
   src/network.cpp
   src/model.cpp
+  src/library_loader.cpp
 )
 
 set_target_properties(franka PROPERTIES
