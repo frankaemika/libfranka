@@ -13,6 +13,7 @@ set(TEST_DEPENDENCIES franka research-interface-common ${GTEST_LIBRARIES})
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
 add_executable(run_all_tests
+  command_tests.cpp
   control_types_tests.cpp
   robot_tests.cpp
   robot_impl_tests.cpp

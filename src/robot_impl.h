@@ -129,6 +129,29 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
   virtual_wall_cuboid->p_min = response.object_p_min;
   virtual_wall_cuboid->active = response.object_activation;
   virtual_wall_cuboid->id = id;
+
+  switch (response.status) {
+    case research_interface::GetCartesianLimit::Status::kSuccess:
+      break;
+    case research_interface::GetCartesianLimit::Status::kAborted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<
+                      research_interface::GetCartesianLimit>::kName) +
+          " command aborted!");
+    case research_interface::GetCartesianLimit::Status::kRejected:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<
+                      research_interface::GetCartesianLimit>::kName) +
+          " command rejected!");
+    case research_interface::GetCartesianLimit::Status::kPreempted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<
+                      research_interface::GetCartesianLimit>::kName) +
+          " command preempted!");
+  }
 }
 
 }  // namespace franka
