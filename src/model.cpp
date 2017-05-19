@@ -68,39 +68,39 @@ std::array<double, 16> franka::Model::jointPose(
       robot_state.O_T_EE.data();
 
   switch (joint) {
-    case Joint::J0:
+    case Joint::kJ0:
       reinterpret_cast<decltype(&O_T_J1_file)>(O_T_J1_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J1:
+    case Joint::kJ1:
       reinterpret_cast<decltype(&O_T_J2_file)>(O_T_J2_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J2:
+    case Joint::kJ2:
       reinterpret_cast<decltype(&O_T_J3_file)>(O_T_J3_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J3:
+    case Joint::kJ3:
       reinterpret_cast<decltype(&O_T_J4_file)>(O_T_J4_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J4:
+    case Joint::kJ4:
       reinterpret_cast<decltype(&O_T_J5_file)>(O_T_J5_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J5:
+    case Joint::kJ5:
       reinterpret_cast<decltype(&O_T_J6_file)>(O_T_J6_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::J6:
+    case Joint::kJ6:
       reinterpret_cast<decltype(&O_T_J7_file)>(O_T_J7_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::FLANGE:
+    case Joint::kFlange:
       reinterpret_cast<decltype(&O_T_J8_file)>(O_T_J8_file_pointer_)(
           q, end_effector, output.data());
       break;
-    case Joint::EE:
+    case Joint::kEndEffector:
       reinterpret_cast<decltype(&O_T_J9_file)>(O_T_J9_file_pointer_)(
           q, end_effector, output.data());
       break;
