@@ -46,21 +46,16 @@ int main(int argc, char** argv) {
     // control loop
     // Set a dynamic load:
     double load_mass = 0.1;
-    std::array<double, 3> F_x_Cload = {// NOLINT (readability-named-parameter)
-                                       0.0, 0.0, 0.0};
-    std::array<double, 9> load_inertia = {0.01, 0.0, 0.0, 0.0, 0.01,
-                                          0.0,  0.0, 0.0, 0.01};
-    robot.setLoad(load_mass, F_x_Cload, load_inertia);
+    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
+    std::array<double, 9> load_inertia{
+        {0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
+    robot.setLoad(load_mass, load_translation, load_inertia);
 
     // Set the cartesian impedance:
-    std::array<double, 6> K_x = {// NOLINT (readability-named-parameter)
-                                 1500, 1500, 1500, 150, 150, 150};
-    robot.setCartesianImpedance(K_x);
+    robot.setCartesianImpedance({{1500, 1500, 1500, 150, 150, 150}});
 
     // Set the joint impedance:
-    std::array<double, 7> K_theta = {// NOLINT (readability-named-parameter)
-                                     3000, 3000, 3000, 2500, 2500, 2000, 2000};
-    robot.setJointImpedance(K_theta);
+    robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
     robot.control(
