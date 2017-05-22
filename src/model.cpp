@@ -7,7 +7,8 @@
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
-franka::Model::Model(franka::Robot&) try {
+franka::Model::Model(
+    franka::Robot&) try {  // NOLINT (readability-named-parameter)
   library_.load(std::string{"libfcimodels"} + Poco::SharedLibrary::suffix());
 
   mass_function_ = library_.getSymbol("M_NE_file");
