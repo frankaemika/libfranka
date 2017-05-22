@@ -118,6 +118,13 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
                                         VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
+  // `using std::string_literals::operator""s` produces a GCC warning that
+  // cannot
+  // be disabled, so we have to use `using namespace ...`.
+  // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
+  using namespace std::string_literals;  // NOLINT
+                                         // (google-build-using-namespace)
+
   research_interface::GetCartesianLimit::Request request(id);
   network_.tcpSendRequest(request);
 
@@ -134,23 +141,20 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
     case research_interface::GetCartesianLimit::Status::kSuccess:
       break;
     case research_interface::GetCartesianLimit::Status::kAborted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<
-                      research_interface::GetCartesianLimit>::kName) +
-          " command aborted!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command aborted!");
     case research_interface::GetCartesianLimit::Status::kRejected:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<
-                      research_interface::GetCartesianLimit>::kName) +
-          " command rejected!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command rejected!");
     case research_interface::GetCartesianLimit::Status::kPreempted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<
-                      research_interface::GetCartesianLimit>::kName) +
-          " command preempted!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command preempted!");
   }
 }
 

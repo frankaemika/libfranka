@@ -47,20 +47,17 @@ bool Robot::Impl::handleCommandResponse(const typename T::Response& response) {
     case T::Status::kSuccess:
       break;
     case T::Status::kAborted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command aborted!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<T>::kName +
+                             " command aborted!");
     case T::Status::kRejected:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command rejected!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<T>::kName +
+                             " command rejected!");
     case T::Status::kPreempted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command preempted!");
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<T>::kName +
+                             " command preempted!");
   }
   return true;
 }
@@ -227,9 +224,7 @@ void Robot::Impl::startMotionGenerator(
           decltype(motion_generator_mode)::kCartesianVelocity;
       break;
     default:
-      throw std::runtime_error(
-          "No matching research_interface::MotionGeneratorMode for the "
-          "research_interface::StartMotionGeneratorRequest::Type");
+      throw std::invalid_argument("Invalid motion generator mode given.");
   }
 
   while (update()) {
