@@ -171,8 +171,4 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::AutomaticErrorRecovery>();
 }
 
-void Robot::resetExternalTorqueAndForceMax() {
-  impl_->executeCommand<research_interface::ResetExternalTorqueAndForceMax>();
-}
-
 }  // namespace franka

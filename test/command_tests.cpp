@@ -197,12 +197,6 @@ AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
   return AutomaticErrorRecovery::Request();
 }
 
-template <>
-ResetExternalTorqueAndForceMax::Request
-Command<ResetExternalTorqueAndForceMax>::getExpected() {
-  return ResetExternalTorqueAndForceMax::Request();
-}
-
 template <typename T>
 void Command<T>::executeCommand(Robot::Impl& robot) {
   robot.executeCommand<T>();
@@ -307,8 +301,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetFToEE,
                                       SetLoad,
                                       SetTimeScalingFactor,
-                                      AutomaticErrorRecovery,
-                                      ResetExternalTorqueAndForceMax>;
+                                      AutomaticErrorRecovery>;
 
 TYPED_TEST_CASE(Command, CommandTypes);
 

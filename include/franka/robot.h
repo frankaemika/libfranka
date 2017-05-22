@@ -420,19 +420,6 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
-   * Resets the measured external torque and force maxima.
-   *
-   * With this command, it is possible to measure maximum torques and forces
-   * during a motion. Maximum values since the last reset are shown in the
-   * robot state.
-   *
-   * TODO: add tau_ext_max to robot state
-   *
-   * @throw CommandException if an error occured.
-   */
-  void resetExternalTorqueAndForceMax();
-
-  /**
    * @}
    */
 
