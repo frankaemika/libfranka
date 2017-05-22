@@ -1,22 +1,5 @@
 #pragma once
 
-// These functions will be implemented inside of the model library
-uint32_t versionMajor() {  // NOLINT
-  return 13;
-}
-uint32_t versionMinor() {  // NOLINT
-  return 1;
-}
-uint32_t versionPatch() {  // NOLINT
-  return 0;
-}
-std::string robotType() {  // NOLINT
-  return "FEA_01_01_identified";
-}
-std::string robotId() {  // NOLINT
-  return "";
-}
-
 extern "C" {
 
 void M_NE_file(const double q[7],  // NOLINT
@@ -63,4 +46,5 @@ void g_NE_file(const double q[7],  // NOLINT
                const double F_x_Cload[16],
                double g_NE[7]);
 void libfcimodels_initialize(void);  // NOLINT
+
 }
