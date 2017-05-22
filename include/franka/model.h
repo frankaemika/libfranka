@@ -8,13 +8,13 @@
 
 /**
  * @file model.h
- * Contains the Model class and the joint enum.
+ * Contains the Model class and the Joint enum.
  */
 
 namespace franka {
 
 /**
- * Enumerates the seven Franka's joints, the Flange and the End Effector.
+ * Enumerates FRANKA's seven joints, the flange and the end effector.
  */
 enum Joint : uint8_t {
   kJ0,
@@ -34,90 +34,101 @@ enum Joint : uint8_t {
 class Model {
  public:
   /**
-   * Creates a new model instance given a connected robot.
-   * @param robot connected robot instance.
+   * Creates a new model for a given franka::Robot.
+   *
+   * @param[in] robot Robot to create model for.
+   *
    * @throw ModelLibraryException if the model library cannot be loaded, or if
-   * the
-   * versions do not match.
+   * the versions do not match.
    */
   Model(franka::Robot& robot);
-  ~Model();
+
+  ~Model() noexcept;
 
   /**
-   * Gets the 4x4 pose matrix for the given joint.
-   * Pose is represented as a 4x4 matrix in column-major format.
-   * @param joint number of the desired joint
-   * @param robot_state state from which the pose should be calculated.
+   * Gets the 4x4 pose matrix for the given joint in world coordinates.
    *
-   * @return 4x4 pose matrix
+   * The pose is represented as a 4x4 matrix in column-major format.
+   *
+   * @param[in] joint number of the desired joint.
+   * @param[in] robot_state state from which the pose should be calculated.
+   *
+   * @return Vectorized 4x4 pose matrix, column-major.
    */
   std::array<double, 16> jointPose(Joint joint,
                                    const franka::RobotState& robot_state) const;
 
   /**
-   * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$
-   * @param robot_state state from which the pose should be calculated.
-   * @param load_inertia Inertia of the load, relative to center of mass. Unit:
-   * \f$[kg \times m^2]\f$
-   * @param load_mass Weight of the load. Unit: \f$[kg]\f$
-   * @param F_T_Cload Translation from flange to center of mass of load. Unit:
-   * \f$[m]\f$
+   * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
-   * @return 7x7 mass matrix
+   * @param[in] robot_state State from which the pose should be calculated.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass.
+   * Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Vectorized 7x7 mass matrix, column-major.
    */
   std::array<double, 49> mass(const franka::RobotState& robot_state,
                               const std::array<double, 7> load_inertia,
                               double load_mass,
-                              std::array<double, 3> F_T_Cload) const noexcept;
+                              std::array<double, 3> F_x_Cload) const noexcept;
 
   /**
- * Calculates the Coriolis Force vector (state-space equation): \f$ c= C \times
- * dq\f$, in \f$[Nm]\f$
- * @param robot_state state from which the pose should be calculated.
- * @param load_inertia Inertia of the load, relative to center of mass. Unit:
- * \f$[kg \times m^2]\f$
- * @param load_mass Weight of the load. Unit: \f$[kg]\f$
- * @param F_x_Cload Translation from flange to center of mass of load. Unit:
- * \f$[m]\f$
+ * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
+ * dq\f$, in \f$[Nm]\f$.
  *
- * @return Coriolis Force vector
+ * @param[in] robot_state State from which the Coriolis force vector should be
+ * calculated.
+ * @param[in] load_inertia Inertia of the load, relative to center of mass.
+ * Unit: \f$[kg \times m^2]\f$.
+ * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+ * @param[in] F_x_Cload Translation from flange to center of mass of load.
+ * Unit: \f$[m]\f$.
+ *
+ * @return Coriolis force vector.
  */
   std::array<double, 7> coriolis(const franka::RobotState& robot_state,
                                  const std::array<double, 7> load_inertia,
                                  double load_mass,
                                  std::array<double, 3> F_x_Cload) const
       noexcept;
+
   /**
-  * Calculates the gravity vector. Unit: \f$[Nm]\f$
-  * @param robot_state state from which the pose should be calculated.
-  * @param load_mass Weight of the load. Unit: \f$[kg]\f$
-  * @param F_x_Cload Translation from flange to center of mass of load. Unit:
-  * \f$[m]\f$
-  * @param gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$
+  * Calculates the gravity vector. Unit: \f$[Nm]\f$.
   *
-  * @return The gravity vector.
+  * @param[in] robot_state State from which the gravity vector should be
+  * calculated.
+  * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+  * @param[in] F_x_Cload Translation from flange to center of mass of load.
+  * Unit: \f$[m]\f$.
+  * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
+  * Default to {0.0, 0.0, -9.81}.
+  *
+  * @return Gravity vector.
   */
   std::array<double, 7> gravity(const franka::RobotState& robot_state,
                                 double load_mass,
                                 std::array<double, 3> F_x_Cload,
-                                std::array<double, 3> gravity_earth) const
-      noexcept;
+                                std::array<double, 3> gravity_earth = {
+                                    {0., 0., -9.81}}) const noexcept;
 
  private:
   Poco::SharedLibrary library_;
 
-  void* M_NE_file_pointer_;    // NOLINT
-  void* O_T_J1_file_pointer_;  // NOLINT
-  void* O_T_J2_file_pointer_;  // NOLINT
-  void* O_T_J3_file_pointer_;  // NOLINT
-  void* O_T_J4_file_pointer_;  // NOLINT
-  void* O_T_J5_file_pointer_;  // NOLINT
-  void* O_T_J6_file_pointer_;  // NOLINT
-  void* O_T_J7_file_pointer_;  // NOLINT
-  void* O_T_J8_file_pointer_;  // NOLINT
-  void* O_T_J9_file_pointer_;  // NOLINT
-  void* c_NE_file_pointer_;    // NOLINT
-  void* g_NE_file_pointer_;    // NOLINT
+  void* mass_function_;
+  void* joint0_function_;
+  void* joint1_function_;
+  void* joint2_function_;
+  void* joint3_function_;
+  void* joint4_function_;
+  void* joint5_function_;
+  void* joint6_function_;
+  void* flange_function_;
+  void* ee_function_;
+  void* coriolis_function_;
+  void* gravity_function_;
 };
 
 }  // namespace franka

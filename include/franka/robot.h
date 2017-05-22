@@ -179,18 +179,18 @@ class Robot {
   RobotState readOnce();
 
   /**
-   * Returns the version reported by the connected server.
+   * Returns the software version reported by the connected server.
    *
-   * @return Version of the connected server.
+   * @return Software version of the connected server.
    */
   ServerVersion serverVersion() const noexcept;
 
   /**
- * Returns the robot version as reported by the connected server.
- *
- * @return Version of the robot to which the server is connected.
- */
-  std::string robotVersion() const noexcept;
+   * Returns the hardware revision as reported by the connected robot.
+   *
+   * @return Hardware revision of the connected robot.
+   */
+  std::string robotRevision() const noexcept;
 
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;

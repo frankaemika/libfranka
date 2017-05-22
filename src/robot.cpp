@@ -18,8 +18,8 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-std::string Robot::robotVersion() const noexcept {
-  return impl_->robotVersion();
+std::string Robot::robotRevision() const noexcept {
+  return impl_->robotRevision();
 }
 
 void Robot::control(

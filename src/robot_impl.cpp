@@ -11,10 +11,10 @@ namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
-std::string robotVersionToString(
-    research_interface::RobotVersion robot_version) {
+std::string robotRevisionToString(
+    research_interface::RobotRevision robot_revision) {
   std::stringstream robot_version_string;
-  switch (robot_version.type) {
+  switch (robot_revision.type) {
     case research_interface::RobotType::FEA_01_01_identified:
       robot_version_string << "FEA_01_01_identified";
       break;
@@ -24,16 +24,16 @@ std::string robotVersionToString(
 
   robot_version_string << "_";
 
-  switch (robot_version.id) {
+  switch (robot_revision.id) {
     case research_interface::RobotId::NONE:
       break;
     default:
       throw ModelLibraryException("Unknown robot id"s);
   }
 
-  robot_version_string << "v" << robot_version.version_major << "."
-                       << robot_version.version_minor << "."
-                       << robot_version.version_patch;
+  robot_version_string << "v" << robot_revision.version_major << "."
+                       << robot_revision.version_minor << "."
+                       << robot_revision.version_patch;
   return robot_version_string.str();
 }
 
@@ -61,7 +61,7 @@ Robot::Impl::Impl(const std::string& franka_address,
     }
     case research_interface::Connect::Status::kSuccess: {
       ri_version_ = connect_response.version;
-      robot_version_ = robotVersionToString(connect_response.robot_version);
+      robot_revision_ = robotRevisionToString(connect_response.robot_revision);
       break;
     }
     default:
@@ -319,8 +319,8 @@ void Robot::Impl::handleStopControllerResponse(
   }
 }
 
-std::string Robot::Impl::robotVersion() const noexcept {
-  return robot_version_;
+std::string Robot::Impl::robotRevision() const noexcept {
+  return robot_revision_;
 }
 
 }  // namespace franka
