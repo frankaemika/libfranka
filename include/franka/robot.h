@@ -185,13 +185,6 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
-  /**
-   * Returns the hardware revision as reported by the connected robot.
-   *
-   * @return Hardware revision of the connected robot.
-   */
-  std::string robotRevision() const noexcept;
-
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
 

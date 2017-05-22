@@ -7,7 +7,7 @@
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
-franka::Model::Model(franka::Robot& robot) try {
+franka::Model::Model(franka::Robot&) try {
   library_.load(std::string{"libfcimodels"} + Poco::SharedLibrary::suffix());
 
   mass_function_ = library_.getSymbol("M_NE_file");
@@ -22,20 +22,6 @@ franka::Model::Model(franka::Robot& robot) try {
   ee_function_ = library_.getSymbol("O_T_J9_file");
   coriolis_function_ = library_.getSymbol("c_NE_file");
   gravity_function_ = library_.getSymbol("g_NE_file");
-
-  std::stringstream loaded_robot_revision;
-  loaded_robot_revision << robotType() << "_";
-  if (robotId() != "") {
-    loaded_robot_revision << robotId() << "_";
-  }
-  loaded_robot_revision << "v" << versionMajor() << "." << versionMinor() << "."
-                        << versionPatch();
-
-  if (loaded_robot_revision.str() != robot.robotRevision()) {
-    throw ModelLibraryException("Robot version mismatch - loaded: "s +
-                                loaded_robot_revision.str() + ", expected: " +
-                                robot.robotRevision());
-  }
 } catch (const Poco::LibraryAlreadyLoadedException& e) {
   throw ModelLibraryException("libfranka: model library already loaded"s);
 } catch (const Poco::LibraryLoadException& e) {
