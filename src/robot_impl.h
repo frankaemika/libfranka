@@ -119,8 +119,7 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
   // `using std::string_literals::operator""s` produces a GCC warning that
-  // cannot
-  // be disabled, so we have to use `using namespace ...`.
+  // cannot be disabled, so we have to use `using namespace ...`.
   // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
   using namespace std::string_literals;  // NOLINT
                                          // (google-build-using-namespace)

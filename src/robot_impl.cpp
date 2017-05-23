@@ -69,8 +69,7 @@ bool Robot::Impl::handleCommandResponse<
   switch (response.status) {
     case research_interface::StartMotionGenerator::Status::kMotionStarted:
       // After sending MotionStarted, RCU will send another response in the
-      // future,
-      // e.g. Finished or Aborted.
+      // future, e.g. Finished or Aborted.
       expected_responses_.insert(
           research_interface::Function::kStartMotionGenerator);
       break;
