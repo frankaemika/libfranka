@@ -14,14 +14,14 @@ namespace franka {
 /**
  * Enumerates FRANKA's seven joints, the flange and the end effector.
  */
-enum Joint : uint8_t {
-  kJ0,
-  kJ1,
-  kJ2,
-  kJ3,
-  kJ4,
-  kJ5,
-  kJ6,
+enum Frames : uint8_t {
+  kJoint1,
+  kJoint2,
+  kJoint3,
+  kJoint4,
+  kJoint5,
+  kJoint6,
+  kJoint7,
   kFlange,
   kEndEffector
 };
@@ -58,7 +58,7 @@ class Model {
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */
-  std::array<double, 16> jointPose(Joint joint,
+  std::array<double, 16> jointPose(Frames joint,
                                    const franka::RobotState& robot_state) const;
 
   /**
