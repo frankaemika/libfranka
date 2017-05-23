@@ -214,7 +214,7 @@ class Robot {
    *
    * @return Parameters of virtual wall.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   VirtualWallCuboid getVirtualWall(int32_t id);
 
@@ -223,7 +223,7 @@ class Robot {
    *
    * @param[in] controller_mode Controller mode.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setControllerMode(ControllerMode controller_mode);
 
@@ -255,7 +255,7 @@ class Robot {
    * @param[in] upper_force_thresholds_nominal Collision force thresholds in
    * \f$[N]\f$.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    *
    * @see RobotState::cartesian_contact
    * @see RobotState::cartesian_collision
@@ -291,7 +291,7 @@ class Robot {
    * @param[in] lower_force_thresholds Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds Collision force thresholds in \f$[N]\f$.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    *
    * @see RobotState::cartesian_contact
    * @see RobotState::cartesian_collision
@@ -311,7 +311,7 @@ class Robot {
    *
    * @param[in] K_theta Joint impedance values \f$K_{\theta}\f$.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setJointImpedance(
       const std::array<double, 7>&
@@ -322,7 +322,7 @@ class Robot {
    *
    * @param[in] K_x Cartesian impedance values \f$K_x=(x, y, z, R, P, Y)\f$.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setCartesianImpedance(
       const std::array<double, 6>&
@@ -342,7 +342,7 @@ class Robot {
    * @param[in] elbow True if the elbow is free in guiding mode, false
    * otherwise.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow);
 
@@ -355,7 +355,7 @@ class Robot {
    * @param[in] EE_T_K Vectorized EE-to-K transformation matrix \f$^{EE}T_K\f$,
    * column-major.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    *
    * @see Robot for an explanation of the K frame.
    */
@@ -371,7 +371,7 @@ class Robot {
    * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix
    * \f$^FT_{EE}\f$, column-major.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    *
    * @see RobotState::O_T_EE for end-effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
@@ -392,7 +392,7 @@ class Robot {
    * @param[in] load_inertia Inertia matrix \f$I_\text{load}\f$ in \f$[kg \times
    * m^2]\f$, column-major.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setLoad(double load_mass,
                const std::array<double, 3>&
@@ -406,7 +406,7 @@ class Robot {
    *
    * @param[in] factor Time scaling factor \f$\in [0, 1]\f$.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void setTimeScalingFactor(double factor);
 
@@ -415,7 +415,7 @@ class Robot {
    *
    * Automatic error recovery e.g. resets FRANKA after a collision occurred.
    *
-   * @throw CommandException if an error occured.
+   * @throw CommandException if an error occurred.
    */
   void automaticErrorRecovery();
 
