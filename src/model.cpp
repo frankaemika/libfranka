@@ -30,7 +30,7 @@ Model::Model(franka::Robot& robot)
 Model::~Model() noexcept = default;
 
 std::array<double, 16> Model::jointPose(
-    Frames joint,
+    Frame joint,
     const franka::RobotState& robot_state) const {
   std::array<double, 16> output;
 
@@ -39,39 +39,39 @@ std::array<double, 16> Model::jointPose(
       robot_state.O_T_EE.data();
 
   switch (joint) {
-    case Frames::kJoint1:
+    case Frame::kJoint1:
       reinterpret_cast<decltype(&O_T_J1_file)>(joint0_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint2:
+    case Frame::kJoint2:
       reinterpret_cast<decltype(&O_T_J2_file)>(joint1_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint3:
+    case Frame::kJoint3:
       reinterpret_cast<decltype(&O_T_J3_file)>(joint2_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint4:
+    case Frame::kJoint4:
       reinterpret_cast<decltype(&O_T_J4_file)>(joint3_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint5:
+    case Frame::kJoint5:
       reinterpret_cast<decltype(&O_T_J5_file)>(joint4_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint6:
+    case Frame::kJoint6:
       reinterpret_cast<decltype(&O_T_J6_file)>(joint5_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kJoint7:
+    case Frame::kJoint7:
       reinterpret_cast<decltype(&O_T_J7_file)>(joint6_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kFlange:
+    case Frame::kFlange:
       reinterpret_cast<decltype(&O_T_J8_file)>(flange_function_)(
           q, end_effector, output.data());
       break;
-    case Frames::kEndEffector:
+    case Frame::kEndEffector:
       reinterpret_cast<decltype(&O_T_J9_file)>(ee_function_)(q, end_effector,
                                                              output.data());
       break;

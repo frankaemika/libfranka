@@ -25,9 +25,9 @@ int main(int argc, char** argv) {
     franka::RobotState state = robot.readOnce();
 
     franka::Model model(robot);
-    for (franka::Frames joint = franka::Frames::kJoint1;
-         joint <= franka::Frames::kEndEffector;
-         joint = franka::Frames(joint + 1)) {
+    for (franka::Frame joint = franka::Frame::kJoint1;
+         joint <= franka::Frame::kEndEffector;
+         joint = franka::Frame(joint + 1)) {
       std::cout << model.jointPose(joint, state) << std::endl;
     }
   } catch (franka::Exception const& e) {
