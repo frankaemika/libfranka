@@ -9,7 +9,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 franka::Model::Model(
     franka::Robot&) try {  // NOLINT (readability-named-parameter)
-  library_.load(std::string{"libfcimodels"} + Poco::SharedLibrary::suffix());
+  library_.load("libfcimodels"s + Poco::SharedLibrary::suffix());
 
   mass_function_ = library_.getSymbol("M_NE_file");
   joint0_function_ = library_.getSymbol("O_T_J1_file");
@@ -94,9 +94,9 @@ std::array<double, 16> franka::Model::jointPose(
 
 std::array<double, 49> franka::Model::mass(
     const franka::RobotState& robot_state,
-    const std::array<double, 7> load_inertia,
+    const std::array<double, 9>& load_inertia,
     double load_mass,
-    std::array<double, 3> F_x_Cload) const noexcept {
+    const std::array<double, 3>& F_x_Cload) const noexcept {
   std::array<double, 49> output;
   auto function = reinterpret_cast<decltype(&M_NE_file)>(mass_function_);
   function(robot_state.q.data(), load_inertia.data(), load_mass,
@@ -107,9 +107,9 @@ std::array<double, 49> franka::Model::mass(
 
 std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
-    const std::array<double, 7> load_inertia,
+    const std::array<double, 9>& load_inertia,
     double load_mass,
-    std::array<double, 3> F_x_Cload) const noexcept {
+    const std::array<double, 3>& F_x_Cload) const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&c_NE_file)>(coriolis_function_);
   function(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
@@ -121,8 +121,8 @@ std::array<double, 7> franka::Model::coriolis(
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
     double load_mass,
-    std::array<double, 3> F_x_Cload,
-    std::array<double, 3> gravity_earth) const noexcept {
+    const std::array<double, 3>& F_x_Cload,
+    const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&g_NE_file)>(gravity_function_);
   function(robot_state.q.data(), gravity_earth.data(), load_mass,

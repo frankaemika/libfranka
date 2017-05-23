@@ -62,8 +62,8 @@ class Model {
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] load_inertia Inertia of the load, relative to center of mass.
-   * Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass,
+   * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
    * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load.
    * Unit: \f$[m]\f$.
@@ -71,9 +71,10 @@ class Model {
    * @return Vectorized 7x7 mass matrix, column-major.
    */
   std::array<double, 49> mass(const franka::RobotState& robot_state,
-                              const std::array<double, 7> load_inertia,
+                              const std::array<double, 9>& load_inertia,
                               double load_mass,
-                              std::array<double, 3> F_x_Cload) const noexcept;
+                              const std::array<double, 3>& F_x_Cload) const
+      noexcept;
 
   /**
  * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
@@ -81,8 +82,8 @@ class Model {
  *
  * @param[in] robot_state State from which the Coriolis force vector should be
  * calculated.
- * @param[in] load_inertia Inertia of the load, relative to center of mass.
- * Unit: \f$[kg \times m^2]\f$.
+ * @param[in] load_inertia Inertia of the load, relative to center of mass,
+ * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
  * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
  * @param[in] F_x_Cload Translation from flange to center of mass of load.
  * Unit: \f$[m]\f$.
@@ -90,9 +91,9 @@ class Model {
  * @return Coriolis force vector.
  */
   std::array<double, 7> coriolis(const franka::RobotState& robot_state,
-                                 const std::array<double, 7> load_inertia,
+                                 const std::array<double, 9>& load_inertia,
                                  double load_mass,
-                                 std::array<double, 3> F_x_Cload) const
+                                 const std::array<double, 3>& F_x_Cload) const
       noexcept;
 
   /**
@@ -110,8 +111,8 @@ class Model {
   */
   std::array<double, 7> gravity(const franka::RobotState& robot_state,
                                 double load_mass,
-                                std::array<double, 3> F_x_Cload,
-                                std::array<double, 3> gravity_earth = {
+                                const std::array<double, 3>& F_x_Cload,
+                                const std::array<double, 3>& gravity_earth = {
                                     {0., 0., -9.81}}) const noexcept;
 
  private:

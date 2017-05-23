@@ -5,7 +5,7 @@ extern "C" {
 void M_NE_file(const double q[7],  // NOLINT
                const double I_load[9],
                double m_load,
-               const double F_x_Cload[16],
+               const double F_x_Cload[3],
                double M_NE[49]);
 void O_T_J1_file(const double q[7],  // NOLINT
                  const double F_T_EE[16],
@@ -38,13 +38,11 @@ void c_NE_file(const double q[7],  // NOLINT
                const double dq[7],
                const double I_load[9],
                double m_load,
-               const double F_x_Cload[16],
+               const double F_x_Cload[3],
                double c_NE[7]);
 void g_NE_file(const double q[7],  // NOLINT
                const double g_earth[3],
                double m_load,
-               const double F_x_Cload[16],
+               const double F_x_Cload[3],
                double g_NE[7]);
-void libfcimodels_initialize(void);  // NOLINT
-
 }
