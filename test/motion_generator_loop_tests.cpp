@@ -55,8 +55,6 @@ class MotionGeneratorLoops : public ::testing::Test {
   research_interface::StartMotionGenerator::MotionGeneratorMode kMotionGeneratorMode = franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
 
   T createMotion();
-  std::function<T(const RobotState&)> getCallback();
-  bool isSameMotion(const T& motion, const MotionGeneratorCommand& motion_command);
   auto getField(const T& values);
 };
 
