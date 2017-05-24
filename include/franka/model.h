@@ -38,8 +38,7 @@ class Model {
    *
    * @param[in] robot Robot to create model for.
    *
-   * @throw ModelLibraryException if the model library cannot be loaded, or if
-   * the versions do not match.
+   * @throw ModelException if the model library cannot be loaded.
    */
   Model(franka::Robot& robot);
 
