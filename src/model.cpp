@@ -10,7 +10,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Model::Model(franka::Robot& robot)
+Model::Model(franka::Robot&)  // NOLINT (readability-named-parameter)
     : library_{new LibraryLoader("libfcimodels")},
       mass_function_{library_->getSymbol("M_NE_file")},
       joint0_function_{library_->getSymbol("O_T_J1_file")},
