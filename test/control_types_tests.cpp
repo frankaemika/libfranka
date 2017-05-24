@@ -4,13 +4,13 @@
 #include <franka/exception.h>
 
 TEST(Torques, CanConstructFromArray) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::Torques t(array);
   EXPECT_EQ(array, t.tau_J);
 }
 
 TEST(Torques, CanConstructFromInitializerList) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::Torques t({0, 1, 2, 3, 4, 5, 6});
   EXPECT_EQ(array, t.tau_J);
 }
@@ -20,13 +20,13 @@ TEST(Torques, CanNotConstructFromTooSmallInitializerList) {
 }
 
 TEST(JointValues, CanConstructFromArray) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::JointValues jv(array);
   EXPECT_EQ(array, jv.q);
 }
 
 TEST(JointValues, CanConstructFromInitializerList) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::JointValues jv({0, 1, 2, 3, 4, 5, 6});
   EXPECT_EQ(array, jv.q);
 }
@@ -36,13 +36,13 @@ TEST(JointValues, CanNotConstructFromTooSmallInitializerList) {
 }
 
 TEST(JointVelocities, CanConstructFromArray) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::JointVelocities jv(array);
   EXPECT_EQ(array, jv.dq);
 }
 
 TEST(JointVelocities, CanConstructFromInitializerList) {
-  std::array<double, 7> array {0, 1, 2, 3, 4, 5, 6};
+  std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
   franka::JointVelocities jv({0, 1, 2, 3, 4, 5, 6});
   EXPECT_EQ(array, jv.dq);
 }
@@ -69,21 +69,21 @@ TEST(CartesianPose, CanNotConstructFromTooSmallInitializerList) {
 
 TEST(CartesianPose, CanNotConstructFromInvalidMatrix) {
   EXPECT_THROW(franka::CartesianPose({0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}),
-      franka::ControlException);
+               franka::ControlException);
 
   // Translation of [1,1,1] stored in row_major order
   EXPECT_THROW(franka::CartesianPose({1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1}),
-      franka::ControlException);
+               franka::ControlException);
 }
 
 TEST(CartesianVelocities, CanConstructFromArray) {
-  std::array<double, 6> array {0, 1, 2, 3, 4, 5};
+  std::array<double, 6> array{0, 1, 2, 3, 4, 5};
   franka::CartesianVelocities cv(array);
   EXPECT_EQ(array, cv.O_dP_EE);
 }
 
 TEST(CartesianVelocities, CanConstructFromInitializerList) {
-  std::array<double, 6> array {0, 1, 2, 3, 4, 5};
+  std::array<double, 6> array{0, 1, 2, 3, 4, 5};
   franka::CartesianVelocities cv({0, 1, 2, 3, 4, 5});
   EXPECT_EQ(array, cv.O_dP_EE);
 }

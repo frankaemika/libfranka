@@ -36,10 +36,8 @@ uint16_t Network::udpPort() const noexcept {
   return udp_socket_.address().port();
 }
 
-void Network::udpSendRobotCommand(
-    const research_interface::RobotCommand& command) try {
-  int bytes_sent =
-      udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
+void Network::udpSendRobotCommand(const research_interface::RobotCommand& command) try {
+  int bytes_sent = udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
   if (bytes_sent != sizeof(command)) {
     throw NetworkException("libfranka: robot command send error");
   }
@@ -49,8 +47,7 @@ void Network::udpSendRobotCommand(
 
 research_interface::RobotState Network::udpReadRobotState() try {
   std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
-  int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(),
-                                               udp_server_address_);
+  int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(), udp_server_address_);
   if (bytes_received != buffer.size()) {
     throw ProtocolException("libfranka: incorrect object size");
   }
@@ -62,8 +59,7 @@ research_interface::RobotState Network::udpReadRobotState() try {
 int Network::tcpReceiveIntoBuffer() try {
   size_t offset = read_buffer_.size();
   read_buffer_.resize(offset + tcp_socket_.available());
-  return tcp_socket_.receiveBytes(&read_buffer_[offset],
-                                  tcp_socket_.available());
+  return tcp_socket_.receiveBytes(&read_buffer_[offset], tcp_socket_.available());
 } catch (const Poco::Exception& e) {
   throw NetworkException("libfranka: "s + e.what());
 }
@@ -80,8 +76,7 @@ bool Network::tcpReadResponse(research_interface::Function* function) try {
       return false;
     }
 
-    *function =
-        *reinterpret_cast<research_interface::Function*>(read_buffer_.data());
+    *function = *reinterpret_cast<research_interface::Function*>(read_buffer_.data());
     return true;
   }
   return false;

@@ -48,31 +48,26 @@ bool Robot::Impl::handleCommandResponse(const typename T::Response& response) {
     case T::Status::kSuccess:
       break;
     case T::Status::kAborted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
                              " command aborted!");
     case T::Status::kRejected:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
                              " command rejected!");
     case T::Status::kPreempted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
                              " command preempted!");
   }
   return true;
 }
 
 template <>
-bool Robot::Impl::handleCommandResponse<
-    research_interface::StartMotionGenerator>(
+bool Robot::Impl::handleCommandResponse<research_interface::StartMotionGenerator>(
     const research_interface::StartMotionGenerator::Response& response) {
   switch (response.status) {
     case research_interface::StartMotionGenerator::Status::kMotionStarted:
       // After sending MotionStarted, RCU will send another response in the
       // future, e.g. Finished or Aborted.
-      expected_responses_.insert(
-          research_interface::Function::kStartMotionGenerator);
+      expected_responses_.insert(research_interface::Function::kStartMotionGenerator);
       break;
     case research_interface::StartMotionGenerator::Status::kSuccess:
       motion_generator_running_ = false;
@@ -99,8 +94,7 @@ bool Robot::Impl::handleCommandResponse<research_interface::StartController>(
       break;
     default:
       controller_running_ = false;
-      throw ProtocolException(
-          "libfranka: unexpected start controller response!");
+      throw ProtocolException("libfranka: unexpected start controller response!");
   }
   return true;
 }
@@ -115,30 +109,24 @@ bool Robot::Impl::update() {
     bool handled = false;
     switch (function) {
       case research_interface::Function::kStartMotionGenerator:
-        handled =
-            network_.handleResponse<research_interface::StartMotionGenerator>(
-                std::bind(&Robot::Impl::handleCommandResponse<
-                              research_interface::StartMotionGenerator>,
-                          this, std::placeholders::_1));
+        handled = network_.handleResponse<research_interface::StartMotionGenerator>(
+            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StartMotionGenerator>,
+                      this, std::placeholders::_1));
         break;
       case research_interface::Function::kStopMotionGenerator:
-        handled =
-            network_.handleResponse<research_interface::StopMotionGenerator>(
-                std::bind(&Robot::Impl::handleCommandResponse<
-                              research_interface::StopMotionGenerator>,
-                          this, std::placeholders::_1));
+        handled = network_.handleResponse<research_interface::StopMotionGenerator>(
+            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StopMotionGenerator>,
+                      this, std::placeholders::_1));
         break;
       case research_interface::Function::kStartController:
         handled = network_.handleResponse<research_interface::StartController>(
-            std::bind(&Robot::Impl::handleCommandResponse<
-                          research_interface::StartController>,
+            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StartController>,
                       this, std::placeholders::_1));
         break;
       case research_interface::Function::kStopController:
         handled = network_.handleResponse<research_interface::StopController>(
-            std::bind(&Robot::Impl::handleCommandResponse<
-                          research_interface::StopController>,
-                      this, std::placeholders::_1));
+            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StopController>, this,
+                      std::placeholders::_1));
         break;
       default:
         throw ProtocolException("libfranka: unsupported response!");
@@ -188,24 +176,21 @@ void Robot::Impl::controllerCommand(
 }
 
 void Robot::Impl::motionGeneratorCommand(
-    const research_interface::MotionGeneratorCommand&
-        motion_generator_command) noexcept {
+    const research_interface::MotionGeneratorCommand& motion_generator_command) noexcept {
   robot_command_.motion = motion_generator_command;
 }
 
 void Robot::Impl::startMotionGenerator(
     research_interface::StartMotionGenerator::MotionGeneratorMode mode) {
   if (motion_generator_running_) {
-    throw ControlException(
-        "libfranka: attempted to start multiple motion generators!");
+    throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
   std::memset(&robot_command_, 0, sizeof(robot_command_));
 
   research_interface::StartMotionGenerator::Request request(mode);
   network_.tcpSendRequest(request);
 
-  expected_responses_.insert(
-      research_interface::Function::kStartMotionGenerator);
+  expected_responses_.insert(research_interface::Function::kStartMotionGenerator);
 
   research_interface::MotionGeneratorMode motion_generator_mode;
   switch (mode) {
@@ -216,20 +201,17 @@ void Robot::Impl::startMotionGenerator(
       motion_generator_mode = decltype(motion_generator_mode)::kJointVelocity;
       break;
     case decltype(mode)::kCartesianPosition:
-      motion_generator_mode =
-          decltype(motion_generator_mode)::kCartesianPosition;
+      motion_generator_mode = decltype(motion_generator_mode)::kCartesianPosition;
       break;
     case decltype(mode)::kCartesianVelocity:
-      motion_generator_mode =
-          decltype(motion_generator_mode)::kCartesianVelocity;
+      motion_generator_mode = decltype(motion_generator_mode)::kCartesianVelocity;
       break;
     default:
       throw std::invalid_argument("Invalid motion generator mode given.");
   }
 
   while (update()) {
-    if (robot_state_.rcuRobotState().motion_generator_mode ==
-        motion_generator_mode) {
+    if (robot_state_.rcuRobotState().motion_generator_mode == motion_generator_mode) {
       motion_generator_running_ = true;
       return;
     }
@@ -245,8 +227,7 @@ void Robot::Impl::stopMotionGenerator() {
   research_interface::StopMotionGenerator::Request request;
   network_.tcpSendRequest(request);
 
-  expected_responses_.insert(
-      research_interface::Function::kStopMotionGenerator);
+  expected_responses_.insert(research_interface::Function::kStopMotionGenerator);
 
   robot_command_.motion.motion_generation_finished = true;
   while (update()) {
@@ -261,8 +242,7 @@ void Robot::Impl::stopMotionGenerator() {
 
 void Robot::Impl::startController() {
   if (controller_running_) {
-    throw ControlException(
-        "libfranka: attempted to start multiple controllers!");
+    throw ControlException("libfranka: attempted to start multiple controllers!");
   }
 
   research_interface::StartController::Request request;

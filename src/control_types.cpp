@@ -15,9 +15,8 @@ bool IsStop::stop() const noexcept {
 
 Torques::Torques() noexcept : IsStop(true) {}
 
-Torques::Torques(
-    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-    torques) noexcept : tau_J(torques) {}
+Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+                 torques) noexcept : tau_J(torques) {}
 
 Torques::Torques(std::initializer_list<double> torques) {
   if (torques.size() != tau_J.size()) {
@@ -28,9 +27,8 @@ Torques::Torques(std::initializer_list<double> torques) {
 
 JointValues::JointValues() noexcept : IsStop(true) {}
 
-JointValues::JointValues(
-    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-    joint_values) noexcept : q(joint_values) {}
+JointValues::JointValues(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+                         joint_values) noexcept : q(joint_values) {}
 
 JointValues::JointValues(std::initializer_list<double> joint_values) {
   if (joint_values.size() != q.size()) {
@@ -41,12 +39,10 @@ JointValues::JointValues(std::initializer_list<double> joint_values) {
 
 JointVelocities::JointVelocities() noexcept : IsStop(true) {}
 
-JointVelocities::JointVelocities(
-    const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-    joint_velocities) noexcept : dq(joint_velocities) {}
+JointVelocities::JointVelocities(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+                                 joint_velocities) noexcept : dq(joint_velocities) {}
 
-JointVelocities::JointVelocities(
-    std::initializer_list<double> joint_velocities) {
+JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities) {
   if (joint_velocities.size() != dq.size()) {
     throw ControlException("Invalid number of elements in joint_velocities.");
   }
@@ -55,9 +51,8 @@ JointVelocities::JointVelocities(
 
 CartesianPose::CartesianPose() noexcept : IsStop(true) {}
 
-CartesianPose::CartesianPose(
-    const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
-    cartesian_pose)
+CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
+                             cartesian_pose)
     : O_T_EE(cartesian_pose) {
   checkHomogeneousTransformation();
 }
@@ -78,25 +73,21 @@ void CartesianPose::checkHomogeneousTransformation() {
   }
 }
 
-bool CartesianPose::isHomogeneousTransformation(
-    const std::array<double, 16>& transform) noexcept {
+bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept {
   constexpr double kOrthonormalThreshold = 1e-6;
 
-  if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 ||
-      transform[15] != 1.0) {
+  if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 || transform[15] != 1.0) {
     return false;
   }
   for (size_t j = 0; j < 3; ++j) {  // i..column
-    if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) +
-                           std::pow(transform[j * 4 + 1], 2) +
+    if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) + std::pow(transform[j * 4 + 1], 2) +
                            std::pow(transform[j * 4 + 2], 2)) -
                  1.0) > kOrthonormalThreshold) {
       return false;
     }
   }
   for (size_t i = 0; i < 3; ++i) {  // j..row
-    if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) +
-                           std::pow(transform[1 * 4 + i], 2) +
+    if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) + std::pow(transform[1 * 4 + i], 2) +
                            std::pow(transform[2 * 4 + i], 2)) -
                  1.0) > kOrthonormalThreshold) {
       return false;
@@ -112,14 +103,11 @@ CartesianVelocities::CartesianVelocities(
     cartesian_velocities)
     : O_dP_EE(cartesian_velocities) {}
 
-CartesianVelocities::CartesianVelocities(
-    std::initializer_list<double> cartesian_velocities) {
+CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian_velocities) {
   if (cartesian_velocities.size() != O_dP_EE.size()) {
-    throw ControlException(
-        "Invalid number of elements in cartesian_velocities.");
+    throw ControlException("Invalid number of elements in cartesian_velocities.");
   }
-  std::copy(cartesian_velocities.begin(), cartesian_velocities.end(),
-            O_dP_EE.begin());
+  std::copy(cartesian_velocities.begin(), cartesian_velocities.end(), O_dP_EE.begin());
 }
 
 }  // namespace franka

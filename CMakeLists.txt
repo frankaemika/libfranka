@@ -169,20 +169,25 @@ file(GLOB_RECURSE HEADERS
   examples/*.h
   lib/research-interface-common/*.h
 )
+file(GLOB_RECURSE TEST_FILES
+  test/*.h
+  test/*.cpp
+)
 file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
 
+
 find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format
-    COMMAND ${CLANG_FORMAT_PROG} -i ${SOURCES} ${HEADERS}
+    COMMAND ${CLANG_FORMAT_PROG} -i ${SOURCES} ${HEADERS} ${TEST_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Formatting source code with clang-format"
     VERBATIM
   )
   add_custom_target(check-format
-    COMMAND scripts/format-check.sh ${CLANG_FORMAT_PROG} -output-replacements-xml ${SOURCES} ${HEADERS}
+    COMMAND scripts/format-check.sh ${CLANG_FORMAT_PROG} -output-replacements-xml ${SOURCES} ${HEADERS} ${TEST_FILES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Checking code formatting with clang-format"
     VERBATIM

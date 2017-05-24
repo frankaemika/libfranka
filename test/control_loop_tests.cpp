@@ -42,9 +42,7 @@ TEST(ControlLoop, CanConstructWithCallback) {
     EXPECT_CALL(robot, stopController());
   }
 
-  ControlLoop loop(robot, [](const franka::RobotState&){
-    return Torques({0, 1, 2, 3, 4, 5, 6});
-  });
+  ControlLoop loop(robot, [](const franka::RobotState&) { return Torques({0, 1, 2, 3, 4, 5, 6}); });
 }
 
 TEST(ControlLoop, SpinOnceWithoutCallback) {
@@ -66,22 +64,21 @@ TEST(ControlLoop, SpinOnceWithCallback) {
 
   RobotState robot_state;
   EXPECT_CALL(robot, robotStateMock()).WillOnce(ReturnRef(robot_state));
-  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d, Eq(torques.tau_J))));
+  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d,
+                                                 Eq(torques.tau_J))));
 
-  EXPECT_CALL(control_callback, invoke(_))
-    .WillOnce(Return(torques));
+  EXPECT_CALL(control_callback, invoke(_)).WillOnce(Return(torques));
 
-  ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
+  ControlLoop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
 }
 
 TEST(ControlLoop, SpinOnceWithStoppingCallback) {
   NiceMock<MockRobotControl> robot;
   RobotState robot_state;
-  ON_CALL(robot, robotStateMock())
-    .WillByDefault(ReturnRef(robot_state));
-  ON_CALL(robot, update())
-    .WillByDefault(Return(true));
+  ON_CALL(robot, robotStateMock()).WillByDefault(ReturnRef(robot_state));
+  ON_CALL(robot, update()).WillByDefault(Return(true));
 
   ControlLoop loop(robot, [](const RobotState&) { return Stop; });
 

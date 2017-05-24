@@ -18,40 +18,31 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-void Robot::control(
-    std::function<Torques(const RobotState&)> control_callback) {
+void Robot::control(std::function<Torques(const RobotState&)> control_callback) {
   ControlLoop loop(*impl_, control_callback);
   loop();
 }
 
-void Robot::control(
-    std::function<JointValues(const RobotState&)> motion_generator_callback,
-    std::function<Torques(const RobotState&)> control_callback) {
-  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback,
-                                        motion_generator_callback);
+void Robot::control(std::function<JointValues(const RobotState&)> motion_generator_callback,
+                    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 
-void Robot::control(
-    std::function<JointVelocities(const RobotState&)> motion_generator_callback,
-    std::function<Torques(const RobotState&)> control_callback) {
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback,
-                                            motion_generator_callback);
+void Robot::control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
+                    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 
-void Robot::control(
-    std::function<CartesianPose(const RobotState&)> motion_generator_callback,
-    std::function<Torques(const RobotState&)> control_callback) {
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_callback,
-                                          motion_generator_callback);
+void Robot::control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+                    std::function<Torques(const RobotState&)> control_callback) {
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 
-void Robot::control(
-    std::function<CartesianVelocities(const RobotState&)>
-        motion_generator_callback,
-    std::function<Torques(const RobotState&)> control_callback) {
+void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
+                    std::function<Torques(const RobotState&)> control_callback) {
   MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_callback,
                                                 motion_generator_callback);
   loop();
@@ -74,8 +65,7 @@ RobotState Robot::readOnce() {
 
 VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
   VirtualWallCuboid virtual_wall;
-  impl_->executeCommand<research_interface::GetCartesianLimit>(id,
-                                                               &virtual_wall);
+  impl_->executeCommand<research_interface::GetCartesianLimit>(id, &virtual_wall);
   return virtual_wall;
 }
 
@@ -100,28 +90,25 @@ void Robot::setControllerMode(ControllerMode controller_mode) {
   impl_->executeCommand<research_interface::SetControllerMode>(mode);
 }
 
-void Robot::setCollisionBehavior(
-    const std::array<double, 7>& lower_torque_thresholds_acceleration,
-    const std::array<double, 7>& upper_torque_thresholds_acceleration,
-    const std::array<double, 7>& lower_torque_thresholds_nominal,
-    const std::array<double, 7>& upper_torque_thresholds_nominal,
-    const std::array<double, 6>& lower_force_thresholds_acceleration,
-    const std::array<double, 6>& upper_force_thresholds_acceleration,
-    const std::array<double, 6>& lower_force_thresholds_nominal,
-    const std::array<double, 6>& upper_force_thresholds_nominal) {
+void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
+                                 const std::array<double, 7>& upper_torque_thresholds_acceleration,
+                                 const std::array<double, 7>& lower_torque_thresholds_nominal,
+                                 const std::array<double, 7>& upper_torque_thresholds_nominal,
+                                 const std::array<double, 6>& lower_force_thresholds_acceleration,
+                                 const std::array<double, 6>& upper_force_thresholds_acceleration,
+                                 const std::array<double, 6>& lower_force_thresholds_nominal,
+                                 const std::array<double, 6>& upper_force_thresholds_nominal) {
   impl_->executeCommand<research_interface::SetCollisionBehavior>(
-      lower_torque_thresholds_acceleration,
-      upper_torque_thresholds_acceleration, lower_torque_thresholds_nominal,
-      upper_torque_thresholds_nominal, lower_force_thresholds_acceleration,
-      upper_force_thresholds_acceleration, lower_force_thresholds_nominal,
-      upper_force_thresholds_nominal);
+      lower_torque_thresholds_acceleration, upper_torque_thresholds_acceleration,
+      lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
+      lower_force_thresholds_acceleration, upper_force_thresholds_acceleration,
+      lower_force_thresholds_nominal, upper_force_thresholds_nominal);
 }
 
-void Robot::setCollisionBehavior(
-    const std::array<double, 7>& lower_torque_thresholds,
-    const std::array<double, 7>& upper_torque_thresholds,
-    const std::array<double, 6>& lower_force_thresholds,
-    const std::array<double, 6>& upper_force_thresholds) {
+void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
+                                 const std::array<double, 7>& upper_torque_thresholds,
+                                 const std::array<double, 6>& lower_force_thresholds,
+                                 const std::array<double, 6>& upper_force_thresholds) {
   impl_->executeCommand<research_interface::SetCollisionBehavior>(
       lower_torque_thresholds, upper_torque_thresholds, lower_torque_thresholds,
       upper_torque_thresholds, lower_force_thresholds, upper_force_thresholds,
@@ -129,8 +116,7 @@ void Robot::setCollisionBehavior(
 }
 
 void Robot::setJointImpedance(
-    const std::array<double, 7>&
-        K_theta) {  // NOLINT (readability-named-parameter)
+    const std::array<double, 7>& K_theta) {  // NOLINT (readability-named-parameter)
   impl_->executeCommand<research_interface::SetJointImpedance>(K_theta);
 }
 
@@ -139,28 +125,22 @@ void Robot::setCartesianImpedance(
   impl_->executeCommand<research_interface::SetCartesianImpedance>(K_x);
 }
 
-void Robot::setGuidingMode(const std::array<bool, 6>& guiding_mode,
-                           bool elbow) {
-  impl_->executeCommand<research_interface::SetGuidingMode>(guiding_mode,
-                                                            elbow);
+void Robot::setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow) {
+  impl_->executeCommand<research_interface::SetGuidingMode>(guiding_mode, elbow);
 }
 
-void Robot::setK(const std::array<double, 16>&
-                     EE_T_K) {  // NOLINT (readability-named-parameter)
+void Robot::setK(const std::array<double, 16>& EE_T_K) {  // NOLINT (readability-named-parameter)
   impl_->executeCommand<research_interface::SetEEToK>(EE_T_K);
 }
 
-void Robot::setEE(const std::array<double, 16>&
-                      F_T_EE) {  // NOLINT (readability-named-parameter)
+void Robot::setEE(const std::array<double, 16>& F_T_EE) {  // NOLINT (readability-named-parameter)
   impl_->executeCommand<research_interface::SetFToEE>(F_T_EE);
 }
 
 void Robot::setLoad(double load_mass,
-                    const std::array<double, 3>&
-                        F_x_Cload,  // NOLINT (readability-named-parameter)
+                    const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-named-parameter)
                     const std::array<double, 9>& load_inertia) {
-  impl_->executeCommand<research_interface::SetLoad>(load_mass, F_x_Cload,
-                                                     load_inertia);
+  impl_->executeCommand<research_interface::SetLoad>(load_mass, F_x_Cload, load_inertia);
 }
 
 void Robot::setTimeScalingFactor(double factor) {

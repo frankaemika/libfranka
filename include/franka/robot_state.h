@@ -111,23 +111,20 @@ struct RobotState {
    * External wrench (force, torque) scaled by a factor acting on K frame,
    * expressed relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
-  std::array<double, 6>
-      O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
    * External wrench (force, torque) acting on K frame, expressed relative to
    * the end effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
-  std::array<double, 6>
-      K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 };
 
 /**
  * Streams the RobotState according to the following format: {field_name_1:
  * [0,0,0,0,0,0,0], field_name_2: [0,0,0,0,0,0], ...}
  */
-std::ostream& operator<<(std::ostream& ostream,
-                         const franka::RobotState& robot_state);
+std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
 
 }  // namespace franka

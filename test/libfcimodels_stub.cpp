@@ -14,73 +14,55 @@ void M_NE_file(const double q[7],
   }
 }
 
-void O_T_J1_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J1[16]) {
+void O_T_J1_file(const double q[7], const double F_T_EE[16], double O_T_J1[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J1(q, F_T_EE, O_T_J1);
   }
 }
 
-void O_T_J2_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J2[16]) {
+void O_T_J2_file(const double q[7], const double F_T_EE[16], double O_T_J2[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J2(q, F_T_EE, O_T_J2);
   }
 }
 
-void O_T_J3_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J3[16]) {
+void O_T_J3_file(const double q[7], const double F_T_EE[16], double O_T_J3[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J3(q, F_T_EE, O_T_J3);
   }
 }
 
-void O_T_J4_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J4[16]) {
+void O_T_J4_file(const double q[7], const double F_T_EE[16], double O_T_J4[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J4(q, F_T_EE, O_T_J4);
   }
 }
 
-void O_T_J5_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J5[16]) {
+void O_T_J5_file(const double q[7], const double F_T_EE[16], double O_T_J5[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J5(q, F_T_EE, O_T_J5);
   }
 }
 
-void O_T_J6_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J6[16]) {
+void O_T_J6_file(const double q[7], const double F_T_EE[16], double O_T_J6[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J6(q, F_T_EE, O_T_J6);
   }
 }
 
-void O_T_J7_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J7[16]) {
+void O_T_J7_file(const double q[7], const double F_T_EE[16], double O_T_J7[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J7(q, F_T_EE, O_T_J7);
   }
 }
 
-void O_T_J8_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J8[16]) {
+void O_T_J8_file(const double q[7], const double F_T_EE[16], double O_T_J8[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J8(q, F_T_EE, O_T_J8);
   }
 }
 
-void O_T_J9_file(const double q[7],
-                 const double F_T_EE[16],
-                 double O_T_J9[16]) {
+void O_T_J9_file(const double q[7], const double F_T_EE[16], double O_T_J9[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J9(q, F_T_EE, O_T_J9);
   }

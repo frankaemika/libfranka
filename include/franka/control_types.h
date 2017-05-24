@@ -188,8 +188,7 @@ class CartesianPose : public IsStop {
    * @return True if transformation has ortho-normal rotation matrix,
    * the last row is [0 0 0 1] and the array defines a column major matrix.
    */
-  static bool isHomogeneousTransformation(
-      const std::array<double, 16>& transform) noexcept;
+  static bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept;
 };
 
 /**
@@ -233,11 +232,7 @@ class CartesianVelocities : public IsStop {
  *
  * @see Robot::control
  */
-struct StopT final : Torques,
-                     JointValues,
-                     JointVelocities,
-                     CartesianVelocities,
-                     CartesianPose {
+struct StopT final : Torques, JointValues, JointVelocities, CartesianVelocities, CartesianPose {
   StopT() noexcept = default;
 };
 
