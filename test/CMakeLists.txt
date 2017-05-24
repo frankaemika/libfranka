@@ -19,7 +19,6 @@ add_library(fcimodels SHARED
 target_include_directories(fcimodels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fcimodels PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
-# Link library to make sure it can be resolved
 list(APPEND TEST_DEPENDENCIES fcimodels)
 
 ## Test runner
