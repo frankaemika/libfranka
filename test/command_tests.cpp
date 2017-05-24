@@ -20,36 +20,31 @@ class Command : public ::testing::Test {
 
   void executeCommand(Robot::Impl& robot);
   typename T::Request getExpected();
-  bool compare(const typename T::Request& request_one,
-               const typename T::Request& request_two);
+  bool compare(const typename T::Request& request_one, const typename T::Request& request_two);
   typename T::Response createResponse(const typename T::Request& request,
                                       const typename T::Status status);
 };
 
 template <typename T>
-bool Command<T>::compare(const typename T::Request&,
-                         const typename T::Request&) {
+bool Command<T>::compare(const typename T::Request&, const typename T::Request&) {
   return true;
 }
 
 template <>
-bool Command<GetCartesianLimit>::compare(
-    const GetCartesianLimit::Request& request_one,
-    const GetCartesianLimit::Request& request_two) {
+bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
+                                         const GetCartesianLimit::Request& request_two) {
   return request_one.id == request_two.id;
 }
 
 template <>
-bool Command<SetControllerMode>::compare(
-    const SetControllerMode::Request& request_one,
-    const SetControllerMode::Request& request_two) {
+bool Command<SetControllerMode>::compare(const SetControllerMode::Request& request_one,
+                                         const SetControllerMode::Request& request_two) {
   return request_one.mode == request_two.mode;
 }
 
 template <>
-bool Command<SetCollisionBehavior>::compare(
-    const SetCollisionBehavior::Request& request_one,
-    const SetCollisionBehavior::Request& request_two) {
+bool Command<SetCollisionBehavior>::compare(const SetCollisionBehavior::Request& request_one,
+                                            const SetCollisionBehavior::Request& request_two) {
   return request_one.lower_torque_thresholds_acceleration ==
              request_two.lower_torque_thresholds_acceleration &&
          request_one.upper_torque_thresholds_acceleration ==
@@ -60,30 +55,25 @@ bool Command<SetCollisionBehavior>::compare(
              request_two.lower_force_thresholds_acceleration &&
          request_one.upper_force_thresholds_acceleration ==
              request_two.upper_force_thresholds_acceleration &&
-         request_one.lower_force_thresholds_nominal ==
-             request_two.lower_force_thresholds_nominal &&
-         request_one.upper_force_thresholds_nominal ==
-             request_two.upper_force_thresholds_nominal;
+         request_one.lower_force_thresholds_nominal == request_two.lower_force_thresholds_nominal &&
+         request_one.upper_force_thresholds_nominal == request_two.upper_force_thresholds_nominal;
 }
 
 template <>
-bool Command<SetJointImpedance>::compare(
-    const SetJointImpedance::Request& request_one,
-    const SetJointImpedance::Request& request_two) {
+bool Command<SetJointImpedance>::compare(const SetJointImpedance::Request& request_one,
+                                         const SetJointImpedance::Request& request_two) {
   return request_one.K_theta == request_two.K_theta;
 }
 
 template <>
-bool Command<SetCartesianImpedance>::compare(
-    const SetCartesianImpedance::Request& request_one,
-    const SetCartesianImpedance::Request& request_two) {
+bool Command<SetCartesianImpedance>::compare(const SetCartesianImpedance::Request& request_one,
+                                             const SetCartesianImpedance::Request& request_two) {
   return request_one.K_x == request_two.K_x;
 }
 
 template <>
-bool Command<SetGuidingMode>::compare(
-    const SetGuidingMode::Request& request_one,
-    const SetGuidingMode::Request& request_two) {
+bool Command<SetGuidingMode>::compare(const SetGuidingMode::Request& request_one,
+                                      const SetGuidingMode::Request& request_two) {
   return request_one.guiding_mode == request_two.guiding_mode &&
          request_one.nullspace == request_two.nullspace;
 }
@@ -104,14 +94,12 @@ template <>
 bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
                                const SetLoad::Request& request_two) {
   return request_one.F_x_Cload == request_two.F_x_Cload &&
-         request_one.I_load == request_two.I_load &&
-         request_one.m_load == request_two.m_load;
+         request_one.I_load == request_two.I_load && request_one.m_load == request_two.m_load;
 }
 
 template <>
-bool Command<SetTimeScalingFactor>::compare(
-    const SetTimeScalingFactor::Request& request_one,
-    const SetTimeScalingFactor::Request& request_two) {
+bool Command<SetTimeScalingFactor>::compare(const SetTimeScalingFactor::Request& request_one,
+                                            const SetTimeScalingFactor::Request& request_two) {
   return request_one.time_scaling_factor == request_two.time_scaling_factor;
 }
 
@@ -123,28 +111,24 @@ GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
 
 template <>
 SetControllerMode::Request Command<SetControllerMode>::getExpected() {
-  return SetControllerMode::Request(
-      SetControllerMode::ControllerMode::kJointPosition);
+  return SetControllerMode::Request(SetControllerMode::ControllerMode::kJointPosition);
 }
 
 template <>
 SetCollisionBehavior::Request Command<SetCollisionBehavior>::getExpected() {
-  std::array<double, 7> lower_torque_thresholds_acceleration{1, 2, 3, 4,
-                                                             5, 6, 7};
+  std::array<double, 7> lower_torque_thresholds_acceleration{1, 2, 3, 4, 5, 6, 7};
   std::array<double, 7> lower_torque_thresholds_nominal{7, 6, 5, 4, 3, 2, 1};
   std::array<double, 6> lower_force_thresholds_acceleration{1, 3, 5, 7, 9, 11};
   std::array<double, 6> lower_force_thresholds_nominal{2, 4, 6, 8, 10, 12};
-  std::array<double, 7> upper_torque_thresholds_acceleration{2, 2, 4, 4,
-                                                             6, 6, 7};
+  std::array<double, 7> upper_torque_thresholds_acceleration{2, 2, 4, 4, 6, 6, 7};
   std::array<double, 7> upper_torque_thresholds_nominal{8, 6, 6, 4, 4, 2, 2};
   std::array<double, 6> upper_force_thresholds_acceleration{1, 4, 5, 8, 9, 12};
   std::array<double, 6> upper_force_thresholds_nominal{3, 4, 7, 8, 11, 12};
   return SetCollisionBehavior::Request(
-      lower_torque_thresholds_acceleration,
-      upper_torque_thresholds_acceleration, lower_torque_thresholds_nominal,
-      upper_torque_thresholds_nominal, lower_force_thresholds_acceleration,
-      upper_force_thresholds_acceleration, lower_force_thresholds_nominal,
-      upper_force_thresholds_nominal);
+      lower_torque_thresholds_acceleration, upper_torque_thresholds_acceleration,
+      lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
+      lower_force_thresholds_acceleration, upper_force_thresholds_acceleration,
+      lower_force_thresholds_nominal, upper_force_thresholds_nominal);
 }
 
 template <>
@@ -206,8 +190,7 @@ template <>
 void Command<GetCartesianLimit>::executeCommand(Robot::Impl& robot) {
   int32_t limit_id = 3;
   franka::VirtualWallCuboid cuboid;
-  robot.executeCommand<GetCartesianLimit, int32_t, franka::VirtualWallCuboid*>(
-      limit_id, &cuboid);
+  robot.executeCommand<GetCartesianLimit, int32_t, franka::VirtualWallCuboid*>(limit_id, &cuboid);
 }
 
 template <>
@@ -220,14 +203,10 @@ template <>
 void Command<SetCollisionBehavior>::executeCommand(Robot::Impl& robot) {
   SetCollisionBehavior::Request request = getExpected();
   robot.executeCommand<SetCollisionBehavior>(
-      request.lower_torque_thresholds_acceleration,
-      request.upper_torque_thresholds_acceleration,
-      request.lower_torque_thresholds_nominal,
-      request.upper_torque_thresholds_nominal,
-      request.lower_force_thresholds_acceleration,
-      request.upper_force_thresholds_acceleration,
-      request.lower_force_thresholds_nominal,
-      request.upper_force_thresholds_nominal);
+      request.lower_torque_thresholds_acceleration, request.upper_torque_thresholds_acceleration,
+      request.lower_torque_thresholds_nominal, request.upper_torque_thresholds_nominal,
+      request.lower_force_thresholds_acceleration, request.upper_force_thresholds_acceleration,
+      request.lower_force_thresholds_nominal, request.upper_force_thresholds_nominal);
 }
 
 template <>
@@ -263,8 +242,7 @@ void Command<SetFToEE>::executeCommand(Robot::Impl& robot) {
 template <>
 void Command<SetLoad>::executeCommand(Robot::Impl& robot) {
   SetLoad::Request request = getExpected();
-  robot.executeCommand<SetLoad>(request.m_load, request.F_x_Cload,
-                                request.I_load);
+  robot.executeCommand<SetLoad>(request.m_load, request.F_x_Cload, request.I_load);
 }
 
 template <>
@@ -274,9 +252,8 @@ void Command<SetTimeScalingFactor>::executeCommand(Robot::Impl& robot) {
 }
 
 template <typename T>
-typename T::Response Command<T>::createResponse(
-    const typename T::Request&,
-    const typename T::Status status) {
+typename T::Response Command<T>::createResponse(const typename T::Request&,
+                                                const typename T::Status status) {
   return typename T::Response(status);
 }
 
@@ -285,10 +262,8 @@ GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
     const GetCartesianLimit::Request&,
     GetCartesianLimit::Status status) {
   std::array<double, 3> object_p_min{-1, 1, 1}, object_p_max{2, 2, 2};
-  std::array<double, 16> object_frame{1, 0, 0, 0, 0, 1, 0, 0,
-                                      0, 0, 1, 0, 0, 0, 0, 1};
-  return GetCartesianLimit::Response(status, object_p_min, object_p_max,
-                                     object_frame, true);
+  std::array<double, 16> object_frame{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  return GetCartesianLimit::Response(status, object_p_min, object_p_max, object_frame, true);
 }
 
 using CommandTypes = ::testing::Types<GetCartesianLimit,
@@ -312,8 +287,7 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(
-                request, TestFixture::TCommand::Status::kSuccess);
+            return this->createResponse(request, TestFixture::TCommand::Status::kSuccess);
           })
       .spinOnce();
 
@@ -328,8 +302,7 @@ TYPED_TEST(Command, CanSendAndReceiveAbort) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(
-                request, TestFixture::TCommand::Status::kAborted);
+            return this->createResponse(request, TestFixture::TCommand::Status::kAborted);
           })
       .spinOnce();
 
@@ -344,8 +317,7 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(
-                request, TestFixture::TCommand::Status::kRejected);
+            return this->createResponse(request, TestFixture::TCommand::Status::kRejected);
           })
       .spinOnce();
 
@@ -360,8 +332,7 @@ TYPED_TEST(Command, CanSendAndReceivePreempted) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(
-                request, TestFixture::TCommand::Status::kPreempted);
+            return this->createResponse(request, TestFixture::TCommand::Status::kPreempted);
           })
       .spinOnce();
 

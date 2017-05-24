@@ -19,8 +19,7 @@ class MotionGeneratorLoop : public ControlLoop {
   bool spinOnce() override;
 
  private:
-  void convertMotion(const T& motion,
-                     research_interface::MotionGeneratorCommand* command);
+  void convertMotion(const T& motion, research_interface::MotionGeneratorCommand* command);
 
   MotionGeneratorCallback motion_callback_;
 };

@@ -58,26 +58,23 @@ void ControlLoop::setCurrentThreadToRealtime(RealtimeConfig config) {
     DWORD error_id = GetLastError();
     LPSTR buffer = nullptr;
     size_t size = FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-            FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        static_cast<LPSTR>(&buffer), 0, nullptr);
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), static_cast<LPSTR>(&buffer),
+        0, nullptr);
     return std::string(buffer, size);
   };
 
   if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
     if (config == RealtimeConfig::kEnforce) {
-      throw RealTimeException(
-          "libfranka: unable to set realtime priority for the process: "s +
-          get_last_windows_error());
+      throw RealTimeException("libfranka: unable to set realtime priority for the process: "s +
+                              get_last_windows_error());
     }
     return;
   }
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
     if (config == RealtimeConfig::kEnforce) {
-      throw RealTimeException(
-          "libfranka: unable to set realtime priority for the thread: "s +
-          get_last_windows_error());
+      throw RealTimeException("libfranka: unable to set realtime priority for the thread: "s +
+                              get_last_windows_error());
     }
   }
 #else
@@ -87,8 +84,7 @@ void ControlLoop::setCurrentThreadToRealtime(RealtimeConfig config) {
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
     if (config == RealtimeConfig::kEnforce) {
-      throw RealtimeException(
-          "libfranka: unable to set realtime scheduling: "s + strerror(errno));
+      throw RealtimeException("libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }
   }
 #endif

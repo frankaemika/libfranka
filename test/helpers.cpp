@@ -66,7 +66,8 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
 }
 
-void testRobotStatesAreEqual(const research_interface::RobotState& expected, const franka::RobotState& actual) {
+void testRobotStatesAreEqual(const research_interface::RobotState& expected,
+                             const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
@@ -207,7 +208,8 @@ void randomRobotCommand(research_interface::RobotCommand& robot_command) {
   robot_command.message_id = randomDouble();
 }
 
-void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected, const research_interface::MotionGeneratorCommand& actual) {
+void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected,
+                                         const research_interface::MotionGeneratorCommand& actual) {
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
   EXPECT_EQ(expected.ddq_d, actual.ddq_d);
@@ -218,6 +220,7 @@ void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGenerat
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
 
-void testControllerCommandsAreEqual(const research_interface::ControllerCommand& expected, const research_interface::ControllerCommand& actual) {
+void testControllerCommandsAreEqual(const research_interface::ControllerCommand& expected,
+                                    const research_interface::ControllerCommand& actual) {
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
 }

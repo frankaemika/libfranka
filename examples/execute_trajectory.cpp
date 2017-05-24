@@ -9,8 +9,7 @@
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
-  std::copy(array.cbegin(), array.cend() - 1,
-            std::ostream_iterator<T>(ostream, ","));
+  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
   std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
   ostream << "]";
   return ostream;
@@ -18,8 +17,7 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 int main(int argc, char** argv) {
   if (argc != 4) {
-    std::cerr << "Usage: " << argv[0]
-              << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
     return -1;
   }
 
@@ -47,8 +45,7 @@ int main(int argc, char** argv) {
     // Set a dynamic load:
     double load_mass = 0.1;
     std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{
-        {0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
+    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
     robot.setLoad(load_mass, load_translation, load_inertia);
 
     // Set the cartesian impedance:
@@ -58,14 +55,13 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
-    robot.control(
-        [&](const franka::RobotState& robot_state) -> franka::JointValues {
-          if (index >= samples.size()) {
-            return franka::Stop;
-          }
-          states.push_back(robot_state);
-          return samples[index++];
-        });
+    robot.control([&](const franka::RobotState& robot_state) -> franka::JointValues {
+      if (index >= samples.size()) {
+        return franka::Stop;
+      }
+      states.push_back(robot_state);
+      return samples[index++];
+    });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
   } catch (const franka::Exception& e) {

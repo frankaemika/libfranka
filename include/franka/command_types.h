@@ -13,12 +13,7 @@ namespace franka {
 /**
  * Controller mode for FRANKA.
  */
-enum ControllerMode {
-  kMotorPD,
-  kJointPosition,
-  kJointImpedance,
-  kCartesianImpedance
-};
+enum ControllerMode { kMotorPD, kJointPosition, kJointImpedance, kCartesianImpedance };
 
 /**
  * Parameters of a cuboid used as virtual wall.

@@ -4,12 +4,10 @@
 namespace franka {
 
 template <typename T>
-MotionGeneratorLoop<T>::MotionGeneratorLoop(
-    RobotControl& robot,
-    ControlCallback control_callback,
-    MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, control_callback),
-      motion_callback_(std::move(motion_callback)) {
+MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
+                                            ControlCallback control_callback,
+                                            MotionGeneratorCallback motion_callback)
+    : ControlLoop(robot, control_callback), motion_callback_(std::move(motion_callback)) {
   if (motion_callback_) {
     robot.startMotionGenerator(MotionGeneratorTraits<T>::kMotionGeneratorMode);
   }

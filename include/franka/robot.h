@@ -99,10 +99,9 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(
-      std::function<JointValues(const RobotState&)> motion_generator_callback,
-      std::function<Torques(const RobotState&)> control_callback =
-          std::function<Torques(const RobotState&)>());
+  void control(std::function<JointValues(const RobotState&)> motion_generator_callback,
+               std::function<Torques(const RobotState&)> control_callback =
+                   std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a control loop for a joint velocity motion generator, optionally
@@ -123,8 +122,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(std::function<JointVelocities(const RobotState&)>
-                   motion_generator_callback,
+  void control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
                std::function<Torques(const RobotState&)> control_callback =
                    std::function<Torques(const RobotState&)>());
 
@@ -147,10 +145,9 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(
-      std::function<CartesianPose(const RobotState&)> motion_generator_callback,
-      std::function<Torques(const RobotState&)> control_callback =
-          std::function<Torques(const RobotState&)>());
+  void control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+               std::function<Torques(const RobotState&)> control_callback =
+                   std::function<Torques(const RobotState&)>());
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator, optionally
@@ -171,8 +168,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(std::function<CartesianVelocities(const RobotState&)>
-                   motion_generator_callback,
+  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
                std::function<Torques(const RobotState&)> control_callback =
                    std::function<Torques(const RobotState&)>());
   /**
@@ -267,15 +263,14 @@ class Robot {
    * @see Robot::automaticErrorRecovery for performing a reset after a
    * collision.
    */
-  void setCollisionBehavior(
-      const std::array<double, 7>& lower_torque_thresholds_acceleration,
-      const std::array<double, 7>& upper_torque_thresholds_acceleration,
-      const std::array<double, 7>& lower_torque_thresholds_nominal,
-      const std::array<double, 7>& upper_torque_thresholds_nominal,
-      const std::array<double, 6>& lower_force_thresholds_acceleration,
-      const std::array<double, 6>& upper_force_thresholds_acceleration,
-      const std::array<double, 6>& lower_force_thresholds_nominal,
-      const std::array<double, 6>& upper_force_thresholds_nominal);
+  void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
+                            const std::array<double, 7>& upper_torque_thresholds_acceleration,
+                            const std::array<double, 7>& lower_torque_thresholds_nominal,
+                            const std::array<double, 7>& upper_torque_thresholds_nominal,
+                            const std::array<double, 6>& lower_force_thresholds_acceleration,
+                            const std::array<double, 6>& upper_force_thresholds_acceleration,
+                            const std::array<double, 6>& lower_force_thresholds_nominal,
+                            const std::array<double, 6>& upper_force_thresholds_nominal);
 
   /**
    * Changes the collision behavior.
@@ -303,11 +298,10 @@ class Robot {
    * @see Robot::automaticErrorRecovery for performing a reset after a
    * collision.
    */
-  void setCollisionBehavior(
-      const std::array<double, 7>& lower_torque_thresholds,
-      const std::array<double, 7>& upper_torque_thresholds,
-      const std::array<double, 6>& lower_force_thresholds,
-      const std::array<double, 6>& upper_force_thresholds);
+  void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
+                            const std::array<double, 7>& upper_torque_thresholds,
+                            const std::array<double, 6>& lower_force_thresholds,
+                            const std::array<double, 6>& upper_force_thresholds);
 
   /**
    * Sets the impedance for each joint.
@@ -317,8 +311,7 @@ class Robot {
    * @throw CommandException if an error occurred.
    */
   void setJointImpedance(
-      const std::array<double, 7>&
-          K_theta);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 7>& K_theta);  // NOLINT (readability-identifier-naming)
 
   /**
    * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw).
@@ -328,8 +321,7 @@ class Robot {
    * @throw CommandException if an error occurred.
    */
   void setCartesianImpedance(
-      const std::array<double, 6>&
-          K_x);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 6>& K_x);  // NOLINT (readability-identifier-naming)
 
   /**
    * Locks or unlocks guiding mode movement in (x, y, z, roll, pitch, yaw).
@@ -362,8 +354,7 @@ class Robot {
    *
    * @see Robot for an explanation of the K frame.
    */
-  void setK(const std::array<double, 16>&
-                EE_T_K);  // NOLINT (readability-identifier-naming)
+  void setK(const std::array<double, 16>& EE_T_K);  // NOLINT (readability-identifier-naming)
 
   /**
    * Sets the transformation \f$^FT_{EE}\f$ from flange to end effector frame.
@@ -379,8 +370,7 @@ class Robot {
    * @see RobotState::O_T_EE for end-effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
    */
-  void setEE(const std::array<double, 16>&
-                 F_T_EE);  // NOLINT (readability-identifier-naming)
+  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT (readability-identifier-naming)
 
   /**
    * Sets dynamic parameters of a payload.
@@ -398,8 +388,7 @@ class Robot {
    * @throw CommandException if an error occurred.
    */
   void setLoad(double load_mass,
-               const std::array<double, 3>&
-                   F_x_Cload,  // NOLINT (readability-identifier-naming)
+               const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
                const std::array<double, 9>& load_inertia);
 
   /**

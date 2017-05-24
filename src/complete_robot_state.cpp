@@ -33,8 +33,7 @@ const franka::RobotState& CompleteRobotState::robotState() const noexcept {
   return robot_state_;
 }
 
-const research_interface::RobotState& CompleteRobotState::rcuRobotState() const
-    noexcept {
+const research_interface::RobotState& CompleteRobotState::rcuRobotState() const noexcept {
   return rcu_robot_state_;
 }
 

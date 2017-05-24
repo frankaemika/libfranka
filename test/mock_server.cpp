@@ -3,19 +3,16 @@
 #include <cstring>
 #include <sstream>
 
-#include <gtest/gtest.h>
+#include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/StreamSocket.h>
-#include <Poco/Net/DatagramSocket.h>
+#include <gtest/gtest.h>
 
-MockServer::MockServer()
-    : shutdown_{false},
-      continue_{false},
-      initialized_{false} {
+MockServer::MockServer() : shutdown_{false}, continue_{false}, initialized_{false} {
   std::unique_lock<std::mutex> lock(mutex_);
   server_thread_ = std::thread(&MockServer::serverThread, this);
 
-  cv_.wait(lock, [this]{ return initialized_; });
+  cv_.wait(lock, [this] { return initialized_; });
 }
 
 MockServer::~MockServer() {
@@ -42,11 +39,13 @@ MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
   return *this;
 }
 
-MockServer& MockServer::onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator) {
+MockServer& MockServer::onStartMotionGenerator(
+    StartMotionGeneratorCallbackT on_start_motion_generator) {
   return waitForCommand<research_interface::StartMotionGenerator>(on_start_motion_generator);
 }
 
-MockServer& MockServer::onStopMotionGenerator(StopMotionGeneratorCallbackT on_stop_motion_generator) {
+MockServer& MockServer::onStopMotionGenerator(
+    StopMotionGeneratorCallbackT on_stop_motion_generator) {
   return waitForCommand<research_interface::StopMotionGenerator>(on_stop_motion_generator);
 }
 
@@ -82,7 +81,8 @@ MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_s
   });
 }
 
-MockServer& MockServer::onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command) {
+MockServer& MockServer::onReceiveRobotCommand(
+    ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
     research_interface::RobotCommand robot_command;
@@ -107,11 +107,12 @@ void MockServer::serverThread() {
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
 
-  srv = Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort}); // does bind + listen
+  srv =
+      Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort});  // does bind + listen
   initialized_ = true;
 
   cv_.notify_one();
-  cv_.wait(lock, [this]{ return continue_; });
+  cv_.wait(lock, [this] { return continue_; });
 
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
@@ -129,12 +130,13 @@ void MockServer::serverThread() {
   };
 
   uint16_t udp_port;
-  handleCommand<research_interface::Connect>(tcp_socket_wrapper, [&,this](const research_interface::Connect::Request& request) {
-    udp_port = request.udp_port;
-    return on_connect_
-           ? on_connect_(request)
-           : research_interface::Connect::Response(research_interface::Connect::Status::kSuccess);
-  });
+  handleCommand<research_interface::Connect>(
+      tcp_socket_wrapper, [&, this](const research_interface::Connect::Request& request) {
+        udp_port = request.udp_port;
+        return on_connect_ ? on_connect_(request)
+                           : research_interface::Connect::Response(
+                                 research_interface::Connect::Status::kSuccess);
+      });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});
   udp_socket.setBlocking(true);
@@ -149,7 +151,7 @@ void MockServer::serverThread() {
   };
 
   while (!shutdown_) {
-    cv_.wait(lock, [this]{ return continue_ || shutdown_; });
+    cv_.wait(lock, [this] { return continue_ || shutdown_; });
     while (!commands_.empty()) {
       commands_.front().second(tcp_socket_wrapper, udp_socket_wrapper);
       commands_.pop();

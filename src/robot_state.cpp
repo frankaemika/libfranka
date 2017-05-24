@@ -10,21 +10,17 @@ namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
-  std::copy(array.cbegin(), array.cend() - 1,
-            std::ostream_iterator<T>(ostream, ","));
+  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
   std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
   ostream << "]";
   return ostream;
 }
 }  // anonymous namespace
 
-std::ostream& operator<<(std::ostream& ostream,
-                         const franka::RobotState& robot_state) {
-  ostream << "{O_T_EE: " << robot_state.O_T_EE
-          << ", elbow: " << robot_state.elbow
-          << ", tau_J: " << robot_state.tau_J
-          << ", dtau_J: " << robot_state.dtau_J << ", q: " << robot_state.q
-          << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d
+std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
+  ostream << "{O_T_EE: " << robot_state.O_T_EE << ", elbow: " << robot_state.elbow
+          << ", tau_J: " << robot_state.tau_J << ", dtau_J: " << robot_state.dtau_J
+          << ", q: " << robot_state.q << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d
           << ", joint_contact: " << robot_state.joint_contact
           << ", cartesian_contact: " << robot_state.cartesian_contact
           << ", joint_collision: " << robot_state.joint_collision

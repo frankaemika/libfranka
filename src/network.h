@@ -57,18 +57,15 @@ void Network::tcpSendRequest(const T& request) try {
 }
 
 template <typename T>
-bool Network::handleResponse(
-    std::function<void(const typename T::Response&)> handler) {
+bool Network::handleResponse(std::function<void(const typename T::Response&)> handler) {
   if (read_buffer_.size() < sizeof(typename T::Response)) {
     return false;
   }
 
-  typename T::Response response =
-      *reinterpret_cast<typename T::Response*>(read_buffer_.data());
+  typename T::Response response = *reinterpret_cast<typename T::Response*>(read_buffer_.data());
 
   size_t remaining_bytes = read_buffer_.size() - sizeof(response);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(response)],
-               remaining_bytes);
+  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(response)], remaining_bytes);
   read_buffer_.resize(remaining_bytes);
 
   handler(response);
@@ -91,8 +88,7 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
     if (bytes_read != 0) {
       throw ProtocolException(std::string{"libfranka: incorrect object size"});
     } else {
-      throw NetworkException(
-          std::string{"libfranka: FRANKA connection timeout"});
+      throw NetworkException(std::string{"libfranka: FRANKA connection timeout"});
     }
   } catch (const Poco::Exception& e) {
     throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
@@ -100,8 +96,7 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());
   if (response->function != T::kFunction) {
-    throw ProtocolException(
-        std::string{"libfranka: received response of wrong type."});
+    throw ProtocolException(std::string{"libfranka: received response of wrong type."});
   }
   return *response;
 }

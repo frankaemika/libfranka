@@ -24,10 +24,10 @@ class Robot::Impl : public RobotControl {
 
   bool update() override;
 
-  void controllerCommand(const research_interface::ControllerCommand&
-                             controller_command) noexcept override;
-  void motionGeneratorCommand(const research_interface::MotionGeneratorCommand&
-                                  motion_generator_command) noexcept override;
+  void controllerCommand(
+      const research_interface::ControllerCommand& controller_command) noexcept override;
+  void motionGeneratorCommand(
+      const research_interface::MotionGeneratorCommand& motion_generator_command) noexcept override;
   const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
@@ -38,25 +38,21 @@ class Robot::Impl : public RobotControl {
   void stopController() override;
 
   void startMotionGenerator(
-      research_interface::StartMotionGenerator::MotionGeneratorMode mode)
-      override;
+      research_interface::StartMotionGenerator::MotionGeneratorMode mode) override;
   void stopMotionGenerator() override;
 
   template <typename T, typename... TArgs>
   void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
 
-  template <research_interface::StartMotionGenerator::MotionGeneratorMode,
-            typename T>
-  void control(
-      std::function<T(const RobotState&)> control_callback,
-      std::function<void(const T&, research_interface::MotionGeneratorCommand*)>
-          conversion_callback);
+  template <research_interface::StartMotionGenerator::MotionGeneratorMode, typename T>
+  void control(std::function<T(const RobotState&)> control_callback,
+               std::function<void(const T&, research_interface::MotionGeneratorCommand*)>
+                   conversion_callback);
 
   template <typename T>
   void control(
       std::function<T(const RobotState&)> control_callback,
-      std::function<void(const T&, research_interface::ControllerCommand*)>
-          conversion_callback);
+      std::function<void(const T&, research_interface::ControllerCommand*)> conversion_callback);
 
  private:
   template <typename T>
@@ -81,8 +77,7 @@ class Robot::Impl : public RobotControl {
       return static_cast<size_t>(t);
     }
   };
-  std::unordered_multiset<research_interface::Function, EnumClassHash>
-      expected_responses_;
+  std::unordered_multiset<research_interface::Function, EnumClassHash> expected_responses_;
 };
 
 template <typename T, typename... TArgs>
@@ -96,27 +91,23 @@ void Robot::Impl::executeCommand(TArgs... args) {
     case T::Status::kSuccess:
       break;
     case T::Status::kAborted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command aborted!");
+      throw CommandException("libfranka: " +
+                             std::string(research_interface::CommandTraits<T>::kName) +
+                             " command aborted!");
     case T::Status::kRejected:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command rejected!");
+      throw CommandException("libfranka: " +
+                             std::string(research_interface::CommandTraits<T>::kName) +
+                             " command rejected!");
     case T::Status::kPreempted:
-      throw CommandException(
-          "libfranka: " +
-          std::string(research_interface::CommandTraits<T>::kName) +
-          " command preempted!");
+      throw CommandException("libfranka: " +
+                             std::string(research_interface::CommandTraits<T>::kName) +
+                             " command preempted!");
   }
 }
 
 template <>
-inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
-                                        int32_t,
-                                        VirtualWallCuboid*>(
+inline void
+Robot::Impl::executeCommand<research_interface::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
   // `using std::string_literals::operator""s` produces a GCC warning that
@@ -129,8 +120,7 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
   network_.tcpSendRequest(request);
 
   research_interface::GetCartesianLimit::Response response =
-      network_
-          .tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
+      network_.tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
   virtual_wall_cuboid->p_frame = response.object_frame;
   virtual_wall_cuboid->p_max = response.object_p_max;
   virtual_wall_cuboid->p_min = response.object_p_min;
@@ -141,20 +131,20 @@ inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
     case research_interface::GetCartesianLimit::Status::kSuccess:
       break;
     case research_interface::GetCartesianLimit::Status::kAborted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<
-                                 research_interface::GetCartesianLimit>::kName +
-                             " command aborted!");
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
+          " command aborted!");
     case research_interface::GetCartesianLimit::Status::kRejected:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<
-                                 research_interface::GetCartesianLimit>::kName +
-                             " command rejected!");
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
+          " command rejected!");
     case research_interface::GetCartesianLimit::Status::kPreempted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<
-                                 research_interface::GetCartesianLimit>::kName +
-                             " command preempted!");
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
+          " command preempted!");
   }
 }
 

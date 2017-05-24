@@ -58,8 +58,7 @@ class Model {
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */
-  std::array<double, 16> jointPose(Frame joint,
-                                   const franka::RobotState& robot_state) const;
+  std::array<double, 16> jointPose(Frame joint, const franka::RobotState& robot_state) const;
 
   /**
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
@@ -77,8 +76,7 @@ class Model {
       const franka::RobotState& robot_state,
       const std::array<double, 9>& load_inertia,
       double load_mass,
-      const std::array<double, 3>&
-          F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
   /**
@@ -99,8 +97,7 @@ class Model {
       const franka::RobotState& robot_state,
       const std::array<double, 9>& load_inertia,
       double load_mass,
-      const std::array<double, 3>&
-          F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
   /**
@@ -119,10 +116,8 @@ class Model {
   std::array<double, 7> gravity(
       const franka::RobotState& robot_state,
       double load_mass,
-      const std::array<double, 3>&
-          F_x_Cload,  // NOLINT (readability-identifier-naming)
-      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const
-      noexcept;
+      const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const noexcept;
 
  private:
   std::unique_ptr<ModelLibrary> library_;

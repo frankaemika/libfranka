@@ -52,7 +52,8 @@ class MotionGeneratorLoops : public ::testing::Test {
   using MotionGeneratorCallback = typename Loop::MotionGeneratorCallback;
   using ControlCallback = typename Loop::ControlCallback;
 
-  research_interface::StartMotionGenerator::MotionGeneratorMode kMotionGeneratorMode = franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
+  research_interface::StartMotionGenerator::MotionGeneratorMode kMotionGeneratorMode =
+      franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
 
   T createMotion();
   auto getField(const T& values);
@@ -94,14 +95,14 @@ CartesianVelocities MotionGeneratorLoops<CartesianVelocities>::createMotion() {
 }
 
 template <>
-auto MotionGeneratorLoops<CartesianVelocities>::getField(const CartesianVelocities& cartesian_velocities) {
-  return Field(&research_interface::MotionGeneratorCommand::O_dP_EE_d, Eq(cartesian_velocities.O_dP_EE));
+auto MotionGeneratorLoops<CartesianVelocities>::getField(
+    const CartesianVelocities& cartesian_velocities) {
+  return Field(&research_interface::MotionGeneratorCommand::O_dP_EE_d,
+               Eq(cartesian_velocities.O_dP_EE));
 }
 
-using MotionTypes = ::testing::Types<JointValues,
-                                     JointVelocities,
-                                     CartesianPose,
-                                     CartesianVelocities>;
+using MotionTypes =
+    ::testing::Types<JointValues, JointVelocities, CartesianPose, CartesianVelocities>;
 TYPED_TEST_CASE(MotionGeneratorLoops, MotionTypes);
 
 TYPED_TEST(MotionGeneratorLoops, CanConstructWithoutCallbacks) {
@@ -109,9 +110,8 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithoutCallbacks) {
   EXPECT_CALL(robot, startController()).Times(0);
   EXPECT_CALL(robot, stopController()).Times(0);
 
-  typename TestFixture::Loop loop(robot,
-    typename TestFixture::ControlCallback(),
-    typename TestFixture::MotionGeneratorCallback());
+  typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
+                                  typename TestFixture::MotionGeneratorCallback());
 }
 
 TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionCallback) {
@@ -122,9 +122,8 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionCallback) {
     EXPECT_CALL(robot, stopMotionGenerator());
   }
 
-  typename TestFixture::Loop loop(robot,
-    typename TestFixture::ControlCallback(),
-    std::bind(&TestFixture::createMotion, this));
+  typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
+                                  std::bind(&TestFixture::createMotion, this));
 }
 
 TYPED_TEST(MotionGeneratorLoops, CanConstructWithBothCallbacks) {
@@ -138,16 +137,17 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithBothCallbacks) {
   }
 
   typename TestFixture::Loop loop(robot,
-    [](const RobotState&) { return Torques({0,1,2,3,4,5,6}); },
-    std::bind(&TestFixture::createMotion, this));
+                                  [](const RobotState&) {
+                                    return Torques({0, 1, 2, 3, 4, 5, 6});
+                                  },
+                                  std::bind(&TestFixture::createMotion, this));
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithoutCallbacks) {
   MockRobotControl robot;
 
-  typename TestFixture::Loop loop(robot,
-    typename TestFixture::ControlCallback(),
-    typename TestFixture::MotionGeneratorCallback());
+  typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
+                                  typename TestFixture::MotionGeneratorCallback());
   EXPECT_TRUE(loop.spinOnce());
 }
 
@@ -158,18 +158,14 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionCallback) {
   auto motion = this->createMotion();
 
   RobotState robot_state;
-  EXPECT_CALL(robot, robotStateMock())
-    .WillOnce(ReturnRef(robot_state));
+  EXPECT_CALL(robot, robotStateMock()).WillOnce(ReturnRef(robot_state));
   EXPECT_CALL(robot, motionGeneratorCommandMock(this->getField(motion)));
 
-  EXPECT_CALL(motion_callback, invoke(_))
-    .WillOnce(Return(motion));
+  EXPECT_CALL(motion_callback, invoke(_)).WillOnce(Return(motion));
 
-  typename TestFixture::Loop loop(robot,
-    typename TestFixture::ControlCallback(),
-    std::bind(&decltype(motion_callback)::invoke,
-              &motion_callback,
-              std::placeholders::_1));
+  typename TestFixture::Loop loop(
+      robot, typename TestFixture::ControlCallback(),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
 }
 
@@ -182,46 +178,34 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithBothCallbacks) {
   auto motion = this->createMotion();
 
   RobotState robot_state;
-  EXPECT_CALL(robot, robotStateMock())
-    .Times(AtLeast(1))
-    .WillRepeatedly(ReturnRef(robot_state));
+  EXPECT_CALL(robot, robotStateMock()).Times(AtLeast(1)).WillRepeatedly(ReturnRef(robot_state));
   EXPECT_CALL(robot, motionGeneratorCommandMock(this->getField(motion)));
-  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d, Eq(torques.tau_J))));
+  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d,
+                                                 Eq(torques.tau_J))));
 
-  EXPECT_CALL(control_callback, invoke(_))
-    .WillOnce(Return(torques));
-  EXPECT_CALL(motion_callback, invoke(_))
-    .WillOnce(Return(motion));
+  EXPECT_CALL(control_callback, invoke(_)).WillOnce(Return(torques));
+  EXPECT_CALL(motion_callback, invoke(_)).WillOnce(Return(motion));
 
-  typename TestFixture::Loop loop(robot,
-    std::bind(&MockControlCallback::invoke,
-              &control_callback,
-              std::placeholders::_1),
-    std::bind(&decltype(motion_callback)::invoke,
-              &motion_callback,
-              std::placeholders::_1));
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
   EXPECT_TRUE(loop.spinOnce());
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
   NiceMock<MockRobotControl> robot;
 
-  ON_CALL(robot, controllerCommandMock(_))
-    .WillByDefault(Return());
+  ON_CALL(robot, controllerCommandMock(_)).WillByDefault(Return());
 
   RobotState robot_state;
-  ON_CALL(robot, robotStateMock())
-    .WillByDefault(ReturnRef(robot_state));
+  ON_CALL(robot, robotStateMock()).WillByDefault(ReturnRef(robot_state));
 
   NiceMock<MockControlCallback> control_callback;
-  ON_CALL(control_callback, invoke(_))
-    .WillByDefault(Return(Torques({0,1,2,3,4,5,6})));
+  ON_CALL(control_callback, invoke(_)).WillByDefault(Return(Torques({0, 1, 2, 3, 4, 5, 6})));
 
-  typename TestFixture::Loop loop(robot,
-    std::bind(&MockControlCallback::invoke,
-              &control_callback,
-              std::placeholders::_1),
-    [](const RobotState&) { return Stop; });
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1),
+      [](const RobotState&) { return Stop; });
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
@@ -232,24 +216,18 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
   NiceMock<MockRobotControl> robot;
 
-  ON_CALL(robot, motionGeneratorCommandMock(_))
-    .WillByDefault(Return());
-  ON_CALL(robot, update())
-    .WillByDefault(Return(true));
+  ON_CALL(robot, motionGeneratorCommandMock(_)).WillByDefault(Return());
+  ON_CALL(robot, update()).WillByDefault(Return(true));
 
   RobotState robot_state;
-  ON_CALL(robot, robotStateMock())
-    .WillByDefault(ReturnRef(robot_state));
+  ON_CALL(robot, robotStateMock()).WillByDefault(ReturnRef(robot_state));
 
   NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;
-  ON_CALL(motion_callback, invoke(_))
-    .WillByDefault(Return(this->createMotion()));
+  ON_CALL(motion_callback, invoke(_)).WillByDefault(Return(this->createMotion()));
 
-  typename TestFixture::Loop loop(robot,
-    [](const RobotState&) { return Stop; },
-    std::bind(&decltype(motion_callback)::invoke,
-              &motion_callback,
-              std::placeholders::_1));
+  typename TestFixture::Loop loop(
+      robot, [](const RobotState&) { return Stop; },
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
