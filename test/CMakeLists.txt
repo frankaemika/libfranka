@@ -13,7 +13,7 @@ set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src
 
 ## Test libraries
 add_library(fcimodels SHARED
-  libfcimodels_impl.cpp
+  libfcimodels_stub.cpp
 )
 
 target_include_directories(fcimodels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

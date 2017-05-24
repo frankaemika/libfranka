@@ -4,13 +4,13 @@
 
 #include "helpers.h"
 #include "mock_server.h"
-#include "libfcimodels_impl.h"
+#include "model_library_interface.h"
 
 using ::testing::_;
 using ::testing::WithArgs;
 using ::testing::Invoke;
 
-struct MockModel : public ModelLibImpl {
+struct MockModel : public ModelLibraryInterface {
   MOCK_METHOD3(O_T_J1, void(const double*, const double*, double*));
   MOCK_METHOD3(O_T_J2, void(const double*, const double*, double*));
   MOCK_METHOD3(O_T_J3, void(const double*, const double*, double*));
@@ -34,7 +34,7 @@ struct Model : public ::testing::Test {
     server.spinOnce();
     robot.reset(new franka::Robot("127.0.0.1"));
 
-    model_lib_impl = nullptr;
+    model_library_interface = nullptr;
   }
 
   std::unique_ptr<franka::Robot> robot;
@@ -63,7 +63,7 @@ TEST_F(Model, CanGetMassMatrix) {
       }
     })));
 
-  model_lib_impl = &mock;
+  model_library_interface = &mock;
 
   franka::Model model(*robot);
   auto matrix = model.mass(robot_state, load_inertia, load_mass, F_x_Cload);
@@ -91,7 +91,7 @@ TEST_F(Model, CanGetCoriolisVector) {
       std::copy(expected_vector.cbegin(), expected_vector.cend(), output);
     })));
 
-  model_lib_impl = &mock;
+  model_library_interface = &mock;
 
   franka::Model model(*robot);
   auto vector = model.coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
@@ -117,7 +117,7 @@ TEST_F(Model, CanGetGravity) {
       }
     })));
 
-  model_lib_impl = &mock;
+  model_library_interface = &mock;
 
   franka::Model model(*robot);
   auto matrix = model.gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
@@ -189,7 +189,7 @@ TEST_F(Model, CanGetJointPoses) {
       std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
     })));
 
-  model_lib_impl = &mock;
+  model_library_interface = &mock;
 
   franka::Model model(*robot);
   for (franka::Frame joint = franka::Frame::kJoint1;

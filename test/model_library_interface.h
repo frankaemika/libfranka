@@ -1,7 +1,7 @@
 #pragma once
 
-struct ModelLibImpl {
-  virtual ~ModelLibImpl() {}
+struct ModelLibraryInterface {
+  virtual ~ModelLibraryInterface() {}
   virtual void M_NE(const double q[7],
                     const double I_load[9],
                     double m_load,
@@ -47,4 +47,4 @@ struct ModelLibImpl {
                     double g_NE[7]) = 0;
 };
 
-extern ModelLibImpl* model_lib_impl;
+extern ModelLibraryInterface* model_library_interface;
