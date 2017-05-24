@@ -207,7 +207,8 @@ if(CLANG_TIDY_PROG)
     VERBATIM
   )
   add_custom_target(check-tidy
-    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
+    COMMAND scripts/fail-on-output.sh ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR}
+                                      -line-filter=${TIDY_LINE_FILTER} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS franka
     COMMENT "Running clang-tidy"
