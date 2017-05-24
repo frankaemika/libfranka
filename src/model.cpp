@@ -29,25 +29,25 @@ std::array<double, 16> Model::jointPose(
 
   switch (joint) {
     case Frame::kJoint1:
-      library_->joint0(q, end_effector, output.data());
-      break;
-    case Frame::kJoint2:
       library_->joint1(q, end_effector, output.data());
       break;
-    case Frame::kJoint3:
+    case Frame::kJoint2:
       library_->joint2(q, end_effector, output.data());
       break;
-    case Frame::kJoint4:
+    case Frame::kJoint3:
       library_->joint3(q, end_effector, output.data());
       break;
-    case Frame::kJoint5:
+    case Frame::kJoint4:
       library_->joint4(q, end_effector, output.data());
       break;
-    case Frame::kJoint6:
+    case Frame::kJoint5:
       library_->joint5(q, end_effector, output.data());
       break;
-    case Frame::kJoint7:
+    case Frame::kJoint6:
       library_->joint6(q, end_effector, output.data());
+      break;
+    case Frame::kJoint7:
+      library_->joint7(q, end_effector, output.data());
       break;
     case Frame::kFlange:
       library_->flange(q, end_effector, output.data());
