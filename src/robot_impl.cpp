@@ -185,7 +185,9 @@ void Robot::Impl::startMotionGenerator(
   if (motion_generator_running_) {
     throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
-  std::memset(&robot_command_, 0, sizeof(robot_command_));
+
+  // Reset robot command
+  robot_command_ = decltype(robot_command_)();
 
   research_interface::StartMotionGenerator::Request request(mode);
   network_.tcpSendRequest(request);
@@ -244,6 +246,9 @@ void Robot::Impl::startController() {
   if (controller_running_) {
     throw ControlException("libfranka: attempted to start multiple controllers!");
   }
+
+  // Reset robot command
+  robot_command_ = decltype(robot_command_)();
 
   research_interface::StartController::Request request;
   network_.tcpSendRequest(request);

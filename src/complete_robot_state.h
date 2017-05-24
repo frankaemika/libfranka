@@ -7,7 +7,6 @@ namespace franka {
 
 class CompleteRobotState {
  public:
-  CompleteRobotState() noexcept;
   const franka::RobotState& robotState() const noexcept;
   const research_interface::RobotState& rcuRobotState() const noexcept;
   CompleteRobotState& operator=(const research_interface::RobotState& rcu_robot_state) noexcept;

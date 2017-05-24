@@ -1,6 +1,5 @@
 #include "mock_server.h"
 
-#include <cstring>
 #include <sstream>
 
 #include <Poco/Net/DatagramSocket.h>
@@ -72,8 +71,7 @@ MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_s
 
 MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state) {
   return onSendRobotState([=]() {
-    research_interface::RobotState robot_state;
-    std::memset(&robot_state, 0, sizeof(robot_state));
+    research_interface::RobotState robot_state{};
     if (on_send_robot_state) {
       on_send_robot_state(robot_state);
     }
