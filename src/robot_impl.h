@@ -4,6 +4,7 @@
 
 #include <franka/robot.h>
 #include <research_interface/rbk_types.h>
+#include <research_interface/service_traits.h>
 #include <research_interface/service_types.h>
 
 #include "complete_robot_state.h"
@@ -41,6 +42,9 @@ class Robot::Impl : public RobotControl {
       override;
   void stopMotionGenerator() override;
 
+  template <typename T, typename... TArgs>
+  void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
+
   template <research_interface::StartMotionGenerator::MotionGeneratorMode,
             typename T>
   void control(
@@ -55,14 +59,8 @@ class Robot::Impl : public RobotControl {
           conversion_callback);
 
  private:
-  void handleStartMotionGeneratorResponse(
-      const research_interface::StartMotionGenerator::Response& response);
-  void handleStopMotionGeneratorResponse(
-      const research_interface::StopMotionGenerator::Response& response);
-  void handleStartControllerResponse(
-      const research_interface::StartController::Response& response);
-  void handleStopControllerResponse(
-      const research_interface::StopController::Response& response);
+  template <typename T>
+  bool handleCommandResponse(const typename T::Response& response);
 
   Network network_;
 
@@ -86,5 +84,78 @@ class Robot::Impl : public RobotControl {
   std::unordered_multiset<research_interface::Function, EnumClassHash>
       expected_responses_;
 };
+
+template <typename T, typename... TArgs>
+void Robot::Impl::executeCommand(TArgs... args) {
+  typename T::Request request(std::forward<TArgs>(args)...);
+  network_.tcpSendRequest(request);
+
+  typename T::Response response = network_.tcpBlockingReceiveResponse<T>();
+
+  switch (response.status) {
+    case T::Status::kSuccess:
+      break;
+    case T::Status::kAborted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command aborted!");
+    case T::Status::kRejected:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command rejected!");
+    case T::Status::kPreempted:
+      throw CommandException(
+          "libfranka: " +
+          std::string(research_interface::CommandTraits<T>::kName) +
+          " command preempted!");
+  }
+}
+
+template <>
+inline void Robot::Impl::executeCommand<research_interface::GetCartesianLimit,
+                                        int32_t,
+                                        VirtualWallCuboid*>(
+    int32_t id,
+    VirtualWallCuboid* virtual_wall_cuboid) {
+  // `using std::string_literals::operator""s` produces a GCC warning that
+  // cannot be disabled, so we have to use `using namespace ...`.
+  // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
+  using namespace std::string_literals;  // NOLINT
+                                         // (google-build-using-namespace)
+
+  research_interface::GetCartesianLimit::Request request(id);
+  network_.tcpSendRequest(request);
+
+  research_interface::GetCartesianLimit::Response response =
+      network_
+          .tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
+  virtual_wall_cuboid->p_frame = response.object_frame;
+  virtual_wall_cuboid->p_max = response.object_p_max;
+  virtual_wall_cuboid->p_min = response.object_p_min;
+  virtual_wall_cuboid->active = response.object_activation;
+  virtual_wall_cuboid->id = id;
+
+  switch (response.status) {
+    case research_interface::GetCartesianLimit::Status::kSuccess:
+      break;
+    case research_interface::GetCartesianLimit::Status::kAborted:
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command aborted!");
+    case research_interface::GetCartesianLimit::Status::kRejected:
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command rejected!");
+    case research_interface::GetCartesianLimit::Status::kPreempted:
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<
+                                 research_interface::GetCartesianLimit>::kName +
+                             " command preempted!");
+  }
+}
 
 }  // namespace franka

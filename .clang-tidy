@@ -16,6 +16,8 @@ CheckOptions:
     value:  CamelCase
 
 # Variables, member variables, ...
+  - key:    readability-identifier-naming.ParameterCase
+    value:  lower_case
   - key:    readability-identifier-naming.VariableCase
     value:  lower_case
   - key:    readability-identifier-naming.MemberCase

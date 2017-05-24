@@ -11,6 +11,12 @@
 #include <research_interface/rbk_types.h>
 
 class MockServer {
+ private:
+  struct Socket {
+    std::function<void(const void*, size_t)> sendBytes;
+    std::function<void(void*, size_t)> receiveBytes;
+  };
+  
  public:
   using ConnectCallbackT = std::function<research_interface::Connect::Response(const research_interface::Connect::Request&)>;
   using StartMotionGeneratorCallbackT = std::function<research_interface::StartMotionGenerator::Response(const research_interface::StartMotionGenerator::Request&)>;
@@ -39,20 +45,31 @@ class MockServer {
   MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
 
+  template <typename T>
+  void handleCommand(Socket& tcp_socket, std::function<typename T::Response(const typename T::Request&)> callback) {
+    std::array<uint8_t, sizeof(typename T::Request)> buffer;
+    tcp_socket.receiveBytes(buffer.data(), buffer.size());
+    typename T::Request request(*reinterpret_cast<typename T::Request*>(buffer.data()));
+    typename T::Response response = callback(request);
+    tcp_socket.sendBytes(&response, sizeof(response));
+  }
+
+  template <typename T>
+  MockServer& waitForCommand(std::function<typename T::Response(const typename T::Request&)> callback) {
+    using namespace std::string_literals;
+
+    std::lock_guard<std::mutex> _(mutex_);
+    std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " + typeid(typename T::Response).name();
+    commands_.emplace(name, [this,callback](Socket& tcp_socket, Socket&) {
+      handleCommand<T>(tcp_socket, callback);
+    });
+    return *this;
+  }
+
   void spinOnce(bool block = false);
 
- private:
-  struct Socket {
-    std::function<void(const void*, size_t)> sendBytes;
-    std::function<void(void*, size_t)> receiveBytes;
-  };
-
+private:
   void serverThread();
-
-  template <typename T>
-  MockServer& waitForCommand(std::function<typename T::Response(const typename T::Request&)> callback);
-  template <typename T>
-  void handleCommand(Socket& tcp_socket, std::function<typename T::Response(const typename T::Request&)> callback);
 
   std::condition_variable cv_;
   std::mutex mutex_;

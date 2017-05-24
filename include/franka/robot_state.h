@@ -66,18 +66,26 @@ struct RobotState {
   /**
    * Indicates which contact level is activated in which joint. After contact
    * disappears, value turns to zero.
+   *
+   * @see Robot::setCollisionBehavior for setting sensitivity values.
    */
   std::array<double, 7> joint_contact{};
 
   /**
    * Indicates which contact level is activated in which cartesian dimension (x,
    * y, z, roll, pitch, yaw). After contact disappears, value turns to zero.
+   *
+   * @see Robot::setCollisionBehavior for setting sensitivity values.
    */
   std::array<double, 6> cartesian_contact{};
 
   /**
    * Indicates which contact level is activated in which joint. After contact
    * disappears, the value stays the same until a reset command is sent.
+   *
+   * @see Robot::setCollisionBehavior for setting sensitivity values.
+   * @see Robot::automaticErrorRecovery for performing a reset after a
+   * collision.
    */
   std::array<double, 7> joint_collision{};
 
@@ -85,27 +93,31 @@ struct RobotState {
    * Indicates which contact level is activated in which cartesian dimension (x,
    * y, z, roll, pitch, yaw). After contact disappears, the value stays the same
    * until a reset command is sent.
+   *
+   * @see Robot::setCollisionBehavior for setting sensitivity values.
+   * @see Robot::automaticErrorRecovery for performing a reset after a
+   * collision.
    */
   std::array<double, 6> cartesian_collision{};
 
   /**
-   * \f$\hat{\tau}_{ext}\f$
-   * External torque, filtered. Unit: \f$[Nm]\f$
+   * \f$\hat{\tau}_{\text{ext}}\f$
+   * External torque, filtered. Unit: \f$[Nm]\f$.
    */
   std::array<double, 7> tau_ext_hat_filtered{};
 
   /**
-   * \f$^OF_{K,ext}\f$
-   * External wrench(force, torque) acting on end-effector relative to the base
-   * frame scaled by a factor. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
+   * \f$^OF_{K,\text{ext}}\f$
+   * External wrench (force, torque) scaled by a factor acting on K frame,
+   * expressed relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6>
       O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$^{K}F_{K,ext}\f$
-   * External wrench(force, torque) acting on end-effector relative to
-   * end-effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$
+   * \f$^{K}F_{K,\text{ext}}\f$
+   * External wrench (force, torque) acting on K frame, expressed relative to
+   * the end effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6>
       K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
