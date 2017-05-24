@@ -68,18 +68,6 @@ set_target_properties(franka PROPERTIES
   SOVERSION ${libfranka_VERSION_MAJOR}
 )
 
-file(GLOB_RECURSE SOURCES
-  src/*.cpp
-  examples/*.cpp
-  lib/research-interface-common/*.cpp
-)
-file(GLOB_RECURSE HEADERS
-  include/*.h
-  src/*.h
-  examples/*.h
-  lib/research-interface-common/*.h
-)
-
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -169,6 +157,21 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
 include(CPack)
 
 ## Tools
+file(GLOB_RECURSE SOURCES
+  src/*.cpp
+  examples/*.cpp
+  lib/research-interface-common/*.cpp
+)
+file(GLOB_RECURSE HEADERS
+  include/*.h
+  src/*.h
+  examples/*.h
+  lib/research-interface-common/*.h
+)
+file(GLOB_RECURSE TIDY_IGNORED_FILES
+  src/libfcimodels.h
+)
+
 find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format
@@ -186,8 +189,17 @@ if(CLANG_FORMAT_PROG)
 endif()
 find_program(CLANG_TIDY_PROG clang-tidy DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
+  set(TIDY_FILES ${SOURCES} ${HEADERS})
+  foreach(ignored_file ${TIDY_IGNORED_FILES})
+    message(STATUS "Ignoring '${ignored_file}' for clang-tidy.")
+    list(REMOVE_ITEM TIDY_FILES ${ignored_file})
+  endforeach()
+  string(REPLACE ";" "\"},{\"name\":\"" TIDY_LINE_FILTER "${TIDY_FILES}")
+  set(TIDY_LINE_FILTER "[{\"name\":\"${TIDY_LINE_FILTER}\"}]")
+
   add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} ${SOURCES}
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR}
+                               -line-filter=${TIDY_LINE_FILTER} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS franka
     COMMENT "Running clang-tidy"

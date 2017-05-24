@@ -73,11 +73,13 @@ class Model {
    *
    * @return Vectorized 7x7 mass matrix, column-major.
    */
-  std::array<double, 49> mass(const franka::RobotState& robot_state,
-                              const std::array<double, 9>& load_inertia,
-                              double load_mass,
-                              const std::array<double, 3>& F_x_Cload) const
-      noexcept;
+  std::array<double, 49> mass(
+      const franka::RobotState& robot_state,
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>&
+          F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const noexcept;
 
   /**
  * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
@@ -93,11 +95,13 @@ class Model {
  *
  * @return Coriolis force vector.
  */
-  std::array<double, 7> coriolis(const franka::RobotState& robot_state,
-                                 const std::array<double, 9>& load_inertia,
-                                 double load_mass,
-                                 const std::array<double, 3>& F_x_Cload) const
-      noexcept;
+  std::array<double, 7> coriolis(
+      const franka::RobotState& robot_state,
+      const std::array<double, 9>& load_inertia,
+      double load_mass,
+      const std::array<double, 3>&
+          F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const noexcept;
 
   /**
   * Calculates the gravity vector. Unit: \f$[Nm]\f$.
@@ -112,11 +116,13 @@ class Model {
   *
   * @return Gravity vector.
   */
-  std::array<double, 7> gravity(const franka::RobotState& robot_state,
-                                double load_mass,
-                                const std::array<double, 3>& F_x_Cload,
-                                const std::array<double, 3>& gravity_earth = {
-                                    {0., 0., -9.81}}) const noexcept;
+  std::array<double, 7> gravity(
+      const franka::RobotState& robot_state,
+      double load_mass,
+      const std::array<double, 3>&
+          F_x_Cload,  // NOLINT (readability-identifier-naming)
+      const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const
+      noexcept;
 
  private:
   std::unique_ptr<LibraryLoader> library_;

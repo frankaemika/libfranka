@@ -86,7 +86,9 @@ std::array<double, 49> franka::Model::mass(
     const franka::RobotState& robot_state,
     const std::array<double, 9>& load_inertia,
     double load_mass,
-    const std::array<double, 3>& F_x_Cload) const noexcept {
+    const std::array<double, 3>&
+        F_x_Cload)  // NOLINT (readability-identifier-naming)
+    const noexcept {
   std::array<double, 49> output;
   auto function = reinterpret_cast<decltype(&M_NE_file)>(mass_function_);
   function(robot_state.q.data(), load_inertia.data(), load_mass,
@@ -99,7 +101,9 @@ std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
     const std::array<double, 9>& load_inertia,
     double load_mass,
-    const std::array<double, 3>& F_x_Cload) const noexcept {
+    const std::array<double, 3>&
+        F_x_Cload)  // NOLINT (readability-identifier-naming)
+    const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&c_NE_file)>(coriolis_function_);
   function(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
@@ -111,7 +115,8 @@ std::array<double, 7> franka::Model::coriolis(
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
     double load_mass,
-    const std::array<double, 3>& F_x_Cload,
+    const std::array<double, 3>&
+        F_x_Cload,  // NOLINT (readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
   auto function = reinterpret_cast<decltype(&g_NE_file)>(gravity_function_);
