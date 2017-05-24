@@ -49,6 +49,13 @@ struct ControlException : public Exception {
 };
 
 /**
+ * CommandException is thrown if an error occurs during command execution.
+ */
+struct CommandException : public Exception {
+  using Exception::Exception;
+};
+
+/**
  * RealtimeException is thrown if realtime priority can not be set.
  */
 struct RealtimeException : public Exception {

@@ -80,7 +80,7 @@ TEST(RobotImpl, CanStartMotionGenerator) {
     .onStartMotionGenerator([](const research_interface::StartMotionGenerator::Request& request) {
       EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGenerator::MotionGeneratorMode::kJointVelocity, request.mode);
-      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kSuccess);
+      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kMotionStarted);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kJointVelocity;
@@ -113,7 +113,7 @@ TEST(RobotImpl, CanNotStartMultipleMotionGenerators) {
     .onStartMotionGenerator([](const research_interface::StartMotionGenerator::Request& request) {
       EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGenerator::MotionGeneratorMode::kJointPosition, request.mode);
-      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kSuccess);
+      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kMotionStarted);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kJointPosition;
@@ -152,7 +152,7 @@ TEST(RobotImpl, CanSendMotionGeneratorCommand) {
     .onStartMotionGenerator([](const research_interface::StartMotionGenerator::Request& request) {
       EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGenerator::MotionGeneratorMode::kCartesianPosition, request.mode);
-      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kSuccess);
+      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kMotionStarted);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
@@ -216,7 +216,7 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
     .onStartMotionGenerator([](const research_interface::StartMotionGenerator::Request& request) {
       EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGenerator::MotionGeneratorMode::kCartesianPosition, request.mode);
-      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kSuccess);
+      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kMotionStarted);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianPosition;
@@ -252,7 +252,7 @@ TEST(RobotImpl, CanStopMotionGenerator) {
     .onStartMotionGenerator([](const research_interface::StartMotionGenerator::Request& request) {
       EXPECT_EQ(research_interface::Function::kStartMotionGenerator, request.function);
       EXPECT_EQ(research_interface::StartMotionGenerator::MotionGeneratorMode::kCartesianVelocity, request.mode);
-      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kSuccess);
+      return research_interface::StartMotionGenerator::Response(research_interface::StartMotionGenerator::Status::kMotionStarted);
     })
     .onSendRobotState([](research_interface::RobotState& robot_state) {
       robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kCartesianVelocity;

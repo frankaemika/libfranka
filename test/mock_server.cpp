@@ -170,24 +170,3 @@ void MockServer::serverThread() {
     cv_.notify_one();
   }
 }
-
-template <typename T>
-MockServer& MockServer::waitForCommand(std::function<typename T::Response(const typename T::Request&)> callback) {
-  using namespace std::string_literals;
-
-  std::lock_guard<std::mutex> _(mutex_);
-  std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " + typeid(typename T::Response).name();
-  commands_.emplace(name, [this,callback](Socket& tcp_socket, Socket&) {
-    handleCommand<T>(tcp_socket, callback);
-  });
-  return *this;
-}
-
-template <typename T>
-void MockServer::handleCommand(Socket& tcp_socket, std::function<typename T::Response(const typename T::Request&)> callback) {
-  std::array<uint8_t, sizeof(typename T::Request)> buffer;
-  tcp_socket.receiveBytes(buffer.data(), buffer.size());
-  typename T::Request request(*reinterpret_cast<typename T::Request*>(buffer.data()));
-  typename T::Response response = callback(request);
-  tcp_socket.sendBytes(&response, sizeof(response));
-}

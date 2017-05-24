@@ -78,8 +78,8 @@ bool Network::handleResponse(
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse() {
   int bytes_read = 0;
-  std::array<uint8_t, sizeof(T)> buffer;
   constexpr int kBytesTotal = sizeof(typename T::Response);
+  std::array<uint8_t, kBytesTotal> buffer;
 
   try {
     while (bytes_read < kBytesTotal) {
