@@ -33,9 +33,10 @@ Robot::Impl::Impl(const std::string& franka_address,
               << "Library version: " << research_interface::kVersion;
       throw IncompatibleVersionException(message.str());
     }
-    case research_interface::Connect::Status::kSuccess:
+    case research_interface::Connect::Status::kSuccess: {
       ri_version_ = connect_response.version;
       break;
+    }
     default:
       throw ProtocolException("libfranka: protocol error");
   }

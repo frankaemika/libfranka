@@ -7,25 +7,36 @@ set(GTEST_LIBRARIES gtest gmock gmock_main)
 
 include(SetupGoogleTest)
 
-## Test runner
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka research-interface-common ${GTEST_LIBRARIES})
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
+## Test libraries
+add_library(fcimodels SHARED
+  libfcimodels_stub.cpp
+)
+
+target_include_directories(fcimodels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(fcimodels PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+list(APPEND TEST_DEPENDENCIES fcimodels)
+
+## Test runner
 add_executable(run_all_tests
   command_tests.cpp
+  control_loop_tests.cpp
   control_types_tests.cpp
-  robot_tests.cpp
+  helpers.cpp
+  mock_server.cpp
+  model_tests.cpp
+  motion_generator_loop_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
-  control_loop_tests.cpp
-  motion_generator_loop_tests.cpp
-  mock_server.cpp
-  helpers.cpp
+  robot_tests.cpp
 )
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
-target_link_libraries(run_all_tests ${TEST_DEPENDENCIES})
+target_link_libraries(run_all_tests PUBLIC ${TEST_DEPENDENCIES})
 
 add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
 
@@ -78,7 +89,7 @@ foreach(sanitizer ${SANITIZERS})
 
     add_executable(${target_name} ${TESTS})
     target_include_directories(${target_name} PRIVATE ${TEST_INCLUDE_DIRECTORIES})
-    target_link_libraries(${target_name} ${TEST_DEPENDENCIES} ${sanitizer_flags})
+    target_link_libraries(${target_name} PUBLIC ${TEST_DEPENDENCIES} ${sanitizer_flags})
     target_compile_options(${target_name} PRIVATE ${sanitizer_flags})
     add_test(NAME ${sanitizer}
       COMMAND ${target_name} --gtest_output=xml:${TEST_OUTPUT_DIR}/${sanitizer_lc}.xml

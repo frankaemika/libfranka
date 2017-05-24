@@ -18,6 +18,13 @@ struct Exception : public std::runtime_error {
 };
 
 /**
+ * ModelException is thrown when unsupported robot model is used.
+ */
+struct ModelException : public Exception {
+  using Exception::Exception;
+};
+
+/**
  * NetworkException is thrown when a connection to FRANKA cannot be established,
  * or when a timeout occurs.
  */

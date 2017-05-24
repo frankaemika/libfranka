@@ -66,6 +66,7 @@ class Robot::Impl : public RobotControl {
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
+
   bool motion_generator_running_;
   bool controller_running_;
 

@@ -46,3 +46,7 @@ CheckOptions:
     value:  ''
   - key:    readability-identifier-naming.ConstantMemberCase
     value:  lower_case
+  - key:    readability-identifier-naming.ConstantParameterCase
+    value:  lower_case
+  - key:    readability-identifier-naming.ConstantParameterPrefix
+    value:  ''

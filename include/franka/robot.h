@@ -49,6 +49,9 @@ class Robot {
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+  /**
+   * Closes the connection.
+   */
   ~Robot() noexcept;
 
   /**
@@ -424,9 +427,9 @@ class Robot {
    */
 
   /**
-   * Returns the version reported by the connected server.
+   * Returns the software version reported by the connected server.
    *
-   * @return Version of the connected server.
+   * @return Software version of the connected server.
    */
   ServerVersion serverVersion() const noexcept;
 
