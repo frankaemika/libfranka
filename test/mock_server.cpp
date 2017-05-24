@@ -7,11 +7,18 @@
 #include <Poco/Net/StreamSocket.h>
 #include <gtest/gtest.h>
 
-MockServer::MockServer() : block_{false}, shutdown_{false}, continue_{false}, initialized_{false} {
+MockServer::MockServer(ConnectCallbackT on_connect)
+    : block_{false},
+      shutdown_{false},
+      continue_{false},
+      initialized_{false},
+      on_connect_(on_connect) {
   std::unique_lock<std::mutex> lock(mutex_);
   server_thread_ = std::thread(&MockServer::serverThread, this);
 
   cv_.wait(lock, [this] { return initialized_; });
+  lock.unlock();
+  spinOnce();  // spin to accept connections immediately
 }
 
 MockServer::~MockServer() {
@@ -31,11 +38,6 @@ MockServer::~MockServer() {
     }
     ADD_FAILURE() << ss.str();
   }
-}
-
-MockServer& MockServer::onConnect(ConnectCallbackT on_connect) {
-  on_connect_ = on_connect;
-  return *this;
 }
 
 MockServer& MockServer::onStartMotionGenerator(
@@ -66,6 +68,7 @@ MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_s
     research_interface::RobotState robot_state = on_send_robot_state();
     udp_socket.sendBytes(&robot_state, sizeof(robot_state));
   });
+  block_ = true;
   return *this;
 }
 
@@ -90,14 +93,15 @@ MockServer& MockServer::onReceiveRobotCommand(
   return *this;
 }
 
-void MockServer::spinOnce() {
+MockServer& MockServer::spinOnce() {
   std::unique_lock<std::mutex> lock(mutex_);
   continue_ = true;
   cv_.notify_one();
   if (block_) {
     cv_.wait(lock, [this]() { return !continue_; });
-    block_ = false;
   }
+  block_ = false;
+  return *this;
 }
 
 void MockServer::serverThread() {

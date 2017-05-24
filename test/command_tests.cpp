@@ -282,6 +282,8 @@ TYPED_TEST_CASE(Command, CommandTypes);
 
 TYPED_TEST(Command, CanSendAndReceiveSuccess) {
   MockServer server;
+  Robot::Impl robot("127.0.0.1");
+
   server
       .waitForCommand<typename TestFixture::TCommand>(
           [this](const typename TestFixture::TCommand::Request& request) ->
@@ -291,12 +293,13 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
           })
       .spinOnce();
 
-  Robot::Impl robot("127.0.0.1");
   EXPECT_NO_THROW(TestFixture::executeCommand(robot));
 }
 
 TYPED_TEST(Command, CanSendAndReceiveAbort) {
   MockServer server;
+  Robot::Impl robot("127.0.0.1");
+
   server
       .waitForCommand<typename TestFixture::TCommand>(
           [this](const typename TestFixture::TCommand::Request& request) ->
@@ -306,12 +309,13 @@ TYPED_TEST(Command, CanSendAndReceiveAbort) {
           })
       .spinOnce();
 
-  Robot::Impl robot("127.0.0.1");
   EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
 }
 
 TYPED_TEST(Command, CanSendAndReceiveRejected) {
   MockServer server;
+  Robot::Impl robot("127.0.0.1");
+
   server
       .waitForCommand<typename TestFixture::TCommand>(
           [this](const typename TestFixture::TCommand::Request& request) ->
@@ -321,12 +325,13 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
           })
       .spinOnce();
 
-  Robot::Impl robot("127.0.0.1");
   EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
 }
 
 TYPED_TEST(Command, CanSendAndReceivePreempted) {
   MockServer server;
+  Robot::Impl robot("127.0.0.1");
+
   server
       .waitForCommand<typename TestFixture::TCommand>(
           [this](const typename TestFixture::TCommand::Request& request) ->
@@ -336,6 +341,5 @@ TYPED_TEST(Command, CanSendAndReceivePreempted) {
           })
       .spinOnce();
 
-  Robot::Impl robot("127.0.0.1");
   EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
 }
