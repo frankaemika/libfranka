@@ -52,14 +52,15 @@ add_subdirectory(lib/research-interface-common)
 add_library(franka SHARED
   src/complete_robot_state.cpp
   src/control_loop.cpp
-  src/motion_generator_loop.cpp
   src/control_types.cpp
+  src/library_loader.cpp
+  src/model.cpp
+  src/model_library.cpp
+  src/motion_generator_loop.cpp
+  src/network.cpp
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
-  src/network.cpp
-  src/model.cpp
-  src/library_loader.cpp
 )
 
 set_target_properties(franka PROPERTIES

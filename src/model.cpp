@@ -1,31 +1,20 @@
+#include <franka/model.h>
+
 #include <sstream>
 
-#include <franka/model.h>
 #include <research_interface/service_types.h>
 
-#include "libfcimodels.h"
-#include "library_loader.h"
+#include "model_library.h"
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Model::Model(franka::Robot&)  // NOLINT (readability-named-parameter)
-    : library_{new LibraryLoader("libfcimodels")},
-      mass_function_{library_->getSymbol("M_NE_file")},
-      joint0_function_{library_->getSymbol("O_T_J1_file")},
-      joint1_function_{library_->getSymbol("O_T_J2_file")},
-      joint2_function_{library_->getSymbol("O_T_J3_file")},
-      joint3_function_{library_->getSymbol("O_T_J4_file")},
-      joint4_function_{library_->getSymbol("O_T_J5_file")},
-      joint5_function_{library_->getSymbol("O_T_J6_file")},
-      joint6_function_{library_->getSymbol("O_T_J7_file")},
-      flange_function_{library_->getSymbol("O_T_J8_file")},
-      ee_function_{library_->getSymbol("O_T_J9_file")},
-      coriolis_function_{library_->getSymbol("c_NE_file")},
-      gravity_function_{library_->getSymbol("g_NE_file")} {}
+Model::Model(
+    franka::Robot& /* robot */)  // NOLINT (readability-named-parameter)
+    : library_{new ModelLibrary} {}
 
-// Has to be declared here, as the LibraryLoader type is incomplete in the
+// Has to be declared here, as the ModelLibrary type is incomplete in the
 // header
 Model::~Model() noexcept = default;
 
@@ -40,40 +29,31 @@ std::array<double, 16> Model::jointPose(
 
   switch (joint) {
     case Frame::kJoint1:
-      reinterpret_cast<decltype(&O_T_J1_file)>(joint0_function_)(
-          q, end_effector, output.data());
+      library_->joint0(q, end_effector, output.data());
       break;
     case Frame::kJoint2:
-      reinterpret_cast<decltype(&O_T_J2_file)>(joint1_function_)(
-          q, end_effector, output.data());
+      library_->joint1(q, end_effector, output.data());
       break;
     case Frame::kJoint3:
-      reinterpret_cast<decltype(&O_T_J3_file)>(joint2_function_)(
-          q, end_effector, output.data());
+      library_->joint2(q, end_effector, output.data());
       break;
     case Frame::kJoint4:
-      reinterpret_cast<decltype(&O_T_J4_file)>(joint3_function_)(
-          q, end_effector, output.data());
+      library_->joint3(q, end_effector, output.data());
       break;
     case Frame::kJoint5:
-      reinterpret_cast<decltype(&O_T_J5_file)>(joint4_function_)(
-          q, end_effector, output.data());
+      library_->joint4(q, end_effector, output.data());
       break;
     case Frame::kJoint6:
-      reinterpret_cast<decltype(&O_T_J6_file)>(joint5_function_)(
-          q, end_effector, output.data());
+      library_->joint5(q, end_effector, output.data());
       break;
     case Frame::kJoint7:
-      reinterpret_cast<decltype(&O_T_J7_file)>(joint6_function_)(
-          q, end_effector, output.data());
+      library_->joint6(q, end_effector, output.data());
       break;
     case Frame::kFlange:
-      reinterpret_cast<decltype(&O_T_J8_file)>(flange_function_)(
-          q, end_effector, output.data());
+      library_->flange(q, end_effector, output.data());
       break;
     case Frame::kEndEffector:
-      reinterpret_cast<decltype(&O_T_J9_file)>(ee_function_)(q, end_effector,
-                                                             output.data());
+      library_->ee(q, end_effector, output.data());
       break;
     default:
       throw std::invalid_argument("Invalid joint given.");
@@ -90,9 +70,8 @@ std::array<double, 49> franka::Model::mass(
         F_x_Cload)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 49> output;
-  auto function = reinterpret_cast<decltype(&M_NE_file)>(mass_function_);
-  function(robot_state.q.data(), load_inertia.data(), load_mass,
-           F_x_Cload.data(), output.data());
+  library_->mass(robot_state.q.data(), load_inertia.data(), load_mass,
+                 F_x_Cload.data(), output.data());
 
   return output;
 }
@@ -105,9 +84,9 @@ std::array<double, 7> franka::Model::coriolis(
         F_x_Cload)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 7> output;
-  auto function = reinterpret_cast<decltype(&c_NE_file)>(coriolis_function_);
-  function(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
-           load_mass, F_x_Cload.data(), output.data());
+  library_->coriolis(robot_state.q.data(), robot_state.dq.data(),
+                     load_inertia.data(), load_mass, F_x_Cload.data(),
+                     output.data());
 
   return output;
 }
@@ -119,9 +98,8 @@ std::array<double, 7> franka::Model::gravity(
         F_x_Cload,  // NOLINT (readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
-  auto function = reinterpret_cast<decltype(&g_NE_file)>(gravity_function_);
-  function(robot_state.q.data(), gravity_earth.data(), load_mass,
-           F_x_Cload.data(), output.data());
+  library_->gravity(robot_state.q.data(), gravity_earth.data(), load_mass,
+                    F_x_Cload.data(), output.data());
 
   return output;
 }

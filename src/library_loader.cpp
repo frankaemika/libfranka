@@ -1,5 +1,9 @@
 #include "library_loader.h"
 
+#include <Poco/Exception.h>
+
+#include <franka/exception.h>
+
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {

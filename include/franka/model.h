@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include <franka/robot.h>
 
@@ -26,7 +27,7 @@ enum Frame : uint8_t {
   kEndEffector
 };
 
-class LibraryLoader;
+class ModelLibrary;
 
 /**
  * Calculates poses of joints and dynamic properties of the robot.
@@ -124,20 +125,7 @@ class Model {
       noexcept;
 
  private:
-  std::unique_ptr<LibraryLoader> library_;
-
-  void* mass_function_;
-  void* joint0_function_;
-  void* joint1_function_;
-  void* joint2_function_;
-  void* joint3_function_;
-  void* joint4_function_;
-  void* joint5_function_;
-  void* joint6_function_;
-  void* flange_function_;
-  void* ee_function_;
-  void* coriolis_function_;
-  void* gravity_function_;
+  std::unique_ptr<ModelLibrary> library_;
 };
 
 }  // namespace franka
