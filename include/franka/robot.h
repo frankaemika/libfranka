@@ -43,8 +43,7 @@ class Robot {
    * to Ignore disables this behavior.
    *
    * @throw NetworkException if the connection is unsuccessful.
-   * @throw IncompatibleVersionException if this library is not supported by
-   * FRANKA CONTROL.
+   * @throw IncompatibleVersionException if this library is not supported by FRANKA CONTROL.
    * @throw ProtocolException if data received from the host is invalid.
    */
   explicit Robot(const std::string& franka_address,
@@ -69,108 +68,159 @@ class Robot {
    *
    * @param[in] control_callback Callback function for torque control.
    *
-   * @throw ControlException if an error related to torque control or motion
-   * generation occurred.
+   * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a joint position motion generator, optionally with
-   * torque control.
+   * Starts a control loop for a joint position motion generator with torque control.
    *
-   * Sets realtime priority for the current thread if torque control is used.
+   * Sets realtime priority for the current thread.
    *
-   * @param[in] motion_generator_callback Callback function for motion
-   * generation.
+   * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
    *
-   * @throw ControlException if an error related to torque control or motion
-   * generation occurred.
+   * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
-               std::function<Torques(const RobotState&)> control_callback =
-                   std::function<Torques(const RobotState&)>());
+               std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a joint velocity motion generator, optionally
-   * with torque control.
+   * Starts a control loop for a joint position motion generator with a given controller mode.
    *
-   * Sets realtime priority for the current thread if torque control is used.
+   * Sets realtime priority for the current thread.
    *
-   * @param[in] motion_generator_callback Callback function for motion
-   * generation.
-   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
    *
-   * @throw ControlException if an error related to torque control or motion
-   * generation occurred.
+   * @throw ControlException if an error related to motion generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
+               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
+   * Starts a control loop for a joint velocity motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
-               std::function<Torques(const RobotState&)> control_callback =
-                   std::function<Torques(const RobotState&)>());
+               std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a Cartesian pose motion generator, optionally
-   * with torque control.
+   * Starts a control loop for a joint velocity motion generator with a given controller mode.
    *
-   * Sets realtime priority for the current thread if torque control is used.
+   * Sets realtime priority for the current thread.
    *
-   * @param[in] motion_generator_callback Callback function for motion
-   * generation.
-   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
    *
-   * @throw ControlException if an error related to torque control or motion
-   * generation occurred.
+   * @throw ControlException if an error related to motion generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
+               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
+   * Starts a control loop for a Cartesian pose motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
-               std::function<Torques(const RobotState&)> control_callback =
-                   std::function<Torques(const RobotState&)>());
+               std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a Cartesian velocity motion generator, optionally
-   * with torque control.
+   * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
    *
-   * Sets realtime priority for the current thread if torque control is used.
+   * Sets realtime priority for the current thread.
    *
-   * @param[in] motion_generator_callback Callback function for motion
-   * generation.
-   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
    *
-   * @throw ControlException if an error related to torque control or motion
-   * generation occurred.
+   * @throw ControlException if an error related to motion generation occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the
-   * current thread.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
+   * Starts a control loop for a Cartesian velocity motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
-               std::function<Torques(const RobotState&)> control_callback =
-                   std::function<Torques(const RobotState&)>());
+               std::function<Torques(const RobotState&)> control_callback);
+
+  /**
+   * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
+   *
+   * Sets realtime priority for the current thread.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
+   *
+   * @throw ControlException if an error related to motion generation occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
+               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
   /**
    * @}
    */
@@ -199,10 +249,8 @@ class Robot {
 
   /**
    * @name Commands
-   * Commands are executed by communicating with FRANKA CONTROL over the
-   * network.
-   * These functions should therefore not be called from within control or
-   * motion generator loops.
+   * Commands are executed by communicating with FRANKA CONTROL over the network.
+   * These functions should therefore not be called from within control or motion generator loops.
    * @{
    */
 
@@ -237,22 +285,18 @@ class Robot {
    * Forces or torques above the upper threshold are registered as collision
    * and cause FRANKA to stop moving.
    *
-   * @param[in] lower_torque_thresholds_acceleration Contact torque thresholds
-   * during acceleration/deceleration in \f$[Nm]\f$.
-   * @param[in] upper_torque_thresholds_acceleration Collision torque
-   * thresholds during acceleration/deceleration in \f$[Nm]\f$.
-   * @param[in] lower_torque_thresholds_nominal Contact torque thresholds in
-   * \f$[Nm]\f$.
-   * @param[in] upper_torque_thresholds_nominal Collision torque thresholds in
-   * \f$[Nm]\f$.
-   * @param[in] lower_force_thresholds_acceleration Contact force thresholds
-   * during acceleration/deceleration in \f$[N]\f$.
-   * @param[in] upper_force_thresholds_acceleration Collision force thresholds
-   * during acceleration/deceleration in \f$[N]\f$.
-   * @param[in] lower_force_thresholds_nominal Contact force thresholds in
-   * \f$[N]\f$.
-   * @param[in] upper_force_thresholds_nominal Collision force thresholds in
-   * \f$[N]\f$.
+   * @param[in] lower_torque_thresholds_acceleration Contact torque thresholds during
+   * acceleration/deceleration in \f$[Nm]\f$.
+   * @param[in] upper_torque_thresholds_acceleration Collision torque thresholds during
+   * acceleration/deceleration in \f$[Nm]\f$.
+   * @param[in] lower_torque_thresholds_nominal Contact torque thresholds in \f$[Nm]\f$.
+   * @param[in] upper_torque_thresholds_nominal Collision torque thresholds in \f$[Nm]\f$.
+   * @param[in] lower_force_thresholds_acceleration Contact force thresholds during
+   * acceleration/deceleration in \f$[N]\f$.
+   * @param[in] upper_force_thresholds_acceleration Collision force thresholds during
+   * acceleration/deceleration in \f$[N]\f$.
+   * @param[in] lower_force_thresholds_nominal Contact force thresholds in \f$[N]\f$.
+   * @param[in] upper_force_thresholds_nominal Collision force thresholds in \f$[N]\f$.
    *
    * @throw CommandException if an error occurred.
    *
@@ -278,14 +322,12 @@ class Robot {
    * Set common torque and force boundaries for acceleration/deceleration and
    * constant velocity movement phases.
    *
-   * Forces or torques between lower and upper threshold are shown as
-   * contacts in the RobotState.
-   * Forces or torques above the upper threshold are registered as collision
-   * and cause FRANKA to stop moving.
+   * Forces or torques between lower and upper threshold are shown as contacts in the RobotState.
+   * Forces or torques above the upper threshold are registered as collision and cause FRANKA to
+   * stop moving.
    *
    * @param[in] lower_torque_thresholds Contact torque thresholds in \f$[Nm]\f$.
-   * @param[in] upper_torque_thresholds Collision torque thresholds in
-   * \f$[Nm]\f$.
+   * @param[in] upper_torque_thresholds Collision torque thresholds in \f$[Nm]\f$.
    * @param[in] lower_force_thresholds Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds Collision force thresholds in \f$[N]\f$.
    *
@@ -329,13 +371,10 @@ class Robot {
    * If a flag is set to true, movement is unlocked.
    *
    * @note
-   * Guiding mode can be enabled by pressing the two opposing buttons near
-   * FRANKA's flange.
+   * Guiding mode can be enabled by pressing the two opposing buttons near FRANKA's flange.
    *
-   * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding
-   * mode.
-   * @param[in] elbow True if the elbow is free in guiding mode, false
-   * otherwise.
+   * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding mode.
+   * @param[in] elbow True if the elbow is free in guiding mode, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
@@ -344,11 +383,9 @@ class Robot {
   /**
    * Sets the transformation \f$^{EE}T_K\f$ from end effector to K frame.
    *
-   * The transformation matrix is represented as a vectorized 4x4 matrix in
-   * column-major format.
+   * The transformation matrix is represented as a vectorized 4x4 matrix in column-major format.
    *
-   * @param[in] EE_T_K Vectorized EE-to-K transformation matrix \f$^{EE}T_K\f$,
-   * column-major.
+   * @param[in] EE_T_K Vectorized EE-to-K transformation matrix \f$^{EE}T_K\f$, column-major.
    *
    * @throw CommandException if an error occurred.
    *
@@ -359,11 +396,9 @@ class Robot {
   /**
    * Sets the transformation \f$^FT_{EE}\f$ from flange to end effector frame.
    *
-   * The transformation matrix is represented as a vectorized 4x4 matrix in
-   * column-major format.
+   * The transformation matrix is represented as a vectorized 4x4 matrix in column-major format.
    *
-   * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix
-   * \f$^FT_{EE}\f$, column-major.
+   * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix \f$^FT_{EE}\f$, column-major.
    *
    * @throw CommandException if an error occurred.
    *
@@ -376,14 +411,13 @@ class Robot {
    * Sets dynamic parameters of a payload.
    *
    * @note
-   * This is not for setting end effector parameters, which have to be set in
-   * a configuration file.
+   * This is not for setting end effector parameters, which have to be set in a configuration file.
    *
    * @param[in] load_mass Mass of the load in \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load
    * \f$^Fx_{C_\text{load}}\f$ in \f$[m]\f$.
-   * @param[in] load_inertia Inertia matrix \f$I_\text{load}\f$ in \f$[kg \times
-   * m^2]\f$, column-major.
+   * @param[in] load_inertia Inertia matrix \f$I_\text{load}\f$ in \f$[kg \times m^2]\f$,
+   * column-major.
    *
    * @throw CommandException if an error occurred.
    */

@@ -29,9 +29,25 @@ void Robot::control(std::function<JointPositions(const RobotState&)> motion_gene
   loop();
 }
 
+void Robot::control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
+                    ControllerMode controller_mode) {
+  // TODO
+  MotionGeneratorLoop<JointPositions> loop(*impl_, ControlLoop::ControlCallback(),
+                                           motion_generator_callback);
+  loop();
+}
+
 void Robot::control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
                     std::function<Torques(const RobotState&)> control_callback) {
   MotionGeneratorLoop<JointVelocities> loop(*impl_, control_callback, motion_generator_callback);
+  loop();
+}
+
+void Robot::control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
+                    ControllerMode controller_mode) {
+  // TODO
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, ControlLoop::ControlCallback(),
+                                            motion_generator_callback);
   loop();
 }
 
@@ -41,9 +57,25 @@ void Robot::control(std::function<CartesianPose(const RobotState&)> motion_gener
   loop();
 }
 
+void Robot::control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
+                    ControllerMode controller_mode) {
+  // TODO
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, ControlLoop::ControlCallback(),
+                                          motion_generator_callback);
+  loop();
+}
+
 void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
                     std::function<Torques(const RobotState&)> control_callback) {
   MotionGeneratorLoop<CartesianVelocities> loop(*impl_, control_callback,
+                                                motion_generator_callback);
+  loop();
+}
+
+void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
+                    ControllerMode controller_mode) {
+  // TODO
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, ControlLoop::ControlCallback(),
                                                 motion_generator_callback);
   loop();
 }

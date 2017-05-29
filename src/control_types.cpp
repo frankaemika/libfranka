@@ -28,7 +28,7 @@ Torques::Torques(std::initializer_list<double> torques) {
 JointPositions::JointPositions() noexcept : IsStop(true) {}
 
 JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                         joint_positions) noexcept : q(joint_positions) {}
+                               joint_positions) noexcept : q(joint_positions) {}
 
 JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   if (joint_positions.size() != q.size()) {
