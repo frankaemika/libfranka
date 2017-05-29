@@ -187,7 +187,7 @@ void Robot::Impl::startMotionGenerator(
   }
 
   // Reset robot command
-  robot_command_ = decltype(robot_command_)();
+  robot_command_ = {};
 
   research_interface::StartMotionGenerator::Request request(mode);
   network_.tcpSendRequest(request);
@@ -248,7 +248,7 @@ void Robot::Impl::startController() {
   }
 
   // Reset robot command
-  robot_command_ = decltype(robot_command_)();
+  robot_command_ = {};
 
   research_interface::StartController::Request request;
   network_.tcpSendRequest(request);
