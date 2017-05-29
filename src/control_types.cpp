@@ -25,16 +25,16 @@ Torques::Torques(std::initializer_list<double> torques) {
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
 
-JointValues::JointValues() noexcept : IsStop(true) {}
+JointPositions::JointPositions() noexcept : IsStop(true) {}
 
-JointValues::JointValues(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                         joint_values) noexcept : q(joint_values) {}
+JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
+                         joint_positions) noexcept : q(joint_positions) {}
 
-JointValues::JointValues(std::initializer_list<double> joint_values) {
-  if (joint_values.size() != q.size()) {
-    throw ControlException("Invalid number of elements in joint_values.");
+JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
+  if (joint_positions.size() != q.size()) {
+    throw ControlException("Invalid number of elements in joint_positions.");
   }
-  std::copy(joint_values.begin(), joint_values.end(), q.begin());
+  std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
 }
 
 JointVelocities::JointVelocities() noexcept : IsStop(true) {}

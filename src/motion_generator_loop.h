@@ -24,7 +24,7 @@ class MotionGeneratorLoop : public ControlLoop {
   MotionGeneratorCallback motion_callback_;
 };
 
-template class MotionGeneratorLoop<JointValues>;
+template class MotionGeneratorLoop<JointPositions>;
 template class MotionGeneratorLoop<JointVelocities>;
 template class MotionGeneratorLoop<CartesianPose>;
 template class MotionGeneratorLoop<CartesianVelocities>;

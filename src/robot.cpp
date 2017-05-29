@@ -23,9 +23,9 @@ void Robot::control(std::function<Torques(const RobotState&)> control_callback) 
   loop();
 }
 
-void Robot::control(std::function<JointValues(const RobotState&)> motion_generator_callback,
+void Robot::control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
                     std::function<Torques(const RobotState&)> control_callback) {
-  MotionGeneratorLoop<JointValues> loop(*impl_, control_callback, motion_generator_callback);
+  MotionGeneratorLoop<JointPositions> loop(*impl_, control_callback, motion_generator_callback);
   loop();
 }
 

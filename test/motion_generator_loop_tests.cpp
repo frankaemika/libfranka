@@ -18,7 +18,7 @@ using ::testing::_;
 
 using franka::RobotState;
 using franka::Stop;
-using franka::JointValues;
+using franka::JointPositions;
 using franka::JointVelocities;
 using franka::CartesianPose;
 using franka::CartesianVelocities;
@@ -60,12 +60,12 @@ class MotionGeneratorLoops : public ::testing::Test {
 };
 
 template <>
-JointValues MotionGeneratorLoops<JointValues>::createMotion() {
-  return JointValues({0, 1, 2, 3, 4, 5, 6});
+JointPositions MotionGeneratorLoops<JointPositions>::createMotion() {
+  return JointPositions({0, 1, 2, 3, 4, 5, 6});
 }
 
 template <>
-auto MotionGeneratorLoops<JointValues>::getField(const JointValues& values) {
+auto MotionGeneratorLoops<JointPositions>::getField(const JointPositions& values) {
   return Field(&research_interface::MotionGeneratorCommand::q_d, Eq(values.q));
 }
 
@@ -102,7 +102,7 @@ auto MotionGeneratorLoops<CartesianVelocities>::getField(
 }
 
 using MotionTypes =
-    ::testing::Types<JointValues, JointVelocities, CartesianPose, CartesianVelocities>;
+    ::testing::Types<JointPositions, JointVelocities, CartesianPose, CartesianVelocities>;
 TYPED_TEST_CASE(MotionGeneratorLoops, MotionTypes);
 
 TYPED_TEST(MotionGeneratorLoops, CanConstructWithoutCallbacks) {

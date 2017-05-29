@@ -81,7 +81,7 @@ class Robot {
   void control(std::function<Torques(const RobotState&)> control_callback);
 
   /**
-   * Starts a control loop for a joint value motion generator, optionally with
+   * Starts a control loop for a joint position motion generator, optionally with
    * torque control.
    *
    * Sets realtime priority for the current thread if torque control is used.
@@ -99,7 +99,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(std::function<JointValues(const RobotState&)> motion_generator_callback,
+  void control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
                std::function<Torques(const RobotState&)> control_callback =
                    std::function<Torques(const RobotState&)>());
 

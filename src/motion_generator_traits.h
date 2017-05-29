@@ -9,7 +9,7 @@ template <typename T>
 struct MotionGeneratorTraits {};
 
 template <>
-struct MotionGeneratorTraits<JointValues> {
+struct MotionGeneratorTraits<JointPositions> {
   static constexpr auto kMotionGeneratorMode =
       research_interface::StartMotionGenerator::MotionGeneratorMode::kJointPosition;
 };

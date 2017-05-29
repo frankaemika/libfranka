@@ -36,8 +36,8 @@ bool MotionGeneratorLoop<T>::spinOnce() {
 }
 
 template <>
-void MotionGeneratorLoop<JointValues>::convertMotion(
-    const JointValues& motion,
+void MotionGeneratorLoop<JointPositions>::convertMotion(
+    const JointPositions& motion,
     research_interface::MotionGeneratorCommand* command) {
   command->q_d = motion.q;
 }

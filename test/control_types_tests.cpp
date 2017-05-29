@@ -19,20 +19,20 @@ TEST(Torques, CanNotConstructFromTooSmallInitializerList) {
   EXPECT_THROW(franka::Torques({0, 1, 2, 3, 4, 5}), franka::ControlException);
 }
 
-TEST(JointValues, CanConstructFromArray) {
+TEST(JointPositions, CanConstructFromArray) {
   std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
-  franka::JointValues jv(array);
+  franka::JointPositions jv(array);
   EXPECT_EQ(array, jv.q);
 }
 
-TEST(JointValues, CanConstructFromInitializerList) {
+TEST(JointPositions, CanConstructFromInitializerList) {
   std::array<double, 7> array{0, 1, 2, 3, 4, 5, 6};
-  franka::JointValues jv({0, 1, 2, 3, 4, 5, 6});
+  franka::JointPositions jv({0, 1, 2, 3, 4, 5, 6});
   EXPECT_EQ(array, jv.q);
 }
 
-TEST(JointValues, CanNotConstructFromTooSmallInitializerList) {
-  EXPECT_THROW(franka::JointValues({0, 1, 2, 3, 4, 5}), franka::ControlException);
+TEST(JointPositions, CanNotConstructFromTooSmallInitializerList) {
+  EXPECT_THROW(franka::JointPositions({0, 1, 2, 3, 4, 5}), franka::ControlException);
 }
 
 TEST(JointVelocities, CanConstructFromArray) {
