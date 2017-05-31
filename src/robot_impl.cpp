@@ -16,9 +16,7 @@ Robot::Impl::Impl(const std::string& franka_address,
                   std::chrono::milliseconds timeout,
                   RealtimeConfig realtime_config)
     : network_{franka_address, franka_port, timeout},
-      realtime_config_{realtime_config},
-      motion_generator_running_{false},
-      controller_running_{false} {
+      realtime_config_{realtime_config} {
   research_interface::Connect::Request connect_request(network_.udpPort());
 
   network_.tcpSendRequest(connect_request);
@@ -42,111 +40,23 @@ Robot::Impl::Impl(const std::string& franka_address,
   }
 }
 
-template <typename T>
-bool Robot::Impl::handleCommandResponse(const typename T::Response& response) {
-  switch (response.status) {
-    case T::Status::kSuccess:
-      break;
-    case T::Status::kAborted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
-                             " command aborted!");
-    case T::Status::kRejected:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
-                             " command rejected!");
-    case T::Status::kPreempted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
-                             " command preempted!");
-  }
-  return true;
-}
-
-template <>
-bool Robot::Impl::handleCommandResponse<research_interface::StartMotionGenerator>(
-    const research_interface::StartMotionGenerator::Response& response) {
-  switch (response.status) {
-    case research_interface::StartMotionGenerator::Status::kMotionStarted:
-      // After sending MotionStarted, RCU will send another response in the
-      // future, e.g. Finished or Aborted.
-      expected_responses_.insert(research_interface::Function::kStartMotionGenerator);
-      break;
-    case research_interface::StartMotionGenerator::Status::kSuccess:
-      motion_generator_running_ = false;
-      break;
-    case research_interface::StartMotionGenerator::Status::kAborted:
-      motion_generator_running_ = false;
-      throw ControlException("libfranka: motion generator command aborted!");
-    case research_interface::StartMotionGenerator::Status::kPreempted:
-      motion_generator_running_ = false;
-      throw ControlException("libfranka: motion generator command preempted!");
-    case research_interface::StartMotionGenerator::Status::kRejected:
-    default:
-      motion_generator_running_ = false;
-      throw ControlException("libfranka: motion generator command rejected!");
-  }
-  return true;
-}
-
-template <>
-bool Robot::Impl::handleCommandResponse<research_interface::StartController>(
-    const research_interface::StartController::Response& response) {
-  switch (response.status) {
-    case research_interface::StartController::Status::kSuccess:
-      break;
-    default:
-      controller_running_ = false;
-      throw ProtocolException("libfranka: unexpected start controller response!");
-  }
-  return true;
-}
-
 bool Robot::Impl::update() {
   research_interface::Function function;
   if (network_.tcpReadResponse(&function)) {
-    if (expected_responses_.find(function) == expected_responses_.end()) {
+    if (!motionGeneratorRunning() || function != research_interface::Function::kMove) {
       throw ProtocolException("libfranka: unexpected response!");
     }
 
-    bool handled = false;
-    switch (function) {
-      case research_interface::Function::kStartMotionGenerator:
-        handled = network_.handleResponse<research_interface::StartMotionGenerator>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StartMotionGenerator>,
-                      this, std::placeholders::_1));
-        break;
-      case research_interface::Function::kStopMotionGenerator:
-        handled = network_.handleResponse<research_interface::StopMotionGenerator>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StopMotionGenerator>,
-                      this, std::placeholders::_1));
-        break;
-      case research_interface::Function::kStartController:
-        handled = network_.handleResponse<research_interface::StartController>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StartController>,
-                      this, std::placeholders::_1));
-        break;
-      case research_interface::Function::kStopController:
-        handled = network_.handleResponse<research_interface::StopController>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::StopController>, this,
-                      std::placeholders::_1));
-        break;
-      default:
-        throw ProtocolException("libfranka: unsupported response!");
-    }
-
-    if (handled) {
-      auto iterator = expected_responses_.find(function);
-      if (iterator != expected_responses_.end()) {
-        expected_responses_.erase(iterator);
-      }
-    }
+    network_.tcpHandleResponse<research_interface::Move>(std::bind(&Robot::Impl::handleCommandResponse<research_interface::Move>, this, std::placeholders::_1));
   }
 
-  robot_state_ = network_.udpReadRobotState();
-
-  if (motion_generator_running_ || controller_running_) {
+  if (motionGeneratorRunning() || controllerRunning()) {
     robot_command_.message_id = robot_state_.rcuRobotState().message_id;
 
     network_.udpSendRobotCommand(robot_command_);
   }
+
+  robot_state_ = network_.udpReadRobotState();
   return true;
 }
 
@@ -159,11 +69,11 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
 }
 
 bool Robot::Impl::motionGeneratorRunning() const noexcept {
-  return motion_generator_running_;
+  return robot_state_.rcuRobotState().motion_generator_mode != research_interface::MotionGeneratorMode::kIdle;
 }
 
 bool Robot::Impl::controllerRunning() const noexcept {
-  return controller_running_;
+  return robot_state_.rcuRobotState().controller_mode == research_interface::ControllerMode::kExternalController;
 }
 
 RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
@@ -181,16 +91,19 @@ void Robot::Impl::motionGeneratorCommand(
 }
 
 void Robot::Impl::startMotionGenerator(
-    research_interface::StartMotionGenerator::MotionGeneratorMode mode) {
-  if (motion_generator_running_) {
+      research_interface::Move::MotionGeneratorMode mode) {
+  if (motionGeneratorRunning()) {
     throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
   std::memset(&robot_command_, 0, sizeof(robot_command_));
 
-  research_interface::StartMotionGenerator::Request request(mode);
-  network_.tcpSendRequest(request);
-
-  expected_responses_.insert(research_interface::Function::kStartMotionGenerator);
+  //TODO
+  executeCommand<research_interface::Move>(
+    research_interface::Move::ControllerMode::kJointImpedance,
+    mode,
+    research_interface::Move::Deviation(0.2, 1.5, 1.5),
+    research_interface::Move::Deviation(0.2, 1.5, 1.5)
+  );
 
   research_interface::MotionGeneratorMode motion_generator_mode;
   switch (mode) {
@@ -212,7 +125,6 @@ void Robot::Impl::startMotionGenerator(
 
   while (update()) {
     if (robot_state_.rcuRobotState().motion_generator_mode == motion_generator_mode) {
-      motion_generator_running_ = true;
       return;
     }
   }
@@ -220,20 +132,16 @@ void Robot::Impl::startMotionGenerator(
 }
 
 void Robot::Impl::stopMotionGenerator() {
-  if (!motion_generator_running_) {
+  if (!motionGeneratorRunning()) {
     return;
   }
 
-  research_interface::StopMotionGenerator::Request request;
-  network_.tcpSendRequest(request);
-
-  expected_responses_.insert(research_interface::Function::kStopMotionGenerator);
+  // TODO: never necessary?
+  // executeCommand<research_interface::StopMove>();
 
   robot_command_.motion.motion_generation_finished = true;
   while (update()) {
-    if (robot_state_.rcuRobotState().motion_generator_mode ==
-        research_interface::MotionGeneratorMode::kIdle) {
-      motion_generator_running_ = false;
+    if (!motionGeneratorRunning()) {
       return;
     }
   }
@@ -241,19 +149,14 @@ void Robot::Impl::stopMotionGenerator() {
 }
 
 void Robot::Impl::startController() {
-  if (controller_running_) {
-    throw ControlException("libfranka: attempted to start multiple controllers!");
+  if (controllerRunning()) {
+    return;
   }
 
-  research_interface::StartController::Request request;
-  network_.tcpSendRequest(request);
-
-  expected_responses_.insert(research_interface::Function::kStartController);
+  executeCommand<research_interface::SetControllerMode>(research_interface::SetControllerMode::ControllerMode::kExternalController);
 
   while (update()) {
-    if (robot_state_.rcuRobotState().controller_mode ==
-        research_interface::ControllerMode::kExternalController) {
-      controller_running_ = true;
+    if (controllerRunning()) {
       return;
     }
   }
@@ -261,19 +164,14 @@ void Robot::Impl::startController() {
 }
 
 void Robot::Impl::stopController() {
-  if (!controller_running_) {
+  if (!controllerRunning()) {
     return;
   }
 
-  research_interface::StopController::Request request;
-  network_.tcpSendRequest(request);
-
-  expected_responses_.insert(research_interface::Function::kStopController);
+  executeCommand<research_interface::SetControllerMode>(research_interface::SetControllerMode::ControllerMode::kJointImpedance);
 
   while (update()) {
-    if (robot_state_.rcuRobotState().controller_mode !=
-        research_interface::ControllerMode::kExternalController) {
-      controller_running_ = false;
+    if (!controllerRunning()) {
       return;
     }
   }

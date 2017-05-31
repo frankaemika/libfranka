@@ -38,47 +38,77 @@ class Robot::Impl : public RobotControl {
   void stopController() override;
 
   void startMotionGenerator(
-      research_interface::StartMotionGenerator::MotionGeneratorMode mode) override;
+      research_interface::Move::MotionGeneratorMode mode) override;
   void stopMotionGenerator() override;
+
+  void startMotion(research_interface::Move::ControllerMode controller_mode, research_interface::Move::MotionGeneratorMode motion_generator_mode, const research_interface::Move::Deviation& maximum_path_deviation, const research_interface::Move::Deviation& maximum_goal_pose_deviation) override;
+  void stopMotion() override;
 
   template <typename T, typename... TArgs>
   void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
 
-  template <research_interface::StartMotionGenerator::MotionGeneratorMode, typename T>
-  void control(std::function<T(const RobotState&)> control_callback,
-               std::function<void(const T&, research_interface::MotionGeneratorCommand*)>
-                   conversion_callback);
-
-  template <typename T>
-  void control(
-      std::function<T(const RobotState&)> control_callback,
-      std::function<void(const T&, research_interface::ControllerCommand*)> conversion_callback);
-
  private:
   template <typename T>
-  bool handleCommandResponse(const typename T::Response& response);
+  void handleCommandResponse(const typename T::Response& response);
 
   Network network_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  bool motion_generator_running_;
-  bool controller_running_;
-
   research_interface::RobotCommand robot_command_;
   CompleteRobotState robot_state_;
-
-  // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
-  // taken from http://stackoverflow.com/a/24847480/249642
-  struct EnumClassHash {
-    template <typename T>
-    size_t operator()(T t) const {
-      return static_cast<size_t>(t);
-    }
-  };
-  std::unordered_multiset<research_interface::Function, EnumClassHash> expected_responses_;
 };
+
+template <typename T>
+void Robot::Impl::handleCommandResponse(const typename T::Response& response) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+  switch (response.status) {
+    case T::Status::kSuccess:
+      break;
+    case T::Status::kAborted:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+                             " command aborted!");
+    case T::Status::kRejected:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+                             " command rejected!");
+    case T::Status::kPreempted:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+                             " command preempted!");
+    default:
+      throw ProtocolException("libfranka: Unexpected response while handling "s + research_interface::CommandTraits<T>::kName + " command!");
+  }
+}
+
+template <>
+inline void Robot::Impl::handleCommandResponse<research_interface::Move>(const research_interface::Move::Response& response) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+  switch (response.status) {
+    case research_interface::Move::Status::kSuccess:
+      if (!motionGeneratorRunning()) {
+        throw ProtocolException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName + " received unexpected motion finished message.");
+      }
+      break;
+    case research_interface::Move::Status::kMotionStarted:
+      if (motionGeneratorRunning()) {
+        throw ProtocolException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName + " received unexpected motion started message.");
+      }
+      break;
+    case research_interface::Move::Status::kAborted:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+                             " command aborted!");
+    case research_interface::Move::Status::kRejected:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+                             " command rejected!");
+    case research_interface::Move::Status::kPreempted:
+      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+                             " command preempted!");
+    default:
+      throw ProtocolException("libfranka: Unexpected response while handling "s + research_interface::CommandTraits<research_interface::Move>::kName + " command!");
+  }
+}
 
 template <typename T, typename... TArgs>
 void Robot::Impl::executeCommand(TArgs... args) {
@@ -87,22 +117,7 @@ void Robot::Impl::executeCommand(TArgs... args) {
 
   typename T::Response response = network_.tcpBlockingReceiveResponse<T>();
 
-  switch (response.status) {
-    case T::Status::kSuccess:
-      break;
-    case T::Status::kAborted:
-      throw CommandException("libfranka: " +
-                             std::string(research_interface::CommandTraits<T>::kName) +
-                             " command aborted!");
-    case T::Status::kRejected:
-      throw CommandException("libfranka: " +
-                             std::string(research_interface::CommandTraits<T>::kName) +
-                             " command rejected!");
-    case T::Status::kPreempted:
-      throw CommandException("libfranka: " +
-                             std::string(research_interface::CommandTraits<T>::kName) +
-                             " command preempted!");
-  }
+  handleCommandResponse<T>(response);
 }
 
 template <>
@@ -110,11 +125,7 @@ inline void
 Robot::Impl::executeCommand<research_interface::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
-  // `using std::string_literals::operator""s` produces a GCC warning that
-  // cannot be disabled, so we have to use `using namespace ...`.
-  // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
-  using namespace std::string_literals;  // NOLINT
-                                         // (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   research_interface::GetCartesianLimit::Request request(id);
   network_.tcpSendRequest(request);
@@ -127,25 +138,7 @@ Robot::Impl::executeCommand<research_interface::GetCartesianLimit, int32_t, Virt
   virtual_wall_cuboid->active = response.object_activation;
   virtual_wall_cuboid->id = id;
 
-  switch (response.status) {
-    case research_interface::GetCartesianLimit::Status::kSuccess:
-      break;
-    case research_interface::GetCartesianLimit::Status::kAborted:
-      throw CommandException(
-          "libfranka: "s +
-          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
-          " command aborted!");
-    case research_interface::GetCartesianLimit::Status::kRejected:
-      throw CommandException(
-          "libfranka: "s +
-          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
-          " command rejected!");
-    case research_interface::GetCartesianLimit::Status::kPreempted:
-      throw CommandException(
-          "libfranka: "s +
-          research_interface::CommandTraits<research_interface::GetCartesianLimit>::kName +
-          " command preempted!");
-  }
+  handleCommandResponse<research_interface::GetCartesianLimit>(response);
 }
 
 }  // namespace franka

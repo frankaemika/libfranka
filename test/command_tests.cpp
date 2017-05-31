@@ -25,11 +25,6 @@ class Command : public ::testing::Test {
                                       const typename T::Status status);
 };
 
-template <typename T>
-bool Command<T>::compare(const typename T::Request&, const typename T::Request&) {
-  return true;
-}
-
 template <>
 bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
                                          const GetCartesianLimit::Request& request_two) {
