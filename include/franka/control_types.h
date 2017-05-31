@@ -12,6 +12,11 @@
 namespace franka {
 
 /**
+ * Controller mode for FRANKA.
+ */
+enum ControllerMode { kMotorPD, kJointPosition, kJointImpedance, kCartesianImpedance };
+
+/**
  * Used to decide whether to enforce realtime mode for a control loop thread.
  *
  * @see Robot::Robot
