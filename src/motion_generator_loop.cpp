@@ -7,16 +7,49 @@ template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             ControlCallback control_callback,
                                             MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, control_callback), motion_callback_(std::move(motion_callback)) {
+    : ControlLoop(robot, control_callback, false), motion_callback_(std::move(motion_callback)) {
   if (motion_callback_) {
-    robot.startMotionGenerator(MotionGeneratorTraits<T>::kMotionGeneratorMode);
+    robot.startMotion(research_interface::Move::ControllerMode::kExternalController,
+                      MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                      research_interface::Move::Deviation(0.2, 1.5, 1.5),
+                      research_interface::Move::Deviation(0.2, 1.5, 1.5));
+  }
+}
+
+template <typename T>
+MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
+                                            ControllerMode controller_mode,
+                                            MotionGeneratorCallback motion_callback)
+    : ControlLoop(robot, {}, false), motion_callback_(std::move(motion_callback)) {
+  research_interface::Move::ControllerMode mode;
+  switch (controller_mode) {
+    case ControllerMode::kJointImpedance:
+      mode = decltype(mode)::kJointImpedance;
+      break;
+    case ControllerMode::kMotorPD:
+      mode = decltype(mode)::kMotorPD;
+      break;
+    case ControllerMode::kJointPosition:
+      mode = decltype(mode)::kJointPosition;
+      break;
+    case ControllerMode::kCartesianImpedance:
+      mode = decltype(mode)::kCartesianImpedance;
+      break;
+    default:
+      throw std::invalid_argument("Invalid motion generator mode given.");
+  }
+  if (motion_callback_) {
+    robot.startMotion(mode,
+                      MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                      research_interface::Move::Deviation(0.2, 1.5, 1.5),
+                      research_interface::Move::Deviation(0.2, 1.5, 1.5));
   }
 }
 
 template <typename T>
 MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
   if (motion_callback_) {
-    robot_.stopMotionGenerator();
+    robot_.stopMotion();
   }
 }
 

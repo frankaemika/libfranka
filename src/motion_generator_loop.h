@@ -13,6 +13,10 @@ class MotionGeneratorLoop : public ControlLoop {
                       ControlCallback control_callback,
                       MotionGeneratorCallback motion_callback);
 
+  MotionGeneratorLoop(RobotControl& robot,
+                      ControllerMode controller_mode,
+                      MotionGeneratorCallback motion_callback);
+
   ~MotionGeneratorLoop() override;
 
  protected:

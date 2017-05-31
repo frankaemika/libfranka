@@ -13,7 +13,7 @@ class ControlLoop {
  public:
   using ControlCallback = std::function<Torques(const RobotState&)>;
 
-  ControlLoop(RobotControl& robot, ControlCallback control_callback);
+  ControlLoop(RobotControl& robot, ControlCallback control_callback, bool start_controller = false);
   virtual ~ControlLoop();
 
   void operator()();
@@ -29,6 +29,7 @@ class ControlLoop {
 
  private:
   ControlCallback control_callback_;
+  bool start_controller_;
 };
 
 }  // namespace franka

@@ -31,9 +31,7 @@ void Robot::control(std::function<JointPositions(const RobotState&)> motion_gene
 
 void Robot::control(std::function<JointPositions(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  // TODO
-  MotionGeneratorLoop<JointPositions> loop(*impl_, ControlLoop::ControlCallback(),
-                                           motion_generator_callback);
+  MotionGeneratorLoop<JointPositions> loop(*impl_, controller_mode, motion_generator_callback);
   loop();
 }
 
@@ -45,8 +43,7 @@ void Robot::control(std::function<JointVelocities(const RobotState&)> motion_gen
 
 void Robot::control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  // TODO
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, ControlLoop::ControlCallback(),
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, controller_mode,
                                             motion_generator_callback);
   loop();
 }
@@ -59,8 +56,7 @@ void Robot::control(std::function<CartesianPose(const RobotState&)> motion_gener
 
 void Robot::control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  // TODO
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, ControlLoop::ControlCallback(),
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, controller_mode,
                                           motion_generator_callback);
   loop();
 }
@@ -74,8 +70,7 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  // TODO
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, ControlLoop::ControlCallback(),
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, controller_mode,
                                                 motion_generator_callback);
   loop();
 }

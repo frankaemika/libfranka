@@ -17,16 +17,16 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
-    : robot_(robot), control_callback_(std::move(control_callback)) {
-  if (control_callback_) {
+ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback, bool start_controller)
+    : robot_(robot), control_callback_(std::move(control_callback)), start_controller_(start_controller) {
+  if (start_controller_ && control_callback_) {
     setCurrentThreadToRealtime(robot_.realtimeConfig());
     robot_.startController();
   }
 }
 
 ControlLoop::~ControlLoop() {
-  if (control_callback_) {
+  if (start_controller_ && control_callback_) {
     robot_.stopController();
   }
 }

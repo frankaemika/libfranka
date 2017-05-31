@@ -12,9 +12,8 @@ class RobotControl {
   virtual void startController() = 0;
   virtual void stopController() = 0;
 
-  virtual void startMotionGenerator(
-      research_interface::StartMotionGenerator::MotionGeneratorMode mode) = 0;
-  virtual void stopMotionGenerator() = 0;
+  virtual void startMotion(research_interface::Move::ControllerMode controller_mode, research_interface::Move::MotionGeneratorMode motion_generator_mode, const research_interface::Move::Deviation& maximum_path_deviation, const research_interface::Move::Deviation& maximum_goal_pose_deviation) = 0;
+  virtual void stopMotion() = 0;
 
   virtual bool update() = 0;
 
