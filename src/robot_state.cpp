@@ -4,8 +4,6 @@
 #include <cstring>
 #include <iterator>
 
-#include <research_interface/rbk_types.h>
-
 namespace franka {
 
 namespace {
