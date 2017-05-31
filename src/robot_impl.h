@@ -56,8 +56,8 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  research_interface::RobotCommand robot_command_;
-  CompleteRobotState robot_state_;
+  research_interface::RobotCommand robot_command_{};
+  CompleteRobotState robot_state_{};
 };
 
 template <typename T>

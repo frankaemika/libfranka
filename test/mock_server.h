@@ -34,7 +34,7 @@ class MockServer {
   using SendRobotStateCallbackT = std::function<research_interface::RobotState()>;
   using ReceiveRobotCommandCallbackT = std::function<void(const research_interface::RobotCommand&)>;
 
-  MockServer();
+  MockServer(ConnectCallbackT on_connect = ConnectCallbackT());
   ~MockServer();
 
   MockServer& sendEmptyRobotState();
@@ -42,7 +42,6 @@ class MockServer {
   template <typename TResponse>
   MockServer& sendResponse(std::function<TResponse()> create_response);
 
-  MockServer& onConnect(ConnectCallbackT on_connect);
   MockServer& onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator);
   MockServer& onStopMotionGenerator(StopMotionGeneratorCallbackT on_stop_motion_generator);
   MockServer& onStartController(StartControllerCallbackT on_start_motion_generator);
@@ -76,7 +75,7 @@ class MockServer {
     return *this;
   }
 
-  void spinOnce(bool block = false);
+  MockServer& spinOnce();
 
  private:
   void serverThread();
@@ -84,11 +83,12 @@ class MockServer {
   std::condition_variable cv_;
   std::mutex mutex_;
   std::thread server_thread_;
+  bool block_;
   bool shutdown_;
   bool continue_;
   bool initialized_;
 
-  ConnectCallbackT on_connect_;
+  const ConnectCallbackT on_connect_;
   std::queue<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
 };
 
@@ -97,6 +97,7 @@ MockServer& MockServer::sendResponse(std::function<TResponse()> create_response)
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);
+  block_ = true;
   commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
                     [=](Socket& tcp_socket, Socket&) {
                       TResponse response = create_response();

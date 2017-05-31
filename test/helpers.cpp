@@ -134,6 +134,8 @@ void randomRobotState(franka::RobotState& robot_state) {
 }
 
 void randomRobotState(research_interface::RobotState& robot_state) {
+  // Reset to all-zeros first
+  robot_state = research_interface::RobotState();
   for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
     robot_state.O_T_EE[i] = randomDouble();
   }
@@ -182,6 +184,8 @@ void randomRobotState(research_interface::RobotState& robot_state) {
 }
 
 void randomRobotCommand(research_interface::RobotCommand& robot_command) {
+  // Reset to all-zeros first
+  robot_command = research_interface::RobotCommand();
   for (size_t i = 0; i < robot_command.motion.q_d.size(); i++) {
     robot_command.motion.q_d[i] = randomDouble();
   }

@@ -95,7 +95,9 @@ void Robot::Impl::startMotionGenerator(
   if (motionGeneratorRunning()) {
     throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
-  std::memset(&robot_command_, 0, sizeof(robot_command_));
+
+  // Reset robot command
+  robot_command_ = {};
 
   //TODO
   executeCommand<research_interface::Move>(
@@ -152,6 +154,9 @@ void Robot::Impl::startController() {
   if (controllerRunning()) {
     return;
   }
+
+  // Reset robot command
+  robot_command_ = {};
 
   executeCommand<research_interface::SetControllerMode>(research_interface::SetControllerMode::ControllerMode::kExternalController);
 
