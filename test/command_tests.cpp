@@ -99,6 +99,12 @@ bool Command<SetTimeScalingFactor>::compare(const SetTimeScalingFactor::Request&
 }
 
 template <>
+bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Request&,
+                                              const AutomaticErrorRecovery::Request&) {
+  return true;
+}
+
+template <>
 GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
   int32_t limit_id = 3;
   return GetCartesianLimit::Request(limit_id);
