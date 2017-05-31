@@ -66,8 +66,8 @@ class Robot::Impl : public RobotControl {
   bool motion_generator_running_;
   bool controller_running_;
 
-  research_interface::RobotCommand robot_command_;
-  CompleteRobotState robot_state_;
+  research_interface::RobotCommand robot_command_{};
+  CompleteRobotState robot_state_{};
 
   // Workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=60970
   // taken from http://stackoverflow.com/a/24847480/249642

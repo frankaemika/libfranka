@@ -5,10 +5,6 @@
 
 namespace franka {
 
-CompleteRobotState::CompleteRobotState() noexcept {
-  std::memset(this, 0, sizeof(*this));
-}
-
 CompleteRobotState& CompleteRobotState::operator=(
     const research_interface::RobotState& rcu_robot_state) noexcept {
   rcu_robot_state_ = rcu_robot_state;
