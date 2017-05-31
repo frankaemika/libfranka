@@ -50,9 +50,10 @@ add_subdirectory(lib/research-interface-common)
 
 ## Library
 add_library(franka SHARED
-  src/complete_robot_state.cpp
   src/control_loop.cpp
+  src/control_loop_base.cpp
   src/control_types.cpp
+  src/conversion.cpp
   src/library_loader.cpp
   src/model.cpp
   src/model_library.cpp

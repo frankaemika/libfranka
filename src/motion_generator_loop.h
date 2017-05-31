@@ -1,11 +1,17 @@
 #pragma once
 
-#include "control_loop.h"
+#include <functional>
+
+#include <franka/control_types.h>
+#include <franka/robot_state.h>
+#include <research_interface/rbk_types.h>
+
+#include "control_loop_base.h"
 
 namespace franka {
 
 template <typename T>
-class MotionGeneratorLoop : public ControlLoop {
+class MotionGeneratorLoop : public ControlLoopBase {
  public:
   using MotionGeneratorCallback = std::function<T(const RobotState&)>;
 
@@ -19,10 +25,11 @@ class MotionGeneratorLoop : public ControlLoop {
 
   ~MotionGeneratorLoop() override;
 
- protected:
-  bool spinOnce() override;
+  void operator()();
 
  private:
+  bool spinMotionOnce(const RobotState& robot_state,
+                      research_interface::MotionGeneratorCommand* command);
   void convertMotion(const T& motion, research_interface::MotionGeneratorCommand* command);
 
   MotionGeneratorCallback motion_callback_;

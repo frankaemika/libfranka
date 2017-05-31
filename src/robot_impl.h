@@ -7,7 +7,6 @@
 #include <research_interface/service_traits.h>
 #include <research_interface/service_types.h>
 
-#include "complete_robot_state.h"
 #include "network.h"
 #include "robot_control.h"
 
@@ -22,13 +21,15 @@ class Robot::Impl : public RobotControl {
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
-  bool update() override;
+  const research_interface::RobotState& update();
+  const research_interface::RobotState& update(
+      const research_interface::MotionGeneratorCommand& command);
+  const research_interface::RobotState& update(
+      const research_interface::ControllerCommand& command) override;
+  const research_interface::RobotState& update(
+      const research_interface::MotionGeneratorCommand& motion_command,
+      const research_interface::ControllerCommand& control_command) override;
 
-  void controllerCommand(
-      const research_interface::ControllerCommand& controller_command) noexcept override;
-  void motionGeneratorCommand(
-      const research_interface::MotionGeneratorCommand& motion_generator_command) noexcept override;
-  const RobotState& robotState() const noexcept override;
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
@@ -37,7 +38,10 @@ class Robot::Impl : public RobotControl {
   void startController() override;
   void stopController() override;
 
-  void startMotion(research_interface::Move::ControllerMode controller_mode, research_interface::Move::MotionGeneratorMode motion_generator_mode, const research_interface::Move::Deviation& maximum_path_deviation, const research_interface::Move::Deviation& maximum_goal_pose_deviation) override;
+  void startMotion(research_interface::Move::ControllerMode controller_mode,
+                   research_interface::Move::MotionGeneratorMode motion_generator_mode,
+                   const research_interface::Move::Deviation& maximum_path_deviation,
+                   const research_interface::Move::Deviation& maximum_goal_pose_deviation) override;
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
@@ -52,8 +56,7 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  research_interface::RobotCommand robot_command_{};
-  CompleteRobotState robot_state_{};
+  research_interface::RobotState robot_state_{};
 };
 
 template <typename T>
@@ -73,36 +76,47 @@ void Robot::Impl::handleCommandResponse(const typename T::Response& response) {
       throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
                              " command preempted!");
     default:
-      throw ProtocolException("libfranka: Unexpected response while handling "s + research_interface::CommandTraits<T>::kName + " command!");
+      throw ProtocolException("libfranka: Unexpected response while handling "s +
+                              research_interface::CommandTraits<T>::kName + " command!");
   }
 }
 
 template <>
-inline void Robot::Impl::handleCommandResponse<research_interface::Move>(const research_interface::Move::Response& response) {
+inline void Robot::Impl::handleCommandResponse<research_interface::Move>(
+    const research_interface::Move::Response& response) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
     case research_interface::Move::Status::kSuccess:
       if (!motionGeneratorRunning()) {
-        throw ProtocolException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName + " received unexpected motion finished message.");
+        throw ProtocolException("libfranka: "s +
+                                research_interface::CommandTraits<research_interface::Move>::kName +
+                                " received unexpected motion finished message.");
       }
       break;
     case research_interface::Move::Status::kMotionStarted:
       if (motionGeneratorRunning()) {
-        throw ProtocolException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName + " received unexpected motion started message.");
+        throw ProtocolException("libfranka: "s +
+                                research_interface::CommandTraits<research_interface::Move>::kName +
+                                " received unexpected motion started message.");
       }
       break;
     case research_interface::Move::Status::kAborted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<research_interface::Move>::kName +
                              " command aborted!");
     case research_interface::Move::Status::kRejected:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<research_interface::Move>::kName +
                              " command rejected!");
     case research_interface::Move::Status::kPreempted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<research_interface::Move>::kName +
+      throw CommandException("libfranka: "s +
+                             research_interface::CommandTraits<research_interface::Move>::kName +
                              " command preempted!");
     default:
-      throw ProtocolException("libfranka: Unexpected response while handling "s + research_interface::CommandTraits<research_interface::Move>::kName + " command!");
+      throw ProtocolException("libfranka: Unexpected response while handling "s +
+                              research_interface::CommandTraits<research_interface::Move>::kName +
+                              " command!");
   }
 }
 

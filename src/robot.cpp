@@ -1,5 +1,7 @@
 #include <franka/robot.h>
 
+#include "control_loop.h"
+#include "conversion.h"
 #include "motion_generator_loop.h"
 #include "robot_impl.h"
 
@@ -43,8 +45,7 @@ void Robot::control(std::function<JointVelocities(const RobotState&)> motion_gen
 
 void Robot::control(std::function<JointVelocities(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, controller_mode,
-                                            motion_generator_callback);
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, controller_mode, motion_generator_callback);
   loop();
 }
 
@@ -56,8 +57,7 @@ void Robot::control(std::function<CartesianPose(const RobotState&)> motion_gener
 
 void Robot::control(std::function<CartesianPose(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, controller_mode,
-                                          motion_generator_callback);
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, controller_mode, motion_generator_callback);
   loop();
 }
 
@@ -70,24 +70,21 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion_generator_callback,
                     ControllerMode controller_mode) {
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, controller_mode,
-                                                motion_generator_callback);
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, controller_mode, motion_generator_callback);
   loop();
 }
 
 void Robot::read(std::function<bool(const RobotState&)> read_callback) {
-  while (impl_->update()) {
-    if (!read_callback(impl_->robotState())) {
+  while (true) {
+    RobotState robot_state = convertRobotState(impl_->update());
+    if (!read_callback(robot_state)) {
       break;
     }
   }
 }
 
 RobotState Robot::readOnce() {
-  if (!impl_->update()) {
-    throw NetworkException("libfranka: Disconnected.");
-  }
-  return impl_->robotState();
+  return convertRobotState(impl_->update());
 }
 
 VirtualWallCuboid Robot::getVirtualWall(int32_t id) {

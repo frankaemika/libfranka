@@ -1,4 +1,6 @@
 #include "motion_generator_loop.h"
+
+#include "conversion.h"
 #include "motion_generator_traits.h"
 
 namespace franka {
@@ -7,20 +9,25 @@ template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             ControlCallback control_callback,
                                             MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, control_callback, false), motion_callback_(std::move(motion_callback)) {
-  if (motion_callback_) {
-    robot.startMotion(research_interface::Move::ControllerMode::kExternalController,
-                      MotionGeneratorTraits<T>::kMotionGeneratorMode,
-                      research_interface::Move::Deviation(0.2, 1.5, 1.5),
-                      research_interface::Move::Deviation(0.2, 1.5, 1.5));
+    : ControlLoopBase(robot, control_callback), motion_callback_(std::move(motion_callback)) {
+  if (!motion_callback_) {
+    std::invalid_argument("libfranka: Invalid motion callback given.");
   }
+
+  robot.startMotion(research_interface::Move::ControllerMode::kExternalController,
+                    MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                    research_interface::Move::Deviation(0.2, 1.5, 1.5),
+                    research_interface::Move::Deviation(0.2, 1.5, 1.5));
 }
 
 template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             ControllerMode controller_mode,
                                             MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, {}, false), motion_callback_(std::move(motion_callback)) {
+    : ControlLoopBase(robot, {}), motion_callback_(std::move(motion_callback)) {
+  if (!motion_callback_) {
+    std::invalid_argument("libfranka: Invalid motion callback given.");
+  }
   research_interface::Move::ControllerMode mode;
   switch (controller_mode) {
     case ControllerMode::kJointImpedance:
@@ -38,12 +45,9 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     default:
       throw std::invalid_argument("Invalid motion generator mode given.");
   }
-  if (motion_callback_) {
-    robot.startMotion(mode,
-                      MotionGeneratorTraits<T>::kMotionGeneratorMode,
-                      research_interface::Move::Deviation(0.2, 1.5, 1.5),
-                      research_interface::Move::Deviation(0.2, 1.5, 1.5));
-  }
+  robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                    research_interface::Move::Deviation(0.2, 1.5, 1.5),
+                    research_interface::Move::Deviation(0.2, 1.5, 1.5));
 }
 
 template <typename T>
@@ -54,18 +58,28 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
 }
 
 template <typename T>
-bool MotionGeneratorLoop<T>::spinOnce() {
+void MotionGeneratorLoop<T>::operator()() {
+  RobotState robot_state = convertRobotState(robot_.update({}));
+  research_interface::ControllerCommand control_command{};
+  research_interface::MotionGeneratorCommand motion_command{};
+  while (spinMotionOnce(robot_state, &motion_command) &&
+         spinControlOnce(robot_state, &control_command)) {
+    robot_state = convertRobotState(robot_.update(motion_command, control_command));
+  }
+}
+
+template <typename T>
+bool MotionGeneratorLoop<T>::spinMotionOnce(const RobotState& robot_state,
+                                            research_interface::MotionGeneratorCommand* command) {
   if (motion_callback_) {
-    T motion_output = motion_callback_(robot_.robotState());
+    T motion_output = motion_callback_(robot_state);
     if (motion_output.stop()) {
       return false;
     }
-    research_interface::MotionGeneratorCommand command{};
-    convertMotion(motion_output, &command);
-    robot_.motionGeneratorCommand(command);
+    convertMotion(motion_output, command);
   }
 
-  return ControlLoop::spinOnce();
+  return true;
 }
 
 template <>
