@@ -90,8 +90,7 @@ void Robot::Impl::motionGeneratorCommand(
   robot_command_.motion = motion_generator_command;
 }
 
-void Robot::Impl::startMotionGenerator(
-      research_interface::Move::MotionGeneratorMode mode) {
+void Robot::Impl::startMotion(research_interface::Move::ControllerMode controller_mode, research_interface::Move::MotionGeneratorMode motion_generator_mode, const research_interface::Move::Deviation& maximum_path_deviation, const research_interface::Move::Deviation& maximum_goal_pose_deviation) {
   if (motionGeneratorRunning()) {
     throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
@@ -99,41 +98,42 @@ void Robot::Impl::startMotionGenerator(
   // Reset robot command
   robot_command_ = {};
 
-  //TODO
-  executeCommand<research_interface::Move>(
-    research_interface::Move::ControllerMode::kJointImpedance,
-    mode,
-    research_interface::Move::Deviation(0.2, 1.5, 1.5),
-    research_interface::Move::Deviation(0.2, 1.5, 1.5)
-  );
-
-  research_interface::MotionGeneratorMode motion_generator_mode;
-  switch (mode) {
-    case decltype(mode)::kJointPosition:
-      motion_generator_mode = decltype(motion_generator_mode)::kJointPosition;
+  research_interface::MotionGeneratorMode robot_state_motion_generator_mode;
+  switch (motion_generator_mode) {
+    case decltype(motion_generator_mode)::kJointPosition:
+      robot_state_motion_generator_mode = decltype(robot_state_motion_generator_mode)::kJointPosition;
       break;
-    case decltype(mode)::kJointVelocity:
-      motion_generator_mode = decltype(motion_generator_mode)::kJointVelocity;
+    case decltype(motion_generator_mode)::kJointVelocity:
+      robot_state_motion_generator_mode = decltype(robot_state_motion_generator_mode)::kJointVelocity;
       break;
-    case decltype(mode)::kCartesianPosition:
-      motion_generator_mode = decltype(motion_generator_mode)::kCartesianPosition;
+    case decltype(motion_generator_mode)::kCartesianPosition:
+      robot_state_motion_generator_mode = decltype(robot_state_motion_generator_mode)::kCartesianPosition;
       break;
-    case decltype(mode)::kCartesianVelocity:
-      motion_generator_mode = decltype(motion_generator_mode)::kCartesianVelocity;
+    case decltype(motion_generator_mode)::kCartesianVelocity:
+      robot_state_motion_generator_mode = decltype(robot_state_motion_generator_mode)::kCartesianVelocity;
       break;
     default:
       throw std::invalid_argument("Invalid motion generator mode given.");
   }
 
+  std::memset(&robot_command_, 0, sizeof(robot_command_));
+
+  executeCommand<research_interface::Move>(
+    controller_mode,
+    motion_generator_mode,
+    maximum_path_deviation,
+    maximum_goal_pose_deviation
+  );
+
   while (update()) {
-    if (robot_state_.rcuRobotState().motion_generator_mode == motion_generator_mode) {
+    if (robot_state_.rcuRobotState().motion_generator_mode == robot_state_motion_generator_mode) {
       return;
     }
   }
   throw NetworkException("libfranka: connection closed by server.");
 }
 
-void Robot::Impl::stopMotionGenerator() {
+void Robot::Impl::stopMotion() {
   if (!motionGeneratorRunning()) {
     return;
   }

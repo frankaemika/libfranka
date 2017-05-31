@@ -37,10 +37,6 @@ class Robot::Impl : public RobotControl {
   void startController() override;
   void stopController() override;
 
-  void startMotionGenerator(
-      research_interface::Move::MotionGeneratorMode mode) override;
-  void stopMotionGenerator() override;
-
   void startMotion(research_interface::Move::ControllerMode controller_mode, research_interface::Move::MotionGeneratorMode motion_generator_mode, const research_interface::Move::Deviation& maximum_path_deviation, const research_interface::Move::Deviation& maximum_goal_pose_deviation) override;
   void stopMotion() override;
 
