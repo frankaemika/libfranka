@@ -10,6 +10,9 @@
 
 namespace franka {
 
+void setCurrentThreadToRealtime(RealtimeConfig config);
+RobotState convertRobotState(const research_interface::RobotState& robot_state) noexcept;
+
 class ControlLoopBase {
  public:
   using ControlCallback = std::function<Torques(const RobotState&)>;
@@ -20,7 +23,6 @@ class ControlLoopBase {
  protected:
   bool spinControlOnce(const RobotState& robot_state,
                        research_interface::ControllerCommand* command);
-  void setCurrentThreadToRealtime(RealtimeConfig config);
 
   RobotControl& robot_;
   ControlCallback control_callback_;

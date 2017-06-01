@@ -1,7 +1,5 @@
 #include "control_loop.h"
 
-#include "conversion.h"
-
 namespace franka {
 
 ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)

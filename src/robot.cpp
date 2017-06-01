@@ -1,7 +1,6 @@
 #include <franka/robot.h>
 
 #include "control_loop.h"
-#include "conversion.h"
 #include "motion_generator_loop.h"
 #include "robot_impl.h"
 

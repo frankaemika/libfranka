@@ -1,6 +1,5 @@
 #include "motion_generator_loop.h"
 
-#include "conversion.h"
 #include "motion_generator_traits.h"
 
 namespace franka {
