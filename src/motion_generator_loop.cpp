@@ -52,9 +52,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
 
 template <typename T>
 MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
-  if (motion_callback_) {
-    robot_.stopMotion();
-  }
+  robot_.stopMotion();
 }
 
 template <typename T>
