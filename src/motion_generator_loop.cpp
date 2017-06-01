@@ -1,5 +1,7 @@
 #include "motion_generator_loop.h"
 
+#include <exception>
+
 #include "motion_generator_traits.h"
 
 namespace franka {
@@ -57,17 +59,16 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = convertRobotState(robot_.update({}));
-  research_interface::ControllerCommand control_command{};
   research_interface::MotionGeneratorCommand motion_command{};
-  while (spinMotionOnce(robot_state, &motion_command) &&
-         spinControlOnce(robot_state, &control_command)) {
+  research_interface::ControllerCommand control_command{};
+  while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
     robot_state = convertRobotState(robot_.update(motion_command, control_command));
   }
 }
 
 template <typename T>
-bool MotionGeneratorLoop<T>::spinMotionOnce(const RobotState& robot_state,
-                                            research_interface::MotionGeneratorCommand* command) {
+bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
+                                      research_interface::MotionGeneratorCommand* command) {
   if (motion_callback_) {
     T motion_output = motion_callback_(robot_state);
     if (motion_output.stop()) {

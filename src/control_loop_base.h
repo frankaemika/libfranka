@@ -21,11 +21,10 @@ class ControlLoopBase {
   virtual ~ControlLoopBase() = default;
 
  protected:
-  bool spinControlOnce(const RobotState& robot_state,
-                       research_interface::ControllerCommand* command);
+  bool spinOnce(const RobotState& robot_state, research_interface::ControllerCommand* command);
 
   RobotControl& robot_;
-  ControlCallback control_callback_;
+  const ControlCallback control_callback_;
 };
 
 }  // namespace franka

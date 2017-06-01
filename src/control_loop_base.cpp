@@ -22,8 +22,8 @@ ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_ca
   setCurrentThreadToRealtime(robot_.realtimeConfig());
 }
 
-bool ControlLoopBase::spinControlOnce(const RobotState& robot_state,
-                                      research_interface::ControllerCommand* command) {
+bool ControlLoopBase::spinOnce(const RobotState& robot_state,
+                               research_interface::ControllerCommand* command) {
   if (control_callback_) {
     Torques control_output = control_callback_(robot_state);
     if (control_output.stop()) {

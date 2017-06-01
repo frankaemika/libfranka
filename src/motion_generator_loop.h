@@ -27,12 +27,14 @@ class MotionGeneratorLoop : public ControlLoopBase {
 
   void operator()();
 
+ protected:
+  using ControlLoopBase::spinOnce;
+  bool spinOnce(const RobotState& robot_state, research_interface::MotionGeneratorCommand* command);
+
  private:
-  bool spinMotionOnce(const RobotState& robot_state,
-                      research_interface::MotionGeneratorCommand* command);
   void convertMotion(const T& motion, research_interface::MotionGeneratorCommand* command);
 
-  MotionGeneratorCallback motion_callback_;
+  const MotionGeneratorCallback motion_callback_;
 };
 
 template class MotionGeneratorLoop<JointPositions>;

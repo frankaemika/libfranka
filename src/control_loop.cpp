@@ -1,10 +1,12 @@
 #include "control_loop.h"
 
+#include <exception>
+
 namespace franka {
 
 ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
     : ControlLoopBase(robot, std::move(control_callback)) {
-  if (!control_callback) {
+  if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
 
@@ -18,7 +20,7 @@ ControlLoop::~ControlLoop() {
 void ControlLoop::operator()() {
   RobotState robot_state = convertRobotState(robot_.update({}));
   research_interface::ControllerCommand command{};
-  while (spinControlOnce(robot_state, &command)) {
+  while (spinOnce(robot_state, &command)) {
     robot_state = convertRobotState(robot_.update(command));
   }
 }
