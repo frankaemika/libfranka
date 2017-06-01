@@ -19,6 +19,9 @@ namespace franka {
  * Maintains a connection to FRANKA CONTROL, provides the current robot state,
  * and allows to execute commands, motions, and torque control.
  *
+ * @note
+ * Before using this functionality, make sure FRANKA's brakes have been released.
+ *
  * @par End effector frame
  * While the end effector parameters are set in a configuration file, it is
  * possible to change the end effector frame with Robot::setEE.
@@ -266,13 +269,21 @@ class Robot {
   VirtualWallCuboid getVirtualWall(int32_t id);
 
   /**
-   * Switches the current controller.
+   * Changes the type of controller used for idle mode.
+   *
+   * FRANKA is in idle mode when holding the current position, i.e. when no motion
+   * is being performed and guiding mode is not active.
+   *
+   * The controller mode is reset when a motion is started or guiding mode is activated.
    *
    * @param[in] controller_mode Controller mode.
    *
    * @throw CommandException if an error occurred.
+   *
+   * @see setGuidingMode for an explanation of guiding mode.
+   * @see control to start a motion.
    */
-  void setControllerMode(ControllerMode controller_mode);
+  void setIdleControllerMode(ControllerMode controller_mode);
 
   /**
    * Changes the collision behavior.
