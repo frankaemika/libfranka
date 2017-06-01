@@ -93,7 +93,7 @@ VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
   return virtual_wall;
 }
 
-void Robot::setControllerMode(ControllerMode controller_mode) {
+void Robot::setIdleControllerMode(ControllerMode controller_mode) {
   research_interface::SetControllerMode::ControllerMode mode;
   switch (controller_mode) {
     case ControllerMode::kMotorPD:
