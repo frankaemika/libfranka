@@ -18,7 +18,9 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 namespace franka {
 
 ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_callback)
-    : robot_(robot), control_callback_(std::move(control_callback)) {}
+    : robot_(robot), control_callback_(std::move(control_callback)) {
+  setCurrentThreadToRealtime(robot_.realtimeConfig());
+}
 
 bool ControlLoopBase::spinControlOnce(const RobotState& robot_state,
                                       research_interface::ControllerCommand* command) {

@@ -11,7 +11,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             MotionGeneratorCallback motion_callback)
     : ControlLoopBase(robot, control_callback), motion_callback_(std::move(motion_callback)) {
   if (!motion_callback_) {
-    std::invalid_argument("libfranka: Invalid motion callback given.");
+    throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
 
   robot.startMotion(research_interface::Move::ControllerMode::kExternalController,

@@ -9,7 +9,7 @@ ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
   if (!control_callback) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
-  setCurrentThreadToRealtime(robot_.realtimeConfig());
+
   robot_.startController();
 }
 
