@@ -75,7 +75,7 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&)> motion
 
 void Robot::read(std::function<bool(const RobotState&)> read_callback) {
   while (true) {
-    RobotState robot_state = convertRobotState(impl_->update());
+    RobotState robot_state = impl_->update();
     if (!read_callback(robot_state)) {
       break;
     }
@@ -83,7 +83,7 @@ void Robot::read(std::function<bool(const RobotState&)> read_callback) {
 }
 
 RobotState Robot::readOnce() {
-  return convertRobotState(impl_->update());
+  return impl_->update();
 }
 
 VirtualWallCuboid Robot::getVirtualWall(int32_t id) {

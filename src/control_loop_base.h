@@ -11,7 +11,6 @@
 namespace franka {
 
 void setCurrentThreadToRealtime(RealtimeConfig config);
-RobotState convertRobotState(const research_interface::RobotState& robot_state) noexcept;
 
 class ControlLoopBase {
  public:

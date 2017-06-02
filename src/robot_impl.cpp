@@ -39,9 +39,8 @@ Robot::Impl::Impl(const std::string& franka_address,
   }
 }
 
-const research_interface::RobotState& Robot::Impl::update(
-    const research_interface::MotionGeneratorCommand& motion_command,
-    const research_interface::ControllerCommand& control_command) {
+RobotState Robot::Impl::update(const research_interface::MotionGeneratorCommand& motion_command,
+                               const research_interface::ControllerCommand& control_command) {
   research_interface::Function function;
   if (network_.tcpReadResponse(&function)) {
     if (!motionGeneratorRunning() || function != research_interface::Function::kMove) {
@@ -55,34 +54,35 @@ const research_interface::RobotState& Robot::Impl::update(
 
   if (motionGeneratorRunning() || controllerRunning()) {
     research_interface::RobotCommand robot_command{};
-    robot_command.message_id = robot_state_.message_id;
+    robot_command.message_id = message_id_;
     robot_command.motion = motion_command;
     robot_command.control = control_command;
 
     network_.udpSendRobotCommand(robot_command);
   }
 
-  robot_state_ = network_.udpReadRobotState();
-  return robot_state_;
+  research_interface::RobotState robot_state = network_.udpReadRobotState();
+  motion_generator_mode_ = robot_state.motion_generator_mode;
+  controller_mode_ = robot_state.controller_mode;
+  message_id_ = robot_state.message_id;
+  return convertRobotState(robot_state);
 }
 
-const research_interface::RobotState& Robot::Impl::update(
-    const research_interface::MotionGeneratorCommand& motion_command) {
+RobotState Robot::Impl::update(const research_interface::MotionGeneratorCommand& motion_command) {
   if (!motionGeneratorRunning() || controllerRunning()) {
     throw ControlException("libfranka: Inconsistent state in update(MotionGeneratorCommand).");
   }
   return update(motion_command, {});
 }
 
-const research_interface::RobotState& Robot::Impl::update(
-    const research_interface::ControllerCommand& control_command) {
+RobotState Robot::Impl::update(const research_interface::ControllerCommand& control_command) {
   if (motionGeneratorRunning() || !controllerRunning()) {
     throw ControlException("libfranka: Inconsistent state in update(ControllerCommand).");
   }
   return update({}, control_command);
 }
 
-const research_interface::RobotState& Robot::Impl::update() {
+RobotState Robot::Impl::update() {
   if (motionGeneratorRunning() || controllerRunning()) {
     throw ControlException("libfranka: Inconsistent state in update().");
   }
@@ -94,11 +94,11 @@ Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
 }
 
 bool Robot::Impl::motionGeneratorRunning() const noexcept {
-  return robot_state_.motion_generator_mode != research_interface::MotionGeneratorMode::kIdle;
+  return motion_generator_mode_ != research_interface::MotionGeneratorMode::kIdle;
 }
 
 bool Robot::Impl::controllerRunning() const noexcept {
-  return robot_state_.controller_mode == research_interface::ControllerMode::kExternalController;
+  return controller_mode_ == research_interface::ControllerMode::kExternalController;
 }
 
 RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
@@ -163,6 +163,25 @@ void Robot::Impl::stopController() {
   while (controllerRunning()) {
     update();
   }
+}
+
+RobotState convertRobotState(const research_interface::RobotState& robot_state) noexcept {
+  RobotState converted;
+  converted.O_T_EE = robot_state.O_T_EE;
+  converted.elbow = robot_state.elbow;
+  converted.tau_J = robot_state.tau_J;
+  converted.dtau_J = robot_state.dtau_J;
+  converted.q = robot_state.q;
+  converted.dq = robot_state.dq;
+  converted.q_d = robot_state.q_d;
+  converted.joint_contact = robot_state.joint_contact;
+  converted.cartesian_contact = robot_state.cartesian_contact;
+  converted.joint_collision = robot_state.joint_collision;
+  converted.cartesian_collision = robot_state.cartesian_collision;
+  converted.tau_ext_hat_filtered = robot_state.tau_ext_hat_filtered;
+  converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
+  converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
+  return converted;
 }
 
 }  // namespace franka

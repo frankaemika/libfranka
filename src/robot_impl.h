@@ -12,6 +12,8 @@
 
 namespace franka {
 
+RobotState convertRobotState(const research_interface::RobotState& robot_state) noexcept;
+
 class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
@@ -21,14 +23,11 @@ class Robot::Impl : public RobotControl {
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
-  const research_interface::RobotState& update();
-  const research_interface::RobotState& update(
-      const research_interface::MotionGeneratorCommand& command);
-  const research_interface::RobotState& update(
-      const research_interface::ControllerCommand& command) override;
-  const research_interface::RobotState& update(
-      const research_interface::MotionGeneratorCommand& motion_command,
-      const research_interface::ControllerCommand& control_command) override;
+  RobotState update();
+  RobotState update(const research_interface::MotionGeneratorCommand& command);
+  RobotState update(const research_interface::ControllerCommand& command) override;
+  RobotState update(const research_interface::MotionGeneratorCommand& motion_command,
+                    const research_interface::ControllerCommand& control_command) override;
 
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
@@ -56,7 +55,9 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  research_interface::RobotState robot_state_{};
+  research_interface::MotionGeneratorMode motion_generator_mode_{};
+  research_interface::ControllerMode controller_mode_{};
+  uint32_t message_id_{};
 };
 
 template <typename T>
