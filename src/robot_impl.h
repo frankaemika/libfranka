@@ -136,8 +136,6 @@ inline void
 Robot::Impl::executeCommand<research_interface::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-
   research_interface::GetCartesianLimit::Request request(id);
   network_.tcpSendRequest(request);
 
