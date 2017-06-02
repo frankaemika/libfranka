@@ -6,6 +6,7 @@
 #include "motion_generator_loop.h"
 #include "motion_generator_traits.h"
 
+#include "helpers.h"
 #include "mock_robot_control.h"
 
 using namespace ::testing;
@@ -97,15 +98,6 @@ auto MotionGeneratorLoops<CartesianVelocities>::getField(
   return Field(&research_interface::MotionGeneratorCommand::O_dP_EE_d,
                Eq(cartesian_velocities.O_dP_EE));
 }
-
-namespace research_interface {
-
-bool operator==(const Move::Deviation& left, const Move::Deviation& right) {
-  return left.translation == right.translation && left.rotation == right.rotation &&
-         left.elbow == right.elbow;
-}
-
-}  // namespace research_interface
 
 using MotionTypes =
     ::testing::Types<JointPositions, JointVelocities, CartesianPose, CartesianVelocities>;

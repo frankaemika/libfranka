@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 #include <robot_impl.h>
 
+#include "helpers.h"
 #include "mock_server.h"
 
 using franka::Robot;
@@ -40,17 +41,8 @@ template <>
 bool Command<Move>::compare(const Move::Request& request_one, const Move::Request& request_two) {
   return request_one.controller_mode == request_two.controller_mode &&
          request_one.motion_generator_mode == request_two.motion_generator_mode &&
-         request_one.maximum_path_deviation.translation ==
-             request_two.maximum_path_deviation.translation &&
-         request_one.maximum_path_deviation.rotation ==
-             request_two.maximum_path_deviation.rotation &&
-         request_one.maximum_path_deviation.elbow == request_two.maximum_path_deviation.elbow &&
-         request_one.maximum_goal_pose_deviation.translation ==
-             request_two.maximum_goal_pose_deviation.translation &&
-         request_one.maximum_goal_pose_deviation.rotation ==
-             request_two.maximum_goal_pose_deviation.rotation &&
-         request_one.maximum_goal_pose_deviation.elbow ==
-             request_two.maximum_goal_pose_deviation.elbow;
+         request_one.maximum_path_deviation == request_two.maximum_path_deviation &&
+         request_one.maximum_goal_pose_deviation == request_two.maximum_goal_pose_deviation;
 }
 
 template <>
