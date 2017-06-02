@@ -1,18 +1,14 @@
+#include <exception>
 #include <functional>
 
 #include <gmock/gmock.h>
 
 #include "control_loop.h"
 
+#include "helpers.h"
 #include "mock_robot_control.h"
 
-using ::testing::InSequence;
-using ::testing::Eq;
-using ::testing::Field;
-using ::testing::Return;
-using ::testing::ReturnRef;
-using ::testing::NiceMock;
-using ::testing::_;
+using namespace ::testing;
 
 using franka::RobotState;
 using franka::Stop;
@@ -23,15 +19,16 @@ using research_interface::ControllerCommand;
 class ControlLoop : public franka::ControlLoop {
  public:
   using franka::ControlLoop::ControlLoop;
-  using franka::ControlLoop::spinOnce;
+  using franka::ControlLoopBase::spinOnce;
 };
 
-TEST(ControlLoop, CanConstructWithoutCallback) {
-  MockRobotControl robot;
-  EXPECT_CALL(robot, startController()).Times(0);
-  EXPECT_CALL(robot, stopController()).Times(0);
+struct MockControlCallback {
+  MOCK_METHOD1(invoke, Torques(const RobotState&));
+};
 
-  ControlLoop loop(robot, ControlLoop::ControlCallback());
+TEST(ControlLoop, CanNotConstructWithoutCallback) {
+  MockRobotControl robot;
+  EXPECT_THROW(ControlLoop(robot, ControlLoop::ControlCallback()), std::invalid_argument);
 }
 
 TEST(ControlLoop, CanConstructWithCallback) {
@@ -42,48 +39,47 @@ TEST(ControlLoop, CanConstructWithCallback) {
     EXPECT_CALL(robot, stopController());
   }
 
-  ControlLoop loop(robot, [](const franka::RobotState&) { return Torques({0, 1, 2, 3, 4, 5, 6}); });
+  StrictMock<MockControlCallback> control_callback;
+
+  ControlLoop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
 }
 
-TEST(ControlLoop, SpinOnceWithoutCallback) {
-  MockRobotControl robot;
-
-  ControlLoop loop(robot, ControlLoop::ControlCallback());
-  EXPECT_TRUE(loop.spinOnce());
-}
-
-TEST(ControlLoop, SpinOnceWithCallback) {
-  struct MockControlCallback {
-    MOCK_METHOD1(invoke, Torques(const RobotState&));
-  };
-
+TEST(ControlLoop, SpinOnce) {
   NiceMock<MockRobotControl> robot;
   MockControlCallback control_callback;
 
   Torques torques({0, 1, 2, 3, 4, 5, 6});
 
   RobotState robot_state;
-  EXPECT_CALL(robot, robotStateMock()).WillOnce(ReturnRef(robot_state));
-  EXPECT_CALL(robot, controllerCommandMock(Field(&research_interface::ControllerCommand::tau_J_d,
-                                                 Eq(torques.tau_J))));
 
-  EXPECT_CALL(control_callback, invoke(_)).WillOnce(Return(torques));
+  EXPECT_CALL(control_callback, invoke(Ref(robot_state))).WillOnce(Return(torques));
 
   ControlLoop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
-  EXPECT_TRUE(loop.spinOnce());
+
+  ControllerCommand command;
+  EXPECT_TRUE(loop.spinOnce(robot_state, &command));
+  EXPECT_EQ(torques.tau_J, command.tau_J_d);
 }
 
-TEST(ControlLoop, SpinOnceWithStoppingCallback) {
+TEST(ControlLoop, SpinWithStoppingCallback) {
   NiceMock<MockRobotControl> robot;
+  MockControlCallback control_callback;
+
   RobotState robot_state;
-  ON_CALL(robot, robotStateMock()).WillByDefault(ReturnRef(robot_state));
-  ON_CALL(robot, update()).WillByDefault(Return(true));
+  EXPECT_CALL(control_callback, invoke(Ref(robot_state))).WillOnce(Return(Stop));
 
-  ControlLoop loop(robot, [](const RobotState&) { return Stop; });
+  ControlLoop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
 
-  // Use ASSERT to abort on failure because loop() in next line
+  // Use ASSERT to abort on failure because loop() further down
   // would block otherwise
-  ASSERT_FALSE(loop.spinOnce());
+  ASSERT_FALSE(loop.spinOnce(robot_state, nullptr));
+
+  EXPECT_CALL(robot, update(_)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(control_callback, invoke(_)).WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
   loop();
+
+  testRobotStateIsZero(robot_state);
 }
