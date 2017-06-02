@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <functional>
 
 #include <franka/control_types.h>
@@ -14,6 +15,7 @@ template <typename T>
 class MotionGeneratorLoop : public ControlLoopBase {
  public:
   using MotionGeneratorCallback = std::function<T(const RobotState&)>;
+  static constexpr research_interface::Move::Deviation kDefaultDeviation{10.0, 3.12, 2 * M_PI};
 
   MotionGeneratorLoop(RobotControl& robot,
                       ControlCallback control_callback,

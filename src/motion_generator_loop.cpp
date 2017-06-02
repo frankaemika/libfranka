@@ -7,18 +7,23 @@
 namespace franka {
 
 template <typename T>
+constexpr research_interface::Move::Deviation MotionGeneratorLoop<T>::kDefaultDeviation;
+
+template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             ControlCallback control_callback,
                                             MotionGeneratorCallback motion_callback)
     : ControlLoopBase(robot, control_callback), motion_callback_(std::move(motion_callback)) {
+  if (!control_callback_) {
+    throw std::invalid_argument("libfranka: Invalid control callback given.");
+  }
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
 
   robot.startMotion(research_interface::Move::ControllerMode::kExternalController,
-                    MotionGeneratorTraits<T>::kMotionGeneratorMode,
-                    research_interface::Move::Deviation(0.2, 1.5, 1.5),
-                    research_interface::Move::Deviation(0.2, 1.5, 1.5));
+                    MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
+                    kDefaultDeviation);
 }
 
 template <typename T>
@@ -27,7 +32,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             MotionGeneratorCallback motion_callback)
     : ControlLoopBase(robot, {}), motion_callback_(std::move(motion_callback)) {
   if (!motion_callback_) {
-    std::invalid_argument("libfranka: Invalid motion callback given.");
+    throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
   research_interface::Move::ControllerMode mode;
   switch (controller_mode) {
@@ -46,9 +51,8 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     default:
       throw std::invalid_argument("Invalid motion generator mode given.");
   }
-  robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode,
-                    research_interface::Move::Deviation(0.2, 1.5, 1.5),
-                    research_interface::Move::Deviation(0.2, 1.5, 1.5));
+  robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
+                    kDefaultDeviation);
 }
 
 template <typename T>
