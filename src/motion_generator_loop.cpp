@@ -49,7 +49,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
       mode = decltype(mode)::kCartesianImpedance;
       break;
     default:
-      throw std::invalid_argument("Invalid motion generator mode given.");
+      throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
   }
   robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
                     kDefaultDeviation);

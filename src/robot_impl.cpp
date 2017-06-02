@@ -47,9 +47,20 @@ RobotState Robot::Impl::update(const research_interface::MotionGeneratorCommand&
       throw ProtocolException("libfranka: unexpected response!");
     }
 
-    network_.tcpHandleResponse<research_interface::Move>(
-        std::bind(&Robot::Impl::handleCommandResponse<research_interface::Move>, this,
-                  std::placeholders::_1));
+    try {
+      network_.tcpHandleResponse<research_interface::Move>(
+          std::bind(&Robot::Impl::handleCommandResponse<research_interface::Move>, this,
+                    std::placeholders::_1));
+    } catch (const CommandException& e) {
+      // Make sure that we have an up-to-date robot state that shows the stopped motion.
+      research_interface::RobotState robot_state = network_.udpReadRobotState();
+      motion_generator_mode_ = robot_state.motion_generator_mode;
+      controller_mode_ = robot_state.controller_mode;
+      message_id_ = robot_state.message_id;
+
+      // Rethrow as control exception to be consistent with starting/stopping of motions.
+      throw ControlException(e.what());
+    }
   }
 
   if (motionGeneratorRunning() || controllerRunning()) {
@@ -114,11 +125,51 @@ void Robot::Impl::startMotion(
     throw ControlException("libfranka: attempted to start multiple motion generators!");
   }
 
+  research_interface::MotionGeneratorMode state_motion_generator_mode;
+  switch (motion_generator_mode) {
+    case decltype(motion_generator_mode)::kJointPosition:
+      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointPosition;
+      break;
+    case decltype(motion_generator_mode)::kJointVelocity:
+      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointVelocity;
+      break;
+    case decltype(motion_generator_mode)::kCartesianPosition:
+      state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianPosition;
+      break;
+    case decltype(motion_generator_mode)::kCartesianVelocity:
+      state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianVelocity;
+      break;
+    default:
+      throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
+  }
+
+  research_interface::ControllerMode state_controller_mode;
+  switch (controller_mode) {
+    case decltype(controller_mode)::kMotorPD:
+      state_controller_mode = decltype(state_controller_mode)::kMotorPD;
+      break;
+    case decltype(controller_mode)::kJointPosition:
+      state_controller_mode = decltype(state_controller_mode)::kJointPosition;
+      break;
+    case decltype(controller_mode)::kJointImpedance:
+      state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
+      break;
+    case decltype(controller_mode)::kCartesianImpedance:
+      state_controller_mode = decltype(state_controller_mode)::kCartesianImpedance;
+      break;
+    case decltype(controller_mode)::kExternalController:
+      state_controller_mode = decltype(state_controller_mode)::kExternalController;
+      break;
+    default:
+      throw std::invalid_argument("libfranka: Invalid controller mode given.");
+  }
+
   executeCommand<research_interface::Move>(controller_mode, motion_generator_mode,
                                            maximum_path_deviation, maximum_goal_pose_deviation);
 
-  while (!motionGeneratorRunning()) {
-    update();
+  while (motion_generator_mode_ != state_motion_generator_mode ||
+         controller_mode_ != state_controller_mode) {
+    update({}, {});
   }
 }
 
@@ -148,7 +199,7 @@ void Robot::Impl::startController() {
       research_interface::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    update();
+    update({}, {});
   }
 }
 
@@ -160,8 +211,9 @@ void Robot::Impl::stopController() {
   executeCommand<research_interface::SetControllerMode>(
       research_interface::SetControllerMode::ControllerMode::kJointImpedance);
 
-  while (controllerRunning()) {
-    update();
+  research_interface::ControllerCommand command{};
+  while (controller_mode_ != research_interface::ControllerMode::kJointImpedance) {
+    update(command);
   }
 }
 
