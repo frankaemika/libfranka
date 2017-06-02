@@ -178,10 +178,10 @@ void Robot::Impl::stopMotion() {
     return;
   }
 
-  // TODO: StopMove never necessary?
+  // TODO(FWA): StopMove never necessary?
   // executeCommand<research_interface::StopMove>();
 
-  // TODO: needs other parameters set as well (from previous motion?)?
+  // TODO(FWA): needs other parameters set as well (from previous motion?)?
   research_interface::MotionGeneratorCommand command{};
   command.motion_generation_finished = true;
   while (motionGeneratorRunning()) {

@@ -24,8 +24,8 @@ class Robot::Impl : public RobotControl {
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update();
-  RobotState update(const research_interface::MotionGeneratorCommand& command);
-  RobotState update(const research_interface::ControllerCommand& command) override;
+  RobotState update(const research_interface::MotionGeneratorCommand& motion_command);
+  RobotState update(const research_interface::ControllerCommand& control_command) override;
   RobotState update(const research_interface::MotionGeneratorCommand& motion_command,
                     const research_interface::ControllerCommand& control_command) override;
 

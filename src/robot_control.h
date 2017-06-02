@@ -21,7 +21,7 @@ class RobotControl {
       const research_interface::Move::Deviation& maximum_goal_pose_deviation) = 0;
   virtual void stopMotion() = 0;
 
-  virtual RobotState update(const research_interface::ControllerCommand& command) = 0;
+  virtual RobotState update(const research_interface::ControllerCommand& control_command) = 0;
   virtual RobotState update(const research_interface::MotionGeneratorCommand& motion_command,
                             const research_interface::ControllerCommand& control_command) = 0;
 
