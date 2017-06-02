@@ -22,6 +22,7 @@ using franka::Torques;
 using research_interface::ControllerCommand;
 using research_interface::MotionGeneratorCommand;
 using research_interface::Move;
+using research_interface::RobotCommand;
 
 class MockControlCallback {
  public:
@@ -175,11 +176,12 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionCallbackAndControllerMode) {
   typename TestFixture::Loop loop(
       robot, ControllerMode::kJointImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
-  MotionGeneratorCommand motion_command;
-  ControllerCommand control_command;
-  EXPECT_TRUE(loop.spinOnce(robot_state, &motion_command));
-  EXPECT_TRUE(loop.spinOnce(robot_state, &control_command));
-  EXPECT_THAT(motion_command, this->getField(motion));
+
+  RobotCommand command;
+  randomRobotCommand(command);
+  EXPECT_TRUE(loop.spinOnce(robot_state, &command.motion));
+  EXPECT_TRUE(loop.spinOnce(robot_state, &command.control));
+  EXPECT_THAT(command.motion, this->getField(motion));
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionAndControllerCallback) {
@@ -198,12 +200,12 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionAndControllerCallback) {
       robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1),
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
 
-  MotionGeneratorCommand motion_command;
-  ControllerCommand control_command;
-  EXPECT_TRUE(loop.spinOnce(robot_state, &motion_command));
-  EXPECT_TRUE(loop.spinOnce(robot_state, &control_command));
-  EXPECT_THAT(motion_command, this->getField(motion));
-  EXPECT_EQ(torques.tau_J, control_command.tau_J_d);
+  RobotCommand command;
+  randomRobotCommand(command);
+  EXPECT_TRUE(loop.spinOnce(robot_state, &command.motion));
+  EXPECT_TRUE(loop.spinOnce(robot_state, &command.control));
+  EXPECT_THAT(command.motion, this->getField(motion));
+  EXPECT_EQ(torques.tau_J, command.control.tau_J_d);
 }
 
 TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
@@ -217,12 +219,12 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
       [](const RobotState&) { return Stop; });
 
   RobotState robot_state{};
-  ControllerCommand control_command;
+  ControllerCommand control_command{};
   EXPECT_TRUE(loop.spinOnce(robot_state, &control_command));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
-  MotionGeneratorCommand motion_command;
+  MotionGeneratorCommand motion_command{};
   ASSERT_FALSE(loop.spinOnce(robot_state, &motion_command));
   loop();
 }
@@ -237,12 +239,12 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallbackAndController
                                   [](const RobotState&) { return Stop; });
 
   RobotState robot_state{};
-  ControllerCommand control_command;
+  ControllerCommand control_command{};
   EXPECT_TRUE(loop.spinOnce(robot_state, &control_command));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
-  MotionGeneratorCommand motion_command;
+  MotionGeneratorCommand motion_command{};
   ASSERT_FALSE(loop.spinOnce(robot_state, &motion_command));
   loop();
 }
@@ -258,12 +260,12 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, std::placeholders::_1));
 
   RobotState robot_state{};
-  MotionGeneratorCommand motion_command;
+  MotionGeneratorCommand motion_command{};
   EXPECT_TRUE(loop.spinOnce(robot_state, &motion_command));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
-  ControllerCommand control_command;
+  ControllerCommand control_command{};
   ASSERT_FALSE(loop.spinOnce(robot_state, &control_command));
   loop();
 }
