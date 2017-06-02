@@ -177,7 +177,6 @@ file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
 
-
 find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format

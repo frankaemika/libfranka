@@ -41,8 +41,8 @@ TEST(ControlLoop, CanConstructWithCallback) {
 
   StrictMock<MockControlCallback> control_callback;
 
-  ControlLoop loop(
-      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
+  EXPECT_NO_THROW(ControlLoop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1)));
 }
 
 TEST(ControlLoop, SpinOnce) {
@@ -51,7 +51,7 @@ TEST(ControlLoop, SpinOnce) {
 
   Torques torques({0, 1, 2, 3, 4, 5, 6});
 
-  RobotState robot_state;
+  RobotState robot_state{};
 
   EXPECT_CALL(control_callback, invoke(Ref(robot_state))).WillOnce(Return(torques));
 
@@ -67,7 +67,7 @@ TEST(ControlLoop, SpinWithStoppingCallback) {
   NiceMock<MockRobotControl> robot;
   MockControlCallback control_callback;
 
-  RobotState robot_state;
+  RobotState robot_state{};
   EXPECT_CALL(control_callback, invoke(Ref(robot_state))).WillOnce(Return(Stop));
 
   ControlLoop loop(
