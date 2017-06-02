@@ -20,16 +20,6 @@ class MockServer {
  public:
   using ConnectCallbackT = std::function<research_interface::Connect::Response(
       const research_interface::Connect::Request&)>;
-  using StartMotionGeneratorCallbackT =
-      std::function<research_interface::StartMotionGenerator::Response(
-          const research_interface::StartMotionGenerator::Request&)>;
-  using StopMotionGeneratorCallbackT =
-      std::function<research_interface::StopMotionGenerator::Response(
-          const research_interface::StopMotionGenerator::Request&)>;
-  using StartControllerCallbackT = std::function<research_interface::StartController::Response(
-      const research_interface::StartController::Request&)>;
-  using StopControllerCallbackT = std::function<research_interface::StopController::Response(
-      const research_interface::StopController::Request&)>;
   using SendRobotStateAlternativeCallbackT = std::function<void(research_interface::RobotState&)>;
   using SendRobotStateCallbackT = std::function<research_interface::RobotState()>;
   using ReceiveRobotCommandCallbackT = std::function<void(const research_interface::RobotCommand&)>;
@@ -41,11 +31,6 @@ class MockServer {
 
   template <typename TResponse>
   MockServer& sendResponse(std::function<TResponse()> create_response);
-
-  MockServer& onStartMotionGenerator(StartMotionGeneratorCallbackT on_start_motion_generator);
-  MockServer& onStopMotionGenerator(StopMotionGeneratorCallbackT on_stop_motion_generator);
-  MockServer& onStartController(StartControllerCallbackT on_start_motion_generator);
-  MockServer& onStopController(StopControllerCallbackT on_stop_motion_generator);
 
   MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
   MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
