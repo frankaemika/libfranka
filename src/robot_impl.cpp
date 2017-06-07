@@ -43,7 +43,7 @@ RobotState Robot::Impl::update(const research_interface::MotionGeneratorCommand&
                                const research_interface::ControllerCommand& control_command) {
   research_interface::Function function;
   if (network_.tcpReadResponse(&function)) {
-    if (!motionGeneratorRunning() || function != research_interface::Function::kMove) {
+    if (function != research_interface::Function::kMove) {
       throw ProtocolException("libfranka: unexpected response!");
     }
 
