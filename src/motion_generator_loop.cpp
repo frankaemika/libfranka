@@ -62,7 +62,7 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
 
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
-  RobotState robot_state = robot_.update({});
+  RobotState robot_state = robot_.update({}, {});
   research_interface::MotionGeneratorCommand motion_command{};
   research_interface::ControllerCommand control_command{};
   while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
