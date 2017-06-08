@@ -10,8 +10,8 @@ namespace {
 class Controller {
  public:
   Controller(size_t dq_filter_size,
-             std::array<double, 7> K_P,  // NOLINT (modernize-pass-by-value)
-             std::array<double, 7> K_D)  // NOLINT (modernize-pass-by-value)
+             const std::array<double, 7>& K_P,  // NOLINT
+             const std::array<double, 7>& K_D)  // NOLINT
       : dq_current_filter_position_(0),
         dq_filter_size_(dq_filter_size),
         K_P_(K_P),
@@ -54,7 +54,7 @@ class Controller {
   const std::array<double, 7> K_D_;  // NOLINT
 
   std::array<double, 7> dq_d_;
-  std::unique_ptr<double> dq_buffer_;
+  std::unique_ptr<double[]> dq_buffer_;
 };
 
 std::vector<double> generateTrajectory(double a_max) {
@@ -99,12 +99,12 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  size_t filter_size = std::stof(argv[2]);
+  size_t filter_size = std::stoul(argv[2]);
   std::array<double, 7> K_P;  // NOLINT
   std::array<double, 7> K_D;  // NOLINT
   for (size_t i = 0; i < 7; i++) {
-    K_P[i] = std::stof(argv[3]);
-    K_D[i] = std::stof(argv[4]);
+    K_P[i] = std::stod(argv[3]);
+    K_D[i] = std::stod(argv[4]);
   }
 
   std::cout << "Initializing controller: " << std::endl;
