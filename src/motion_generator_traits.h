@@ -9,27 +9,27 @@ template <typename T>
 struct MotionGeneratorTraits {};
 
 template <>
-struct MotionGeneratorTraits<JointValues> {
+struct MotionGeneratorTraits<JointPositions> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::StartMotionGenerator::MotionGeneratorMode::kJointPosition;
+      research_interface::Move::MotionGeneratorMode::kJointPosition;
 };
 
 template <>
 struct MotionGeneratorTraits<JointVelocities> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::StartMotionGenerator::MotionGeneratorMode::kJointVelocity;
+      research_interface::Move::MotionGeneratorMode::kJointVelocity;
 };
 
 template <>
 struct MotionGeneratorTraits<CartesianPose> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::StartMotionGenerator::MotionGeneratorMode::kCartesianPosition;
+      research_interface::Move::MotionGeneratorMode::kCartesianPosition;
 };
 
 template <>
 struct MotionGeneratorTraits<CartesianVelocities> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::StartMotionGenerator::MotionGeneratorMode::kCartesianVelocity;
+      research_interface::Move::MotionGeneratorMode::kCartesianVelocity;
 };
 
 }  // namespace franka

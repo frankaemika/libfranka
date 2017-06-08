@@ -228,3 +228,12 @@ void testControllerCommandsAreEqual(const research_interface::ControllerCommand&
                                     const research_interface::ControllerCommand& actual) {
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
 }
+
+namespace research_interface {
+
+bool operator==(const Move::Deviation& left, const Move::Deviation& right) {
+  return left.translation == right.translation && left.rotation == right.rotation &&
+         left.elbow == right.elbow;
+}
+
+}  // namespace research_interface

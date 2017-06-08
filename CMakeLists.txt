@@ -50,8 +50,8 @@ add_subdirectory(lib/research-interface-common)
 
 ## Library
 add_library(franka SHARED
-  src/complete_robot_state.cpp
   src/control_loop.cpp
+  src/control_loop_base.cpp
   src/control_types.cpp
   src/library_loader.cpp
   src/model.cpp
@@ -176,7 +176,6 @@ file(GLOB_RECURSE TEST_FILES
 file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
-
 
 find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)

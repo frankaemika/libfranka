@@ -40,24 +40,6 @@ MockServer::~MockServer() {
   }
 }
 
-MockServer& MockServer::onStartMotionGenerator(
-    StartMotionGeneratorCallbackT on_start_motion_generator) {
-  return waitForCommand<research_interface::StartMotionGenerator>(on_start_motion_generator);
-}
-
-MockServer& MockServer::onStopMotionGenerator(
-    StopMotionGeneratorCallbackT on_stop_motion_generator) {
-  return waitForCommand<research_interface::StopMotionGenerator>(on_stop_motion_generator);
-}
-
-MockServer& MockServer::onStartController(StartControllerCallbackT on_start_controller) {
-  return waitForCommand<research_interface::StartController>(on_start_controller);
-}
-
-MockServer& MockServer::onStopController(StopControllerCallbackT on_stop_motion_generator) {
-  return waitForCommand<research_interface::StopController>(on_stop_motion_generator);
-}
-
 MockServer& MockServer::sendEmptyRobotState() {
   return onSendRobotState(SendRobotStateAlternativeCallbackT());
 }

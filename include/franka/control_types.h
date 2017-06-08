@@ -12,6 +12,11 @@
 namespace franka {
 
 /**
+ * Controller mode for FRANKA.
+ */
+enum ControllerMode { kMotorPD, kJointPosition, kJointImpedance, kCartesianImpedance };
+
+/**
  * Used to decide whether to enforce realtime mode for a control loop thread.
  *
  * @see Robot::Robot
@@ -81,23 +86,23 @@ class Torques : public IsStop {
 /**
  * Stores values for joint position motion generation.
  */
-class JointValues : public IsStop {
+class JointPositions : public IsStop {
  public:
   /**
-   * Creates a new JointValues instance.
+   * Creates a new JointPositions instance.
    *
-   * @param[in] joint_values Desired joint angles in [rad].
+   * @param[in] joint_positions Desired joint angles in [rad].
    */
-  JointValues(const std::array<double, 7>& joint_values) noexcept;
+  JointPositions(const std::array<double, 7>& joint_positions) noexcept;
 
   /**
-   * Creates a new JointValues instance.
+   * Creates a new JointPositions instance.
    *
-   * @param[in] joint_values Desired joint angles in [rad].
+   * @param[in] joint_positions Desired joint angles in [rad].
    *
-   * @throw ControlException Invalid number of elements in joint_values.
+   * @throw ControlException Invalid number of elements in joint_positions.
    */
-  JointValues(std::initializer_list<double> joint_values);
+  JointPositions(std::initializer_list<double> joint_positions);
 
   /**
    * Desired joint angles in [rad].
@@ -105,7 +110,7 @@ class JointValues : public IsStop {
   std::array<double, 7> q{};
 
  protected:
-  JointValues() noexcept;
+  JointPositions() noexcept;
 };
 
 /**
@@ -232,7 +237,7 @@ class CartesianVelocities : public IsStop {
  *
  * @see Robot::control
  */
-struct StopT final : Torques, JointValues, JointVelocities, CartesianVelocities, CartesianPose {
+struct StopT final : Torques, JointPositions, JointVelocities, CartesianVelocities, CartesianPose {
   StopT() noexcept = default;
 };
 

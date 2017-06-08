@@ -21,6 +21,7 @@ set(EXAMPLES
   generate_joint_velocity_motion
   execute_trajectory
   print_joint_poses
+  motion_with_control
 )
 
 foreach(example ${EXAMPLES})

@@ -37,7 +37,7 @@ class Network {
   bool tcpReadResponse(research_interface::Function* function);
 
   template <typename T>
-  bool handleResponse(std::function<void(const typename T::Response&)> handler);
+  bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
  private:
   int tcpReceiveIntoBuffer();
@@ -57,7 +57,7 @@ void Network::tcpSendRequest(const T& request) try {
 }
 
 template <typename T>
-bool Network::handleResponse(std::function<void(const typename T::Response&)> handler) {
+bool Network::tcpHandleResponse(std::function<void(const typename T::Response&)> handler) {
   if (read_buffer_.size() < sizeof(typename T::Response)) {
     return false;
   }

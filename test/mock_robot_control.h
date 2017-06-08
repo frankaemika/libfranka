@@ -1,5 +1,7 @@
 #pragma once
 
+#include <franka/robot_state.h>
+
 #include "robot_control.h"
 
 class MockRobotControl : public franka::RobotControl {
@@ -7,25 +9,18 @@ class MockRobotControl : public franka::RobotControl {
   MOCK_METHOD0(startController, void());
   MOCK_METHOD0(stopController, void());
 
-  MOCK_METHOD1(startMotionGenerator,
-               void(research_interface::StartMotionGenerator::MotionGeneratorMode));
-  MOCK_METHOD0(stopMotionGenerator, void());
+  MOCK_METHOD4(startMotion,
+               void(research_interface::Move::ControllerMode controller_mode,
+                    research_interface::Move::MotionGeneratorMode motion_generator_mode,
+                    const research_interface::Move::Deviation& maximum_path_deviation,
+                    const research_interface::Move::Deviation& maximum_goal_pose_deviation));
+  MOCK_METHOD0(stopMotion, void());
 
-  MOCK_METHOD0(update, bool());
+  MOCK_METHOD1(update, franka::RobotState(const research_interface::ControllerCommand& command));
+  MOCK_METHOD2(update,
+               franka::RobotState(const research_interface::MotionGeneratorCommand& motion_command,
+                                  const research_interface::ControllerCommand& control_command));
 
-  MOCK_CONST_METHOD0(robotStateMock, const franka::RobotState&());
-  MOCK_METHOD1(controllerCommandMock, void(const research_interface::ControllerCommand&));
-  MOCK_METHOD1(motionGeneratorCommandMock, void(const research_interface::MotionGeneratorCommand&));
-
-  // Workaround because Google Mock does not support noexcept.
-  const franka::RobotState& robotState() const noexcept override { return robotStateMock(); }
-  void controllerCommand(const research_interface::ControllerCommand& command) noexcept override {
-    controllerCommandMock(command);
-  }
-  void motionGeneratorCommand(
-      const research_interface::MotionGeneratorCommand& command) noexcept override {
-    motionGeneratorCommandMock(command);
-  }
   franka::RealtimeConfig realtimeConfig() const noexcept override {
     return franka::RealtimeConfig::kIgnore;
   }

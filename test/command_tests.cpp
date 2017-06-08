@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 #include <robot_impl.h>
 
+#include "helpers.h"
 #include "mock_server.h"
 
 using franka::Robot;
@@ -20,14 +21,28 @@ class Command : public ::testing::Test {
 
   void executeCommand(Robot::Impl& robot);
   typename T::Request getExpected();
+  typename T::Status getSuccess();
   bool compare(const typename T::Request& request_one, const typename T::Request& request_two);
   typename T::Response createResponse(const typename T::Request& request,
                                       const typename T::Status status);
 };
 
 template <typename T>
-bool Command<T>::compare(const typename T::Request&, const typename T::Request&) {
-  return true;
+typename T::Status Command<T>::getSuccess() {
+  return T::Status::kSuccess;
+}
+
+template <>
+typename Move::Status Command<Move>::getSuccess() {
+  return Move::Status::kMotionStarted;
+}
+
+template <>
+bool Command<Move>::compare(const Move::Request& request_one, const Move::Request& request_two) {
+  return request_one.controller_mode == request_two.controller_mode &&
+         request_one.motion_generator_mode == request_two.motion_generator_mode &&
+         request_one.maximum_path_deviation == request_two.maximum_path_deviation &&
+         request_one.maximum_goal_pose_deviation == request_two.maximum_goal_pose_deviation;
 }
 
 template <>
@@ -101,6 +116,19 @@ template <>
 bool Command<SetTimeScalingFactor>::compare(const SetTimeScalingFactor::Request& request_one,
                                             const SetTimeScalingFactor::Request& request_two) {
   return request_one.time_scaling_factor == request_two.time_scaling_factor;
+}
+
+template <>
+bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Request&,
+                                              const AutomaticErrorRecovery::Request&) {
+  return true;
+}
+
+template <>
+Move::Request Command<Move>::getExpected() {
+  return Move::Request(Move::ControllerMode::kCartesianImpedance,
+                       Move::MotionGeneratorMode::kJointVelocity, Move::Deviation(1, 2, 3),
+                       Move::Deviation(4, 5, 6));
 }
 
 template <>
@@ -194,6 +222,13 @@ void Command<GetCartesianLimit>::executeCommand(Robot::Impl& robot) {
 }
 
 template <>
+void Command<Move>::executeCommand(Robot::Impl& robot) {
+  Move::Request request = getExpected();
+  robot.executeCommand<Move>(request.controller_mode, request.motion_generator_mode,
+                             request.maximum_path_deviation, request.maximum_goal_pose_deviation);
+}
+
+template <>
 void Command<SetControllerMode>::executeCommand(Robot::Impl& robot) {
   SetControllerMode::Request request = getExpected();
   robot.executeCommand<SetControllerMode>(request.mode);
@@ -275,6 +310,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetEEToK,
                                       SetFToEE,
                                       SetLoad,
+                                      Move,
                                       SetTimeScalingFactor,
                                       AutomaticErrorRecovery>;
 
@@ -289,7 +325,7 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(request, TestFixture::TCommand::Status::kSuccess);
+            return this->createResponse(request, this->getSuccess());
           })
       .spinOnce();
 
