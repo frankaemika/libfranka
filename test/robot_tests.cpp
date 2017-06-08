@@ -18,7 +18,7 @@ using franka::Torques;
 using franka::NetworkException;
 using franka::IncompatibleVersionException;
 
-using research_interface::Connect;
+using research_interface::robot::Connect;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException)
@@ -41,7 +41,7 @@ TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
 }
 
 TEST(Robot, CanReadRobotStateOnce) {
-  research_interface::RobotState sent_robot_state;
+  research_interface::robot::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
   MockServer server;

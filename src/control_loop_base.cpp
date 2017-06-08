@@ -23,7 +23,7 @@ ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_ca
 }
 
 bool ControlLoopBase::spinOnce(const RobotState& robot_state,
-                               research_interface::ControllerCommand* command) {
+                               research_interface::robot::ControllerCommand* command) {
   if (control_callback_) {
     Torques control_output = control_callback_(robot_state);
     if (control_output.stop()) {

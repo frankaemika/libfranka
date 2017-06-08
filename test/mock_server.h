@@ -7,8 +7,8 @@
 #include <thread>
 
 #include <franka/robot_state.h>
-#include <research_interface/rbk_types.h>
-#include <research_interface/service_types.h>
+#include <research_interface/robot/rbk_types.h>
+#include <research_interface/robot/service_types.h>
 
 class MockServer {
  private:
@@ -18,11 +18,13 @@ class MockServer {
   };
 
  public:
-  using ConnectCallbackT = std::function<research_interface::Connect::Response(
-      const research_interface::Connect::Request&)>;
-  using SendRobotStateAlternativeCallbackT = std::function<void(research_interface::RobotState&)>;
-  using SendRobotStateCallbackT = std::function<research_interface::RobotState()>;
-  using ReceiveRobotCommandCallbackT = std::function<void(const research_interface::RobotCommand&)>;
+  using ConnectCallbackT = std::function<research_interface::robot::Connect::Response(
+      const research_interface::robot::Connect::Request&)>;
+  using SendRobotStateAlternativeCallbackT =
+      std::function<void(research_interface::robot::RobotState&)>;
+  using SendRobotStateCallbackT = std::function<research_interface::robot::RobotState()>;
+  using ReceiveRobotCommandCallbackT =
+      std::function<void(const research_interface::robot::RobotCommand&)>;
 
   MockServer(ConnectCallbackT on_connect = ConnectCallbackT());
   ~MockServer();

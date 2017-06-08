@@ -14,7 +14,7 @@ using franka::RobotState;
 using franka::Stop;
 using franka::Torques;
 
-using research_interface::ControllerCommand;
+using research_interface::robot::ControllerCommand;
 
 class ControlLoop : public franka::ControlLoop {
  public:

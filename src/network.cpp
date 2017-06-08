@@ -36,7 +36,7 @@ uint16_t Network::udpPort() const noexcept {
   return udp_socket_.address().port();
 }
 
-void Network::udpSendRobotCommand(const research_interface::RobotCommand& command) try {
+void Network::udpSendRobotCommand(const research_interface::robot::RobotCommand& command) try {
   int bytes_sent = udp_socket_.sendTo(&command, sizeof(command), udp_server_address_);
   if (bytes_sent != sizeof(command)) {
     throw NetworkException("libfranka: robot command send error");
@@ -45,13 +45,13 @@ void Network::udpSendRobotCommand(const research_interface::RobotCommand& comman
   throw NetworkException("libfranka: udp send: "s + e.what());
 }
 
-research_interface::RobotState Network::udpReadRobotState() try {
-  std::array<uint8_t, sizeof(research_interface::RobotState)> buffer;
+research_interface::robot::RobotState Network::udpReadRobotState() try {
+  std::array<uint8_t, sizeof(research_interface::robot::RobotState)> buffer;
   int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(), udp_server_address_);
   if (bytes_received != buffer.size()) {
     throw ProtocolException("libfranka: incorrect object size");
   }
-  return *reinterpret_cast<research_interface::RobotState*>(buffer.data());
+  return *reinterpret_cast<research_interface::robot::RobotState*>(buffer.data());
 } catch (const Poco::Exception& e) {
   throw NetworkException("libfranka: udp read: "s + e.what());
 }
@@ -64,7 +64,7 @@ int Network::tcpReceiveIntoBuffer() try {
   throw NetworkException("libfranka: "s + e.what());
 }
 
-bool Network::tcpReadResponse(research_interface::Function* function) try {
+bool Network::tcpReadResponse(research_interface::robot::Function* function) try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     int rv = tcpReceiveIntoBuffer();
 
@@ -72,11 +72,11 @@ bool Network::tcpReadResponse(research_interface::Function* function) try {
       throw NetworkException("libfranka: server closed connection");
     }
 
-    if (read_buffer_.size() < sizeof(research_interface::Function)) {
+    if (read_buffer_.size() < sizeof(research_interface::robot::Function)) {
       return false;
     }
 
-    *function = *reinterpret_cast<research_interface::Function*>(read_buffer_.data());
+    *function = *reinterpret_cast<research_interface::robot::Function*>(read_buffer_.data());
     return true;
   }
   return false;

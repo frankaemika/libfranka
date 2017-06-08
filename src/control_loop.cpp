@@ -19,7 +19,7 @@ ControlLoop::~ControlLoop() {
 
 void ControlLoop::operator()() {
   RobotState robot_state = robot_.update({});
-  research_interface::ControllerCommand command{};
+  research_interface::robot::ControllerCommand command{};
   while (spinOnce(robot_state, &command)) {
     robot_state = robot_.update(command);
   }

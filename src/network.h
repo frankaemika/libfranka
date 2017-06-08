@@ -6,8 +6,8 @@
 #include <unordered_set>
 
 #include <franka/exception.h>
-#include <research_interface/rbk_types.h>
-#include <research_interface/service_types.h>
+#include <research_interface/robot/rbk_types.h>
+#include <research_interface/robot/service_types.h>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
@@ -22,19 +22,19 @@ class Network {
                    std::chrono::milliseconds timeout);
   ~Network();
 
-  research_interface::RobotState udpReadRobotState();
+  research_interface::robot::RobotState udpReadRobotState();
 
   uint16_t udpPort() const noexcept;
 
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
 
-  void udpSendRobotCommand(const research_interface::RobotCommand& command);
+  void udpSendRobotCommand(const research_interface::robot::RobotCommand& command);
 
   template <typename T>
   void tcpSendRequest(const T& request);
 
-  bool tcpReadResponse(research_interface::Function* function);
+  bool tcpReadResponse(research_interface::robot::Function* function);
 
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);

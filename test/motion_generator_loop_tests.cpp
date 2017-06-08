@@ -20,10 +20,10 @@ using franka::RobotState;
 using franka::Stop;
 using franka::Torques;
 
-using research_interface::ControllerCommand;
-using research_interface::MotionGeneratorCommand;
-using research_interface::Move;
-using research_interface::RobotCommand;
+using research_interface::robot::ControllerCommand;
+using research_interface::robot::MotionGeneratorCommand;
+using research_interface::robot::Move;
+using research_interface::robot::RobotCommand;
 
 class MockControlCallback {
  public:
@@ -50,7 +50,7 @@ class MotionGeneratorLoops : public ::testing::Test {
   using MotionGeneratorCallback = typename Loop::MotionGeneratorCallback;
   using ControlCallback = typename Loop::ControlCallback;
 
-  const research_interface::Move::MotionGeneratorMode kMotionGeneratorMode =
+  const research_interface::robot::Move::MotionGeneratorMode kMotionGeneratorMode =
       franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
 
   T createMotion();
@@ -64,7 +64,7 @@ JointPositions MotionGeneratorLoops<JointPositions>::createMotion() {
 
 template <>
 auto MotionGeneratorLoops<JointPositions>::getField(const JointPositions& values) {
-  return Field(&research_interface::MotionGeneratorCommand::q_d, Eq(values.q));
+  return Field(&research_interface::robot::MotionGeneratorCommand::q_d, Eq(values.q));
 }
 
 template <>
@@ -74,7 +74,7 @@ JointVelocities MotionGeneratorLoops<JointVelocities>::createMotion() {
 
 template <>
 auto MotionGeneratorLoops<JointVelocities>::getField(const JointVelocities& velocities) {
-  return Field(&research_interface::MotionGeneratorCommand::dq_d, Eq(velocities.dq));
+  return Field(&research_interface::robot::MotionGeneratorCommand::dq_d, Eq(velocities.dq));
 }
 
 template <>
@@ -84,7 +84,7 @@ CartesianPose MotionGeneratorLoops<CartesianPose>::createMotion() {
 
 template <>
 auto MotionGeneratorLoops<CartesianPose>::getField(const CartesianPose& pose) {
-  return Field(&research_interface::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE));
+  return Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE));
 }
 
 template <>
@@ -95,7 +95,7 @@ CartesianVelocities MotionGeneratorLoops<CartesianVelocities>::createMotion() {
 template <>
 auto MotionGeneratorLoops<CartesianVelocities>::getField(
     const CartesianVelocities& cartesian_velocities) {
-  return Field(&research_interface::MotionGeneratorCommand::O_dP_EE_d,
+  return Field(&research_interface::robot::MotionGeneratorCommand::O_dP_EE_d,
                Eq(cartesian_velocities.O_dP_EE));
 }
 
