@@ -4,7 +4,7 @@
 
 #include <franka/control_types.h>
 #include <franka/robot_state.h>
-#include <research_interface/rbk_types.h>
+#include <research_interface/robot/rbk_types.h>
 
 #include "robot_control.h"
 
@@ -20,7 +20,8 @@ class ControlLoopBase {
   virtual ~ControlLoopBase() = default;
 
  protected:
-  bool spinOnce(const RobotState& robot_state, research_interface::ControllerCommand* command);
+  bool spinOnce(const RobotState& robot_state,
+                research_interface::robot::ControllerCommand* command);
 
   RobotControl& robot_;
   const ControlCallback control_callback_;

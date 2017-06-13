@@ -47,7 +47,7 @@ MockServer& MockServer::sendEmptyRobotState() {
 MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("onSendRobotState", [=](Socket&, Socket& udp_socket) {
-    research_interface::RobotState robot_state = on_send_robot_state();
+    research_interface::robot::RobotState robot_state = on_send_robot_state();
     udp_socket.sendBytes(&robot_state, sizeof(robot_state));
   });
   block_ = true;
@@ -56,7 +56,7 @@ MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_s
 
 MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state) {
   return onSendRobotState([=]() {
-    research_interface::RobotState robot_state{};
+    research_interface::robot::RobotState robot_state{};
     if (on_send_robot_state) {
       on_send_robot_state(robot_state);
     }
@@ -68,7 +68,7 @@ MockServer& MockServer::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
-    research_interface::RobotCommand robot_command;
+    research_interface::robot::RobotCommand robot_command;
     udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
     on_receive_robot_command(robot_command);
   });
@@ -92,8 +92,8 @@ void MockServer::serverThread() {
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
 
-  srv =
-      Poco::Net::ServerSocket({kHostname, research_interface::kCommandPort});  // does bind + listen
+  srv = Poco::Net::ServerSocket(
+      {kHostname, research_interface::robot::kCommandPort});  // does bind + listen
   initialized_ = true;
 
   cv_.notify_one();
@@ -115,12 +115,12 @@ void MockServer::serverThread() {
   };
 
   uint16_t udp_port;
-  handleCommand<research_interface::Connect>(
-      tcp_socket_wrapper, [&, this](const research_interface::Connect::Request& request) {
+  handleCommand<research_interface::robot::Connect>(
+      tcp_socket_wrapper, [&, this](const research_interface::robot::Connect::Request& request) {
         udp_port = request.udp_port;
         return on_connect_ ? on_connect_(request)
-                           : research_interface::Connect::Response(
-                                 research_interface::Connect::Status::kSuccess);
+                           : research_interface::robot::Connect::Response(
+                                 research_interface::robot::Connect::Status::kSuccess);
       });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});

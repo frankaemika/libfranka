@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include <research_interface/service_types.h>
+#include <research_interface/robot/service_types.h>
 
 #include "model_library.h"
 

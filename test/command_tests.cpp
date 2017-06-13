@@ -12,7 +12,7 @@ using franka::Torques;
 using franka::CommandException;
 using franka::IncompatibleVersionException;
 
-using namespace research_interface;
+using namespace research_interface::robot;
 
 template <typename T>
 class Command : public ::testing::Test {

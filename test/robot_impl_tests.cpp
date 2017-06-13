@@ -8,7 +8,7 @@
 #include "mock_server.h"
 
 using namespace std::chrono_literals;
-using namespace research_interface;
+using namespace research_interface::robot;
 
 using franka::ControlException;
 using franka::NetworkException;
@@ -136,8 +136,9 @@ TEST(RobotImpl, CanStartController) {
   Robot::Impl robot("127.0.0.1");
 
   server
-      .onSendRobotState([](research_interface::RobotState& robot_state) {
-        robot_state.controller_mode = research_interface::ControllerMode::kExternalController;
+      .onSendRobotState([](research_interface::robot::RobotState& robot_state) {
+        robot_state.controller_mode =
+            research_interface::robot::ControllerMode::kExternalController;
       })
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {

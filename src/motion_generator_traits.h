@@ -1,7 +1,7 @@
 #pragma once
 
 #include <franka/control_types.h>
-#include <research_interface/service_types.h>
+#include <research_interface/robot/service_types.h>
 
 namespace franka {
 
@@ -11,25 +11,25 @@ struct MotionGeneratorTraits {};
 template <>
 struct MotionGeneratorTraits<JointPositions> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::Move::MotionGeneratorMode::kJointPosition;
+      research_interface::robot::Move::MotionGeneratorMode::kJointPosition;
 };
 
 template <>
 struct MotionGeneratorTraits<JointVelocities> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::Move::MotionGeneratorMode::kJointVelocity;
+      research_interface::robot::Move::MotionGeneratorMode::kJointVelocity;
 };
 
 template <>
 struct MotionGeneratorTraits<CartesianPose> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::Move::MotionGeneratorMode::kCartesianPosition;
+      research_interface::robot::Move::MotionGeneratorMode::kCartesianPosition;
 };
 
 template <>
 struct MotionGeneratorTraits<CartesianVelocities> {
   static constexpr auto kMotionGeneratorMode =
-      research_interface::Move::MotionGeneratorMode::kCartesianVelocity;
+      research_interface::robot::Move::MotionGeneratorMode::kCartesianVelocity;
 };
 
 }  // namespace franka

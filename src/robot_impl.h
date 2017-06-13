@@ -3,31 +3,31 @@
 #include <chrono>
 
 #include <franka/robot.h>
-#include <research_interface/rbk_types.h>
-#include <research_interface/service_traits.h>
-#include <research_interface/service_types.h>
+#include <research_interface/robot/rbk_types.h>
+#include <research_interface/robot/service_traits.h>
+#include <research_interface/robot/service_types.h>
 
 #include "network.h"
 #include "robot_control.h"
 
 namespace franka {
 
-RobotState convertRobotState(const research_interface::RobotState& robot_state) noexcept;
+RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept;
 
 class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
 
   explicit Impl(const std::string& franka_address,
-                uint16_t franka_port = research_interface::kCommandPort,
+                uint16_t franka_port = research_interface::robot::kCommandPort,
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update();
-  RobotState update(const research_interface::MotionGeneratorCommand& motion_command);
-  RobotState update(const research_interface::ControllerCommand& control_command) override;
-  RobotState update(const research_interface::MotionGeneratorCommand& motion_command,
-                    const research_interface::ControllerCommand& control_command) override;
+  RobotState update(const research_interface::robot::MotionGeneratorCommand& motion_command);
+  RobotState update(const research_interface::robot::ControllerCommand& control_command) override;
+  RobotState update(const research_interface::robot::MotionGeneratorCommand& motion_command,
+                    const research_interface::robot::ControllerCommand& control_command) override;
 
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
@@ -37,10 +37,11 @@ class Robot::Impl : public RobotControl {
   void startController() override;
   void stopController() override;
 
-  void startMotion(research_interface::Move::ControllerMode controller_mode,
-                   research_interface::Move::MotionGeneratorMode motion_generator_mode,
-                   const research_interface::Move::Deviation& maximum_path_deviation,
-                   const research_interface::Move::Deviation& maximum_goal_pose_deviation) override;
+  void startMotion(
+      research_interface::robot::Move::ControllerMode controller_mode,
+      research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
+      const research_interface::robot::Move::Deviation& maximum_path_deviation,
+      const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) override;
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
@@ -55,8 +56,8 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  research_interface::MotionGeneratorMode motion_generator_mode_{};
-  research_interface::ControllerMode controller_mode_{};
+  research_interface::robot::MotionGeneratorMode motion_generator_mode_{};
+  research_interface::robot::ControllerMode controller_mode_{};
   uint32_t message_id_{};
 };
 
@@ -68,56 +69,62 @@ void Robot::Impl::handleCommandResponse(const typename T::Response& response) {
     case T::Status::kSuccess:
       break;
     case T::Status::kAborted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                              " command aborted!");
     case T::Status::kRejected:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                              " command rejected!");
     case T::Status::kPreempted:
-      throw CommandException("libfranka: "s + research_interface::CommandTraits<T>::kName +
+      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                              " command preempted!");
     default:
       throw ProtocolException("libfranka: Unexpected response while handling "s +
-                              research_interface::CommandTraits<T>::kName + " command!");
+                              research_interface::robot::CommandTraits<T>::kName + " command!");
   }
 }
 
 template <>
-inline void Robot::Impl::handleCommandResponse<research_interface::Move>(
-    const research_interface::Move::Response& response) {
+inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
+    const research_interface::robot::Move::Response& response) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
-    case research_interface::Move::Status::kSuccess:
+    case research_interface::robot::Move::Status::kSuccess:
       if (!motionGeneratorRunning()) {
-        throw ProtocolException("libfranka: "s +
-                                research_interface::CommandTraits<research_interface::Move>::kName +
-                                " received unexpected motion finished message.");
+        throw ProtocolException(
+            "libfranka: "s +
+            research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+            " received unexpected motion finished message.");
       }
       break;
-    case research_interface::Move::Status::kMotionStarted:
+    case research_interface::robot::Move::Status::kMotionStarted:
       if (motionGeneratorRunning()) {
-        throw ProtocolException("libfranka: "s +
-                                research_interface::CommandTraits<research_interface::Move>::kName +
-                                " received unexpected motion started message.");
+        throw ProtocolException(
+            "libfranka: "s +
+            research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+            " received unexpected motion started message.");
       }
       break;
-    case research_interface::Move::Status::kAborted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<research_interface::Move>::kName +
-                             " command aborted!");
-    case research_interface::Move::Status::kRejected:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<research_interface::Move>::kName +
-                             " command rejected!");
-    case research_interface::Move::Status::kPreempted:
-      throw CommandException("libfranka: "s +
-                             research_interface::CommandTraits<research_interface::Move>::kName +
-                             " command preempted!");
+    case research_interface::robot::Move::Status::kAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command aborted!");
+    case research_interface::robot::Move::Status::kRejected:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected!");
+    case research_interface::robot::Move::Status::kPreempted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command preempted!");
     default:
-      throw ProtocolException("libfranka: Unexpected response while handling "s +
-                              research_interface::CommandTraits<research_interface::Move>::kName +
-                              " command!");
+      throw ProtocolException(
+          "libfranka: Unexpected response while handling "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command!");
   }
 }
 
@@ -132,22 +139,23 @@ void Robot::Impl::executeCommand(TArgs... args) {
 }
 
 template <>
-inline void
-Robot::Impl::executeCommand<research_interface::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
+inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianLimit,
+                                        int32_t,
+                                        VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
-  research_interface::GetCartesianLimit::Request request(id);
+  research_interface::robot::GetCartesianLimit::Request request(id);
   network_.tcpSendRequest(request);
 
-  research_interface::GetCartesianLimit::Response response =
-      network_.tcpBlockingReceiveResponse<research_interface::GetCartesianLimit>();
+  research_interface::robot::GetCartesianLimit::Response response =
+      network_.tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>();
   virtual_wall_cuboid->p_frame = response.object_frame;
   virtual_wall_cuboid->p_max = response.object_p_max;
   virtual_wall_cuboid->p_min = response.object_p_min;
   virtual_wall_cuboid->active = response.object_activation;
   virtual_wall_cuboid->id = id;
 
-  handleCommandResponse<research_interface::GetCartesianLimit>(response);
+  handleCommandResponse<research_interface::robot::GetCartesianLimit>(response);
 }
 
 }  // namespace franka

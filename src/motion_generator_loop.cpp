@@ -7,7 +7,7 @@
 namespace franka {
 
 template <typename T>
-constexpr research_interface::Move::Deviation MotionGeneratorLoop<T>::kDefaultDeviation;
+constexpr research_interface::robot::Move::Deviation MotionGeneratorLoop<T>::kDefaultDeviation;
 
 template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
@@ -21,7 +21,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
 
-  robot.startMotion(research_interface::Move::ControllerMode::kExternalController,
+  robot.startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
                     MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
                     kDefaultDeviation);
 }
@@ -34,7 +34,7 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
-  research_interface::Move::ControllerMode mode;
+  research_interface::robot::Move::ControllerMode mode;
   switch (controller_mode) {
     case ControllerMode::kJointImpedance:
       mode = decltype(mode)::kJointImpedance;
@@ -63,8 +63,8 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update({}, {});
-  research_interface::MotionGeneratorCommand motion_command{};
-  research_interface::ControllerCommand control_command{};
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  research_interface::robot::ControllerCommand control_command{};
   while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
     robot_state = robot_.update(motion_command, control_command);
   }
@@ -72,7 +72,7 @@ void MotionGeneratorLoop<T>::operator()() {
 
 template <typename T>
 bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
-                                      research_interface::MotionGeneratorCommand* command) {
+                                      research_interface::robot::MotionGeneratorCommand* command) {
   if (motion_callback_) {
     T motion_output = motion_callback_(robot_state);
     if (motion_output.stop()) {
@@ -87,28 +87,28 @@ bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
 template <>
 void MotionGeneratorLoop<JointPositions>::convertMotion(
     const JointPositions& motion,
-    research_interface::MotionGeneratorCommand* command) {
+    research_interface::robot::MotionGeneratorCommand* command) {
   command->q_d = motion.q;
 }
 
 template <>
 void MotionGeneratorLoop<JointVelocities>::convertMotion(
     const JointVelocities& motion,
-    research_interface::MotionGeneratorCommand* command) {
+    research_interface::robot::MotionGeneratorCommand* command) {
   command->dq_d = motion.dq;
 }
 
 template <>
 void MotionGeneratorLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
-    research_interface::MotionGeneratorCommand* command) {
+    research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_d = motion.O_T_EE;
 }
 
 template <>
 void MotionGeneratorLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
-    research_interface::MotionGeneratorCommand* command) {
+    research_interface::robot::MotionGeneratorCommand* command) {
   command->O_dP_EE_d = motion.O_dP_EE;
 }
 

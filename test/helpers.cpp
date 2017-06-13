@@ -66,7 +66,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
 }
 
-void testRobotStatesAreEqual(const research_interface::RobotState& expected,
+void testRobotStatesAreEqual(const research_interface::robot::RobotState& expected,
                              const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
   EXPECT_EQ(expected.elbow, actual.elbow);
@@ -133,9 +133,9 @@ void randomRobotState(franka::RobotState& robot_state) {
   }
 }
 
-void randomRobotState(research_interface::RobotState& robot_state) {
+void randomRobotState(research_interface::robot::RobotState& robot_state) {
   // Reset to all-zeros first
-  robot_state = research_interface::RobotState();
+  robot_state = research_interface::robot::RobotState();
   for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
     robot_state.O_T_EE[i] = randomDouble();
   }
@@ -179,13 +179,13 @@ void randomRobotState(research_interface::RobotState& robot_state) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
   robot_state.message_id = randomDouble();
-  robot_state.motion_generator_mode = research_interface::MotionGeneratorMode::kIdle;
-  robot_state.controller_mode = research_interface::ControllerMode::kMotorPD;
+  robot_state.motion_generator_mode = research_interface::robot::MotionGeneratorMode::kIdle;
+  robot_state.controller_mode = research_interface::robot::ControllerMode::kMotorPD;
 }
 
-void randomRobotCommand(research_interface::RobotCommand& robot_command) {
+void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
   // Reset to all-zeros first
-  robot_command = research_interface::RobotCommand();
+  robot_command = research_interface::robot::RobotCommand();
   for (size_t i = 0; i < robot_command.motion.q_d.size(); i++) {
     robot_command.motion.q_d[i] = randomDouble();
   }
@@ -212,8 +212,9 @@ void randomRobotCommand(research_interface::RobotCommand& robot_command) {
   robot_command.message_id = randomDouble();
 }
 
-void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGeneratorCommand& expected,
-                                         const research_interface::MotionGeneratorCommand& actual) {
+void testMotionGeneratorCommandsAreEqual(
+    const research_interface::robot::MotionGeneratorCommand& expected,
+    const research_interface::robot::MotionGeneratorCommand& actual) {
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
   EXPECT_EQ(expected.ddq_d, actual.ddq_d);
@@ -224,16 +225,18 @@ void testMotionGeneratorCommandsAreEqual(const research_interface::MotionGenerat
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
 
-void testControllerCommandsAreEqual(const research_interface::ControllerCommand& expected,
-                                    const research_interface::ControllerCommand& actual) {
+void testControllerCommandsAreEqual(const research_interface::robot::ControllerCommand& expected,
+                                    const research_interface::robot::ControllerCommand& actual) {
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
 }
 
 namespace research_interface {
+namespace robot {
 
 bool operator==(const Move::Deviation& left, const Move::Deviation& right) {
   return left.translation == right.translation && left.rotation == right.rotation &&
          left.elbow == right.elbow;
 }
 
+}  // namespace robot
 }  // namespace research_interface
