@@ -16,10 +16,17 @@ namespace franka {
 struct RobotState {
   /**
    * \f$^OT_{EE}\f$
-   * Motion generator's start pose in world base frame.
+   * Measured end effector pose in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * \f$^OT_{EE}\f$
+   * Motion generator's start end effector pose in world base frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
+  std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Elbow pose.
@@ -27,6 +34,13 @@ struct RobotState {
    * joint. Unit: \f$[rad]\f$
    */
   std::array<double, 2> elbow{};
+
+  /**
+   * Desired elbow pose.
+   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th
+   * joint. Unit: \f$[rad]\f$
+   */
+  std::array<double, 2> elbow_d{};
 
   /**
    * \f$\tau_{J}\f$

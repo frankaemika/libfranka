@@ -8,8 +8,14 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.O_T_EE.size(); i++) {
     EXPECT_EQ(0.0, actual.O_T_EE[i]);
   }
+  for (size_t i = 0; i < actual.O_T_EE_d.size(); i++) {
+    EXPECT_EQ(0.0, actual.O_T_EE_d[i]);
+  }
   for (size_t i = 0; i < actual.elbow.size(); i++) {
     EXPECT_EQ(0.0, actual.elbow[i]);
+  }
+  for (size_t i = 0; i < actual.elbow_d.size(); i++) {
+    EXPECT_EQ(0.0, actual.elbow_d[i]);
   }
   for (size_t i = 0; i < actual.tau_J.size(); i++) {
     EXPECT_EQ(0.0, actual.tau_J[i]);
@@ -51,7 +57,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
+  EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.elbow, actual.elbow);
+  EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
   EXPECT_EQ(expected.dtau_J, actual.dtau_J);
   EXPECT_EQ(expected.q, actual.q);
@@ -69,7 +77,9 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
 void testRobotStatesAreEqual(const research_interface::robot::RobotState& expected,
                              const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
+  EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.elbow, actual.elbow);
+  EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
   EXPECT_EQ(expected.dtau_J, actual.dtau_J);
   EXPECT_EQ(expected.q, actual.q);
@@ -92,8 +102,14 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
     robot_state.O_T_EE[i] = randomDouble();
   }
+  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
+    robot_state.O_T_EE_d[i] = randomDouble();
+  }
   for (size_t i = 0; i < robot_state.elbow.size(); i++) {
     robot_state.elbow[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
+    robot_state.elbow_d[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
     robot_state.tau_J[i] = randomDouble();
@@ -139,8 +155,14 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
     robot_state.O_T_EE[i] = randomDouble();
   }
+  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
+    robot_state.O_T_EE_d[i] = randomDouble();
+  }
   for (size_t i = 0; i < robot_state.elbow.size(); i++) {
     robot_state.elbow[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
+    robot_state.elbow_d[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
     robot_state.tau_J[i] = randomDouble();
