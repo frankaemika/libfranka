@@ -23,11 +23,9 @@ class Robot::Impl : public RobotControl {
                 std::chrono::milliseconds timeout = kDefaultTimeout,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
-  RobotState update();
-  RobotState update(const research_interface::robot::MotionGeneratorCommand& motion_command);
-  RobotState update(const research_interface::robot::ControllerCommand& control_command) override;
-  RobotState update(const research_interface::robot::MotionGeneratorCommand& motion_command,
-                    const research_interface::robot::ControllerCommand& control_command) override;
+  RobotState update(
+      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
+      const research_interface::robot::ControllerCommand* control_command = nullptr) override;
 
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
@@ -50,6 +48,10 @@ class Robot::Impl : public RobotControl {
  private:
   template <typename T>
   void handleCommandResponse(const typename T::Response& response);
+
+  RobotState update(const research_interface::robot::MotionGeneratorCommand* motion_command,
+                    const research_interface::robot::ControllerCommand* control_command,
+                    bool ignore_tcp);
 
   Network network_;
 
@@ -90,12 +92,6 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 
   switch (response.status) {
     case research_interface::robot::Move::Status::kSuccess:
-      if (!motionGeneratorRunning()) {
-        throw ProtocolException(
-            "libfranka: "s +
-            research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-            " received unexpected motion finished message.");
-      }
       break;
     case research_interface::robot::Move::Status::kMotionStarted:
       if (motionGeneratorRunning()) {

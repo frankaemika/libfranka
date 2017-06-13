@@ -87,14 +87,24 @@ TEST(RobotImpl, CanStartMotion) {
   EXPECT_FALSE(robot.controllerRunning());
 
   // Test exceptions if wrong update() overload is called
-  EXPECT_THROW(robot.update(), ControlException);
-  EXPECT_THROW(robot.update(ControllerCommand{}), ControlException);
+  server
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.controller_mode = ControllerMode::kJointPosition;
+      })
+      .spinOnce();
+  EXPECT_NO_THROW(robot.update(nullptr, nullptr));
+
+  ControllerCommand control_command{};
+  MotionGeneratorCommand motion_command{};
+  EXPECT_THROW(robot.update(nullptr, &control_command), ControlException);
+  EXPECT_THROW(robot.update(&motion_command, &control_command), ControlException);
 
   server.sendEmptyRobotState()
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
-  EXPECT_NO_THROW(robot.update(MotionGeneratorCommand{}));
+  EXPECT_NO_THROW(robot.update(&motion_command, nullptr));
 }
 
 TEST(RobotImpl, CanStartMotionWithController) {
@@ -126,9 +136,18 @@ TEST(RobotImpl, CanStartMotionWithController) {
   EXPECT_TRUE(robot.controllerRunning());
 
   // Test exceptions if wrong update() overload is called
-  EXPECT_THROW(robot.update(), ControlException);
-  EXPECT_THROW(robot.update(ControllerCommand{}), ControlException);
-  EXPECT_THROW(robot.update(MotionGeneratorCommand{}), ControlException);
+  server
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kCartesianPosition;
+        robot_state.controller_mode = ControllerMode::kExternalController;
+      })
+      .spinOnce();
+  EXPECT_NO_THROW(robot.update(nullptr, nullptr));
+
+  ControllerCommand control_command{};
+  MotionGeneratorCommand motion_command{};
+  EXPECT_THROW(robot.update(nullptr, &control_command), ControlException);
+  EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
 }
 
 TEST(RobotImpl, CanStartController) {
@@ -153,14 +172,23 @@ TEST(RobotImpl, CanStartController) {
   EXPECT_TRUE(robot.controllerRunning());
 
   // Test exceptions if wrong update() overload is called
-  EXPECT_THROW(robot.update(), ControlException);
-  EXPECT_THROW(robot.update(MotionGeneratorCommand{}), ControlException);
+  server
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.controller_mode = ControllerMode::kExternalController;
+      })
+      .spinOnce();
+  EXPECT_NO_THROW(robot.update(nullptr, nullptr));
+
+  ControllerCommand control_command{};
+  MotionGeneratorCommand motion_command{};
+  EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
+  EXPECT_THROW(robot.update(&motion_command, &control_command), ControlException);
 
   server.sendEmptyRobotState()
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
-  EXPECT_NO_THROW(robot.update(ControllerCommand{}));
+  EXPECT_NO_THROW(robot.update(nullptr, &control_command));
 }
 
 TEST(RobotImpl, CanNotStartMultipleMotions) {
@@ -247,7 +275,7 @@ TEST(RobotImpl, CanSendMotionGeneratorCommand) {
       })
       .spinOnce();
 
-  EXPECT_NO_THROW(robot.update(sent_command.motion));
+  EXPECT_NO_THROW(robot.update(&sent_command.motion));
 }
 
 TEST(RobotImpl, CanSendControllerCommand) {
@@ -284,7 +312,7 @@ TEST(RobotImpl, CanSendControllerCommand) {
       })
       .spinOnce();
 
-  EXPECT_NO_THROW(robot.update(sent_command.control));
+  EXPECT_NO_THROW(robot.update(nullptr, &sent_command.control));
 }
 
 TEST(RobotImpl, CanSendMotionGeneratorAndControlCommand) {
@@ -328,7 +356,7 @@ TEST(RobotImpl, CanSendMotionGeneratorAndControlCommand) {
       })
       .spinOnce();
 
-  EXPECT_NO_THROW(robot.update(sent_command.motion, sent_command.control));
+  EXPECT_NO_THROW(robot.update(&sent_command.motion, &sent_command.control));
 }
 
 TEST(RobotImpl, CanReceiveMotionGenerationError) {
@@ -365,7 +393,7 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  robot.update(sent_command.motion);
+  robot.update(&sent_command.motion);
 
   server
       .onSendRobotState([](RobotState& robot_state) {
@@ -376,11 +404,11 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
       .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kRejected); })
       .spinOnce();
 
-  EXPECT_THROW(robot.update(sent_command.motion), ControlException);
+  EXPECT_THROW(robot.update(&sent_command.motion), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
-TEST(RobotImpl, CanStopMotionGenerator) {
+TEST(RobotImpl, CanStopMotion) {
   Move::Deviation maximum_path_deviation{0, 1, 2};
   Move::Deviation maximum_goal_pose_deviation{3, 4, 5};
 
@@ -414,7 +442,7 @@ TEST(RobotImpl, CanStopMotionGenerator) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  robot.update(sent_command.motion);
+  robot.update(&sent_command.motion);
 
   server.sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
       .onSendRobotState([](RobotState& robot_state) {
@@ -459,7 +487,7 @@ TEST(RobotImpl, CanStopController) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  robot.update(sent_command.control);
+  robot.update(nullptr, &sent_command.control);
 
   server
       .onSendRobotState([](RobotState& robot_state) {

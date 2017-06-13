@@ -22,10 +22,8 @@ class RobotControl {
   virtual void stopMotion() = 0;
 
   virtual RobotState update(
-      const research_interface::robot::ControllerCommand& control_command) = 0;
-  virtual RobotState update(
-      const research_interface::robot::MotionGeneratorCommand& motion_command,
-      const research_interface::robot::ControllerCommand& control_command) = 0;
+      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
+      const research_interface::robot::ControllerCommand* control_command = nullptr) = 0;
 
   virtual RealtimeConfig realtimeConfig() const noexcept = 0;
 };
