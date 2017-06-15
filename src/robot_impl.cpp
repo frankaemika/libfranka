@@ -182,16 +182,24 @@ void Robot::Impl::stopMotion() {
     return;
   }
 
-  research_interface::robot::MotionGeneratorCommand command{};
-  command.motion_generation_finished = true;
+  // If a controller is currently running, send zero torques while stopping motion.
+  research_interface::robot::ControllerCommand controller_command{};
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.motion_generation_finished = true;
   // The TCP response for the finished Move might arrive while the robot state still shows
   // that the motion is running, or afterwards. To handle both situations, we ignore TCP
   // packages in update() and wait for the Move response afterwards.
   while (motionGeneratorRunning()) {
-    update(&command, nullptr, true);
+    update(&motion_command, controllerRunning() ? &controller_command : nullptr, true);
   }
   handleCommandResponse<research_interface::robot::Move>(
       network_.tcpBlockingReceiveResponse<research_interface::robot::Move>());
+
+  // Stop running controller.
+  if (controllerRunning()) {
+    stopController();
+  }
 }
 
 void Robot::Impl::startController() {
