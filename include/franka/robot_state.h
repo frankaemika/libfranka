@@ -23,7 +23,7 @@ struct RobotState {
 
   /**
    * \f$^OT_{EE}\f$
-   * Motion generator's start end effector pose in world base frame.
+   * Last desired end effector pose of motion generation in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
