@@ -12,14 +12,6 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    // Set additional parameters always before the control loop, NEVER in the
-    // control loop
-    // Set a dynamic load:
-    double load_mass = 0.0;
-    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
-    robot.setLoad(load_mass, load_translation, load_inertia);
-
     auto initial_pose = robot.readOnce().q_d;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&) -> franka::JointPositions {
