@@ -19,7 +19,7 @@ node {
     stage('Build in release mode') {
       sh 'scripts/ci/release-build.sh'
       dir('build-release/doc') {
-        sh 'tar cfz libfranka-api.tar.gz html'
+        sh 'tar cfz ../libfranka-docs.tar.gz html'
       }
     }
 
