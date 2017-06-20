@@ -52,6 +52,7 @@ class Robot::Impl : public RobotControl {
   RobotState update(const research_interface::robot::MotionGeneratorCommand* motion_command,
                     const research_interface::robot::ControllerCommand* control_command,
                     bool ignore_tcp);
+  research_interface::robot::RobotState readRobotState();
 
   Network network_;
 

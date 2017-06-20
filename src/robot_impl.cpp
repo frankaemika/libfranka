@@ -61,10 +61,9 @@ RobotState Robot::Impl::update(
                     std::placeholders::_1));
     } catch (const CommandException& e) {
       // Make sure that we have an up-to-date robot state that shows the stopped motion.
-      research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
-      motion_generator_mode_ = robot_state.motion_generator_mode;
-      controller_mode_ = robot_state.controller_mode;
-      message_id_ = robot_state.message_id;
+      while (motionGeneratorRunning()) {
+        readRobotState();
+      }
 
       // Rethrow as control exception to be consistent with starting/stopping of motions.
       throw ControlException(e.what());
@@ -76,6 +75,7 @@ RobotState Robot::Impl::update(
     robot_command.message_id = message_id_;
     if (motion_command != nullptr) {
       if (!motionGeneratorRunning()) {
+        // Happens for example if guiding button is pressed during motion.
         throw ControlException(
             "libfranka: Trying to send motion command, but no motion generator running!");
       }
@@ -97,11 +97,15 @@ RobotState Robot::Impl::update(
     network_.udpSendRobotCommand(robot_command);
   }
 
+  return convertRobotState(readRobotState());
+}
+
+research_interface::robot::RobotState Robot::Impl::readRobotState() {
   research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
-  return convertRobotState(robot_state);
+  return robot_state;
 }
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
