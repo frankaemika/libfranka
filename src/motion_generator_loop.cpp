@@ -56,8 +56,11 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
 }
 
 template <typename T>
-MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
-  robot_.stopMotion();
+MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
+  try {
+    robot_.stopMotion();
+  } catch (...) {
+  }
 }
 
 template <typename T>

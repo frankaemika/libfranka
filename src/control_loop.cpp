@@ -13,8 +13,11 @@ ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
   robot_.startController();
 }
 
-ControlLoop::~ControlLoop() {
-  robot_.stopController();
+ControlLoop::~ControlLoop() noexcept {
+  try {
+    robot_.stopController();
+  } catch (...) {
+  }
 }
 
 void ControlLoop::operator()() {

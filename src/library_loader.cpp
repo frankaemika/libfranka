@@ -20,7 +20,11 @@ LibraryLoader::LibraryLoader(const std::string& filepath) try {
   throw ModelException("libfranka: error while loading library: "s + e.what());
 }
 
-LibraryLoader::~LibraryLoader() try { library_.unload(); } catch (...) {
+LibraryLoader::~LibraryLoader() {
+  try {
+    library_.unload();
+  } catch (...) {
+  }
 }
 
 void* LibraryLoader::getSymbol(const std::string& symbol_name) try {

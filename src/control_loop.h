@@ -7,7 +7,7 @@ namespace franka {
 class ControlLoop : public ControlLoopBase {
  public:
   ControlLoop(RobotControl& robot, ControlCallback control_callback);
-  ~ControlLoop() override;
+  ~ControlLoop() noexcept override;
 
   void operator()();
 };

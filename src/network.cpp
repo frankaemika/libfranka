@@ -29,7 +29,11 @@ Network::Network(const std::string& franka_address,
   }
 }
 
-Network::~Network() try { tcp_socket_.shutdown(); } catch (...) {
+Network::~Network() {
+  try {
+    tcp_socket_.shutdown();
+  } catch (...) {
+  }
 }
 
 uint16_t Network::udpPort() const noexcept {
