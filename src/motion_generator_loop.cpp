@@ -61,6 +61,12 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
     robot_.stopMotion();
   } catch (...) {
   }
+  if (control_callback_) {
+    try {
+      robot_.stopController();
+    } catch (...) {
+    }
+  }
 }
 
 template <typename T>

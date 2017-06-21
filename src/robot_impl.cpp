@@ -197,11 +197,6 @@ void Robot::Impl::stopMotion() {
   }
   handleCommandResponse<research_interface::robot::Move>(
       network_.tcpBlockingReceiveResponse<research_interface::robot::Move>());
-
-  // Stop running controller.
-  if (controllerRunning()) {
-    stopController();
-  }
 }
 
 void Robot::Impl::startController() {

@@ -133,6 +133,7 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionAndControllerCallback) {
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
                                    TestFixture::Loop::kDefaultDeviation));
     EXPECT_CALL(robot, stopMotion());
+    EXPECT_CALL(robot, stopController());
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot,

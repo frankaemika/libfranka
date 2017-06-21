@@ -503,12 +503,25 @@ TEST(RobotImpl, CanStopMotionWithController) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kExternalController;
       })
+      .spinOnce()
+      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
+      .spinOnce();
+
+  robot.stopMotion();
+  EXPECT_FALSE(robot.motionGeneratorRunning());
+  EXPECT_TRUE(robot.controllerRunning());
+
+  server
+      .onReceiveRobotCommand([](const RobotCommand& command) {
+        EXPECT_TRUE(command.motion.motion_generation_finished);
+      })
+      .spinOnce();
+
+  server
       .onSendRobotState([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
       })
-      .spinOnce()
-      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kJointImpedance, request.mode);
@@ -516,16 +529,12 @@ TEST(RobotImpl, CanStopMotionWithController) {
       })
       .spinOnce();
 
-  robot.stopMotion();
+  robot.stopController();
 
-  // Receive sent robot commands: first for stopped motion generation,
-  // second for stopped controller.
   server
-      .onReceiveRobotCommand([](const RobotCommand& command) {
-        EXPECT_TRUE(command.motion.motion_generation_finished);
-      })
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
+
   EXPECT_FALSE(robot.motionGeneratorRunning());
   EXPECT_FALSE(robot.controllerRunning());
 }
