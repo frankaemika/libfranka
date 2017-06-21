@@ -250,6 +250,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.tau_ext_hat_filtered = robot_state.tau_ext_hat_filtered;
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
+  converted.sequence_number = robot_state.message_id;
   return converted;
 }
 

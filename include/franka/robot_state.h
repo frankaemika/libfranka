@@ -128,6 +128,11 @@ struct RobotState {
    * the end effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Strictly increasing sequence number for each received robot state.
+   */
+  uint32_t sequence_number{};
 };
 
 /**
