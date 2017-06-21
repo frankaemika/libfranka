@@ -531,9 +531,7 @@ TEST(RobotImpl, CanStopMotionWithController) {
 
   robot.stopController();
 
-  server
-      .onReceiveRobotCommand([](const RobotCommand&) {})
-      .spinOnce();
+  server.onReceiveRobotCommand([](const RobotCommand&) {}).spinOnce();
 
   EXPECT_FALSE(robot.motionGeneratorRunning());
   EXPECT_FALSE(robot.controllerRunning());
