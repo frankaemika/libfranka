@@ -49,10 +49,9 @@ class Robot::Impl : public RobotControl {
   template <typename T>
   void handleCommandResponse(const typename T::Response& response);
 
-  RobotState update(const research_interface::robot::MotionGeneratorCommand* motion_command,
-                    const research_interface::robot::ControllerCommand* control_command,
-                    bool ignore_tcp);
-  research_interface::robot::RobotState readRobotState();
+  void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
+                        const research_interface::robot::ControllerCommand* control_command);
+  research_interface::robot::RobotState receiveRobotState();
 
   Network network_;
 

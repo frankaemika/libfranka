@@ -42,15 +42,8 @@ Robot::Impl::Impl(const std::string& franka_address,
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  return update(motion_command, control_command, false);
-}
-
-RobotState Robot::Impl::update(
-    const research_interface::robot::MotionGeneratorCommand* motion_command,
-    const research_interface::robot::ControllerCommand* control_command,
-    bool ignore_tcp) {
   research_interface::robot::Function function;
-  if (!ignore_tcp && network_.tcpReadResponse(&function)) {
+  if (network_.tcpReadResponse(&function)) {
     if (function != research_interface::robot::Function::kMove) {
       throw ProtocolException("libfranka: unexpected response!");
     }
@@ -62,14 +55,20 @@ RobotState Robot::Impl::update(
     } catch (const CommandException& e) {
       // Make sure that we have an up-to-date robot state that shows the stopped motion.
       while (motionGeneratorRunning()) {
-        readRobotState();
+        receiveRobotState();
       }
 
       // Rethrow as control exception to be consistent with starting/stopping of motions.
       throw ControlException(e.what());
     }
   }
+  sendRobotCommand(motion_command, control_command);
+  return convertRobotState(receiveRobotState());
+}
 
+void Robot::Impl::sendRobotCommand(
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
   if (motion_command != nullptr || control_command != nullptr) {
     research_interface::robot::RobotCommand robot_command{};
     robot_command.message_id = message_id_;
@@ -96,11 +95,9 @@ RobotState Robot::Impl::update(
 
     network_.udpSendRobotCommand(robot_command);
   }
-
-  return convertRobotState(readRobotState());
 }
 
-research_interface::robot::RobotState Robot::Impl::readRobotState() {
+research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
   research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
@@ -192,10 +189,11 @@ void Robot::Impl::stopMotion() {
   research_interface::robot::MotionGeneratorCommand motion_command{};
   motion_command.motion_generation_finished = true;
   // The TCP response for the finished Move might arrive while the robot state still shows
-  // that the motion is running, or afterwards. To handle both situations, we ignore TCP
-  // packages in update() and wait for the Move response afterwards.
+  // that the motion is running, or afterwards. To handle both situations, we do not process
+  // TCP packages in this loop and explicitly wait for the Move response over TCP afterwards.
   while (motionGeneratorRunning()) {
-    update(&motion_command, controllerRunning() ? &controller_command : nullptr, true);
+    sendRobotCommand(&motion_command, controllerRunning() ? &controller_command : nullptr);
+    receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
       network_.tcpBlockingReceiveResponse<research_interface::robot::Move>());
