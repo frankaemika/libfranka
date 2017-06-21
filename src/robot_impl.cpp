@@ -223,7 +223,9 @@ void Robot::Impl::stopController() {
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
+  converted.O_T_EE_d = robot_state.O_T_EE_d;
   converted.elbow = robot_state.elbow;
+  converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
   converted.dtau_J = robot_state.dtau_J;
   converted.q = robot_state.q;
