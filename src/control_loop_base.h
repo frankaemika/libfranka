@@ -17,7 +17,7 @@ class ControlLoopBase {
   using ControlCallback = std::function<Torques(const RobotState&)>;
 
   ControlLoopBase(RobotControl& robot, ControlCallback control_callback);
-  virtual ~ControlLoopBase() = default;
+  virtual ~ControlLoopBase() noexcept = default;
 
  protected:
   bool spinOnce(const RobotState& robot_state,

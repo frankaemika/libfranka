@@ -16,12 +16,10 @@ class MockRobotControl : public franka::RobotControl {
                     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation));
   MOCK_METHOD0(stopMotion, void());
 
-  MOCK_METHOD1(update,
-               franka::RobotState(const research_interface::robot::ControllerCommand& command));
   MOCK_METHOD2(
       update,
-      franka::RobotState(const research_interface::robot::MotionGeneratorCommand& motion_command,
-                         const research_interface::robot::ControllerCommand& control_command));
+      franka::RobotState(const research_interface::robot::MotionGeneratorCommand* motion_command,
+                         const research_interface::robot::ControllerCommand* control_command));
 
   franka::RealtimeConfig realtimeConfig() const noexcept override {
     return franka::RealtimeConfig::kIgnore;

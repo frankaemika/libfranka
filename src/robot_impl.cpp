@@ -40,8 +40,8 @@ Robot::Impl::Impl(const std::string& franka_address,
 }
 
 RobotState Robot::Impl::update(
-    const research_interface::robot::MotionGeneratorCommand& motion_command,
-    const research_interface::robot::ControllerCommand& control_command) {
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
   research_interface::robot::Function function;
   if (network_.tcpReadResponse(&function)) {
     if (function != research_interface::robot::Function::kMove) {
@@ -54,53 +54,55 @@ RobotState Robot::Impl::update(
                     std::placeholders::_1));
     } catch (const CommandException& e) {
       // Make sure that we have an up-to-date robot state that shows the stopped motion.
-      research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
-      motion_generator_mode_ = robot_state.motion_generator_mode;
-      controller_mode_ = robot_state.controller_mode;
-      message_id_ = robot_state.message_id;
+      while (motionGeneratorRunning()) {
+        receiveRobotState();
+      }
 
       // Rethrow as control exception to be consistent with starting/stopping of motions.
       throw ControlException(e.what());
     }
   }
+  sendRobotCommand(motion_command, control_command);
+  return convertRobotState(receiveRobotState());
+}
 
-  if (motionGeneratorRunning() || controllerRunning()) {
+void Robot::Impl::sendRobotCommand(
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
+  if (motion_command != nullptr || control_command != nullptr) {
     research_interface::robot::RobotCommand robot_command{};
     robot_command.message_id = message_id_;
-    robot_command.motion = motion_command;
-    robot_command.control = control_command;
+    if (motion_command != nullptr) {
+      if (!motionGeneratorRunning()) {
+        // Happens for example if guiding button is pressed during motion.
+        throw ControlException(
+            "libfranka: Trying to send motion command, but no motion generator running!");
+      }
+      robot_command.motion = *motion_command;
+    }
+    if (control_command != nullptr) {
+      if (!controllerRunning()) {
+        throw ControlException(
+            "libfranka: Trying to send control command, but no controller running!");
+      }
+      robot_command.control = *control_command;
+    }
+
+    if (motionGeneratorRunning() && controllerRunning() &&
+        (motion_command == nullptr || control_command == nullptr)) {
+      throw ControlException("libfranka: Trying to send partial robot command!");
+    }
 
     network_.udpSendRobotCommand(robot_command);
   }
+}
 
+research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
   research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
-  return convertRobotState(robot_state);
-}
-
-RobotState Robot::Impl::update(
-    const research_interface::robot::MotionGeneratorCommand& motion_command) {
-  if (!motionGeneratorRunning() || controllerRunning()) {
-    throw ControlException("libfranka: Inconsistent state in update(MotionGeneratorCommand).");
-  }
-  return update(motion_command, {});
-}
-
-RobotState Robot::Impl::update(
-    const research_interface::robot::ControllerCommand& control_command) {
-  if (motionGeneratorRunning() || !controllerRunning()) {
-    throw ControlException("libfranka: Inconsistent state in update(ControllerCommand).");
-  }
-  return update({}, control_command);
-}
-
-RobotState Robot::Impl::update() {
-  if (motionGeneratorRunning() || controllerRunning()) {
-    throw ControlException("libfranka: Inconsistent state in update().");
-  }
-  return update({}, {});
+  return robot_state;
 }
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
@@ -172,7 +174,7 @@ void Robot::Impl::startMotion(
 
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
-    update({}, {});
+    update();
   }
 }
 
@@ -181,15 +183,20 @@ void Robot::Impl::stopMotion() {
     return;
   }
 
-  // TODO(FWA): StopMove never necessary?
-  // executeCommand<research_interface::robot::StopMove>();
+  // If a controller is currently running, send zero torques while stopping motion.
+  research_interface::robot::ControllerCommand controller_command{};
 
-  // TODO(FWA): needs other parameters set as well (from previous motion?)?
-  research_interface::robot::MotionGeneratorCommand command{};
-  command.motion_generation_finished = true;
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.motion_generation_finished = true;
+  // The TCP response for the finished Move might arrive while the robot state still shows
+  // that the motion is running, or afterwards. To handle both situations, we do not process
+  // TCP packages in this loop and explicitly wait for the Move response over TCP afterwards.
   while (motionGeneratorRunning()) {
-    update(command);
+    sendRobotCommand(&motion_command, controllerRunning() ? &controller_command : nullptr);
+    receiveRobotState();
   }
+  handleCommandResponse<research_interface::robot::Move>(
+      network_.tcpBlockingReceiveResponse<research_interface::robot::Move>());
 }
 
 void Robot::Impl::startController() {
@@ -202,7 +209,7 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    update({}, {});
+    update();
   }
 }
 
@@ -216,7 +223,7 @@ void Robot::Impl::stopController() {
 
   research_interface::robot::ControllerCommand command{};
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    update(command);
+    update(nullptr, &command);
   }
 }
 
@@ -238,6 +245,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.tau_ext_hat_filtered = robot_state.tau_ext_hat_filtered;
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
+  converted.sequence_number = robot_state.message_id;
   return converted;
 }
 

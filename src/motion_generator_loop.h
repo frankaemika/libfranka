@@ -26,7 +26,7 @@ class MotionGeneratorLoop : public ControlLoopBase {
                       ControllerMode controller_mode,
                       MotionGeneratorCallback motion_callback);
 
-  ~MotionGeneratorLoop() override;
+  ~MotionGeneratorLoop() noexcept override;
 
   void operator()();
 

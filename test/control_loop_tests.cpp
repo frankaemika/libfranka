@@ -77,7 +77,7 @@ TEST(ControlLoop, SpinWithStoppingCallback) {
   // would block otherwise
   ASSERT_FALSE(loop.spinOnce(robot_state, nullptr));
 
-  EXPECT_CALL(robot, update(_)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(control_callback, invoke(_)).WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
   loop();
 

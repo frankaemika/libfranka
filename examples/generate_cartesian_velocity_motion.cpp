@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
         lower_force_thresholds_nominal, upper_force_thresholds_nominal);
 
     // Set a dynamic load:
-    double load_mass = 0.1;
+    double load_mass = 0.0;
     std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
     std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
     robot.setLoad(load_mass, load_translation, load_inertia);
