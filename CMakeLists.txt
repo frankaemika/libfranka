@@ -10,12 +10,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
-   CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(-Wall -Wextra)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  add_compile_options(/Wall)
-endif()
+add_compile_options(-Wall -Wextra)
 
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
@@ -29,12 +24,7 @@ find_package(Poco REQUIRED COMPONENTS Net Foundation)
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR
-     CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_compile_options(-Werror)
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_compile_options(/WX)
-  endif()
+  add_compile_options(-Werror)
 endif()
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
@@ -64,7 +54,6 @@ add_library(franka SHARED
 )
 
 set_target_properties(franka PROPERTIES
-  WINDOWS_EXPORT_ALL_SYMBOLS ON
   VERSION ${libfranka_VERSION}
   SOVERSION ${libfranka_VERSION_MAJOR}
 )
