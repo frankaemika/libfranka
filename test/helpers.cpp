@@ -53,6 +53,7 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
     EXPECT_EQ(0.0, actual.K_F_ext_hat_K[i]);
   }
+  EXPECT_EQ(0u, actual.sequence_number);
 }
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
@@ -72,6 +73,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.sequence_number, actual.sequence_number);
 }
 
 void testRobotStatesAreEqual(const research_interface::robot::RobotState& expected,
@@ -92,6 +94,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.message_id, actual.sequence_number);
 }
 
 double randomDouble() {
@@ -147,6 +150,7 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
+  robot_state.sequence_number = randomDouble();
 }
 
 void randomRobotState(research_interface::robot::RobotState& robot_state) {

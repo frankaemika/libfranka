@@ -56,31 +56,43 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
 }
 
 template <typename T>
-MotionGeneratorLoop<T>::~MotionGeneratorLoop() {
-  robot_.stopMotion();
+MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
+  try {
+    robot_.stopMotion();
+  } catch (...) {
+  }
+  if (control_callback_) {
+    try {
+      robot_.stopController();
+    } catch (...) {
+    }
+  }
 }
 
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
-  RobotState robot_state = robot_.update({}, {});
+  RobotState robot_state = robot_.update();
   research_interface::robot::MotionGeneratorCommand motion_command{};
-  research_interface::robot::ControllerCommand control_command{};
-  while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
-    robot_state = robot_.update(motion_command, control_command);
+  if (control_callback_) {
+    research_interface::robot::ControllerCommand control_command{};
+    while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
+      robot_state = robot_.update(&motion_command, &control_command);
+    }
+  } else {
+    while (spinOnce(robot_state, &motion_command)) {
+      robot_state = robot_.update(&motion_command);
+    }
   }
 }
 
 template <typename T>
 bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
                                       research_interface::robot::MotionGeneratorCommand* command) {
-  if (motion_callback_) {
-    T motion_output = motion_callback_(robot_state);
-    if (motion_output.stop()) {
-      return false;
-    }
-    convertMotion(motion_output, command);
+  T motion_output = motion_callback_(robot_state);
+  if (motion_output.stop()) {
+    return false;
   }
-
+  convertMotion(motion_output, command);
   return true;
 }
 

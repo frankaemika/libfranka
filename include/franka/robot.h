@@ -315,8 +315,7 @@ class Robot {
    * @see RobotState::cartesian_collision
    * @see RobotState::joint_contact
    * @see RobotState::joint_collision
-   * @see Robot::automaticErrorRecovery for performing a reset after a
-   * collision.
+   * @see Robot::automaticErrorRecovery for performing a reset after a collision.
    */
   void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
                             const std::array<double, 7>& upper_torque_thresholds_acceleration,
@@ -348,8 +347,7 @@ class Robot {
    * @see RobotState::cartesian_collision
    * @see RobotState::joint_contact
    * @see RobotState::joint_collision
-   * @see Robot::automaticErrorRecovery for performing a reset after a
-   * collision.
+   * @see Robot::automaticErrorRecovery for performing a reset after a collision.
    */
   void setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds,
                             const std::array<double, 7>& upper_torque_thresholds,

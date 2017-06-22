@@ -12,7 +12,7 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    auto initial_pose = robot.readOnce().O_T_EE;
+    auto initial_pose = robot.readOnce().O_T_EE_d;
     double radius = 0.3;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&) -> franka::CartesianPose {

@@ -133,6 +133,7 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionAndControllerCallback) {
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
                                    TestFixture::Loop::kDefaultDeviation));
     EXPECT_CALL(robot, stopMotion());
+    EXPECT_CALL(robot, stopController());
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot,
@@ -172,7 +173,6 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithMotionCallbackAndControllerMode) {
   RobotCommand command;
   randomRobotCommand(command);
   EXPECT_TRUE(loop.spinOnce(robot_state, &command.motion));
-  EXPECT_TRUE(loop.spinOnce(robot_state, &command.control));
   EXPECT_THAT(command.motion, this->getField(motion));
 }
 
@@ -230,12 +230,9 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallbackAndController
   typename TestFixture::Loop loop(robot, ControllerMode::kMotorPD,
                                   [](const RobotState&) { return Stop; });
 
-  RobotState robot_state{};
-  ControllerCommand control_command{};
-  EXPECT_TRUE(loop.spinOnce(robot_state, &control_command));
-
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
+  RobotState robot_state{};
   MotionGeneratorCommand motion_command{};
   ASSERT_FALSE(loop.spinOnce(robot_state, &motion_command));
   loop();
