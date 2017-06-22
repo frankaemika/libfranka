@@ -21,6 +21,9 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
 
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
@@ -63,7 +66,7 @@ target_include_directories(franka PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation)
+target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation Threads::Threads)
 target_link_libraries(franka PRIVATE research-interface-common)
 
 ## Installation
