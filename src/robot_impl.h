@@ -9,6 +9,7 @@
 
 #include "network.h"
 #include "robot_control.h"
+#include "robot_network.h"
 
 namespace franka {
 
@@ -18,7 +19,7 @@ class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
 
-  explicit Impl(std::unique_ptr<Network> network,
+  explicit Impl(std::unique_ptr<RobotNetwork> network,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update(
@@ -51,7 +52,7 @@ class Robot::Impl : public RobotControl {
                         const research_interface::robot::ControllerCommand* control_command);
   research_interface::robot::RobotState receiveRobotState();
 
-  std::unique_ptr<Network> network_;
+  std::unique_ptr<RobotNetwork> network_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;

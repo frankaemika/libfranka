@@ -60,6 +60,7 @@ add_library(franka SHARED
   src/network.cpp
   src/robot.cpp
   src/robot_impl.cpp
+  src/robot_network.cpp
   src/robot_state.cpp
 )
 

@@ -11,7 +11,7 @@ namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
-Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
+Robot::Impl::Impl(std::unique_ptr<RobotNetwork> network, RealtimeConfig realtime_config)
     : network_{std::move(network)}, realtime_config_{realtime_config} {
   research_interface::robot::Connect::Request connect_request(network_->udpPort());
 
@@ -22,7 +22,7 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
   switch (connect_response.status) {
     case research_interface::robot::Connect::Status::kIncompatibleLibraryVersion: {
       std::stringstream message;
-      message << "libfranka: incompatible library version. " << std::endl
+      message << "libfranka robot: incompatible library version. " << std::endl
               << "Server version: " << connect_response.version << std::endl
               << "Library version: " << research_interface::robot::kVersion;
       throw IncompatibleVersionException(message.str());
@@ -32,7 +32,7 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
       break;
     }
     default:
-      throw ProtocolException("libfranka: protocol error");
+      throw ProtocolException("libfranka robot: protocol error during connection attempt");
   }
 }
 
@@ -42,7 +42,7 @@ RobotState Robot::Impl::update(
   research_interface::robot::Function function;
   if (network_->tcpReadResponse(&function)) {
     if (function != research_interface::robot::Function::kMove) {
-      throw ProtocolException("libfranka: unexpected response!");
+      throw ProtocolException("libfranka robot: unexpected response!");
     }
 
     try {
@@ -73,21 +73,21 @@ void Robot::Impl::sendRobotCommand(
       if (!motionGeneratorRunning()) {
         // Happens for example if guiding button is pressed during motion.
         throw ControlException(
-            "libfranka: Trying to send motion command, but no motion generator running!");
+            "libfranka robot: Trying to send motion command, but no motion generator running!");
       }
       robot_command.motion = *motion_command;
     }
     if (control_command != nullptr) {
       if (!controllerRunning()) {
         throw ControlException(
-            "libfranka: Trying to send control command, but no controller running!");
+            "libfranka robot: Trying to send control command, but no controller running!");
       }
       robot_command.control = *control_command;
     }
 
     if (motionGeneratorRunning() && controllerRunning() &&
         (motion_command == nullptr || control_command == nullptr)) {
-      throw ControlException("libfranka: Trying to send partial robot command!");
+      throw ControlException("libfranka robot: Trying to send partial robot command!");
     }
 
     network_->udpSendRobotCommand(robot_command);
@@ -124,7 +124,7 @@ void Robot::Impl::startMotion(
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) {
   if (motionGeneratorRunning()) {
-    throw ControlException("libfranka: attempted to start multiple motion generators!");
+    throw ControlException("libfranka robot: attempted to start multiple motion generators!");
   }
 
   research_interface::robot::MotionGeneratorMode state_motion_generator_mode;
@@ -163,7 +163,7 @@ void Robot::Impl::startMotion(
       state_controller_mode = decltype(state_controller_mode)::kExternalController;
       break;
     default:
-      throw std::invalid_argument("libfranka: Invalid controller mode given.");
+      throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
   }
 
   executeCommand<research_interface::robot::Move>(
@@ -198,7 +198,7 @@ void Robot::Impl::stopMotion() {
 
 void Robot::Impl::startController() {
   if (controllerRunning()) {
-    throw ControlException("libfranka: attempted to start multiple controllers!");
+    throw ControlException("libfranka robot: attempted to start multiple controllers!");
     return;
   }
 

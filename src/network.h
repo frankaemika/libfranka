@@ -6,8 +6,6 @@
 #include <unordered_set>
 
 #include <franka/exception.h>
-#include <research_interface/robot/rbk_types.h>
-#include <research_interface/robot/service_types.h>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
@@ -20,26 +18,20 @@ class Network {
   explicit Network(const std::string& franka_address,
                    uint16_t franka_port,
                    std::chrono::milliseconds timeout);
-  ~Network();
+  virtual ~Network();
 
-  research_interface::robot::RobotState udpReadRobotState();
-
-  uint16_t udpPort() const noexcept;
+  virtual uint16_t udpPort() const noexcept;
 
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
 
-  void udpSendRobotCommand(const research_interface::robot::RobotCommand& command);
-
   template <typename T>
   void tcpSendRequest(const T& request);
-
-  bool tcpReadResponse(research_interface::robot::Function* function);
 
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
- private:
+ protected:
   int tcpReceiveIntoBuffer();
 
   Poco::Net::StreamSocket tcp_socket_;
@@ -47,6 +39,8 @@ class Network {
   Poco::Net::SocketAddress udp_server_address_;
 
   std::vector<uint8_t> read_buffer_;
+
+  virtual const char* getName() { return ""; };
 };
 
 template <typename T>
@@ -86,17 +80,21 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
     }
   } catch (const Poco::TimeoutException& e) {
     if (bytes_read != 0) {
-      throw ProtocolException(std::string{"libfranka: incorrect object size"});
+      throw ProtocolException(
+          std::string{"libfranka " + std::string(getName()) + ": incorrect object size"});
     } else {
-      throw NetworkException(std::string{"libfranka: FRANKA connection timeout"});
+      throw NetworkException(
+          std::string{"libfranka " + std::string(getName()) + ": connection timeout"});
     }
   } catch (const Poco::Exception& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
+    throw NetworkException(
+        std::string{"libfranka " + std::string(getName()) + ": connection closed"});
   }
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());
   if (response->function != T::kFunction) {
-    throw ProtocolException(std::string{"libfranka: received response of wrong type."});
+    throw ProtocolException(
+        std::string{"libfranka " + std::string(getName()) + ": received response of wrong type"});
   }
   return *response;
 }
