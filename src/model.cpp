@@ -5,13 +5,14 @@
 #include <research_interface/robot/service_types.h>
 
 #include "model_library.h"
+#include "robot_impl.h"
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Model::Model(franka::Robot& /* robot */)  // NOLINT (readability-named-parameter)
-    : library_{new ModelLibrary} {}
+Model::Model(franka::Robot& robot)  // NOLINT (readability-named-parameter)
+    : library_{new ModelLibrary(robot.impl().network())} {}
 
 // Has to be declared here, as the ModelLibrary type is incomplete in the
 // header

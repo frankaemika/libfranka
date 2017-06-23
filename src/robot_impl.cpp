@@ -121,6 +121,10 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
+Network& Robot::Impl::network() noexcept {
+  return network_;
+}
+
 void Robot::Impl::startMotion(
     research_interface::robot::Move::ControllerMode controller_mode,
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,

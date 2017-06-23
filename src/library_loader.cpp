@@ -9,7 +9,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 namespace franka {
 
 LibraryLoader::LibraryLoader(const std::string& filepath) try {
-  library_.load(filepath + Poco::SharedLibrary::suffix());
+  library_.load(filepath);
 } catch (const Poco::LibraryAlreadyLoadedException& e) {
   throw ModelException("libfranka: model library already loaded"s);
 } catch (const Poco::NotFoundException& e) {

@@ -470,6 +470,13 @@ class Robot {
 
   class Impl;
 
+  /**
+   * Returns the stored Robot::Impl instance.
+   *
+   * @return Robot::Impl instance
+   */
+  Impl& impl() noexcept;
+
  private:
   std::unique_ptr<Impl> impl_;
 };

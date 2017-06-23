@@ -57,6 +57,7 @@ add_library(franka SHARED
   src/model.cpp
   src/model_library.cpp
   src/motion_generator_loop.cpp
+  src/model_library_downloader.cpp
   src/network.cpp
   src/robot.cpp
   src/robot_impl.cpp

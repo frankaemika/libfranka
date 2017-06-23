@@ -4,14 +4,17 @@
 
 #include "libfcimodels.h"
 #include "library_loader.h"
+#include "model_library_downloader.h"
+#include "network.h"
 
 namespace franka {
 
 class ModelLibrary {
  public:
-  ModelLibrary();
+  ModelLibrary(Network& network);
 
  private:
+  ModelLibraryDownloader downloader_;
   LibraryLoader loader_;
 
  public:

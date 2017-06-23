@@ -39,6 +39,8 @@ class Network {
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
+  void tcpReceiveIntoBuffer(char* buffer, const int read_size);
+
  private:
   int tcpReceiveIntoBuffer();
 
@@ -74,25 +76,8 @@ bool Network::tcpHandleResponse(std::function<void(const typename T::Response&)>
 
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse() {
-  int bytes_read = 0;
-  constexpr int kBytesTotal = sizeof(typename T::Response);
-  std::array<uint8_t, kBytesTotal> buffer;
-
-  try {
-    while (bytes_read < kBytesTotal) {
-      int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left);
-      bytes_read += rv;
-    }
-  } catch (const Poco::TimeoutException& e) {
-    if (bytes_read != 0) {
-      throw ProtocolException(std::string{"libfranka: incorrect object size"});
-    } else {
-      throw NetworkException(std::string{"libfranka: FRANKA connection timeout"});
-    }
-  } catch (const Poco::Exception& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
-  }
+  std::array<char, sizeof(typename T::Response)> buffer;
+  tcpReceiveIntoBuffer(buffer.data(), buffer.size());
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());
   if (response->function != T::kFunction) {

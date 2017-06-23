@@ -21,6 +21,10 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
+Robot::Impl& Robot::impl() noexcept {
+  return *impl_;
+}
+
 void Robot::control(std::function<Torques(const RobotState&)> control_callback) {
   ControlLoop loop(*impl_, control_callback);
   loop();
