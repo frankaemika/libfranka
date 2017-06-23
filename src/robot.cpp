@@ -4,15 +4,16 @@
 
 #include "control_loop.h"
 #include "motion_generator_loop.h"
+#include "network.h"
 #include "robot_impl.h"
 
 namespace franka {
 
 Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config)
-    : impl_(new Robot::Impl(franka_address,
-                            research_interface::robot::kCommandPort,
-                            Robot::Impl::kDefaultTimeout,
-                            realtime_config)) {}
+    : impl_{new Robot::Impl(std::make_unique<Network>(franka_address,
+                                                      research_interface::robot::kCommandPort,
+                                                      Robot::Impl::kDefaultTimeout),
+                            realtime_config)} {}
 
 // Has to be declared here, as the Impl type is incomplete in the header
 Robot::~Robot() noexcept = default;

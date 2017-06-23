@@ -11,17 +11,14 @@ namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
-Robot::Impl::Impl(const std::string& franka_address,
-                  uint16_t franka_port,
-                  std::chrono::milliseconds timeout,
-                  RealtimeConfig realtime_config)
-    : network_{franka_address, franka_port, timeout}, realtime_config_{realtime_config} {
-  research_interface::robot::Connect::Request connect_request(network_.udpPort());
+Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
+    : network_{std::move(network)}, realtime_config_{realtime_config} {
+  research_interface::robot::Connect::Request connect_request(network_->udpPort());
 
-  network_.tcpSendRequest(connect_request);
+  network_->tcpSendRequest(connect_request);
 
   research_interface::robot::Connect::Response connect_response =
-      network_.tcpBlockingReceiveResponse<research_interface::robot::Connect>();
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Connect>();
   switch (connect_response.status) {
     case research_interface::robot::Connect::Status::kIncompatibleLibraryVersion: {
       std::stringstream message;
@@ -43,13 +40,13 @@ RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
   research_interface::robot::Function function;
-  if (network_.tcpReadResponse(&function)) {
+  if (network_->tcpReadResponse(&function)) {
     if (function != research_interface::robot::Function::kMove) {
       throw ProtocolException("libfranka: unexpected response!");
     }
 
     try {
-      network_.tcpHandleResponse<research_interface::robot::Move>(
+      network_->tcpHandleResponse<research_interface::robot::Move>(
           std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                     std::placeholders::_1));
     } catch (const CommandException& e) {
@@ -93,12 +90,12 @@ void Robot::Impl::sendRobotCommand(
       throw ControlException("libfranka: Trying to send partial robot command!");
     }
 
-    network_.udpSendRobotCommand(robot_command);
+    network_->udpSendRobotCommand(robot_command);
   }
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
-  research_interface::robot::RobotState robot_state = network_.udpReadRobotState();
+  research_interface::robot::RobotState robot_state = network_->udpReadRobotState();
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
@@ -196,7 +193,7 @@ void Robot::Impl::stopMotion() {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
-      network_.tcpBlockingReceiveResponse<research_interface::robot::Move>());
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
 }
 
 void Robot::Impl::startController() {
