@@ -1,9 +1,12 @@
 #include "model_library_downloader.h"
 
+#include <exception>
 #include <fstream>
 #include <vector>
 
 #include <research_interface/robot/service_types.h>
+
+#include <franka/exception.h>
 
 namespace franka {
 
@@ -13,11 +16,16 @@ ModelLibraryDownloader::ModelLibraryDownloader(Network& network) {
       research_interface::robot::LoadModelLibrary::Platform::kLinux);
   network.tcpSendRequest<research_interface::robot::LoadModelLibrary::Request>(request);
   auto response = network.tcpBlockingReceiveResponse<research_interface::robot::LoadModelLibrary>();
-  std::vector<char> buffer(response.size);
-  // TODO(FWA): assert(buffer.size() <= std::numeric_limits<int>::max());
-  network.tcpReceiveIntoBuffer(buffer.data(), buffer.size());
-  std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
-  model_library_stream.write(buffer.data(), buffer.size());
+
+  try {
+    std::vector<char> buffer(response.size);
+    // TODO(FWA): assert(buffer.size() <= std::numeric_limits<int>::max());
+    network.tcpReceiveIntoBuffer(buffer.data(), buffer.size());
+    std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
+    model_library_stream.write(buffer.data(), buffer.size());
+  } catch (const std::exception& ex) {
+    throw ModelException("libfranka: Cannot save model library.");
+  }
 }
 
 const std::string& ModelLibraryDownloader::path() const noexcept {
