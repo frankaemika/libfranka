@@ -63,6 +63,7 @@ add_library(franka SHARED
   src/robot_network.cpp
   src/robot_state.cpp
   src/gripper_network.cpp
+  src/gripper_state.cpp
 )
 
 set_target_properties(franka PROPERTIES
