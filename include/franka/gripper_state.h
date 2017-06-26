@@ -16,19 +16,19 @@ struct GripperState {
   /**
    * Current opening width.
    */
-  double width;
+  double opening_width;
 
   /**
    * Maximum opening width.
    */
-  double max_width;
+  double max_opening_width;
 
   /**
    * Object grasped flag.
    * True: Gripper successfully grasped an object
    * False: Part lost or nothing grasped.
    */
-  bool is_grasped;
+  bool object_grasped;
 
   /**
    * Current gripper temperature.
