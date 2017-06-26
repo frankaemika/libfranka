@@ -60,20 +60,15 @@ research_interface::robot::RobotState Network::udpReadRobotState() try {
   throw NetworkException("libfranka: udp read: "s + e.what());
 }
 
-int Network::tcpReceiveIntoBuffer() try {
-  size_t offset = read_buffer_.size();
-  read_buffer_.resize(offset + tcp_socket_.available());
-  return tcp_socket_.receiveBytes(&read_buffer_[offset], tcp_socket_.available());
-} catch (const Poco::Exception& e) {
-  throw NetworkException("libfranka: "s + e.what());
-}
-
 void Network::tcpReceiveIntoBuffer(char* buffer, const int read_size) {
   int bytes_read = 0;
   try {
     while (bytes_read < read_size) {
       int bytes_left = read_size - bytes_read;
       int rv = tcp_socket_.receiveBytes(&buffer[bytes_read], bytes_left);
+      if (rv == 0) {
+        throw NetworkException("libfranka: server closed connection");
+      }
       bytes_read += rv;
     }
   } catch (const Poco::TimeoutException& e) {
@@ -89,11 +84,10 @@ void Network::tcpReceiveIntoBuffer(char* buffer, const int read_size) {
 
 bool Network::tcpReadResponse(research_interface::robot::Function* function) try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-    int rv = tcpReceiveIntoBuffer();
-
-    if (rv == 0) {
-      throw NetworkException("libfranka: server closed connection");
-    }
+    size_t offset = read_buffer_.size();
+    int bytes_available = tcp_socket_.available();
+    read_buffer_.resize(offset + bytes_available);
+    tcpReceiveIntoBuffer(&read_buffer_[offset], bytes_available);
 
     if (read_buffer_.size() < sizeof(research_interface::robot::Function)) {
       return false;

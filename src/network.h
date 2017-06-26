@@ -42,13 +42,11 @@ class Network {
   void tcpReceiveIntoBuffer(char* buffer, const int read_size);
 
  private:
-  int tcpReceiveIntoBuffer();
-
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
 
-  std::vector<uint8_t> read_buffer_;
+  std::vector<char> read_buffer_;
 };
 
 template <typename T>
