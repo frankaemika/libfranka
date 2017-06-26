@@ -17,6 +17,9 @@ LibraryDownloader::LibraryDownloader(Network& network) {
   network.tcpSendRequest<research_interface::robot::LoadModelLibrary::Request>(request);
   research_interface::robot::LoadModelLibrary::Response response =
       network.tcpBlockingReceiveResponse<research_interface::robot::LoadModelLibrary>();
+  if (response.status != research_interface::robot::LoadModelLibrary::Status::kSuccess) {
+    throw ModelException("libfranka: Server reports error when loading model library.");
+  }
 
   try {
     std::vector<char> buffer(response.size);

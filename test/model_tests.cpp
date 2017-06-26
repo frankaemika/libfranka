@@ -62,6 +62,33 @@ struct Model : public ::testing::Test {
   std::vector<char> buffer;
 };
 
+TEST(InvalidModel, ThrowsIfNoModelReceived) {
+  MockServer server;
+  franka::Robot robot("127.0.0.1");
+
+  server
+      .waitForCommand<LoadModelLibrary>(
+          [&](auto) { return research_interface::robot::LoadModelLibrary::Response(); })
+      .spinOnce();
+
+  EXPECT_THROW(franka::Model model(robot), franka::ModelException);
+}
+
+TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
+  MockServer server;
+  franka::Robot robot("127.0.0.1");
+
+  std::array<char, 10> buffer{};
+  server
+      .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
+        server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) { return buffer.size(); });
+        tcp_socket.sendBytes(buffer.data(), buffer.size());
+      })
+      .spinOnce();
+
+  EXPECT_THROW(franka::Model model(robot), franka::ModelException);
+}
+
 TEST_F(Model, CanCreateModel) {
   EXPECT_NO_THROW(franka::Model model(robot));
 }

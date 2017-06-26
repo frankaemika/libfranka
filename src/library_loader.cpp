@@ -12,8 +12,6 @@ LibraryLoader::LibraryLoader(const std::string& filepath) try {
   library_.load(filepath);
 } catch (const Poco::LibraryAlreadyLoadedException& e) {
   throw ModelException("libfranka: model library already loaded"s);
-} catch (const Poco::NotFoundException& e) {
-  throw ModelException("libfranka: symbol cannot be found: "s + e.what());
 } catch (const Poco::LibraryLoadException& e) {
   throw ModelException("libfranka: cannot load model library: "s + e.what());
 } catch (const Poco::Exception& e) {
