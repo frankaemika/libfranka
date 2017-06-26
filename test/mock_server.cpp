@@ -158,3 +158,11 @@ void MockServer::serverThread() {
     EXPECT_EQ(0, rv) << "TCP socket still has data";
   }
 }
+
+MockServer& MockServer::generic(std::function<void(MockServer::Socket&, MockServer::Socket&)> generic_command) {
+  using namespace std::string_literals;
+
+  std::lock_guard<std::mutex> _(mutex_);
+  commands_.emplace("generic", generic_command);
+  return *this;
+}

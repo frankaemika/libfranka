@@ -1,14 +1,20 @@
+#include <fstream>
+
 #include <gmock/gmock.h>
 
 #include <franka/model.h>
+#include <franka/robot.h>
+#include <research_interface/robot/service_types.h>
 
 #include "helpers.h"
 #include "mock_server.h"
 #include "model_library_interface.h"
+#include "test_config.h"
 
 using ::testing::_;
 using ::testing::WithArgs;
 using ::testing::Invoke;
+using namespace research_interface::robot;
 
 struct MockModel : public ModelLibraryInterface {
   MOCK_METHOD3(O_T_J1, void(const double*, const double*, double*));
@@ -28,18 +34,35 @@ struct MockModel : public ModelLibraryInterface {
 
 struct Model : public ::testing::Test {
   Model() {
-    MockServer server;
-    server.spinOnce();
-    robot.reset(new franka::Robot("127.0.0.1"));
+    using namespace std::string_literals;
+
+    std::ifstream model_library_stream(TEST_BINARY_DIR + "/libfcimodels.so"s,
+      std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
+    buffer.resize(model_library_stream.tellg());
+    model_library_stream.seekg(0, std::ios::beg);
+    if (!model_library_stream.read(buffer.data(), buffer.size())) {
+      throw std::runtime_error("Model test: Cannot load mock libfcimodels.so");
+    }
+
+    server.generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
+      server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
+        return buffer.size();
+      });
+      tcp_socket.sendBytes(buffer.data(), buffer.size());
+    }).spinOnce();
 
     model_library_interface = nullptr;
   }
 
-  std::unique_ptr<franka::Robot> robot;
+  MockServer server{};
+  franka::Robot robot{"127.0.0.1"};
+
+ private:
+  std::vector<char> buffer;
 };
 
 TEST_F(Model, CanCreateModel) {
-  EXPECT_NO_THROW(franka::Model model(*robot));
+  EXPECT_NO_THROW(franka::Model model(robot));
 }
 
 TEST_F(Model, CanGetMassMatrix) {
@@ -59,7 +82,7 @@ TEST_F(Model, CanGetMassMatrix) {
 
   model_library_interface = &mock;
 
-  franka::Model model(*robot);
+  franka::Model model(robot);
   auto matrix = model.mass(robot_state, load_inertia, load_mass, F_x_Cload);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
@@ -83,7 +106,7 @@ TEST_F(Model, CanGetCoriolisVector) {
 
   model_library_interface = &mock;
 
-  franka::Model model(*robot);
+  franka::Model model(robot);
   auto vector = model.coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
   EXPECT_EQ(expected_vector, vector);
 }
@@ -106,7 +129,7 @@ TEST_F(Model, CanGetGravity) {
 
   model_library_interface = &mock;
 
-  franka::Model model(*robot);
+  franka::Model model(robot);
   auto matrix = model.gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
@@ -159,7 +182,7 @@ TEST_F(Model, CanGetJointPoses) {
 
   model_library_interface = &mock;
 
-  franka::Model model(*robot);
+  franka::Model model(robot);
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
        joint = static_cast<franka::Frame>(joint + 1)) {
     auto pose = model.jointPose(joint, robot_state);

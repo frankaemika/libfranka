@@ -11,13 +11,12 @@
 #include <research_interface/robot/service_types.h>
 
 class MockServer {
- private:
+ public:
   struct Socket {
     std::function<void(const void*, size_t)> sendBytes;
     std::function<void(void*, size_t)> receiveBytes;
   };
 
- public:
   using ConnectCallbackT = std::function<research_interface::robot::Connect::Response(
       const research_interface::robot::Connect::Request&)>;
   using SendRobotStateAlternativeCallbackT =
@@ -37,6 +36,8 @@ class MockServer {
   MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
   MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
+
+  MockServer& generic(std::function<void(Socket&, Socket&)> generic_command);
 
   template <typename T>
   void handleCommand(Socket& tcp_socket,

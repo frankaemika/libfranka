@@ -11,6 +11,10 @@ set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka research-interface-common ${GTEST_LIBRARIES})
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
+set(TEST_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+configure_file(test_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/test_config.h @ONLY)
+list(APPEND TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR})
+
 ## Test libraries
 add_library(fcimodels SHARED
   libfcimodels_stub.cpp
