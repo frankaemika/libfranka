@@ -1,4 +1,4 @@
-#include "model_library_downloader.h"
+#include "library_downloader.h"
 
 #include <exception>
 #include <fstream>
@@ -10,7 +10,7 @@
 
 namespace franka {
 
-ModelLibraryDownloader::ModelLibraryDownloader(Network& network) {
+LibraryDownloader::LibraryDownloader(Network& network) {
   research_interface::robot::LoadModelLibrary::Request request(
       research_interface::robot::LoadModelLibrary::Architecture::kX64,
       research_interface::robot::LoadModelLibrary::Platform::kLinux);
@@ -28,7 +28,7 @@ ModelLibraryDownloader::ModelLibraryDownloader(Network& network) {
   }
 }
 
-const std::string& ModelLibraryDownloader::path() const noexcept {
+const std::string& LibraryDownloader::path() const noexcept {
   return model_library_file_.path();
 }
 

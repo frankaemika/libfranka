@@ -1,11 +1,11 @@
 #include "model_library.h"
 
-#include "model_library_downloader.h"
+#include "library_downloader.h"
 
 namespace franka {
 
 ModelLibrary::ModelLibrary(franka::Network& network)
-    : loader_(ModelLibraryDownloader(network).path()),
+    : loader_(LibraryDownloader(network).path()),
       mass{reinterpret_cast<decltype(&M_NE_file)>(loader_.getSymbol("M_NE_file"))},
       joint1{reinterpret_cast<decltype(&O_T_J1_file)>(loader_.getSymbol("O_T_J1_file"))},
       joint2{reinterpret_cast<decltype(&O_T_J2_file)>(loader_.getSymbol("O_T_J2_file"))},

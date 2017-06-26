@@ -8,9 +8,9 @@
 
 namespace franka {
 
-class ModelLibraryDownloader {
+class LibraryDownloader {
  public:
-  ModelLibraryDownloader(Network& network);
+  LibraryDownloader(Network& network);
 
   const std::string& path() const noexcept;
 
