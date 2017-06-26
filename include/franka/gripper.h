@@ -69,7 +69,7 @@ class Gripper {
   void move(double width, double speed);
 
   /**
-   * Stops moving the fingers of the gripper.
+   * Stops applying force.
    *
    * @throw CommandException if an error occurred.
    */
