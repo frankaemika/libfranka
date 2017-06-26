@@ -36,6 +36,10 @@ struct GripperState {
   uint16_t temperature;
 };
 
+/**
+ * Streams the GripperState according to the following format: {field_name_1:
+ * value, field_name_2: value, ...}
+ */
 std::ostream& operator<<(std::ostream& ostream, const franka::GripperState& gripper_state);
 
 }  // namespace franka
