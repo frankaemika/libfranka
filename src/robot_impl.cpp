@@ -11,11 +11,11 @@ namespace franka {
 
 constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
 
-Robot::Impl::Impl(std::unique_ptr<RobotNetwork> network, RealtimeConfig realtime_config)
+Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
     : network_{std::move(network)}, realtime_config_{realtime_config} {
   research_interface::robot::Connect::Request connect_request(network_->udpPort());
 
-  network_->tcpSendRequest(connect_request);
+  network_->tcpSendRequest<research_interface::robot::Connect>(connect_request);
 
   research_interface::robot::Connect::Response connect_response =
       network_->tcpBlockingReceiveResponse<research_interface::robot::Connect>();
@@ -40,7 +40,7 @@ RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
   research_interface::robot::Function function;
-  if (network_->tcpReadResponse(&function)) {
+  if (network_->tcpReadResponse<research_interface::robot::Function>(&function)) {
     if (function != research_interface::robot::Function::kMove) {
       throw ProtocolException("libfranka robot: unexpected response!");
     }
@@ -90,12 +90,13 @@ void Robot::Impl::sendRobotCommand(
       throw ControlException("libfranka robot: Trying to send partial robot command!");
     }
 
-    network_->udpSendRobotCommand(robot_command);
+    network_->udpSend<research_interface::robot::RobotCommand>(robot_command);
   }
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
-  research_interface::robot::RobotState robot_state = network_->udpReadRobotState();
+  research_interface::robot::RobotState robot_state =
+      network_->udpRead<research_interface::robot::RobotState>();
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;

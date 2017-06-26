@@ -4,7 +4,7 @@
 #include <franka/gripper_state.h>
 #include <research_interface/gripper/types.h>
 
-#include "gripper_network.h"
+#include "network.h"
 
 namespace franka {
 
@@ -15,7 +15,7 @@ class Gripper::Impl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
 
-  explicit Impl(std::unique_ptr<GripperNetwork> network);
+  explicit Impl(std::unique_ptr<Network> network);
 
   GripperState readOnce();
 
@@ -30,7 +30,7 @@ class Gripper::Impl {
 
   research_interface::gripper::GripperState receiveGripperState();
 
-  std::unique_ptr<GripperNetwork> network_;
+  std::unique_ptr<Network> network_;
 
   uint16_t ri_version_;
 
@@ -56,7 +56,7 @@ void Gripper::Impl::handleCommandResponse(const typename T::Response& response) 
 template <typename T, typename... TArgs>
 void Gripper::Impl::executeCommand(TArgs... args) {
   typename T::Request request(std::forward<TArgs>(args)...);
-  network_->tcpSendRequest(request);
+  network_->tcpSendRequest<T>(request);
 
   typename T::Response response = network_->tcpBlockingReceiveResponse<T>();
 

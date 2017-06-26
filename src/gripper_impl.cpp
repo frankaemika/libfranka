@@ -8,10 +8,10 @@ namespace franka {
 
 constexpr std::chrono::seconds Gripper::Impl::kDefaultTimeout;
 
-Gripper::Impl::Impl(std::unique_ptr<GripperNetwork> network) : network_(std::move(network)) {
+Gripper::Impl::Impl(std::unique_ptr<Network> network) : network_(std::move(network)) {
   research_interface::gripper::Connect::Request connect_request(network_->udpPort());
 
-  network_->tcpSendRequest(connect_request);
+  network_->tcpSendRequest<research_interface::gripper::Connect>(connect_request);
 
   research_interface::gripper::Connect::Response connect_response =
       network_->tcpBlockingReceiveResponse<research_interface::gripper::Connect>();
@@ -42,7 +42,7 @@ Gripper::ServerVersion Gripper::Impl::serverVersion() const noexcept {
 }
 
 research_interface::gripper::GripperState Gripper::Impl::receiveGripperState() {
-  gripper_state_ = network_->udpReadGripperState();
+  gripper_state_ = network_->udpRead<research_interface::gripper::GripperState>();
   return gripper_state_;
 }
 

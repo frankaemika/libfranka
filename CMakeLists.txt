@@ -60,11 +60,9 @@ add_library(franka SHARED
   src/network.cpp
   src/robot.cpp
   src/robot_impl.cpp
-  src/robot_network.cpp
   src/robot_state.cpp
   src/gripper.cpp
   src/gripper_impl.cpp
-  src/gripper_network.cpp
   src/gripper_state.cpp
 )
 

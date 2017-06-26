@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
 
 #include <franka/robot.h>
 #include <research_interface/robot/rbk_types.h>
@@ -9,7 +10,6 @@
 
 #include "network.h"
 #include "robot_control.h"
-#include "robot_network.h"
 
 namespace franka {
 
@@ -19,7 +19,7 @@ class Robot::Impl : public RobotControl {
  public:
   static constexpr std::chrono::seconds kDefaultTimeout{5};
 
-  explicit Impl(std::unique_ptr<RobotNetwork> network,
+  explicit Impl(std::unique_ptr<Network> network,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update(
@@ -52,7 +52,7 @@ class Robot::Impl : public RobotControl {
                         const research_interface::robot::ControllerCommand* control_command);
   research_interface::robot::RobotState receiveRobotState();
 
-  std::unique_ptr<RobotNetwork> network_;
+  std::unique_ptr<Network> network_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
@@ -126,7 +126,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 template <typename T, typename... TArgs>
 void Robot::Impl::executeCommand(TArgs... args) {
   typename T::Request request(std::forward<TArgs>(args)...);
-  network_->tcpSendRequest(request);
+  network_->tcpSendRequest<T>(request);
 
   typename T::Response response = network_->tcpBlockingReceiveResponse<T>();
 
@@ -140,7 +140,7 @@ inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianL
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
   research_interface::robot::GetCartesianLimit::Request request(id);
-  network_->tcpSendRequest(request);
+  network_->tcpSendRequest<research_interface::robot::GetCartesianLimit>(request);
 
   research_interface::robot::GetCartesianLimit::Response response =
       network_->tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>();
