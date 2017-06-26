@@ -33,8 +33,6 @@ class Gripper::Impl {
   std::unique_ptr<Network> network_;
 
   uint16_t ri_version_;
-
-  research_interface::gripper::GripperState gripper_state_{};
 };
 
 template <typename T>

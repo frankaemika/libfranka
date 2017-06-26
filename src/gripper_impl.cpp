@@ -42,8 +42,7 @@ Gripper::ServerVersion Gripper::Impl::serverVersion() const noexcept {
 }
 
 research_interface::gripper::GripperState Gripper::Impl::receiveGripperState() {
-  gripper_state_ = network_->udpRead<research_interface::gripper::GripperState>();
-  return gripper_state_;
+  return network_->udpRead<research_interface::gripper::GripperState>();
 }
 
 GripperState convertGripperState(
