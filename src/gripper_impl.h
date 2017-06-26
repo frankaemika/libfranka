@@ -44,12 +44,10 @@ void Gripper::Impl::handleCommandResponse(const typename T::Response& response) 
   switch (response.status) {
     case T::Status::kSuccess:
       break;
-    case T::Status::kAborted:
-      throw CommandException("libfranka gripper: command aborted!");
-    case T::Status::kRejected:
-      throw CommandException("libfranka gripper: command rejected!");
-    case T::Status::kPreempted:
-      throw CommandException("libfranka gripper: scommand preempted!");
+    case T::Status::kFail:
+      throw CommandException("libfranka gripper: command failed!");
+    case T::Status::kUnsuccessful:
+      throw CommandException("libfranka gripper: command unsuccessful!");
     default:
       throw ProtocolException("libfranka gripper: Unexpected response while handling command!");
   }

@@ -41,6 +41,41 @@ class Gripper {
   ~Gripper() noexcept;
 
   /**
+   * Performs homing.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void homing();
+
+  /**
+   * Grasp an object.
+   *
+   * @param[in] width Size of object to grasp.
+   * @param[in] speed Closing speed.
+   * @param[in] force Grasping force.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void grasp(double width, double speed, double force);
+
+  /**
+   * Moves the gripper fingers to a specified width.
+   *
+   * @param[in] width Intended opening width.
+   * @param[in] speed Gripper closing speed.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void move(double width, double speed);
+
+  /**
+   * Stops moving the fingers of the gripper.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void stop();
+
+  /**
    * Waits for a gripper state update and returns it.
    *
    * @return Current gripper state.
