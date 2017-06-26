@@ -473,7 +473,7 @@ class Robot {
   /**
    * Returns the stored Robot::Impl instance.
    *
-   * @return Robot::Impl instance
+   * @return Robot::Impl instance.
    */
   Impl& impl() noexcept;
 

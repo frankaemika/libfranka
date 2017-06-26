@@ -15,12 +15,12 @@ LibraryDownloader::LibraryDownloader(Network& network) {
       research_interface::robot::LoadModelLibrary::Architecture::kX64,
       research_interface::robot::LoadModelLibrary::Platform::kLinux);
   network.tcpSendRequest<research_interface::robot::LoadModelLibrary::Request>(request);
-  auto response = network.tcpBlockingReceiveResponse<research_interface::robot::LoadModelLibrary>();
+  research_interface::robot::LoadModelLibrary::Response response =
+      network.tcpBlockingReceiveResponse<research_interface::robot::LoadModelLibrary>();
 
   try {
     std::vector<char> buffer(response.size);
-    // TODO(FWA): assert(buffer.size() <= std::numeric_limits<int>::max());
-    network.tcpReceiveIntoBuffer(buffer.data(), buffer.size());
+    network.tcpReceiveIntoBuffer(buffer.data(), static_cast<int>(buffer.size()));
     std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
     model_library_stream.write(buffer.data(), buffer.size());
   } catch (const std::exception& ex) {
