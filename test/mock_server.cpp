@@ -159,7 +159,8 @@ void MockServer::serverThread() {
   }
 }
 
-MockServer& MockServer::generic(std::function<void(MockServer::Socket&, MockServer::Socket&)> generic_command) {
+MockServer& MockServer::generic(
+    std::function<void(MockServer::Socket&, MockServer::Socket&)> generic_command) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);

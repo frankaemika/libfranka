@@ -36,20 +36,21 @@ struct Model : public ::testing::Test {
   Model() {
     using namespace std::string_literals;
 
-    std::ifstream model_library_stream(TEST_BINARY_DIR + "/libfcimodels.so"s,
-      std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
+    std::ifstream model_library_stream(
+        TEST_BINARY_DIR + "/libfcimodels.so"s,
+        std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
     buffer.resize(model_library_stream.tellg());
     model_library_stream.seekg(0, std::ios::beg);
     if (!model_library_stream.read(buffer.data(), buffer.size())) {
       throw std::runtime_error("Model test: Cannot load mock libfcimodels.so");
     }
 
-    server.generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
-      server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
-        return buffer.size();
-      });
-      tcp_socket.sendBytes(buffer.data(), buffer.size());
-    }).spinOnce();
+    server
+        .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
+          server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) { return buffer.size(); });
+          tcp_socket.sendBytes(buffer.data(), buffer.size());
+        })
+        .spinOnce();
 
     model_library_interface = nullptr;
   }
