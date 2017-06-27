@@ -9,8 +9,6 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-constexpr std::chrono::seconds Robot::Impl::kDefaultTimeout;
-
 Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
     : network_{std::move(network)}, realtime_config_{realtime_config} {
   research_interface::robot::Connect::Request connect_request(network_->udpPort());

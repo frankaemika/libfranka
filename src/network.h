@@ -22,7 +22,7 @@ class Network {
  public:
   explicit Network(const std::string& franka_address,
                    uint16_t franka_port,
-                   std::chrono::milliseconds timeout);
+                   std::chrono::milliseconds timeout = std::chrono::milliseconds(5));
   virtual ~Network();
 
   template <typename T>

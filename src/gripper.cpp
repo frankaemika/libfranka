@@ -5,9 +5,8 @@
 namespace franka {
 
 Gripper::Gripper(const std::string& franka_address)
-    : impl_(new Gripper::Impl(std::make_unique<Network>(franka_address,
-                                                        research_interface::gripper::kCommandPort,
-                                                        Gripper::Impl::kDefaultTimeout))) {}
+    : impl_(new Gripper::Impl(
+          std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort))) {}
 
 Gripper::~Gripper() noexcept = default;
 

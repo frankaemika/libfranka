@@ -17,8 +17,6 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
 
 class Robot::Impl : public RobotControl {
  public:
-  static constexpr std::chrono::seconds kDefaultTimeout{5};
-
   explicit Impl(std::unique_ptr<Network> network,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
@@ -42,7 +40,7 @@ class Robot::Impl : public RobotControl {
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
+  void executeCommand(TArgs... /* args */);
 
  private:
   template <typename T>

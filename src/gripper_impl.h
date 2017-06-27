@@ -13,8 +13,6 @@ GripperState convertGripperState(
 
 class Gripper::Impl {
  public:
-  static constexpr std::chrono::seconds kDefaultTimeout{5};
-
   explicit Impl(std::unique_ptr<Network> network);
 
   GripperState readOnce();
@@ -22,7 +20,7 @@ class Gripper::Impl {
   ServerVersion serverVersion() const noexcept;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
+  void executeCommand(TArgs... /* args */);
 
  private:
   template <typename T>

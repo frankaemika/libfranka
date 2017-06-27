@@ -6,8 +6,6 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-constexpr std::chrono::seconds Gripper::Impl::kDefaultTimeout;
-
 Gripper::Impl::Impl(std::unique_ptr<Network> network) : network_(std::move(network)) {
   research_interface::gripper::Connect::Request connect_request(network_->udpPort());
 
