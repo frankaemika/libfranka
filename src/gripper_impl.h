@@ -11,6 +11,9 @@ namespace franka {
 GripperState convertGripperState(
     const research_interface::gripper::GripperState& gripper_state) noexcept;
 
+template <typename T>
+void handleCommandResponse(const typename T::Response& response);
+
 class Gripper::Impl {
  public:
   explicit Impl(std::unique_ptr<Network> network);
@@ -23,9 +26,6 @@ class Gripper::Impl {
   void executeCommand(TArgs... /* args */);
 
  private:
-  template <typename T>
-  void handleCommandResponse(const typename T::Response& response);
-
   research_interface::gripper::GripperState receiveGripperState();
 
   std::unique_ptr<Network> network_;
@@ -34,7 +34,7 @@ class Gripper::Impl {
 };
 
 template <typename T>
-void Gripper::Impl::handleCommandResponse(const typename T::Response& response) {
+void handleCommandResponse(const typename T::Response& response) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
