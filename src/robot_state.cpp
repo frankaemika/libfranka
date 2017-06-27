@@ -28,7 +28,8 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", cartesian_collision: " << robot_state.cartesian_collision
           << ", tau_ext_hat_filtered: " << robot_state.tau_ext_hat_filtered
           << ", O_F_ext_hat_K: " << robot_state.O_F_ext_hat_K
-          << ", K_F_ext_hat_K: " << robot_state.K_F_ext_hat_K
+          << ", K_F_ext_hat_K: " << robot_state.K_F_ext_hat_K << ", errors: " << robot_state.errors
+          << ", reflex_reasons: " << robot_state.reflex_reasons
           << ", sequence_number: " << robot_state.sequence_number << "}";
   return ostream;
 }

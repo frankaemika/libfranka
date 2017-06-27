@@ -1,5 +1,6 @@
 #include "robot_impl.h"
 
+#include <algorithm>
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -55,7 +56,8 @@ RobotState Robot::Impl::update(
     } catch (const CommandException& e) {
       // Make sure that we have an up-to-date robot state that shows the stopped motion.
       while (motionGeneratorRunning()) {
-        receiveRobotState();
+        research_interface::robot::RobotState state = receiveRobotState();
+        checkStateForErrors(state);
       }
 
       // Rethrow as control exception to be consistent with starting/stopping of motions.
@@ -63,7 +65,10 @@ RobotState Robot::Impl::update(
     }
   }
   sendRobotCommand(motion_command, control_command);
-  return convertRobotState(receiveRobotState());
+
+  research_interface::robot::RobotState state = receiveRobotState();
+  checkStateForErrors(state);
+  return convertRobotState(state);
 }
 
 void Robot::Impl::sendRobotCommand(
@@ -227,6 +232,15 @@ void Robot::Impl::stopController() {
   }
 }
 
+void Robot::Impl::checkStateForErrors(research_interface::robot::RobotState& robot_state) {
+  if (motionGeneratorRunning() || controllerRunning()) {
+    Errors errors(robot_state.errors);
+    if (errors.any()) {
+      throw ControlException("libfranka: motion aborted: "s + errors.namesViolated());
+    }
+  }
+}
+
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
@@ -245,6 +259,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.tau_ext_hat_filtered = robot_state.tau_ext_hat_filtered;
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
+  converted.errors = robot_state.errors;
+  converted.reflex_reasons = robot_state.reflex_reason;
   converted.sequence_number = robot_state.message_id;
   return converted;
 }

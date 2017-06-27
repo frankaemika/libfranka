@@ -3,6 +3,8 @@
 #include <array>
 #include <ostream>
 
+#include <franka/errors.h>
+
 /**
  * @file robot_state.h
  * Contains the RobotState struct.
@@ -129,6 +131,8 @@ struct RobotState {
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
+  Errors errors{};
+  Errors reflex_reasons{};
   /**
    * Strictly increasing sequence number for each received robot state.
    */
