@@ -9,8 +9,9 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  franka::Robot robot(argv[1]);
   try {
+    franka::Robot robot(argv[1]);
+
     auto initial_pose = robot.readOnce().q_d;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&) -> franka::JointPositions {
@@ -27,9 +28,6 @@ int main(int argc, char** argv) {
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
-    auto err = robot.readOnce().errors;
-    std::cout << err.any() << std::endl;
-    std::cout << err << std::endl;
     return -1;
   }
 

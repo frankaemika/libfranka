@@ -53,9 +53,7 @@ research_interface::robot::RobotState Network::udpReadRobotState() try {
   std::array<uint8_t, sizeof(research_interface::robot::RobotState)> buffer;
   int bytes_received = udp_socket_.receiveFrom(buffer.data(), buffer.size(), udp_server_address_);
   if (bytes_received != buffer.size()) {
-    throw ProtocolException("libfranka: udp i exp: "s +
-                            std::to_string(sizeof(research_interface::robot::RobotState)) +
-                            ", got: " + std::to_string(bytes_received));
+    throw ProtocolException("libfranka: incorrect object size");
   }
   return *reinterpret_cast<research_interface::robot::RobotState*>(buffer.data());
 } catch (const Poco::Exception& e) {

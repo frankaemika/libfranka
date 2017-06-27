@@ -20,9 +20,6 @@ int main(int argc, char** argv) {
   } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;
     return -1;
-  } catch (...) {
-    std::cout << ";) " << std::endl;
-    return -1;
   }
 
   return 0;

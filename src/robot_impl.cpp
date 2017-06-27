@@ -1,6 +1,5 @@
 #include "robot_impl.h"
 
-#include <algorithm>
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
