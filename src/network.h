@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <unordered_set>
@@ -39,14 +40,14 @@ class Network {
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
-  void tcpReceiveIntoBuffer(char* buffer, const int read_size);
+  void tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size);
 
  private:
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
 
-  std::vector<char> read_buffer_;
+  std::vector<uint8_t> read_buffer_;
 };
 
 template <typename T>
@@ -74,7 +75,7 @@ bool Network::tcpHandleResponse(std::function<void(const typename T::Response&)>
 
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse() {
-  std::array<char, sizeof(typename T::Response)> buffer;
+  std::array<uint8_t, sizeof(typename T::Response)> buffer;
   tcpReceiveIntoBuffer(buffer.data(), buffer.size());
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());

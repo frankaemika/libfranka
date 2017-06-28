@@ -60,13 +60,13 @@ research_interface::robot::RobotState Network::udpReadRobotState() try {
   throw NetworkException("libfranka: udp read: "s + e.what());
 }
 
-void Network::tcpReceiveIntoBuffer(char* buffer, const int read_size) {
-  int bytes_read = 0;
+void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
+  size_t bytes_read = 0;
   try {
     while (bytes_read < read_size) {
-      int bytes_left = read_size - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer[bytes_read], bytes_left);
-      if (rv == 0) {
+      size_t bytes_left = read_size - bytes_read;
+      int rv = tcp_socket_.receiveBytes(&buffer[bytes_read], static_cast<int>(bytes_left));
+      if (rv < 0) {
         throw NetworkException("libfranka: server closed connection");
       }
       bytes_read += rv;

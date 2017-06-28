@@ -22,10 +22,10 @@ LibraryDownloader::LibraryDownloader(Network& network) {
   }
 
   try {
-    std::vector<char> buffer(response.size);
+    std::vector<uint8_t> buffer(response.size);
     network.tcpReceiveIntoBuffer(buffer.data(), static_cast<int>(buffer.size()));
     std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
-    model_library_stream.write(buffer.data(), buffer.size());
+    model_library_stream.write(reinterpret_cast<char*>(buffer.data()), buffer.size());
   } catch (const std::exception& ex) {
     throw ModelException("libfranka: Cannot save model library.");
   }
