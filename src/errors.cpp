@@ -78,4 +78,13 @@ std::ostream& operator<<(std::ostream& ostream, const Errors& errors) {
   return ostream;
 }
 
+bool operator==(const franka::Errors& lhs, const franka::Errors& rhs) {
+  for (ErrorType e = kJointPositionLimitsViolation; e < kErrorTypeEndMarker; e = ErrorType(e + 1)) {
+    if (lhs.violated(e) != rhs.violated(e)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 }  // namespace franka

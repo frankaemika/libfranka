@@ -47,5 +47,6 @@ class Errors {
 };
 
 std::ostream& operator<<(std::ostream& ostream, const franka::Errors& errors);
+bool operator==(const franka::Errors& lhs, const franka::Errors& rhs);
 
 }  // namespace franka

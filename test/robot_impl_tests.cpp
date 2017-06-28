@@ -581,3 +581,40 @@ TEST(RobotImpl, CanStopController) {
   robot.stopController();
   EXPECT_FALSE(robot.controllerRunning());
 }
+
+TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
+  MockServer server;
+  Move::Deviation maximum_path_deviation{0, 1, 2};
+  Move::Deviation maximum_goal_pose_deviation{3, 4, 5};
+
+  Robot::Impl robot("127.0.0.1");
+
+  server
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.controller_mode = ControllerMode::kJointPosition;
+      })
+      .spinOnce()
+      .waitForCommand<Move>([=](const Move::Request&) {
+        return Move::Response(Move::Status::kMotionStarted);
+      })
+      .spinOnce();
+
+  robot.startMotion(Move::ControllerMode::kJointPosition,
+                                    Move::MotionGeneratorMode::kJointPosition,
+                                    maximum_path_deviation, maximum_goal_pose_deviation);
+  robot.motionGeneratorRunning();
+  robot.controllerRunning();
+
+  MotionGeneratorCommand motion_command{};
+  server
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.controller_mode = ControllerMode::kJointPosition;
+        robot_state.errors[franka::kJointPositionLimitsViolation] = true;
+      })
+      .spinOnce()
+      .onReceiveRobotCommand([](const RobotCommand&) {})
+      .spinOnce();
+  EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
+}
