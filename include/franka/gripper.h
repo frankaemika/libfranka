@@ -13,6 +13,8 @@
 
 namespace franka {
 
+class Network;
+
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
  * and allows to execute gripper commands.
@@ -54,9 +56,11 @@ class Gripper {
    * @param[in] speed Closing speed.
    * @param[in] force Grasping force.
    *
+   * @return Grasped flag.
+   *
    * @throw CommandException if an error occurred.
    */
-  void grasp(double width, double speed, double force);
+  bool grasp(double width, double speed, double force);
 
   /**
    * Moves the gripper fingers to a specified width.
@@ -95,10 +99,10 @@ class Gripper {
   Gripper(const Gripper&) = delete;
   Gripper& operator=(const Gripper&) = delete;
 
-  class Impl;
-
  private:
-  std::unique_ptr<Impl> impl_;
+  std::unique_ptr<Network> network_;
+
+  uint16_t ri_version_;
 };
 
 }  // namespace franka
