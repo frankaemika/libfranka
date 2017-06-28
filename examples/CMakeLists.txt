@@ -22,6 +22,7 @@ set(EXAMPLES
   execute_trajectory
   print_joint_poses
   motion_with_control
+  grasp_object
 )
 
 foreach(example ${EXAMPLES})
