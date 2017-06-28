@@ -34,6 +34,11 @@ struct GripperState {
    * Current gripper temperature.
    */
   uint16_t temperature;
+
+  /**
+   * Strictly increasing sequence number for each received gripper state.
+   */
+  uint32_t sequence_number{};
 };
 
 /**

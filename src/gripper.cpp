@@ -127,6 +127,8 @@ GripperState convertGripperState(
   converted.max_opening_width = gripper_state.max_width;
   converted.object_grasped = gripper_state.is_grasped;
   converted.temperature = gripper_state.temperature;
+  converted.sequence_number = gripper_state.message_id;
   return converted;
 }
+
 }  // namespace franka
