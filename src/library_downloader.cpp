@@ -13,7 +13,7 @@ namespace franka {
 LibraryDownloader::LibraryDownloader(Network& network) {
   research_interface::robot::LoadModelLibrary::Request request(
       research_interface::robot::LoadModelLibrary::Architecture::kX64,
-      research_interface::robot::LoadModelLibrary::Platform::kLinux);
+      research_interface::robot::LoadModelLibrary::System::kLinux);
   network.tcpSendRequest<research_interface::robot::LoadModelLibrary::Request>(request);
   research_interface::robot::LoadModelLibrary::Response response =
       network.tcpBlockingReceiveResponse<research_interface::robot::LoadModelLibrary>();

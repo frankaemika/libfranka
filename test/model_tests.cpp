@@ -47,7 +47,9 @@ struct Model : public ::testing::Test {
 
     server
         .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
-          server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) { return buffer.size(); });
+          server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
+            return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
+          });
           tcp_socket.sendBytes(buffer.data(), buffer.size());
         })
         .spinOnce();
@@ -68,7 +70,7 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
 
   server
       .waitForCommand<LoadModelLibrary>(
-          [&](auto) { return research_interface::robot::LoadModelLibrary::Response(); })
+          [&](auto) { return LoadModelLibrary::Response(LoadModelLibrary::Status::kError, 0); })
       .spinOnce();
 
   EXPECT_THROW(franka::Model model(robot), franka::ModelException);
@@ -81,7 +83,9 @@ TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
   std::array<char, 10> buffer{};
   server
       .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
-        server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) { return buffer.size(); });
+        server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
+          return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
+        });
         tcp_socket.sendBytes(buffer.data(), buffer.size());
       })
       .spinOnce();
