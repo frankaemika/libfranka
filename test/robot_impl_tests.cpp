@@ -595,14 +595,12 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
         robot_state.controller_mode = ControllerMode::kJointPosition;
       })
       .spinOnce()
-      .waitForCommand<Move>([=](const Move::Request&) {
-        return Move::Response(Move::Status::kMotionStarted);
-      })
+      .waitForCommand<Move>(
+          [=](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
       .spinOnce();
 
-  robot.startMotion(Move::ControllerMode::kJointPosition,
-                                    Move::MotionGeneratorMode::kJointPosition,
-                                    maximum_path_deviation, maximum_goal_pose_deviation);
+  robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
+                    maximum_path_deviation, maximum_goal_pose_deviation);
   robot.motionGeneratorRunning();
   robot.controllerRunning();
 
