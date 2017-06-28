@@ -131,8 +131,16 @@ struct RobotState {
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
+  /**
+   * Current error state.
+   */
   Errors errors{};
+
+  /**
+   * Contains the errors that aborted the previous motion.
+   */
   Errors reflex_reasons{};
+
   /**
    * Strictly increasing sequence number for each received robot state.
    */

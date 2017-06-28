@@ -33,6 +33,7 @@ add_executable(run_all_tests
   robot_impl_tests.cpp
   robot_state_tests.cpp
   robot_tests.cpp
+  errors_tests.cpp
 )
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})

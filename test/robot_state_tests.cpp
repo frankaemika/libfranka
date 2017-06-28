@@ -8,10 +8,6 @@
 
 using namespace franka;
 
-bool stringContains(const std::string& actual, const std::string& expected) {
-  return actual.find(expected) != std::string::npos;
-}
-
 TEST(RobotState, IsInitializedToZero) {
   RobotState robot_state;
 

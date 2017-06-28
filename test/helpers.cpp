@@ -4,6 +4,10 @@
 
 #include <gtest/gtest.h>
 
+bool stringContains(const std::string& actual, const std::string& expected) {
+  return actual.find(expected) != std::string::npos;
+}
+
 void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.O_T_EE.size(); i++) {
     EXPECT_EQ(0.0, actual.O_T_EE[i]);
@@ -292,3 +296,46 @@ bool operator==(const Move::Deviation& left, const Move::Deviation& right) {
 
 }  // namespace robot
 }  // namespace research_interface
+
+namespace franka {
+
+bool operator==(const Errors& lhs, const Errors& rhs) {
+  return lhs.joint_position_limits_violation == rhs.joint_position_limits_violation &&
+         lhs.cartesian_position_limits_violation == rhs.cartesian_position_limits_violation &&
+         lhs.self_collision_avoidance_violation == rhs.self_collision_avoidance_violation &&
+         lhs.joint_velocity_violation == rhs.joint_velocity_violation &&
+         lhs.cartesian_velocity_violation == rhs.cartesian_velocity_violation &&
+         lhs.force_control_safety_violation == rhs.force_control_safety_violation &&
+         lhs.joint_reflex == rhs.joint_reflex && lhs.cartesian_reflex == rhs.cartesian_reflex &&
+         lhs.max_goal_pose_deviation_violation == rhs.max_goal_pose_deviation_violation &&
+         lhs.max_path_pose_deviation_violation == rhs.max_path_pose_deviation_violation &&
+         lhs.cartesian_velocity_profile_safety_violation ==
+             rhs.cartesian_velocity_profile_safety_violation &&
+         lhs.joint_position_motion_generator_start_pose_invalid ==
+             rhs.joint_position_motion_generator_start_pose_invalid &&
+         lhs.joint_motion_generator_position_limits_violation ==
+             rhs.joint_motion_generator_position_limits_violation &&
+         lhs.joint_motion_generator_velocity_limits_violation ==
+             rhs.joint_motion_generator_velocity_limits_violation &&
+         lhs.joint_motion_generator_velocity_discontinuity ==
+             rhs.joint_motion_generator_velocity_discontinuity &&
+         lhs.joint_motion_generator_acceleration_discontinuity ==
+             rhs.joint_motion_generator_acceleration_discontinuity &&
+         lhs.cartesian_position_motion_generator_start_pose_invalid ==
+             rhs.cartesian_position_motion_generator_start_pose_invalid &&
+         lhs.cartesian_motion_generator_elbow_limit_violation ==
+             rhs.cartesian_motion_generator_elbow_limit_violation &&
+         lhs.cartesian_motion_generator_velocity_limits_violation ==
+             rhs.cartesian_motion_generator_velocity_limits_violation &&
+         lhs.cartesian_motion_generator_velocity_discontinuity ==
+             rhs.cartesian_motion_generator_velocity_discontinuity &&
+         lhs.cartesian_motion_generator_acceleration_discontinuity ==
+             rhs.cartesian_motion_generator_acceleration_discontinuity &&
+         lhs.cartesian_motion_generator_elbow_sign_inconsistent ==
+             rhs.cartesian_motion_generator_elbow_sign_inconsistent &&
+         lhs.cartesian_motion_generator_start_elbow_invalid ==
+             rhs.cartesian_motion_generator_start_elbow_invalid &&
+         lhs.force_controller_desired_force_tolerance_violation ==
+             rhs.force_controller_desired_force_tolerance_violation;
+}
+}
