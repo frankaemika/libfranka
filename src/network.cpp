@@ -48,4 +48,8 @@ int Network::tcpReceiveIntoBuffer() try {
   throw NetworkException("libfranka: "s + e.what());
 }
 
+int Network::udpAvailableData() {
+  return udp_socket_.available();
+}
+
 }  // namespace franka

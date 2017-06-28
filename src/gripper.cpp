@@ -113,6 +113,10 @@ void Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() {
+  if (network_->udpAvailableData() >
+      static_cast<int>(sizeof(research_interface::gripper::GripperState))) {
+    network_->udpRead<research_interface::gripper::GripperState>();
+  }
   return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
 }
 

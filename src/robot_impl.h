@@ -24,6 +24,8 @@ class Robot::Impl : public RobotControl {
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) override;
 
+  RobotState readOnce();
+
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;

@@ -92,7 +92,7 @@ void Robot::read(std::function<bool(const RobotState&)> read_callback) {
 }
 
 RobotState Robot::readOnce() {
-  return impl_->update();
+  return impl_->readOnce();
 }
 
 VirtualWallCuboid Robot::getVirtualWall(int32_t id) {

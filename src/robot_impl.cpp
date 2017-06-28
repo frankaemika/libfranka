@@ -11,6 +11,10 @@ namespace franka {
 
 Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
     : network_{std::move(network)}, realtime_config_{realtime_config} {
+  if (!network_) {
+    throw NetworkException("libfranka robot: Network error");
+  }
+
   research_interface::robot::Connect::Request connect_request(network_->udpPort());
 
   network_->tcpSendRequest<research_interface::robot::Connect>(connect_request);
@@ -59,6 +63,14 @@ RobotState Robot::Impl::update(
   }
   sendRobotCommand(motion_command, control_command);
   return convertRobotState(receiveRobotState());
+}
+
+RobotState Robot::Impl::readOnce() {
+  if (network_->udpAvailableData() >
+      static_cast<int>(sizeof(research_interface::robot::RobotState))) {
+    network_->udpRead<research_interface::robot::RobotState>();
+  }
+  return convertRobotState(network_->udpRead<research_interface::robot::RobotState>());
 }
 
 void Robot::Impl::sendRobotCommand(
