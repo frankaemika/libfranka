@@ -611,7 +611,7 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
       .onSendRobotState([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
         robot_state.controller_mode = ControllerMode::kJointPosition;
-        robot_state.errors[franka::kJointPositionLimitsViolation] = true;
+        robot_state.errors[0] = true;
       })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})

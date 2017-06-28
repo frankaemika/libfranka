@@ -234,8 +234,8 @@ void Robot::Impl::stopController() {
 void Robot::Impl::checkStateForErrors(research_interface::robot::RobotState& robot_state) {
   if (motionGeneratorRunning() || controllerRunning()) {
     Errors errors(robot_state.errors);
-    if (errors.any()) {
-      throw ControlException("libfranka: motion aborted: "s + errors.namesViolated());
+    if (errors) {
+      throw ControlException("libfranka: motion aborted: "s + activeErrorsString(errors));
     }
   }
 }

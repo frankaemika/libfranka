@@ -53,8 +53,8 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
     EXPECT_EQ(0.0, actual.K_F_ext_hat_K[i]);
   }
-  EXPECT_FALSE(actual.errors.any());
-  EXPECT_FALSE(actual.reflex_reasons.any());
+  EXPECT_FALSE(actual.errors);
+  EXPECT_FALSE(actual.reflex_reasons);
   EXPECT_EQ(0u, actual.sequence_number);
 }
 
