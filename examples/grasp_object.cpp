@@ -1,6 +1,6 @@
 #include <iostream>
-#include <thread>
 #include <sstream>
+#include <thread>
 
 #include <franka/gripper.h>
 #include <franka/gripper_state.h>
@@ -17,12 +17,12 @@ int main(int argc, char** argv) {
 
     std::stringstream ss(argv[2]);
     bool homing;
-    if(!(ss >> homing)) {
+    if (!(ss >> homing)) {
       std::cerr << "<homing> can be 0 or 1." << std::endl;
       return -1;
     }
 
-    if(homing) {
+    if (homing) {
       // Do a homing in order to estimate the maximum grasping width with the current fingers.
       gripper.homing();
     }
