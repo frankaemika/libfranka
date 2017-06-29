@@ -7,21 +7,30 @@
 #include <Poco/Net/StreamSocket.h>
 #include <gtest/gtest.h>
 
-MockServer::MockServer(ConnectCallbackT on_connect)
+template <>
+uint16_t MockServer<research_interface::gripper::Connect>::port =
+    research_interface::gripper::kCommandPort;
+template <>
+uint16_t MockServer<research_interface::robot::Connect>::port =
+    research_interface::robot::kCommandPort;
+
+template <typename C>
+MockServer<C>::MockServer(ConnectCallbackT on_connect)
     : block_{false},
       shutdown_{false},
       continue_{false},
       initialized_{false},
       on_connect_(on_connect) {
   std::unique_lock<std::mutex> lock(mutex_);
-  server_thread_ = std::thread(&MockServer::serverThread, this);
+  server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 
   cv_.wait(lock, [this] { return initialized_; });
   lock.unlock();
   spinOnce();  // spin to accept connections immediately
 }
 
-MockServer::~MockServer() {
+template <typename C>
+MockServer<C>::~MockServer() {
   {
     std::lock_guard<std::mutex> _(mutex_);
     shutdown_ = true;
@@ -40,7 +49,8 @@ MockServer::~MockServer() {
   }
 }
 
-MockServer& MockServer::onReceiveRobotCommand(
+template <typename C>
+MockServer<C>& MockServer<C>::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
@@ -51,7 +61,8 @@ MockServer& MockServer::onReceiveRobotCommand(
   return *this;
 }
 
-MockServer& MockServer::spinOnce() {
+template <typename C>
+MockServer<C>& MockServer<C>::spinOnce() {
   std::unique_lock<std::mutex> lock(mutex_);
   continue_ = true;
   cv_.notify_one();
@@ -62,14 +73,14 @@ MockServer& MockServer::spinOnce() {
   return *this;
 }
 
-void MockServer::serverThread() {
+template <typename C>
+void MockServer<C>::serverThread() {
   std::unique_lock<std::mutex> lock(mutex_);
 
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
 
-  srv = Poco::Net::ServerSocket(
-      {kHostname, research_interface::robot::kCommandPort});  // does bind + listen
+  srv = Poco::Net::ServerSocket({kHostname, port});  // does bind + listen
   initialized_ = true;
 
   cv_.notify_one();
@@ -91,13 +102,10 @@ void MockServer::serverThread() {
   };
 
   uint16_t udp_port;
-  handleCommand<research_interface::robot::Connect>(
-      tcp_socket_wrapper, [&, this](const research_interface::robot::Connect::Request& request) {
-        udp_port = request.udp_port;
-        return on_connect_ ? on_connect_(request)
-                           : research_interface::robot::Connect::Response(
-                                 research_interface::robot::Connect::Status::kSuccess);
-      });
+  handleCommand<C>(tcp_socket_wrapper, [&, this](const typename C::Request& request) {
+    udp_port = request.udp_port;
+    return on_connect_ ? on_connect_(request) : typename C::Response(C::Status::kSuccess);
+  });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});
   udp_socket.setBlocking(true);
@@ -127,7 +135,7 @@ void MockServer::serverThread() {
 
   if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
     // Received something on the TCP socket.
-    // Test that the Robot closed the connection.
+    // Test that the Server closed the connection.
     std::array<uint8_t, 16> buffer;
 
     int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
