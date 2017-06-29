@@ -3,6 +3,7 @@
 #include <chrono>
 #include <cstring>
 #include <functional>
+#include <sstream>
 #include <unordered_set>
 
 #include <franka/exception.h>
@@ -29,7 +30,7 @@ class Network {
   T udpRead();
   int udpAvailableData();
 
-  virtual uint16_t udpPort() const noexcept;
+  uint16_t udpPort() const noexcept;
 
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
@@ -46,7 +47,7 @@ class Network {
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
- protected:
+ private:
   int tcpReceiveIntoBuffer();
 
   Poco::Net::StreamSocket tcp_socket_;
@@ -154,6 +155,30 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
     throw ProtocolException(std::string{"libfranka: received response of wrong type"});
   }
   return *response;
+}
+
+template <typename T, uint16_t kLibraryVersion>
+void connect(Network& network, uint16_t* ri_version) {
+  typename T::Request connect_request(network.udpPort());
+  network.tcpSendRequest<T>(connect_request);
+
+  typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>();
+  switch (connect_response.status) {
+    case (T::Status::kIncompatibleLibraryVersion): {
+      std::stringstream message;
+      message << "libfranka: incompatible library version. " << std::endl
+              << "Server version: " << connect_response.version << std::endl
+              << "Library version: " << kLibraryVersion;
+      throw IncompatibleVersionException(message.str());
+    }
+    case (T::Status::kSuccess): {
+      *ri_version = connect_response.version;
+      break;
+    }
+    default:
+      throw ProtocolException(
+          "libfranka gripper: protocol error during gripper connection attempt");
+  }
 }
 
 }  // namespace franka

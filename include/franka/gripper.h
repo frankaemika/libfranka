@@ -1,9 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
-#include <franka/exception.h>
 #include <franka/gripper_state.h>
 
 /**
@@ -52,7 +52,7 @@ class Gripper {
   /**
    * Grasp an object.
    *
-   * @param[in] width Size of object to grasp.
+   * @param[in] width Size of the object to grasp.
    * @param[in] speed Closing speed.
    * @param[in] force Grasping force.
    *

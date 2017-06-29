@@ -10,7 +10,7 @@ namespace franka {
 Network::Network(const std::string& franka_address,
                  uint16_t franka_port,
                  std::chrono::milliseconds timeout)
-    : tcp_socket_(), udp_socket_() {
+    : tcp_socket_{}, udp_socket_{} {
   try {
     Poco::Timespan poco_timeout(1000l * timeout.count());
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);

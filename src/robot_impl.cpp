@@ -15,27 +15,8 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
     throw NetworkException("libfranka robot: Network error");
   }
 
-  research_interface::robot::Connect::Request connect_request(network_->udpPort());
-
-  network_->tcpSendRequest<research_interface::robot::Connect>(connect_request);
-
-  research_interface::robot::Connect::Response connect_response =
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Connect>();
-  switch (connect_response.status) {
-    case research_interface::robot::Connect::Status::kIncompatibleLibraryVersion: {
-      std::stringstream message;
-      message << "libfranka robot: incompatible library version. " << std::endl
-              << "Server version: " << connect_response.version << std::endl
-              << "Library version: " << research_interface::robot::kVersion;
-      throw IncompatibleVersionException(message.str());
-    }
-    case research_interface::robot::Connect::Status::kSuccess: {
-      ri_version_ = connect_response.version;
-      break;
-    }
-    default:
-      throw ProtocolException("libfranka robot: protocol error during connection attempt");
-  }
+  connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
+                                                                                   &ri_version_);
 }
 
 RobotState Robot::Impl::update(
@@ -66,6 +47,7 @@ RobotState Robot::Impl::update(
 }
 
 RobotState Robot::Impl::readOnce() {
+  // Delete old robot states in the UDP buffer.
   if (network_->udpAvailableData() >
       static_cast<int>(sizeof(research_interface::robot::RobotState))) {
     network_->udpRead<research_interface::robot::RobotState>();

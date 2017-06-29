@@ -45,33 +45,14 @@ bool handleCommandResponse<research_interface::gripper::Grasp>(
 }
 
 Gripper::Gripper(const std::string& franka_address)
-    : network_(
-          std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort)) {
+    : network_{
+          std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort)} {
   if (!network_) {
     throw NetworkException("libfranka gripper: Network error");
   }
 
-  research_interface::gripper::Connect::Request connect_request(network_->udpPort());
-  network_->tcpSendRequest<research_interface::gripper::Connect>(connect_request);
-
-  research_interface::gripper::Connect::Response connect_response =
-      network_->tcpBlockingReceiveResponse<research_interface::gripper::Connect>();
-  switch (connect_response.status) {
-    case research_interface::gripper::Connect::Status::kIncompatibleLibraryVersion: {
-      std::stringstream message;
-      message << "libfranka gripper: incompatible library version. " << std::endl
-              << "Server version: " << connect_response.version << std::endl
-              << "Library version: " << research_interface::gripper::kVersion;
-      throw IncompatibleVersionException(message.str());
-    }
-    case research_interface::gripper::Connect::Status::kSuccess: {
-      ri_version_ = connect_response.version;
-      break;
-    }
-    default:
-      throw ProtocolException(
-          "libfranka gripper: protocol error during gripper connection attempt");
-  }
+  connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
+      *network_, &ri_version_);
 }
 
 Gripper::~Gripper() noexcept = default;
@@ -113,6 +94,7 @@ void Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() {
+  // Delete old gripper states in the UDP buffer.
   if (network_->udpAvailableData() >
       static_cast<int>(sizeof(research_interface::gripper::GripperState))) {
     network_->udpRead<research_interface::gripper::GripperState>();

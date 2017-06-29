@@ -2,6 +2,7 @@
 #include <sstream>
 #include <thread>
 
+#include <franka/exception.h>
 #include <franka/gripper.h>
 #include <franka/gripper_state.h>
 
@@ -40,7 +41,7 @@ int main(int argc, char** argv) {
       return -1;
     }
 
-    // Wait 2s and check afterwards, if the object is still grasped.
+    // Wait 3s and check afterwards, if the object is still grasped.
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
 
     gripper_state = gripper.readOnce();
