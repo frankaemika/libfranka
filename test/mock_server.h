@@ -20,22 +20,24 @@ class MockServer {
  public:
   using ConnectCallbackT = std::function<research_interface::robot::Connect::Response(
       const research_interface::robot::Connect::Request&)>;
-  using SendRobotStateAlternativeCallbackT =
-      std::function<void(research_interface::robot::RobotState&)>;
-  using SendRobotStateCallbackT = std::function<research_interface::robot::RobotState()>;
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
 
   MockServer(ConnectCallbackT on_connect = ConnectCallbackT());
   ~MockServer();
 
-  MockServer& sendEmptyRobotState();
+  template <typename T>
+  MockServer& sendEmptyState();
 
   template <typename TResponse>
   MockServer& sendResponse(std::function<TResponse()> create_response);
 
-  MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
-  MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
+  template <typename T>
+  MockServer& onSendUDP(std::function<T()> on_send_udp);
+
+  template <typename T>
+  MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
+
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
 
   template <typename T>
@@ -91,4 +93,31 @@ MockServer& MockServer::sendResponse(std::function<TResponse()> create_response)
                       tcp_socket.sendBytes(&response, sizeof(response));
                     });
   return *this;
+}
+
+template <typename T>
+MockServer& MockServer::sendEmptyState() {
+  return onSendUDP(std::function<void(T&)>());
+}
+
+template <typename T>
+MockServer& MockServer::onSendUDP(std::function<T()> on_send_udp) {
+  std::lock_guard<std::mutex> _(mutex_);
+  commands_.emplace("onSendUDP", [=](Socket&, Socket& udp_socket) {
+    T state = on_send_udp();
+    udp_socket.sendBytes(&state, sizeof(state));
+  });
+  block_ = true;
+  return *this;
+}
+
+template <typename T>
+MockServer& MockServer::onSendUDP(std::function<void(T&)> on_send_udp) {
+  return onSendUDP<T>([=]() {
+    T state{};
+    if (on_send_udp) {
+      on_send_udp(state);
+    }
+    return state;
+  });
 }

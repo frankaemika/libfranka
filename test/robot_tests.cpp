@@ -47,7 +47,8 @@ TEST(Robot, CanReadRobotStateOnce) {
   MockServer server;
   Robot robot("127.0.0.1");
 
-  server.onSendRobotState([&]() { return sent_robot_state; }).spinOnce();
+  server.onSendUDP<research_interface::robot::RobotState>([&]() { return sent_robot_state; })
+      .spinOnce();
 
   const RobotState& received_robot_state = robot.readOnce();
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
@@ -61,7 +62,7 @@ TEST(Robot, CanReadRobotState) {
   MockServer server;
   Robot robot("127.0.0.1");
 
-  server.sendEmptyRobotState().spinOnce();
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
 
   MockCallback callback;
   EXPECT_CALL(callback, invoke(_));

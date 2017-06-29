@@ -40,30 +40,6 @@ MockServer::~MockServer() {
   }
 }
 
-MockServer& MockServer::sendEmptyRobotState() {
-  return onSendRobotState(SendRobotStateAlternativeCallbackT());
-}
-
-MockServer& MockServer::onSendRobotState(SendRobotStateCallbackT on_send_robot_state) {
-  std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("onSendRobotState", [=](Socket&, Socket& udp_socket) {
-    research_interface::robot::RobotState robot_state = on_send_robot_state();
-    udp_socket.sendBytes(&robot_state, sizeof(robot_state));
-  });
-  block_ = true;
-  return *this;
-}
-
-MockServer& MockServer::onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state) {
-  return onSendRobotState([=]() {
-    research_interface::robot::RobotState robot_state{};
-    if (on_send_robot_state) {
-      on_send_robot_state(robot_state);
-    }
-    return robot_state;
-  });
-}
-
 MockServer& MockServer::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
