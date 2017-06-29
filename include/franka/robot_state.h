@@ -134,12 +134,12 @@ struct RobotState {
   /**
    * Current error state.
    */
-  Errors errors{};
+  Errors current_errors{};
 
   /**
    * Contains the errors that aborted the previous motion.
    */
-  Errors reflex_reasons{};
+  Errors last_motion_errors{};
 
   /**
    * Strictly increasing sequence number for each received robot state.

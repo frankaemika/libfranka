@@ -57,8 +57,8 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
     EXPECT_EQ(0.0, actual.K_F_ext_hat_K[i]);
   }
-  EXPECT_FALSE(actual.errors);
-  EXPECT_FALSE(actual.reflex_reasons);
+  EXPECT_FALSE(actual.current_errors);
+  EXPECT_FALSE(actual.last_motion_errors);
   EXPECT_EQ(0u, actual.sequence_number);
 }
 
@@ -79,8 +79,8 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
-  EXPECT_EQ(expected.errors, actual.errors);
-  EXPECT_EQ(expected.reflex_reasons, actual.reflex_reasons);
+  EXPECT_EQ(expected.current_errors, actual.current_errors);
+  EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
   EXPECT_EQ(expected.sequence_number, actual.sequence_number);
 }
 
@@ -102,8 +102,8 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
-  EXPECT_EQ(franka::Errors(expected.errors), actual.errors);
-  EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.reflex_reasons);
+  EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
+  EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
   EXPECT_EQ(expected.message_id, actual.sequence_number);
 }
 
@@ -168,11 +168,11 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < errors.size(); i++) {
     errors[i] = randomBool();
   }
-  robot_state.errors = franka::Errors(errors);
+  robot_state.current_errors = franka::Errors(errors);
   for (size_t i = 0; i < errors.size(); i++) {
     errors[i] = randomBool();
   }
-  robot_state.reflex_reasons = franka::Errors(errors);
+  robot_state.last_motion_errors = franka::Errors(errors);
 
   robot_state.sequence_number = randomDouble();
 }
