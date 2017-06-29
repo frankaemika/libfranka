@@ -15,18 +15,22 @@ namespace franka {
  */
 struct GripperState {
   /**
-   * Current opening width.
+   * Current gripper opening width.
    */
   double opening_width;
 
   /**
-   * Maximum opening width.
+   * Maximum gripper opening width.
+   * This parameter is estimated by homing the gripper.
+   * After changing the gripper fingers, a homing needs to be done.
+   *
+   * @see Gripper::homing.
    */
   double max_opening_width;
 
   /**
    * Object grasped flag.
-   * True: Gripper successfully grasped an object
+   * True: Successfully grasped an object \n
    * False: Part lost or nothing grasped.
    */
   bool object_grasped;

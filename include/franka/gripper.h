@@ -27,7 +27,7 @@ class Gripper {
   using ServerVersion = uint16_t;
 
   /**
-   * Establishes a connection with FRANKA CONTROL.
+   * Establishes a connection with the gripper service on FRANKA CONTROL.
    *
    * @param[in] franka_address IP/hostname of FRANKA CONTROL
    *
@@ -43,18 +43,22 @@ class Gripper {
   ~Gripper() noexcept;
 
   /**
-   * Performs homing.
+   * Performs homing of the gripper.
+   * After changing the gripper fingers, a homing needs to be done.
+   * This is needed to estimate the maximum grasping width.
    *
    * @throw CommandException if an error occurred.
+   *
+   * @see GripperState
    */
   void homing();
 
   /**
    * Grasp an object.
    *
-   * @param[in] width Size of the object to grasp.
-   * @param[in] speed Closing speed.
-   * @param[in] force Grasping force.
+   * @param[in] width Size of the object to grasp. [m]
+   * @param[in] speed Closing speed. [m/s]
+   * @param[in] force Grasping force. [mA]
    *
    * @return Grasped flag.
    *
@@ -65,8 +69,8 @@ class Gripper {
   /**
    * Moves the gripper fingers to a specified width.
    *
-   * @param[in] width Intended opening width.
-   * @param[in] speed Gripper closing speed.
+   * @param[in] width Intended opening width. [m]
+   * @param[in] speed Closing speed. [m/s]
    *
    * @throw CommandException if an error occurred.
    */
@@ -86,6 +90,8 @@ class Gripper {
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
+   *
+   * @see GripperState
    */
   GripperState readOnce();
 
