@@ -1,6 +1,10 @@
 #include <franka/errors.h>
 
 #include <algorithm>
+#include <iterator>
+#include <sstream>
+
+using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
@@ -51,110 +55,87 @@ Errors::operator bool() const noexcept {
          force_controller_desired_force_tolerance_violation;
 }
 
-std::string activeErrorsString(Errors& errors) {
-  std::string names;
+namespace {
 
-  names += errors.joint_position_limits_violation ? "joint_position_limits_violation, " : "";
-  names +=
-      errors.cartesian_position_limits_violation ? "cartesian_position_limits_violation, " : "";
-  names += errors.self_collision_avoidance_violation ? "self_collision_avoidance_violation, " : "";
-  names += errors.joint_velocity_violation ? "joint_velocity_violation, " : "";
-  names += errors.cartesian_velocity_violation ? "cartesian_velocity_violation, " : "";
-  names += errors.force_control_safety_violation ? "force_control_safety_violation, " : "";
-  names += errors.joint_reflex ? "joint_reflex, " : "";
-  names += errors.cartesian_reflex ? "cartesian_reflex, " : "";
-  names += errors.max_goal_pose_deviation_violation ? "max_goal_pose_deviation_violation, " : "";
-  names += errors.max_path_pose_deviation_violation ? "max_path_pose_deviation_violation, " : "";
-  names += errors.cartesian_velocity_profile_safety_violation
-               ? "cartesian_velocity_profile_safety_violation, "
-               : "";
-  names += errors.joint_position_motion_generator_start_pose_invalid
-               ? "joint_position_motion_generator_start_pose_invalid, "
-               : "";
-  names += errors.joint_motion_generator_position_limits_violation
-               ? "joint_motion_generator_position_limits_violation, "
-               : "";
-  names += errors.joint_motion_generator_velocity_limits_violation
-               ? "joint_motion_generator_velocity_limits_violation, "
-               : "";
-  names += errors.joint_motion_generator_velocity_discontinuity
-               ? "joint_motion_generator_velocity_discontinuity, "
-               : "";
-  names += errors.joint_motion_generator_acceleration_discontinuity
-               ? "joint_motion_generator_acceleration_discontinuity, "
-               : "";
-  names += errors.cartesian_position_motion_generator_start_pose_invalid
-               ? "cartesian_position_motion_generator_start_pose_invalid, "
-               : "";
-  names += errors.cartesian_motion_generator_elbow_limit_violation
-               ? "cartesian_motion_generator_elbow_limit_violation, "
-               : "";
-  names += errors.cartesian_motion_generator_velocity_limits_violation
-               ? "cartesian_motion_generator_velocity_limits_violation, "
-               : "";
-  names += errors.cartesian_motion_generator_velocity_discontinuity
-               ? "cartesian_motion_generator_velocity_discontinuity, "
-               : "";
-  names += errors.cartesian_motion_generator_acceleration_discontinuity
-               ? "cartesian_motion_generator_acceleration_discontinuity, "
-               : "";
-  names += errors.cartesian_motion_generator_elbow_sign_inconsistent
-               ? "cartesian_motion_generator_elbow_sign_inconsistent, "
-               : "";
-  names += errors.cartesian_motion_generator_start_elbow_invalid
-               ? "cartesian_motion_generator_start_elbow_invalid, "
-               : "";
-  names += errors.force_controller_desired_force_tolerance_violation
-               ? "force_controller_desired_force_tolerance_violation, "
-               : "";
-
-  if (names.size() > 0) {
-    names.erase(names.end() - 2, names.end());
+void addName(std::vector<std::string>& vector,
+             bool error,
+             const std::string& name,
+             bool only_active,
+             bool include_value) {
+  if (!only_active || error) {
+    std::string value_string = include_value ? (": "s + (error ? "true"s : "false"s)) : ""s;
+    vector.push_back(name + value_string);
   }
+}
 
-  return names;
+std::string errorNames(const Errors& errors, bool only_active, bool include_value) {
+  std::vector<std::string> names;
+
+  addName(names, errors.joint_position_limits_violation, "joint_position_limits_violation",
+          only_active, include_value);
+  addName(names, errors.cartesian_position_limits_violation, "cartesian_position_limits_violation",
+          only_active, include_value);
+  addName(names, errors.self_collision_avoidance_violation, "self_collision_avoidance_violation",
+          only_active, include_value);
+  addName(names, errors.joint_velocity_violation, "joint_velocity_violation", only_active,
+          include_value);
+  addName(names, errors.cartesian_velocity_violation, "cartesian_velocity_violation", only_active,
+          include_value);
+  addName(names, errors.force_control_safety_violation, "force_control_safety_violation",
+          only_active, include_value);
+  addName(names, errors.joint_reflex, "joint_reflex", only_active, include_value);
+  addName(names, errors.cartesian_reflex, "cartesian_reflex", only_active, include_value);
+  addName(names, errors.max_goal_pose_deviation_violation, "max_goal_pose_deviation_violation",
+          only_active, include_value);
+  addName(names, errors.max_path_pose_deviation_violation, "max_path_pose_deviation_violation",
+          only_active, include_value);
+  addName(names, errors.cartesian_velocity_profile_safety_violation,
+          "cartesian_velocity_profile_safety_violation", only_active, include_value);
+  addName(names, errors.joint_position_motion_generator_start_pose_invalid,
+          "joint_position_motion_generator_start_pose_invalid", only_active, include_value);
+  addName(names, errors.joint_motion_generator_position_limits_violation,
+          "joint_motion_generator_position_limits_violation", only_active, include_value);
+  addName(names, errors.joint_motion_generator_velocity_limits_violation,
+          "joint_motion_generator_velocity_limits_violation", only_active, include_value);
+  addName(names, errors.joint_motion_generator_velocity_discontinuity,
+          "joint_motion_generator_velocity_discontinuity", only_active, include_value);
+  addName(names, errors.joint_motion_generator_acceleration_discontinuity,
+          "joint_motion_generator_acceleration_discontinuity", only_active, include_value);
+  addName(names, errors.cartesian_position_motion_generator_start_pose_invalid,
+          "cartesian_position_motion_generator_start_pose_invalid", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_elbow_limit_violation,
+          "cartesian_motion_generator_elbow_limit_violation", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_velocity_limits_violation,
+          "cartesian_motion_generator_velocity_limits_violation", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_velocity_discontinuity,
+          "cartesian_motion_generator_velocity_discontinuity", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_acceleration_discontinuity,
+          "cartesian_motion_generator_acceleration_discontinuity", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_elbow_sign_inconsistent,
+          "cartesian_motion_generator_elbow_sign_inconsistent", only_active, include_value);
+  addName(names, errors.cartesian_motion_generator_start_elbow_invalid,
+          "cartesian_motion_generator_start_elbow_invalid", only_active, include_value);
+  addName(names, errors.force_controller_desired_force_tolerance_violation,
+          "force_controller_desired_force_tolerance_violation", only_active, include_value);
+
+  if (!names.empty()) {
+    std::ostringstream string_stream;
+    std::copy(names.cbegin(), names.cend() - 1,
+              std::ostream_iterator<std::string>(string_stream, ", "));
+    std::copy(names.cend() - 1, names.cend(), std::ostream_iterator<std::string>(string_stream));
+    return string_stream.str();
+  }
+  return "";
+}
+
+}  // anonymous namespace
+
+std::string activeErrorsString(Errors& errors) {
+  return errorNames(errors, true, false);
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Errors& errors) {
-  ostream << "{joint_position_limits_violation : " << errors.joint_position_limits_violation
-          << ", cartesian_position_limits_violation : "
-          << errors.cartesian_position_limits_violation
-          << ", self_collision_avoidance_violation : " << errors.self_collision_avoidance_violation
-          << ", joint_velocity_violation : " << errors.joint_velocity_violation
-          << ", cartesian_velocity_violation : " << errors.cartesian_velocity_violation
-          << ", force_control_safety_violation : " << errors.force_control_safety_violation
-          << ", joint_reflex : " << errors.joint_reflex
-          << ", cartesian_reflex : " << errors.cartesian_reflex
-          << ", max_goal_pose_deviation_violation : " << errors.max_goal_pose_deviation_violation
-          << ", max_path_pose_deviation_violation : " << errors.max_path_pose_deviation_violation
-          << ", cartesian_velocity_profile_safety_violation : "
-          << errors.cartesian_velocity_profile_safety_violation
-          << ", joint_position_motion_generator_start_pose_invalid : "
-          << errors.joint_position_motion_generator_start_pose_invalid
-          << ", joint_motion_generator_position_limits_violation : "
-          << errors.joint_motion_generator_position_limits_violation
-          << ", joint_motion_generator_velocity_limits_violation : "
-          << errors.joint_motion_generator_velocity_limits_violation
-          << ", joint_motion_generator_velocity_discontinuity : "
-          << errors.joint_motion_generator_velocity_discontinuity
-          << ", joint_motion_generator_acceleration_discontinuity : "
-          << errors.joint_motion_generator_acceleration_discontinuity
-          << ", cartesian_position_motion_generator_start_pose_invalid : "
-          << errors.cartesian_position_motion_generator_start_pose_invalid
-          << ", cartesian_motion_generator_elbow_limit_violation : "
-          << errors.cartesian_motion_generator_elbow_limit_violation
-          << ", cartesian_motion_generator_velocity_limits_violation : "
-          << errors.cartesian_motion_generator_velocity_limits_violation
-          << ", cartesian_motion_generator_velocity_discontinuity : "
-          << errors.cartesian_motion_generator_velocity_discontinuity
-          << ", cartesian_motion_generator_acceleration_discontinuity : "
-          << errors.cartesian_motion_generator_acceleration_discontinuity
-          << ", cartesian_motion_generator_elbow_sign_inconsistent : "
-          << errors.cartesian_motion_generator_elbow_sign_inconsistent
-          << ", cartesian_motion_generator_start_elbow_invalid : "
-          << errors.cartesian_motion_generator_start_elbow_invalid
-          << ", force_controller_desired_force_tolerance_violation : "
-          << errors.force_controller_desired_force_tolerance_violation << "}";
+  ostream << "{" << errorNames(errors, false, true) << "}";
   return ostream;
 }
 

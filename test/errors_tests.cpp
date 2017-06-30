@@ -12,21 +12,21 @@ TEST(Errors, IsInitializedToNoErrors) {
 }
 
 TEST(Errors, EvaluatedToTrueOnError) {
-  research_interface::robot::RobotState state;
-  state.errors[rand() % state.errors.size()] = true;
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> error_flags{};
+  error_flags[rand() % error_flags.size()] = true;
 
-  franka::Errors errors(state.errors);
+  franka::Errors errors(error_flags);
 
   EXPECT_TRUE(errors);
 }
 
 TEST(Errors, CanGetNamesOfErrors) {
-  research_interface::robot::RobotState state;
-  std::fill(state.errors.begin(), state.errors.end(), false);
-  state.errors[0] = true;
-  state.errors[2] = true;
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> error_flags{};
+  std::fill(error_flags.begin(), error_flags.end(), false);
+  error_flags[0] = true;
+  error_flags[2] = true;
 
-  franka::Errors errors(state.errors);
+  franka::Errors errors(error_flags);
 
   std::string expected = "joint_position_limits_violation, self_collision_avoidance_violation";
   EXPECT_EQ(expected, franka::activeErrorsString(errors));

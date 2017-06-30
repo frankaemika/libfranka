@@ -53,21 +53,25 @@ RobotState Robot::Impl::update(
           std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                     std::placeholders::_1));
     } catch (const CommandException& e) {
-      // Make sure that we have an up-to-date robot state that shows the stopped motion.
-      while (motionGeneratorRunning()) {
-        research_interface::robot::RobotState state = receiveRobotState();
-        checkStateForErrors(state);
-      }
+      try {
+        // Make sure that we have an up-to-date robot state that shows the stopped motion.
+        while (motionGeneratorRunning()) {
+          receiveRobotState();
+        }
 
-      // Rethrow as control exception to be consistent with starting/stopping of motions.
-      throw ControlException(e.what());
+        franka::RobotState state = convertRobotState(receiveRobotState());
+        // Rethrow as control exception to be consistent with starting/stopping of motions.
+        throw ControlException(e.what() + " "s + activeErrorsString(state.last_motion_errors));
+      } catch (const std::exception&) {
+        throw;
+      }
     }
   }
   sendRobotCommand(motion_command, control_command);
 
-  research_interface::robot::RobotState state = receiveRobotState();
+  franka::RobotState state = convertRobotState(receiveRobotState());
   checkStateForErrors(state);
-  return convertRobotState(state);
+  return state;
 }
 
 void Robot::Impl::sendRobotCommand(
@@ -231,11 +235,11 @@ void Robot::Impl::stopController() {
   }
 }
 
-void Robot::Impl::checkStateForErrors(research_interface::robot::RobotState& robot_state) {
+void Robot::Impl::checkStateForErrors(franka::RobotState& robot_state) {
   if (motionGeneratorRunning() || controllerRunning()) {
-    Errors errors(robot_state.errors);
-    if (errors) {
-      throw ControlException("libfranka: motion aborted: "s + activeErrorsString(errors));
+    if (robot_state.current_errors) {
+      throw ControlException("libfranka: motion aborted: "s +
+                             activeErrorsString(robot_state.current_errors));
     }
   }
 }

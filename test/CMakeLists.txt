@@ -26,6 +26,7 @@ add_executable(run_all_tests
   command_tests.cpp
   control_loop_tests.cpp
   control_types_tests.cpp
+  errors_tests.cpp
   helpers.cpp
   mock_server.cpp
   model_tests.cpp
@@ -33,7 +34,6 @@ add_executable(run_all_tests
   robot_impl_tests.cpp
   robot_state_tests.cpp
   robot_tests.cpp
-  errors_tests.cpp
 )
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})

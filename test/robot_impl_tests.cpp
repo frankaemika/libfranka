@@ -402,6 +402,11 @@ TEST(RobotImpl, CanReceiveMotionGenerationError) {
       })
       .spinOnce()
       .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kRejected); })
+      .spinOnce()
+      .onSendRobotState([](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = ControllerMode::kCartesianImpedance;
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.update(&sent_command.motion), ControlException);
@@ -601,8 +606,6 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
 
   robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
                     maximum_path_deviation, maximum_goal_pose_deviation);
-  robot.motionGeneratorRunning();
-  robot.controllerRunning();
 
   MotionGeneratorCommand motion_command{};
   server

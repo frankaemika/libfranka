@@ -32,7 +32,7 @@ struct Errors {
    */
   bool joint_position_limits_violation{};
   /**
-   * True if FRANKA moved past on of the virtual walls.
+   * True if FRANKA moved past any of the virtual walls.
    */
   bool cartesian_position_limits_violation{};
   /**
@@ -81,7 +81,7 @@ struct Errors {
    */
   bool joint_motion_generator_position_limits_violation{};
   /**
-   * True if an external joint motion generator would move too high velocity.
+   * True if an external joint motion generator exceeded velocity limits.
    */
   bool joint_motion_generator_velocity_limits_violation{};
   /**

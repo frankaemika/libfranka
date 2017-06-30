@@ -52,7 +52,7 @@ class Robot::Impl : public RobotControl {
   void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
                         const research_interface::robot::ControllerCommand* control_command);
   research_interface::robot::RobotState receiveRobotState();
-  void checkStateForErrors(research_interface::robot::RobotState& robot_state);
+  void checkStateForErrors(franka::RobotState& robot_state);
 
   Network network_;
 

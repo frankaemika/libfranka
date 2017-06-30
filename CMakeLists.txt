@@ -53,6 +53,7 @@ add_library(franka SHARED
   src/control_loop.cpp
   src/control_loop_base.cpp
   src/control_types.cpp
+  src/errors.cpp
   src/library_loader.cpp
   src/model.cpp
   src/model_library.cpp
@@ -61,7 +62,6 @@ add_library(franka SHARED
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
-  src/errors.cpp
 )
 
 set_target_properties(franka PROPERTIES
