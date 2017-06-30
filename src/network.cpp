@@ -73,12 +73,12 @@ void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
     }
   } catch (const Poco::TimeoutException& e) {
     if (bytes_read != 0) {
-      throw ProtocolException(std::string{"libfranka: incorrect object size"});
+      throw ProtocolException("libfranka: incorrect object size");
     } else {
-      throw NetworkException(std::string{"libfranka: FRANKA connection timeout"});
+      throw NetworkException("libfranka: FRANKA connection timeout");
     }
   } catch (const Poco::Exception& e) {
-    throw NetworkException(std::string{"libfranka: FRANKA connection closed"});
+    throw NetworkException("libfranka: FRANKA connection closed");
   }
 }
 
