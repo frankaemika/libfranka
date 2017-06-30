@@ -12,11 +12,6 @@
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 
-// `using std::string_literals::operator""s` produces a GCC warning that cannot
-// be disabled, so we have to use `using namespace ...`.
-// See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-
 namespace franka {
 
 class Network {
@@ -24,7 +19,7 @@ class Network {
   explicit Network(const std::string& franka_address,
                    uint16_t franka_port,
                    std::chrono::milliseconds timeout = std::chrono::seconds(5));
-  virtual ~Network();
+  ~Network();
 
   template <typename T>
   T udpRead();
@@ -71,6 +66,7 @@ T Network::udpRead() try {
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
   throw NetworkException("libfranka: UDP read: "s + e.what());
 }
 
@@ -78,9 +74,10 @@ template <typename T>
 void Network::udpSend(const T& data) try {
   int bytes_sent = udp_socket_.sendTo(&data, sizeof(data), udp_server_address_);
   if (bytes_sent != sizeof(data)) {
-    throw NetworkException("libfranka: UDP - could not send data");
+    throw NetworkException("libfranka: could not send UDP data");
   }
 } catch (const Poco::Exception& e) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
   throw NetworkException("libfranka: UDP send: "s + e.what());
 }
 
@@ -88,7 +85,7 @@ template <typename T>
 void Network::tcpSendRequest(const typename T::Request& request) try {
   tcp_socket_.sendBytes(&request, sizeof(request));
 } catch (const Poco::Exception& e) {
-  throw NetworkException(std::string{"libfranka: tcp send bytes: "} + e.what());
+  throw NetworkException(std::string{"libfranka: TCP send bytes: "} + e.what());
 }
 
 template <typename T>
@@ -109,6 +106,7 @@ bool Network::tcpReadResponse(T* function) try {
   }
   return false;
 } catch (const Poco::Exception& e) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
   throw NetworkException("libfranka: "s + e.what());
 }
 

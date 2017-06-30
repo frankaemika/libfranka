@@ -12,7 +12,7 @@ namespace franka {
 Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config)
     : network_{std::move(network)}, realtime_config_{realtime_config} {
   if (!network_) {
-    throw NetworkException("libfranka robot: Network error");
+    throw std::invalid_argument("libfranka robot: Invalid argument");
   }
 
   connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,

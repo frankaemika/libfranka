@@ -25,7 +25,7 @@ class GripperCommand : public ::testing::Test {
   bool compare(const typename T::Request& request_one, const typename T::Request& request_two);
   typename T::Response createResponse(const typename T::Request& request,
                                       const typename T::Status status);
-  void check(Gripper& gripper);
+  void checkUnsuccessful(Gripper& gripper);
 };
 
 template <typename T>
@@ -85,7 +85,6 @@ bool GripperCommand<Grasp>::executeCommand(Gripper& gripper) {
   double speed = 0.1;
   double force = 400.0;
   return gripper.grasp(width, speed, force);
-  ;
 }
 
 template <>
@@ -107,12 +106,12 @@ typename T::Response GripperCommand<T>::createResponse(const typename T::Request
 }
 
 template <typename T>
-void GripperCommand<T>::check(Gripper& gripper) {
+void GripperCommand<T>::checkUnsuccessful(Gripper& gripper) {
   EXPECT_THROW(executeCommand(gripper), CommandException);
 }
 
 template <>
-void GripperCommand<Grasp>::check(Gripper& gripper) {
+void GripperCommand<Grasp>::checkUnsuccessful(Gripper& gripper) {
   EXPECT_FALSE(executeCommand(gripper));
 }
 
@@ -165,5 +164,5 @@ TYPED_TEST(GripperCommand, CanSendAndReceiveUnsucessful) {
           })
       .spinOnce();
 
-  TestFixture::check(gripper);
+  TestFixture::checkUnsuccessful(gripper);
 }

@@ -15,14 +15,14 @@ endif()
 
 set(EXAMPLES
   echo_robot_state
+  execute_trajectory
   generate_cartesian_pose_motion
   generate_cartesian_velocity_motion
   generate_joint_pose_motion
   generate_joint_velocity_motion
-  execute_trajectory
-  print_joint_poses
-  motion_with_control
   grasp_object
+  motion_with_control
+  print_joint_poses
 )
 
 foreach(example ${EXAMPLES})

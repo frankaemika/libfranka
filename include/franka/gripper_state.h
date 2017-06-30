@@ -17,7 +17,7 @@ struct GripperState {
   /**
    * Current gripper opening width.
    */
-  double opening_width;
+  double opening_width{};
 
   /**
    * Maximum gripper opening width.
@@ -26,19 +26,19 @@ struct GripperState {
    *
    * @see Gripper::homing.
    */
-  double max_opening_width;
+  double max_opening_width{};
 
   /**
    * Object grasped flag.
    * True: Successfully grasped an object \n
    * False: Part lost or nothing grasped.
    */
-  bool object_grasped;
+  bool object_grasped{};
 
   /**
    * Current gripper temperature.
    */
-  uint16_t temperature;
+  uint16_t temperature{};
 
   /**
    * Strictly increasing sequence number for each received gripper state.

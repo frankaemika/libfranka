@@ -31,7 +31,7 @@ Gripper::Gripper(const std::string& franka_address)
     : network_{
           std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort)} {
   if (!network_) {
-    throw NetworkException("libfranka gripper: Network error");
+    throw std::invalid_argument("libfranka gripper: Invalid argument");
   }
 
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
