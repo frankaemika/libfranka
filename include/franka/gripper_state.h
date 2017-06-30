@@ -29,9 +29,7 @@ struct GripperState {
   double max_opening_width{};
 
   /**
-   * Object grasped flag.
-   * True: Successfully grasped an object \n
-   * False: Part lost or nothing grasped.
+   * Indicated whether an object is currently grasped.
    */
   bool object_grasped{};
 

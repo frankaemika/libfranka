@@ -60,7 +60,7 @@ class Gripper {
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [mA]
    *
-   * @return Grasped flag.
+   * @return True if an object has been grasped, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */

@@ -85,7 +85,8 @@ template <typename T>
 void Network::tcpSendRequest(const typename T::Request& request) try {
   tcp_socket_.sendBytes(&request, sizeof(request));
 } catch (const Poco::Exception& e) {
-  throw NetworkException(std::string{"libfranka: TCP send bytes: "} + e.what());
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  throw NetworkException("libfranka: TCP send bytes: "s + e.what());
 }
 
 template <typename T>
@@ -140,17 +141,17 @@ typename T::Response Network::tcpBlockingReceiveResponse() {
     }
   } catch (const Poco::TimeoutException& e) {
     if (bytes_read != 0) {
-      throw ProtocolException(std::string{"libfranka: incorrect object size"});
+      throw ProtocolException("libfranka: incorrect object size");
     } else {
-      throw NetworkException(std::string{"libfranka: connection timeout"});
+      throw NetworkException("libfranka: connection timeout");
     }
   } catch (const Poco::Exception& e) {
-    throw NetworkException(std::string{"libfranka: connection closed"});
+    throw NetworkException("libfranka: connection closed");
   }
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());
   if (response->function != T::kFunction) {
-    throw ProtocolException(std::string{"libfranka: received response of wrong type"});
+    throw ProtocolException("libfranka: received response of wrong type");
   }
   return *response;
 }
