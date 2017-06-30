@@ -21,23 +21,6 @@ bool handleCommandResponse(const typename T::Response& response) {
     case T::Status::kFail:
       throw CommandException("libfranka gripper: command failed!");
     case T::Status::kUnsuccessful:
-      throw CommandException("libfranka gripper: command unsuccessful!");
-    default:
-      throw ProtocolException("libfranka gripper: Unexpected response while handling command!");
-  }
-}
-
-template <>
-bool handleCommandResponse<research_interface::gripper::Grasp>(
-    const research_interface::gripper::Grasp::Response& response) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-
-  switch (response.status) {
-    case research_interface::gripper::Grasp::Status::kSuccess:
-      return true;
-    case research_interface::gripper::Grasp::Status::kFail:
-      throw CommandException("libfranka gripper: command failed!");
-    case research_interface::gripper::Grasp::Status::kUnsuccessful:
       return false;
     default:
       throw ProtocolException("libfranka gripper: Unexpected response while handling command!");
@@ -66,7 +49,9 @@ void Gripper::homing() {
   network_->tcpSendRequest<Homing>({});
   Homing::Response response = network_->tcpBlockingReceiveResponse<Homing>();
 
-  handleCommandResponse<Homing>(response);
+  if (!handleCommandResponse<Homing>(response)) {
+    throw CommandException("libfranka gripper: command unsuccessful!");
+  }
 }
 
 bool Gripper::grasp(double width, double speed, double force) {
@@ -82,7 +67,9 @@ void Gripper::move(double width, double speed) {
   network_->tcpSendRequest<Move>({width, speed});
   Move::Response response = network_->tcpBlockingReceiveResponse<Move>();
 
-  handleCommandResponse<Move>(response);
+  if (!handleCommandResponse<Move>(response)) {
+    throw CommandException("libfranka gripper: command unsuccessful!");
+  }
 }
 
 void Gripper::stop() {
@@ -90,7 +77,9 @@ void Gripper::stop() {
   network_->tcpSendRequest<Stop>({});
   Stop::Response response = network_->tcpBlockingReceiveResponse<Stop>();
 
-  handleCommandResponse<Stop>(response);
+  if (!handleCommandResponse<Stop>(response)) {
+    throw CommandException("libfranka gripper: command unsuccessful!");
+  }
 }
 
 GripperState Gripper::readOnce() {
