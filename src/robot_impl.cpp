@@ -1,5 +1,7 @@
 #include "robot_impl.h"
 
+#include <franka/model.h>
+
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -121,10 +123,6 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
-Network& Robot::Impl::network() noexcept {
-  return network_;
-}
-
 void Robot::Impl::startMotion(
     research_interface::robot::Move::ControllerMode controller_mode,
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
@@ -229,6 +227,10 @@ void Robot::Impl::stopController() {
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
     update(nullptr, &command);
   }
+}
+
+std::shared_ptr<Model> Robot::Impl::loadModel() {
+  return std::shared_ptr<Model>(new Model(network_));
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

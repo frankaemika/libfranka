@@ -15,9 +15,12 @@
 
 namespace franka {
 
+class Model;
+
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current robot state,
- * and allows to execute commands, motions, and torque control.
+ * gives access to the model library and allows to execute commands,
+ * motions, and torque control.
  *
  * @note
  * Before using this functionality, make sure FRANKA's brakes have been released.
@@ -459,6 +462,15 @@ class Robot {
    */
 
   /**
+   * Loads the Model Library from FRANKA CONTROL.
+   *
+   * @throw ModelException if the model library cannot be loaded.
+   *
+   * @return Correctly initialized model library.
+   */
+  std::shared_ptr<Model> loadModel();
+
+  /**
    * Returns the software version reported by the connected server.
    *
    * @return Software version of the connected server.
@@ -469,13 +481,6 @@ class Robot {
   Robot& operator=(const Robot&) = delete;
 
   class Impl;
-
-  /**
-   * Returns the stored Robot::Impl instance.
-   *
-   * @return Robot::Impl instance.
-   */
-  Impl& impl() noexcept;
 
  private:
   std::unique_ptr<Impl> impl_;

@@ -31,7 +31,6 @@ class Robot::Impl : public RobotControl {
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
-  Network& network() noexcept;
 
   void startController() override;
   void stopController() override;
@@ -45,6 +44,8 @@ class Robot::Impl : public RobotControl {
 
   template <typename T, typename... TArgs>
   void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
+
+  std::shared_ptr<Model> loadModel();
 
  private:
   template <typename T>
