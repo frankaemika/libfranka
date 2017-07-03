@@ -17,7 +17,7 @@ struct GripperState {
   /**
    * Current gripper opening width.
    */
-  double opening_width{};
+  double width{};
 
   /**
    * Maximum gripper opening width.
@@ -26,12 +26,12 @@ struct GripperState {
    *
    * @see Gripper::homing.
    */
-  double max_opening_width{};
+  double max_width{};
 
   /**
-   * Indicated whether an object is currently grasped.
+   * Indicates whether an object is currently grasped.
    */
-  bool object_grasped{};
+  bool is_grasped{};
 
   /**
    * Current gripper temperature.

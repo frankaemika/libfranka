@@ -94,9 +94,9 @@ GripperState Gripper::readOnce() {
 GripperState convertGripperState(
     const research_interface::gripper::GripperState& gripper_state) noexcept {
   GripperState converted;
-  converted.opening_width = gripper_state.width;
-  converted.max_opening_width = gripper_state.max_width;
-  converted.object_grasped = gripper_state.is_grasped;
+  converted.width = gripper_state.width;
+  converted.max_width = gripper_state.max_width;
+  converted.is_grasped = gripper_state.is_grasped;
   converted.temperature = gripper_state.temperature;
   converted.sequence_number = gripper_state.message_id;
   return converted;
