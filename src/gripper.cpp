@@ -8,8 +8,7 @@
 
 namespace franka {
 
-GripperState convertGripperState(
-    const research_interface::gripper::GripperState& gripper_state) noexcept;
+namespace {
 
 template <typename T>
 bool handleCommandResponse(const typename T::Response& response) {
@@ -26,6 +25,19 @@ bool handleCommandResponse(const typename T::Response& response) {
       throw ProtocolException("libfranka gripper: Unexpected response while handling command!");
   }
 }
+
+GripperState convertGripperState(
+    const research_interface::gripper::GripperState& gripper_state) noexcept {
+  GripperState converted;
+  converted.width = gripper_state.width;
+  converted.max_width = gripper_state.max_width;
+  converted.is_grasped = gripper_state.is_grasped;
+  converted.temperature = gripper_state.temperature;
+  converted.sequence_number = gripper_state.message_id;
+  return converted;
+}
+
+}  // anonymous namespace
 
 Gripper::Gripper(const std::string& franka_address)
     : network_{
@@ -89,17 +101,6 @@ GripperState Gripper::readOnce() {
     network_->udpRead<research_interface::gripper::GripperState>();
   }
   return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
-}
-
-GripperState convertGripperState(
-    const research_interface::gripper::GripperState& gripper_state) noexcept {
-  GripperState converted;
-  converted.width = gripper_state.width;
-  converted.max_width = gripper_state.max_width;
-  converted.is_grasped = gripper_state.is_grasped;
-  converted.temperature = gripper_state.temperature;
-  converted.sequence_number = gripper_state.message_id;
-  return converted;
 }
 
 }  // namespace franka
