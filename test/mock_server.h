@@ -13,13 +13,12 @@
 
 template <typename C>
 class MockServer {
- private:
+ public:
   struct Socket {
     std::function<void(const void*, size_t)> sendBytes;
     std::function<void(void*, size_t)> receiveBytes;
   };
 
- public:
   using ConnectCallbackT = std::function<typename C::Response(const typename C::Request&)>;
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
@@ -40,6 +39,8 @@ class MockServer {
   MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
 
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
+
+  MockServer& generic(std::function<void(Socket&, Socket&)> generic_command);
 
   template <typename T>
   void handleCommand(Socket& tcp_socket,

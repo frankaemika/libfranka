@@ -44,6 +44,8 @@ class Robot::Impl : public RobotControl {
   template <typename T, typename... TArgs>
   void executeCommand(TArgs... /* args */);
 
+  Model* loadModel();
+
  private:
   template <typename T>
   void handleCommandResponse(const typename T::Response& response);

@@ -1,5 +1,7 @@
 #include "robot_impl.h"
 
+#include <franka/model.h>
+
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -215,6 +217,10 @@ void Robot::Impl::stopController() {
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
     update(nullptr, &command);
   }
+}
+
+Model* Robot::Impl::loadModel() {
+  return new Model(*network_);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
