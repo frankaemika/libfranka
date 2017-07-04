@@ -101,6 +101,10 @@ double randomDouble() {
   return 10.0 * static_cast<double>(std::rand()) / RAND_MAX;
 }
 
+bool randomBool() {
+  return static_cast<bool>(std::rand() % 2);
+}
+
 void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
     robot_state.O_T_EE[i] = randomDouble();
@@ -150,7 +154,7 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
-  robot_state.sequence_number = randomDouble();
+  robot_state.sequence_number = static_cast<uint32_t>(std::rand());
 }
 
 void randomRobotState(research_interface::robot::RobotState& robot_state) {
@@ -204,7 +208,7 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
-  robot_state.message_id = randomDouble();
+  robot_state.message_id = static_cast<uint32_t>(std::rand());
   robot_state.motion_generator_mode = research_interface::robot::MotionGeneratorMode::kIdle;
   robot_state.controller_mode = research_interface::robot::ControllerMode::kMotorPD;
 }
@@ -235,7 +239,7 @@ void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) 
   for (size_t i = 0; i < robot_command.control.tau_J_d.size(); i++) {
     robot_command.control.tau_J_d[i] = randomDouble();
   }
-  robot_command.message_id = randomDouble();
+  robot_command.message_id = static_cast<uint32_t>(std::rand());
 }
 
 void testMotionGeneratorCommandsAreEqual(
@@ -254,6 +258,42 @@ void testMotionGeneratorCommandsAreEqual(
 void testControllerCommandsAreEqual(const research_interface::robot::ControllerCommand& expected,
                                     const research_interface::robot::ControllerCommand& actual) {
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
+}
+
+void randomGripperState(franka::GripperState& gripper_state) {
+  gripper_state.sequence_number = static_cast<uint32_t>(std::rand());
+  gripper_state.temperature = static_cast<uint16_t>(std::rand());
+  gripper_state.is_grasped = randomBool();
+  gripper_state.max_width = randomDouble();
+  gripper_state.width = randomDouble();
+}
+
+void randomGripperState(research_interface::gripper::GripperState& gripper_state) {
+  // Reset to all-zeros first
+  gripper_state = research_interface::gripper::GripperState();
+  gripper_state.message_id = static_cast<uint32_t>(std::rand());
+  gripper_state.temperature = static_cast<uint16_t>(std::rand());
+  gripper_state.is_grasped = randomBool();
+  gripper_state.max_width = randomDouble();
+  gripper_state.width = randomDouble();
+}
+
+void testGripperStatesAreEqual(const franka::GripperState& expected,
+                               const franka::GripperState& actual) {
+  EXPECT_EQ(expected.sequence_number, actual.sequence_number);
+  EXPECT_EQ(expected.width, actual.width);
+  EXPECT_EQ(expected.max_width, actual.max_width);
+  EXPECT_EQ(expected.is_grasped, actual.is_grasped);
+  EXPECT_EQ(expected.temperature, actual.temperature);
+}
+
+void testGripperStatesAreEqual(const research_interface::gripper::GripperState& expected,
+                               const franka::GripperState& actual) {
+  EXPECT_EQ(expected.message_id, actual.sequence_number);
+  EXPECT_EQ(expected.width, actual.width);
+  EXPECT_EQ(expected.max_width, actual.max_width);
+  EXPECT_EQ(expected.is_grasped, actual.is_grasped);
+  EXPECT_EQ(expected.temperature, actual.temperature);
 }
 
 namespace research_interface {

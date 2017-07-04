@@ -46,6 +46,8 @@ add_library(franka SHARED
   src/control_loop.cpp
   src/control_loop_base.cpp
   src/control_types.cpp
+  src/gripper.cpp
+  src/gripper_state.cpp
   src/library_loader.cpp
   src/model.cpp
   src/model_library.cpp

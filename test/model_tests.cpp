@@ -28,7 +28,7 @@ struct MockModel : public ModelLibraryInterface {
 
 struct Model : public ::testing::Test {
   Model() {
-    MockServer server;
+    MockServer<research_interface::robot::Connect> server;
     server.spinOnce();
     robot.reset(new franka::Robot("127.0.0.1"));
 
