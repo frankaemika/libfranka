@@ -46,7 +46,7 @@ struct Model : public ::testing::Test {
     }
 
     server
-        .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
+        .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
           server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
             return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
           });
@@ -57,7 +57,7 @@ struct Model : public ::testing::Test {
     model_library_interface = nullptr;
   }
 
-  MockServer server{};
+  MockServer<research_interface::robot::Connect> server{};
   franka::Robot robot{"127.0.0.1"};
 
  private:
@@ -65,7 +65,7 @@ struct Model : public ::testing::Test {
 };
 
 TEST(InvalidModel, ThrowsIfNoModelReceived) {
-  MockServer server;
+  MockServer<research_interface::robot::Connect> server;
   franka::Robot robot("127.0.0.1");
 
   server
@@ -77,12 +77,12 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
 }
 
 TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
-  MockServer server;
+  MockServer<research_interface::robot::Connect> server;
   franka::Robot robot("127.0.0.1");
 
   std::array<char, 10> buffer{};
   server
-      .generic([&](MockServer::Socket& tcp_socket, MockServer::Socket&) {
+      .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
         server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
           return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
         });

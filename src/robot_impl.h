@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <memory>
 
 #include <franka/robot.h>
 #include <research_interface/robot/rbk_types.h>
@@ -16,16 +17,14 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
 
 class Robot::Impl : public RobotControl {
  public:
-  static constexpr std::chrono::seconds kDefaultTimeout{5};
-
-  explicit Impl(const std::string& franka_address,
-                uint16_t franka_port = research_interface::robot::kCommandPort,
-                std::chrono::milliseconds timeout = kDefaultTimeout,
+  explicit Impl(std::unique_ptr<Network> network,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update(
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) override;
+
+  RobotState readOnce();
 
   ServerVersion serverVersion() const noexcept;
   bool motionGeneratorRunning() const noexcept;
@@ -43,7 +42,7 @@ class Robot::Impl : public RobotControl {
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
+  void executeCommand(TArgs... /* args */);
 
   Model* loadModel();
 
@@ -55,7 +54,7 @@ class Robot::Impl : public RobotControl {
                         const research_interface::robot::ControllerCommand* control_command);
   research_interface::robot::RobotState receiveRobotState();
 
-  Network network_;
+  std::unique_ptr<Network> network_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
@@ -129,9 +128,9 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 template <typename T, typename... TArgs>
 void Robot::Impl::executeCommand(TArgs... args) {
   typename T::Request request(std::forward<TArgs>(args)...);
-  network_.tcpSendRequest(request);
+  network_->tcpSendRequest<T>(request);
 
-  typename T::Response response = network_.tcpBlockingReceiveResponse<T>();
+  typename T::Response response = network_->tcpBlockingReceiveResponse<T>();
 
   handleCommandResponse<T>(response);
 }
@@ -143,10 +142,10 @@ inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianL
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
   research_interface::robot::GetCartesianLimit::Request request(id);
-  network_.tcpSendRequest(request);
+  network_->tcpSendRequest<research_interface::robot::GetCartesianLimit>(request);
 
   research_interface::robot::GetCartesianLimit::Response response =
-      network_.tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>();
+      network_->tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>();
   virtual_wall_cuboid->p_frame = response.object_frame;
   virtual_wall_cuboid->p_max = response.object_p_max;
   virtual_wall_cuboid->p_min = response.object_p_min;

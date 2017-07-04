@@ -11,7 +11,7 @@
 namespace franka {
 
 /**
- * Describes FRANKA's state.
+ * Describes FRANKA's robot state.
  */
 struct RobotState {
   /**

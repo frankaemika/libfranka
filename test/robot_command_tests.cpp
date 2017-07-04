@@ -5,6 +5,7 @@
 #include "helpers.h"
 #include "mock_server.h"
 
+using franka::Network;
 using franka::Robot;
 using franka::RobotState;
 using franka::RealtimeConfig;
@@ -211,79 +212,7 @@ AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
 
 template <typename T>
 void Command<T>::executeCommand(Robot::Impl& robot) {
-  robot.executeCommand<T>();
-}
-
-template <>
-void Command<GetCartesianLimit>::executeCommand(Robot::Impl& robot) {
-  int32_t limit_id = 3;
-  franka::VirtualWallCuboid cuboid;
-  robot.executeCommand<GetCartesianLimit, int32_t, franka::VirtualWallCuboid*>(limit_id, &cuboid);
-}
-
-template <>
-void Command<Move>::executeCommand(Robot::Impl& robot) {
-  Move::Request request = getExpected();
-  robot.executeCommand<Move>(request.controller_mode, request.motion_generator_mode,
-                             request.maximum_path_deviation, request.maximum_goal_pose_deviation);
-}
-
-template <>
-void Command<SetControllerMode>::executeCommand(Robot::Impl& robot) {
-  SetControllerMode::Request request = getExpected();
-  robot.executeCommand<SetControllerMode>(request.mode);
-}
-
-template <>
-void Command<SetCollisionBehavior>::executeCommand(Robot::Impl& robot) {
-  SetCollisionBehavior::Request request = getExpected();
-  robot.executeCommand<SetCollisionBehavior>(
-      request.lower_torque_thresholds_acceleration, request.upper_torque_thresholds_acceleration,
-      request.lower_torque_thresholds_nominal, request.upper_torque_thresholds_nominal,
-      request.lower_force_thresholds_acceleration, request.upper_force_thresholds_acceleration,
-      request.lower_force_thresholds_nominal, request.upper_force_thresholds_nominal);
-}
-
-template <>
-void Command<SetJointImpedance>::executeCommand(Robot::Impl& robot) {
-  SetJointImpedance::Request request = getExpected();
-  robot.executeCommand<SetJointImpedance>(request.K_theta);
-}
-
-template <>
-void Command<SetCartesianImpedance>::executeCommand(Robot::Impl& robot) {
-  SetCartesianImpedance::Request request = getExpected();
-  robot.executeCommand<SetCartesianImpedance>(request.K_x);
-}
-
-template <>
-void Command<SetGuidingMode>::executeCommand(Robot::Impl& robot) {
-  SetGuidingMode::Request request = getExpected();
-  robot.executeCommand<SetGuidingMode>(request.guiding_mode, request.nullspace);
-}
-
-template <>
-void Command<SetEEToK>::executeCommand(Robot::Impl& robot) {
-  SetEEToK::Request request = getExpected();
-  robot.executeCommand<SetEEToK>(request.EE_T_K);
-}
-
-template <>
-void Command<SetFToEE>::executeCommand(Robot::Impl& robot) {
-  SetFToEE::Request request = getExpected();
-  robot.executeCommand<SetFToEE>(request.F_T_EE);
-}
-
-template <>
-void Command<SetLoad>::executeCommand(Robot::Impl& robot) {
-  SetLoad::Request request = getExpected();
-  robot.executeCommand<SetLoad>(request.m_load, request.F_x_Cload, request.I_load);
-}
-
-template <>
-void Command<SetTimeScalingFactor>::executeCommand(Robot::Impl& robot) {
-  SetTimeScalingFactor::Request request = getExpected();
-  robot.executeCommand<SetTimeScalingFactor>(request.time_scaling_factor);
+  robot.executeCommand<T>(getExpected());
 }
 
 template <typename T>
@@ -317,8 +246,9 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
 TYPED_TEST_CASE(Command, CommandTypes);
 
 TYPED_TEST(Command, CanSendAndReceiveSuccess) {
-  MockServer server;
-  Robot::Impl robot("127.0.0.1");
+  MockServer<research_interface::robot::Connect> server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -333,8 +263,9 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
 }
 
 TYPED_TEST(Command, CanSendAndReceiveAbort) {
-  MockServer server;
-  Robot::Impl robot("127.0.0.1");
+  MockServer<research_interface::robot::Connect> server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -349,8 +280,9 @@ TYPED_TEST(Command, CanSendAndReceiveAbort) {
 }
 
 TYPED_TEST(Command, CanSendAndReceiveRejected) {
-  MockServer server;
-  Robot::Impl robot("127.0.0.1");
+  MockServer<research_interface::robot::Connect> server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -365,8 +297,9 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
 }
 
 TYPED_TEST(Command, CanSendAndReceivePreempted) {
-  MockServer server;
-  Robot::Impl robot("127.0.0.1");
+  MockServer<research_interface::robot::Connect> server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
   server
       .waitForCommand<typename TestFixture::TCommand>(

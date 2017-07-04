@@ -7,9 +7,11 @@
 #include <thread>
 
 #include <franka/robot_state.h>
+#include <research_interface/gripper/types.h>
 #include <research_interface/robot/rbk_types.h>
 #include <research_interface/robot/service_types.h>
 
+template <typename C>
 class MockServer {
  public:
   struct Socket {
@@ -17,24 +19,25 @@ class MockServer {
     std::function<void(void*, size_t)> receiveBytes;
   };
 
-  using ConnectCallbackT = std::function<research_interface::robot::Connect::Response(
-      const research_interface::robot::Connect::Request&)>;
-  using SendRobotStateAlternativeCallbackT =
-      std::function<void(research_interface::robot::RobotState&)>;
-  using SendRobotStateCallbackT = std::function<research_interface::robot::RobotState()>;
+  using ConnectCallbackT = std::function<typename C::Response(const typename C::Request&)>;
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
 
   MockServer(ConnectCallbackT on_connect = ConnectCallbackT());
   ~MockServer();
 
-  MockServer& sendEmptyRobotState();
+  template <typename T>
+  MockServer& sendEmptyState();
 
   template <typename TResponse>
   MockServer& sendResponse(std::function<TResponse()> create_response);
 
-  MockServer& onSendRobotState(SendRobotStateCallbackT on_send_robot_state);
-  MockServer& onSendRobotState(SendRobotStateAlternativeCallbackT on_send_robot_state);
+  template <typename T>
+  MockServer& onSendUDP(std::function<T()> on_send_udp);
+
+  template <typename T>
+  MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
+
   MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
 
   MockServer& generic(std::function<void(Socket&, Socket&)> generic_command);
@@ -75,13 +78,15 @@ class MockServer {
   bool shutdown_;
   bool continue_;
   bool initialized_;
+  static uint16_t port;
 
   const ConnectCallbackT on_connect_;
   std::queue<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
 };
 
+template <typename C>
 template <typename TResponse>
-MockServer& MockServer::sendResponse(std::function<TResponse()> create_response) {
+MockServer<C>& MockServer<C>::sendResponse(std::function<TResponse()> create_response) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(mutex_);
@@ -93,3 +98,36 @@ MockServer& MockServer::sendResponse(std::function<TResponse()> create_response)
                     });
   return *this;
 }
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendEmptyState() {
+  return onSendUDP<T>(std::function<void(T&)>());
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::onSendUDP(std::function<T()> on_send_udp) {
+  std::lock_guard<std::mutex> _(mutex_);
+  commands_.emplace("onSendUDP", [=](Socket&, Socket& udp_socket) {
+    T state = on_send_udp();
+    udp_socket.sendBytes(&state, sizeof(state));
+  });
+  block_ = true;
+  return *this;
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::onSendUDP(std::function<void(T&)> on_send_udp) {
+  return onSendUDP<T>([=]() {
+    T state{};
+    if (on_send_udp) {
+      on_send_udp(state);
+    }
+    return state;
+  });
+}
+
+template class MockServer<research_interface::robot::Connect>;
+template class MockServer<research_interface::gripper::Connect>;
