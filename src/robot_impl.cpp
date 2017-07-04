@@ -61,7 +61,8 @@ RobotState Robot::Impl::update(
 
         franka::RobotState state = convertRobotState(receiveRobotState());
         // Rethrow as control exception to be consistent with starting/stopping of motions.
-        throw ControlException(e.what() + " "s + activeErrorsString(state.last_motion_errors));
+        throw ControlException(e.what() + " "s +
+                               static_cast<std::string>(state.last_motion_errors));
       } catch (const std::exception&) {
         throw;
       }
@@ -239,7 +240,7 @@ void Robot::Impl::checkStateForErrors(franka::RobotState& robot_state) {
   if (motionGeneratorRunning() || controllerRunning()) {
     if (robot_state.current_errors) {
       throw ControlException("libfranka: motion aborted: "s +
-                             activeErrorsString(robot_state.current_errors));
+                             static_cast<std::string>(robot_state.current_errors));
     }
   }
 }

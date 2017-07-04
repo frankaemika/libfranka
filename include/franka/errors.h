@@ -28,6 +28,14 @@ struct Errors {
   explicit operator bool() const noexcept;
 
   /**
+   * Creates a string with names of active errors:
+   * "{active_error_name2, active_error_name_2, ... active_error_name_n}"
+   * If no errors are active, the string contains empty braces: "{}"
+   * @return string with names of active errors
+   */
+  explicit operator std::string() const;
+
+  /**
    * True if FRANKA moved past the joint limits.
    */
   bool joint_position_limits_violation{};
@@ -132,14 +140,7 @@ struct Errors {
 };
 
 /**
- * Outputs names of active errors.
- * @param errors to be printed
- * @return a string containing names separated by commas
- */
-std::string activeErrorsString(Errors& errors);
-
-/**
- * Streams the Error struct with the format: {error_name1: 0, error_name2: 1, ...}
+ * Streams the Error struct using its std::string representation.
  */
 std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
 

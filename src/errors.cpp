@@ -55,87 +55,74 @@ Errors::operator bool() const noexcept {
          force_controller_desired_force_tolerance_violation;
 }
 
-namespace {
+Errors::operator std::string() const {
+  std::string error_string = "{";
 
-void addName(std::vector<std::string>& vector,
-             bool error,
-             const std::string& name,
-             bool only_active,
-             bool include_value) {
-  if (!only_active || error) {
-    std::string value_string = include_value ? (": "s + (error ? "true"s : "false"s)) : ""s;
-    vector.push_back(name + value_string);
+  error_string += joint_position_limits_violation ? "joint_position_limits_violation, " : "";
+  error_string +=
+      cartesian_position_limits_violation ? "cartesian_position_limits_violation, " : "";
+  error_string += self_collision_avoidance_violation ? "self_collision_avoidance_violation, " : "";
+  error_string += joint_velocity_violation ? "joint_velocity_violation, " : "";
+  error_string += cartesian_velocity_violation ? "cartesian_velocity_violation, " : "";
+  error_string += force_control_safety_violation ? "force_control_safety_violation, " : "";
+  error_string += joint_reflex ? "joint_reflex, " : "";
+  error_string += cartesian_reflex ? "cartesian_reflex, " : "";
+  error_string += max_goal_pose_deviation_violation ? "max_goal_pose_deviation_violation, " : "";
+  error_string += max_path_pose_deviation_violation ? "max_path_pose_deviation_violation, " : "";
+  error_string += cartesian_velocity_profile_safety_violation
+                      ? "cartesian_velocity_profile_safety_violation, "
+                      : "";
+  error_string += joint_position_motion_generator_start_pose_invalid
+                      ? "joint_position_motion_generator_start_pose_invalid, "
+                      : "";
+  error_string += joint_motion_generator_position_limits_violation
+                      ? "joint_motion_generator_position_limits_violation, "
+                      : "";
+  error_string += joint_motion_generator_velocity_limits_violation
+                      ? "joint_motion_generator_velocity_limits_violation, "
+                      : "";
+  error_string += joint_motion_generator_velocity_discontinuity
+                      ? "joint_motion_generator_velocity_discontinuity, "
+                      : "";
+  error_string += joint_motion_generator_acceleration_discontinuity
+                      ? "joint_motion_generator_acceleration_discontinuity, "
+                      : "";
+  error_string += cartesian_position_motion_generator_start_pose_invalid
+                      ? "cartesian_position_motion_generator_start_pose_invalid, "
+                      : "";
+  error_string += cartesian_motion_generator_elbow_limit_violation
+                      ? "cartesian_motion_generator_elbow_limit_violation, "
+                      : "";
+  error_string += cartesian_motion_generator_velocity_limits_violation
+                      ? "cartesian_motion_generator_velocity_limits_violation, "
+                      : "";
+  error_string += cartesian_motion_generator_velocity_discontinuity
+                      ? "cartesian_motion_generator_velocity_discontinuity, "
+                      : "";
+  error_string += cartesian_motion_generator_acceleration_discontinuity
+                      ? "cartesian_motion_generator_acceleration_discontinuity, "
+                      : "";
+  error_string += cartesian_motion_generator_elbow_sign_inconsistent
+                      ? "cartesian_motion_generator_elbow_sign_inconsistent, "
+                      : "";
+  error_string += cartesian_motion_generator_start_elbow_invalid
+                      ? "cartesian_motion_generator_start_elbow_invalid, "
+                      : "";
+  error_string += force_controller_desired_force_tolerance_violation
+                      ? "force_controller_desired_force_tolerance_violation, "
+                      : "";
+
+  if (error_string.size() > 1) {
+    error_string.erase(error_string.end() - 2, error_string.end());
   }
-}
 
-std::string errorNames(const Errors& errors, bool only_active, bool include_value) {
-  std::vector<std::string> names;
+  error_string += "}";
 
-  addName(names, errors.joint_position_limits_violation, "joint_position_limits_violation",
-          only_active, include_value);
-  addName(names, errors.cartesian_position_limits_violation, "cartesian_position_limits_violation",
-          only_active, include_value);
-  addName(names, errors.self_collision_avoidance_violation, "self_collision_avoidance_violation",
-          only_active, include_value);
-  addName(names, errors.joint_velocity_violation, "joint_velocity_violation", only_active,
-          include_value);
-  addName(names, errors.cartesian_velocity_violation, "cartesian_velocity_violation", only_active,
-          include_value);
-  addName(names, errors.force_control_safety_violation, "force_control_safety_violation",
-          only_active, include_value);
-  addName(names, errors.joint_reflex, "joint_reflex", only_active, include_value);
-  addName(names, errors.cartesian_reflex, "cartesian_reflex", only_active, include_value);
-  addName(names, errors.max_goal_pose_deviation_violation, "max_goal_pose_deviation_violation",
-          only_active, include_value);
-  addName(names, errors.max_path_pose_deviation_violation, "max_path_pose_deviation_violation",
-          only_active, include_value);
-  addName(names, errors.cartesian_velocity_profile_safety_violation,
-          "cartesian_velocity_profile_safety_violation", only_active, include_value);
-  addName(names, errors.joint_position_motion_generator_start_pose_invalid,
-          "joint_position_motion_generator_start_pose_invalid", only_active, include_value);
-  addName(names, errors.joint_motion_generator_position_limits_violation,
-          "joint_motion_generator_position_limits_violation", only_active, include_value);
-  addName(names, errors.joint_motion_generator_velocity_limits_violation,
-          "joint_motion_generator_velocity_limits_violation", only_active, include_value);
-  addName(names, errors.joint_motion_generator_velocity_discontinuity,
-          "joint_motion_generator_velocity_discontinuity", only_active, include_value);
-  addName(names, errors.joint_motion_generator_acceleration_discontinuity,
-          "joint_motion_generator_acceleration_discontinuity", only_active, include_value);
-  addName(names, errors.cartesian_position_motion_generator_start_pose_invalid,
-          "cartesian_position_motion_generator_start_pose_invalid", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_elbow_limit_violation,
-          "cartesian_motion_generator_elbow_limit_violation", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_velocity_limits_violation,
-          "cartesian_motion_generator_velocity_limits_violation", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_velocity_discontinuity,
-          "cartesian_motion_generator_velocity_discontinuity", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_acceleration_discontinuity,
-          "cartesian_motion_generator_acceleration_discontinuity", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_elbow_sign_inconsistent,
-          "cartesian_motion_generator_elbow_sign_inconsistent", only_active, include_value);
-  addName(names, errors.cartesian_motion_generator_start_elbow_invalid,
-          "cartesian_motion_generator_start_elbow_invalid", only_active, include_value);
-  addName(names, errors.force_controller_desired_force_tolerance_violation,
-          "force_controller_desired_force_tolerance_violation", only_active, include_value);
-
-  if (!names.empty()) {
-    std::ostringstream string_stream;
-    std::copy(names.cbegin(), names.cend() - 1,
-              std::ostream_iterator<std::string>(string_stream, ", "));
-    std::copy(names.cend() - 1, names.cend(), std::ostream_iterator<std::string>(string_stream));
-    return string_stream.str();
-  }
-  return "";
-}
-
-}  // anonymous namespace
-
-std::string activeErrorsString(Errors& errors) {
-  return errorNames(errors, true, false);
+  return error_string;
 }
 
 std::ostream& operator<<(std::ostream& ostream, const Errors& errors) {
-  ostream << "{" << errorNames(errors, false, true) << "}";
+  ostream << static_cast<std::string>(errors);
   return ostream;
 }
 
