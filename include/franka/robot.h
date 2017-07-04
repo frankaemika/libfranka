@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -462,13 +463,14 @@ class Robot {
    */
 
   /**
-   * Loads the Model Library from FRANKA CONTROL.
+   * Loads the Model Library from FRANKA CONTROL. User claims ownership
+   * over the object and should free it when no longer in use.
    *
    * @throw ModelException if the model library cannot be loaded.
    *
-   * @return Correctly initialized model library.
+   * @return Pointer to an initialized model library.
    */
-  std::shared_ptr<Model> loadModel();
+  Model* loadModel();
 
   /**
    * Returns the software version reported by the connected server.

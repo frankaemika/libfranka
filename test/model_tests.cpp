@@ -1,4 +1,5 @@
 #include <fstream>
+#include <memory>
 
 #include <gmock/gmock.h>
 
@@ -9,7 +10,6 @@
 #include "helpers.h"
 #include "mock_server.h"
 #include "model_library_interface.h"
-#include "test_config.h"
 
 using ::testing::_;
 using ::testing::WithArgs;
@@ -37,7 +37,7 @@ struct Model : public ::testing::Test {
     using namespace std::string_literals;
 
     std::ifstream model_library_stream(
-        TEST_BINARY_DIR + "/libfcimodels.so"s,
+        FRANKA_TEST_BINARY_DIR + "/libfcimodels.so"s,
         std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
     buffer.resize(model_library_stream.tellg());
     model_library_stream.seekg(0, std::ios::beg);
@@ -73,7 +73,7 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
           [&](auto) { return LoadModelLibrary::Response(LoadModelLibrary::Status::kError, 0); })
       .spinOnce();
 
-  EXPECT_THROW(robot.loadModel(), franka::ModelException);
+  EXPECT_THROW(std::unique_ptr<franka::Model>(robot.loadModel()), franka::ModelException);
 }
 
 TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
@@ -90,11 +90,11 @@ TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
       })
       .spinOnce();
 
-  EXPECT_THROW(robot.loadModel(), franka::ModelException);
+  EXPECT_THROW(std::unique_ptr<franka::Model> model(robot.loadModel()), franka::ModelException);
 }
 
 TEST_F(Model, CanCreateModel) {
-  EXPECT_NO_THROW(robot.loadModel());
+  EXPECT_NO_THROW(std::unique_ptr<franka::Model> model(robot.loadModel()));
 }
 
 TEST_F(Model, CanGetMassMatrix) {
@@ -114,7 +114,7 @@ TEST_F(Model, CanGetMassMatrix) {
 
   model_library_interface = &mock;
 
-  std::shared_ptr<franka::Model> model(robot.loadModel());
+  std::unique_ptr<franka::Model> model(robot.loadModel());
   auto matrix = model->mass(robot_state, load_inertia, load_mass, F_x_Cload);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
@@ -138,7 +138,7 @@ TEST_F(Model, CanGetCoriolisVector) {
 
   model_library_interface = &mock;
 
-  std::shared_ptr<franka::Model> model(robot.loadModel());
+  std::unique_ptr<franka::Model> model(robot.loadModel());
   auto vector = model->coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
   EXPECT_EQ(expected_vector, vector);
 }
@@ -161,7 +161,7 @@ TEST_F(Model, CanGetGravity) {
 
   model_library_interface = &mock;
 
-  std::shared_ptr<franka::Model> model(robot.loadModel());
+  std::unique_ptr<franka::Model> model(robot.loadModel());
   auto matrix = model->gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
@@ -214,7 +214,7 @@ TEST_F(Model, CanGetJointPoses) {
 
   model_library_interface = &mock;
 
-  std::shared_ptr<franka::Model> model(robot.loadModel());
+  std::unique_ptr<franka::Model> model(robot.loadModel());
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
        joint = static_cast<franka::Frame>(joint + 1)) {
     auto pose = model->jointPose(joint, robot_state);

@@ -229,8 +229,8 @@ void Robot::Impl::stopController() {
   }
 }
 
-std::shared_ptr<Model> Robot::Impl::loadModel() {
-  return std::shared_ptr<Model>(new Model(network_));
+Model* Robot::Impl::loadModel() {
+  return new Model(network_);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

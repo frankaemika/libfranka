@@ -45,7 +45,7 @@ class Robot::Impl : public RobotControl {
   template <typename T, typename... TArgs>
   void executeCommand(TArgs...);  // NOLINT (readability-named-parameter)
 
-  std::shared_ptr<Model> loadModel();
+  Model* loadModel();
 
  private:
   template <typename T>

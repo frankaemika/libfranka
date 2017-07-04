@@ -182,7 +182,8 @@ void Robot::setTimeScalingFactor(double factor) {
 void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
-std::shared_ptr<Model> Robot::loadModel() {
+
+Model* Robot::loadModel() {
   return impl_->loadModel();
 }
 

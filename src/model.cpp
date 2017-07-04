@@ -12,8 +12,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Model::Model(Network& network)  // NOLINT (readability-named-parameter)
-    : library_{new ModelLibrary(network)} {}
+Model::Model(Network& network) : library_{new ModelLibrary(network)} {}
 
 // Has to be declared here, as the ModelLibrary type is incomplete in the
 // header

@@ -11,10 +11,6 @@ set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES franka research-interface-common ${GTEST_LIBRARIES})
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
-set(TEST_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
-configure_file(test_config.h.in ${CMAKE_CURRENT_BINARY_DIR}/test_config.h @ONLY)
-list(APPEND TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_BINARY_DIR})
-
 ## Test libraries
 add_library(fcimodels SHARED
   libfcimodels_stub.cpp
@@ -38,6 +34,9 @@ add_executable(run_all_tests
   robot_state_tests.cpp
   robot_tests.cpp
 )
+
+set(TEST_COMPILE_DEFINITIONS FRANKA_TEST_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+target_compile_definitions(run_all_tests PRIVATE ${TEST_COMPILE_DEFINITIONS})
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests PUBLIC ${TEST_DEPENDENCIES})
@@ -92,6 +91,7 @@ foreach(sanitizer ${SANITIZERS})
     set(target_name "run_all_tests_${sanitizer_lc}")
 
     add_executable(${target_name} ${TESTS})
+    target_compile_definitions(${target_name} PRIVATE ${TEST_COMPILE_DEFINITIONS})
     target_include_directories(${target_name} PRIVATE ${TEST_INCLUDE_DIRECTORIES})
     target_link_libraries(${target_name} PUBLIC ${TEST_DEPENDENCIES} ${sanitizer_flags})
     target_compile_options(${target_name} PRIVATE ${sanitizer_flags})
