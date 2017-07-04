@@ -6,7 +6,6 @@
 
 #include "model_library.h"
 #include "network.h"
-#include "robot_impl.h"
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
