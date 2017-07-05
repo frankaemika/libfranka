@@ -26,14 +26,14 @@ TEST(Robot, CannotConnectIfNoServerRunning) {
 }
 
 TEST(Robot, CanPerformHandshake) {
-  MockServer server;
+  MockServer<research_interface::robot::Connect> server;
 
   Robot robot("127.0.0.1");
   EXPECT_EQ(1, robot.serverVersion());
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
-  MockServer server([](const Connect::Request&) {
+  MockServer<research_interface::robot::Connect> server([](const Connect::Request&) {
     return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
   });
 
@@ -44,10 +44,11 @@ TEST(Robot, CanReadRobotStateOnce) {
   research_interface::robot::RobotState sent_robot_state;
   randomRobotState(sent_robot_state);
 
-  MockServer server;
+  MockServer<research_interface::robot::Connect> server;
   Robot robot("127.0.0.1");
 
-  server.onSendRobotState([&]() { return sent_robot_state; }).spinOnce();
+  server.onSendUDP<research_interface::robot::RobotState>([&]() { return sent_robot_state; })
+      .spinOnce();
 
   const RobotState& received_robot_state = robot.readOnce();
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
@@ -58,10 +59,10 @@ TEST(Robot, CanReadRobotState) {
     MOCK_METHOD1(invoke, bool(const RobotState&));
   };
 
-  MockServer server;
+  MockServer<research_interface::robot::Connect> server;
   Robot robot("127.0.0.1");
 
-  server.sendEmptyRobotState().spinOnce();
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
 
   MockCallback callback;
   EXPECT_CALL(callback, invoke(_));
