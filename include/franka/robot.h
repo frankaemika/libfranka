@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 
@@ -15,9 +16,12 @@
 
 namespace franka {
 
+class Model;
+
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current robot state,
- * and allows to execute commands, motions, and torque control.
+ * gives access to the model library and allows to execute commands,
+ * motions, and torque control.
  *
  * @note
  * Before using this functionality, make sure FRANKA's brakes have been released.
@@ -457,6 +461,16 @@ class Robot {
   /**
    * @}
    */
+
+  /**
+   * Loads the Model Library from FRANKA CONTROL. User claims ownership
+   * over the object and should free it when no longer in use.
+   *
+   * @throw ModelException if the model library cannot be loaded.
+   *
+   * @return Pointer to an initialized model library.
+   */
+  Model* loadModel();
 
   /**
    * Returns the software version reported by the connected server.

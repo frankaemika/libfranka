@@ -183,4 +183,8 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
 
+Model* Robot::loadModel() {
+  return impl_->loadModel();
+}
+
 }  // namespace franka

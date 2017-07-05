@@ -1,5 +1,7 @@
 #include "robot_impl.h"
 
+#include <franka/model.h>
+
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -22,37 +24,11 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  research_interface::robot::Function function;
-  if (network_->tcpReadResponse<research_interface::robot::Function>(&function)) {
-    if (function != research_interface::robot::Function::kMove) {
-      throw ProtocolException("libfranka robot: unexpected response!");
-    }
+  network_->checkTcpConnection();
 
-    try {
-      network_->tcpHandleResponse<research_interface::robot::Move>(
-          std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
-                    std::placeholders::_1));
-    } catch (const CommandException& e) {
-      try {
-        // Make sure that we have an up-to-date robot state that shows the stopped motion.
-        while (motionGeneratorRunning()) {
-          receiveRobotState();
-        }
-
-        franka::RobotState state = convertRobotState(receiveRobotState());
-        // Rethrow as control exception to be consistent with starting/stopping of motions.
-        throw ControlException(e.what() + " "s +
-                               static_cast<std::string>(state.last_motion_errors));
-      } catch (const std::exception&) {
-        throw;
-      }
-    }
-  }
   sendRobotCommand(motion_command, control_command);
 
-  franka::RobotState state = convertRobotState(receiveRobotState());
-  checkStateForErrors(state);
-  return state;
+  return convertRobotState(receiveRobotState());
 }
 
 RobotState Robot::Impl::readOnce() {
@@ -173,6 +149,16 @@ void Robot::Impl::startMotion(
 
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
+    research_interface::robot::Function function;
+    if (network_->tcpReadResponse<research_interface::robot::Function>(&function)) {
+      if (function != research_interface::robot::Function::kMove) {
+        throw ProtocolException("libfranka robot: unexpected response!");
+      }
+      network_->tcpHandleResponse<research_interface::robot::Move>(
+          std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
+                    std::placeholders::_1));
+    }
+
     update();
   }
 }
@@ -226,13 +212,8 @@ void Robot::Impl::stopController() {
   }
 }
 
-void Robot::Impl::checkStateForErrors(franka::RobotState& robot_state) {
-  if (motionGeneratorRunning() || controllerRunning()) {
-    if (robot_state.current_errors) {
-      throw ControlException("libfranka: motion aborted: "s +
-                             static_cast<std::string>(robot_state.current_errors));
-    }
-  }
+Model* Robot::Impl::loadModel() {
+  return new Model(*network_);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
@@ -256,6 +237,33 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
   converted.sequence_number = robot_state.message_id;
+
+  switch (robot_state.robot_mode) {
+    case research_interface::robot::RobotMode::kEmergency:
+      converted.robot_mode = RobotMode::kUserStopped;
+      break;
+    case research_interface::robot::RobotMode::kIdle:
+    case research_interface::robot::RobotMode::kMove:
+      converted.robot_mode = RobotMode::kReady;
+      break;
+    case research_interface::robot::RobotMode::kGuiding:
+      converted.robot_mode = RobotMode::kGuiding;
+      break;
+    case research_interface::robot::RobotMode::kReflex:
+      converted.robot_mode = RobotMode::kReflex;
+      break;
+    case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
+      converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
+      break;
+    case research_interface::robot::RobotMode::kEmergency2:
+    case research_interface::robot::RobotMode::kStartup:
+    case research_interface::robot::RobotMode::kForce:
+    case research_interface::robot::RobotMode::kMoveForce:
+    case research_interface::robot::RobotMode::kRcuInputError:
+      converted.robot_mode = RobotMode::kOther;
+      break;
+  }
+
   return converted;
 }
 

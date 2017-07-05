@@ -23,6 +23,8 @@ class ControlLoopBase {
   bool spinOnce(const RobotState& robot_state,
                 research_interface::robot::ControllerCommand* command);
 
+  void checkStateForErrors(const RobotState& robot_state);
+
   RobotControl& robot_;
   const ControlCallback control_callback_;
 };

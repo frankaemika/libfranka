@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <functional>
 #include <sstream>
@@ -27,8 +28,11 @@ class Network {
 
   uint16_t udpPort() const noexcept;
 
+  void checkTcpConnection();
+
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
+
 
   template <typename T>
   void udpSend(const T& data);
@@ -42,9 +46,9 @@ class Network {
   template <typename T>
   bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
 
- private:
-  int tcpReceiveIntoBuffer();
+  void tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size);
 
+ private:
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
@@ -92,11 +96,10 @@ void Network::tcpSendRequest(const typename T::Request& request) try {
 template <typename T>
 bool Network::tcpReadResponse(T* function) try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-    int rv = tcpReceiveIntoBuffer();
-
-    if (rv == 0) {
-      throw NetworkException("libfranka: server closed connection");
-    }
+    size_t offset = read_buffer_.size();
+    int bytes_available = tcp_socket_.available();
+    read_buffer_.resize(offset + bytes_available);
+    tcpReceiveIntoBuffer(&read_buffer_[offset], bytes_available);
 
     if (read_buffer_.size() < sizeof(T)) {
       return false;
@@ -129,25 +132,8 @@ bool Network::tcpHandleResponse(std::function<void(const typename T::Response&)>
 
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse() {
-  int bytes_read = 0;
-  constexpr int kBytesTotal = sizeof(typename T::Response);
-  std::array<uint8_t, kBytesTotal> buffer;
-
-  try {
-    while (bytes_read < kBytesTotal) {
-      int bytes_left = kBytesTotal - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer.at(bytes_read), bytes_left);
-      bytes_read += rv;
-    }
-  } catch (const Poco::TimeoutException& e) {
-    if (bytes_read != 0) {
-      throw ProtocolException("libfranka: incorrect object size");
-    } else {
-      throw NetworkException("libfranka: connection timeout");
-    }
-  } catch (const Poco::Exception& e) {
-    throw NetworkException("libfranka: connection closed");
-  }
+  std::array<uint8_t, sizeof(typename T::Response)> buffer;
+  tcpReceiveIntoBuffer(buffer.data(), buffer.size());
   typename T::Response const* response =
       reinterpret_cast<const typename T::Response*>(buffer.data());
   if (response->function != T::kFunction) {

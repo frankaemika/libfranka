@@ -25,6 +25,7 @@ void ControlLoop::operator()() {
   research_interface::robot::ControllerCommand command{};
   while (spinOnce(robot_state, &command)) {
     robot_state = robot_.update(nullptr, &command);
+    checkStateForErrors(robot_state);
   }
 }
 

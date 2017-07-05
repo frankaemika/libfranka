@@ -28,6 +28,16 @@ bool ControlLoopBase::spinOnce(const RobotState& robot_state,
   return true;
 }
 
+void ControlLoopBase::checkStateForErrors(const RobotState &robot_state) {
+  if (robot_state.robot_mode != RobotMode::kReady) {
+    if (robot_state.robot_mode == RobotMode::kReflex) {
+      throw ControlException("libfranka robot: motion aborted with error: " + static_cast<std::string>(robot_state.last_motion_errors));
+    } else {
+      throw ControlException("libfranka robot: motion aborted");
+    }
+  }
+}
+
 void setCurrentThreadToRealtime(RealtimeConfig config) {
   int policy = SCHED_FIFO;
   struct sched_param thread_param;

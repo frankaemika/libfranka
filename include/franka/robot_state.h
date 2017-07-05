@@ -12,6 +12,15 @@
 
 namespace franka {
 
+enum class RobotMode : uint8_t {
+  kUserStopped,
+  kReady,
+  kGuiding,
+  kReflex,
+  kAutomaticErrorRecovery,
+  kOther
+};
+
 /**
  * Describes FRANKA's robot state.
  */
@@ -140,6 +149,11 @@ struct RobotState {
    * Contains the errors that aborted the previous motion.
    */
   Errors last_motion_errors{};
+
+  /**
+   * Current FRANKA mode.
+   */
+  RobotMode robot_mode{};
 
   /**
    * Strictly increasing sequence number for each received robot state.

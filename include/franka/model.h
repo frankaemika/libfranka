@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <franka/robot.h>
+#include <franka/robot_state.h>
 
 /**
  * @file model.h
@@ -28,6 +29,7 @@ enum Frame : uint8_t {
 };
 
 class ModelLibrary;
+class Network;
 
 /**
  * Calculates poses of joints and dynamic properties of the robot.
@@ -35,13 +37,15 @@ class ModelLibrary;
 class Model {
  public:
   /**
-   * Creates a new model for a given franka::Robot.
+   * This object is obtained from @see Robot::loadModel function.
    *
-   * @param[in] robot Robot to create model for.
+   * The constructor is for internal use only.
+   *
+   * @param[in] network for internal use.
    *
    * @throw ModelException if the model library cannot be loaded.
    */
-  Model(franka::Robot& robot);
+  Model(franka::Network& network);
 
   /**
    * Unloads the model library.
