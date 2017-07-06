@@ -47,13 +47,14 @@ class Robot::Impl : public RobotControl {
   Model* loadModel();
 
  private:
+  void checkStateForErrors(const RobotState& robot_state);
+
   template <typename T>
   void handleCommandResponse(const typename T::Response& response);
 
   void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
                         const research_interface::robot::ControllerCommand* control_command);
   research_interface::robot::RobotState receiveRobotState();
-  void checkStateForErrors(franka::RobotState& robot_state);
 
   std::unique_ptr<Network> network_;
 

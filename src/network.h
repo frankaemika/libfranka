@@ -33,7 +33,6 @@ class Network {
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
 
-
   template <typename T>
   void udpSend(const T& data);
 

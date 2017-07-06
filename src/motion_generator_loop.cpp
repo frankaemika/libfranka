@@ -77,12 +77,10 @@ void MotionGeneratorLoop<T>::operator()() {
     research_interface::robot::ControllerCommand control_command{};
     while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
       robot_state = robot_.update(&motion_command, &control_command);
-      checkStateForErrors(robot_state);
     }
   } else {
     while (spinOnce(robot_state, &motion_command)) {
       robot_state = robot_.update(&motion_command);
-      checkStateForErrors(robot_state);
     }
   }
 }

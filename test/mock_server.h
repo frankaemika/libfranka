@@ -32,6 +32,9 @@ class MockServer {
   template <typename TResponse>
   MockServer& sendResponse(std::function<TResponse()> create_response);
 
+  template <typename TResponse>
+  MockServer& queueResponse(std::function<TResponse()> create_response);
+
   template <typename T>
   MockServer& onSendUDP(std::function<T()> on_send_udp);
 
@@ -91,6 +94,20 @@ MockServer<C>& MockServer<C>::sendResponse(std::function<TResponse()> create_res
 
   std::lock_guard<std::mutex> _(mutex_);
   block_ = true;
+  commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
+                    [=](Socket& tcp_socket, Socket&) {
+                      TResponse response = create_response();
+                      tcp_socket.sendBytes(&response, sizeof(response));
+                    });
+  return *this;
+}
+
+template <typename C>
+template <typename TResponse>
+MockServer<C>& MockServer<C>::queueResponse(std::function<TResponse()> create_response) {
+  using namespace std::string_literals;
+
+  std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
                     [=](Socket& tcp_socket, Socket&) {
                       TResponse response = create_response();

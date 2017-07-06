@@ -26,9 +26,14 @@ RobotState Robot::Impl::update(
     const research_interface::robot::ControllerCommand* control_command) {
   network_->checkTcpConnection();
 
+  bool commanding_robot = motionGeneratorRunning() || controllerRunning();
   sendRobotCommand(motion_command, control_command);
 
-  return convertRobotState(receiveRobotState());
+  RobotState robot_state = convertRobotState(receiveRobotState());
+  if (commanding_robot) {
+    checkStateForErrors(robot_state);
+  }
+  return robot_state;
 }
 
 RobotState Robot::Impl::readOnce() {
@@ -154,9 +159,14 @@ void Robot::Impl::startMotion(
       if (function != research_interface::robot::Function::kMove) {
         throw ProtocolException("libfranka robot: unexpected response!");
       }
-      network_->tcpHandleResponse<research_interface::robot::Move>(
-          std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
-                    std::placeholders::_1));
+      try {
+        network_->tcpHandleResponse<research_interface::robot::Move>(
+            std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
+                      std::placeholders::_1));
+      } catch (const CommandException& e) {
+        // Rethrow as control exception to be consistent with starting/stopping of motions.
+        throw ControlException(e.what());
+      }
     }
 
     update();
@@ -214,6 +224,17 @@ void Robot::Impl::stopController() {
 
 Model* Robot::Impl::loadModel() {
   return new Model(*network_);
+}
+
+void Robot::Impl::checkStateForErrors(const RobotState& robot_state) {
+  if (robot_state.robot_mode != RobotMode::kReady) {
+    if (robot_state.robot_mode == RobotMode::kReflex) {
+      throw ControlException("libfranka robot: motion aborted with error: " +
+                             static_cast<std::string>(robot_state.last_motion_errors));
+    } else {
+      throw ControlException("libfranka robot: motion aborted");
+    }
+  }
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

@@ -44,9 +44,8 @@ uint16_t Network::udpPort() const noexcept {
 
 void Network::checkTcpConnection() try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-    std::vector<uint8_t> buffer;
-    buffer.resize(1);
-    int rv = tcp_socket_.receiveBytes(&buffer, 1, MSG_PEEK);
+    std::array<uint8_t, 1> buffer;
+    int rv = tcp_socket_.receiveBytes(buffer.data(), static_cast<int>(buffer.size()), MSG_PEEK);
 
     if (rv == 0) {
       throw NetworkException("libfranka: server closed connection");
