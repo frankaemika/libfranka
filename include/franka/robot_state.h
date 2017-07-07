@@ -156,7 +156,7 @@ struct RobotState {
   /**
    * Current FRANKA mode.
    */
-  RobotMode robot_mode{};
+  RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
    * Strictly increasing sequence number for each received robot state.

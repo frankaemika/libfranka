@@ -26,12 +26,19 @@ RobotState Robot::Impl::update(
     const research_interface::robot::ControllerCommand* control_command) {
   network_->checkTcpConnection();
 
-  bool commanding_robot = motionGeneratorRunning() || controllerRunning();
+  bool was_commanding_robot = motionGeneratorRunning() || controllerRunning();
   sendRobotCommand(motion_command, control_command);
 
   RobotState robot_state = convertRobotState(receiveRobotState());
-  if (commanding_robot) {
-    checkStateForErrors(robot_state);
+  if (was_commanding_robot) {
+    if (robot_state.robot_mode != RobotMode::kReady) {
+      if (robot_state.robot_mode == RobotMode::kReflex) {
+        throw ControlException("libfranka robot: motion aborted with error: " +
+                               static_cast<std::string>(robot_state.last_motion_errors));
+      } else {
+        throw ControlException("libfranka robot: motion aborted");
+      }
+    }
   }
   return robot_state;
 }
@@ -224,17 +231,6 @@ void Robot::Impl::stopController() {
 
 Model* Robot::Impl::loadModel() {
   return new Model(*network_);
-}
-
-void Robot::Impl::checkStateForErrors(const RobotState& robot_state) {
-  if (robot_state.robot_mode != RobotMode::kReady) {
-    if (robot_state.robot_mode == RobotMode::kReflex) {
-      throw ControlException("libfranka robot: motion aborted with error: " +
-                             static_cast<std::string>(robot_state.last_motion_errors));
-    } else {
-      throw ControlException("libfranka robot: motion aborted");
-    }
-  }
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

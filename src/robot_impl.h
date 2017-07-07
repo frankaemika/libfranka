@@ -47,8 +47,6 @@ class Robot::Impl : public RobotControl {
   Model* loadModel();
 
  private:
-  void checkStateForErrors(const RobotState& robot_state);
-
   template <typename T>
   void handleCommandResponse(const typename T::Response& response);
 
