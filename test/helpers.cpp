@@ -164,7 +164,7 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
-  std::array<bool, 24> errors;
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors;
   for (size_t i = 0; i < errors.size(); i++) {
     errors[i] = randomBool();
   }

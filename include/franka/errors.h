@@ -19,7 +19,7 @@ struct Errors {
    * Sets the error according to values from the array
    * @param errors array of error flags
    */
-  Errors(std::array<bool, 24> errors);
+  Errors(std::array<bool, 25> errors);
 
   /**
    * Check if any error flag is set to true

@@ -8,7 +8,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Errors::Errors(std::array<bool, 24> errors)
+Errors::Errors(std::array<bool, 25> errors)
     : joint_position_limits_violation(errors[0]),
       cartesian_position_limits_violation(errors[1]),
       self_collision_avoidance_violation(errors[2]),

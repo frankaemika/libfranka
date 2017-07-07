@@ -277,7 +277,6 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
       break;
     case research_interface::robot::RobotMode::kEmergency2:
-    case research_interface::robot::RobotMode::kStartup:
     case research_interface::robot::RobotMode::kForce:
     case research_interface::robot::RobotMode::kMoveForce:
     case research_interface::robot::RobotMode::kRcuInputError:
