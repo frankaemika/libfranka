@@ -20,8 +20,9 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
   ostream << "{O_T_EE: " << robot_state.O_T_EE << ", elbow: " << robot_state.elbow
           << ", O_T_EE_d: " << robot_state.O_T_EE_d << ", elbow_d: " << robot_state.elbow_d
-          << ", tau_J: " << robot_state.tau_J << ", dtau_J: " << robot_state.dtau_J
-          << ", q: " << robot_state.q << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d
+          << ", EE_T_K: " << robot_state.EE_T_K << ", tau_J: " << robot_state.tau_J
+          << ", dtau_J: " << robot_state.dtau_J << ", q: " << robot_state.q
+          << ", dq: " << robot_state.dq << ", q_d: " << robot_state.q_d
           << ", joint_contact: " << robot_state.joint_contact
           << ", cartesian_contact: " << robot_state.cartesian_contact
           << ", joint_collision: " << robot_state.joint_collision
