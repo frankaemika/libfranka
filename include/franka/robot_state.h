@@ -36,11 +36,18 @@ struct RobotState {
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$^OT_{EE}\f$
+   * \f$^OT_{EEd}\f$
    * Last desired end effector pose of motion generation in world base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * \f$^{EE}T_{K}\f$
+   * K frame pose in end effector frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
+  std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Elbow pose.
