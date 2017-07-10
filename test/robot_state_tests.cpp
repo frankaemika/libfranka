@@ -8,10 +8,6 @@
 
 using namespace franka;
 
-bool stringContains(const std::string& actual, const std::string& expected) {
-  return actual.find(expected) != std::string::npos;
-}
-
 TEST(RobotState, IsInitializedToZero) {
   RobotState robot_state;
 
@@ -42,6 +38,8 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "tau_ext_hat_filtered");
   EXPECT_PRED2(stringContains, output, "O_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
+  EXPECT_PRED2(stringContains, output, "current_errors");
+  EXPECT_PRED2(stringContains, output, "last_motion_errors");
   EXPECT_PRED2(stringContains, output, "sequence_number");
 }
 

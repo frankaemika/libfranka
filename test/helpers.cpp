@@ -4,6 +4,10 @@
 
 #include <gtest/gtest.h>
 
+bool stringContains(const std::string& actual, const std::string& expected) {
+  return actual.find(expected) != std::string::npos;
+}
+
 void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.O_T_EE.size(); i++) {
     EXPECT_EQ(0.0, actual.O_T_EE[i]);
@@ -56,6 +60,8 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.K_F_ext_hat_K.size(); i++) {
     EXPECT_EQ(0.0, actual.K_F_ext_hat_K[i]);
   }
+  EXPECT_FALSE(actual.current_errors);
+  EXPECT_FALSE(actual.last_motion_errors);
   EXPECT_EQ(0u, actual.sequence_number);
 }
 
@@ -77,6 +83,8 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.current_errors, actual.current_errors);
+  EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
   EXPECT_EQ(expected.sequence_number, actual.sequence_number);
 }
 
@@ -99,6 +107,8 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
+  EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
   EXPECT_EQ(expected.message_id, actual.sequence_number);
 }
 
@@ -162,6 +172,16 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors;
+  for (size_t i = 0; i < errors.size(); i++) {
+    errors[i] = randomBool();
+  }
+  robot_state.current_errors = franka::Errors(errors);
+  for (size_t i = 0; i < errors.size(); i++) {
+    errors[i] = randomBool();
+  }
+  robot_state.last_motion_errors = franka::Errors(errors);
+
   robot_state.sequence_number = static_cast<uint32_t>(std::rand());
 }
 
@@ -219,7 +239,14 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
     robot_state.K_F_ext_hat_K[i] = randomDouble();
   }
+  for (size_t i = 0; i < robot_state.errors.size(); i++) {
+    robot_state.errors[i] = randomBool();
+  }
+  for (size_t i = 0; i < robot_state.reflex_reason.size(); i++) {
+    robot_state.reflex_reason[i] = randomBool();
+  }
   robot_state.message_id = static_cast<uint32_t>(std::rand());
+
   robot_state.motion_generator_mode = research_interface::robot::MotionGeneratorMode::kIdle;
   robot_state.controller_mode = research_interface::robot::ControllerMode::kMotorPD;
 }
@@ -317,3 +344,46 @@ bool operator==(const Move::Deviation& left, const Move::Deviation& right) {
 
 }  // namespace robot
 }  // namespace research_interface
+
+namespace franka {
+
+bool operator==(const Errors& lhs, const Errors& rhs) {
+  return lhs.joint_position_limits_violation == rhs.joint_position_limits_violation &&
+         lhs.cartesian_position_limits_violation == rhs.cartesian_position_limits_violation &&
+         lhs.self_collision_avoidance_violation == rhs.self_collision_avoidance_violation &&
+         lhs.joint_velocity_violation == rhs.joint_velocity_violation &&
+         lhs.cartesian_velocity_violation == rhs.cartesian_velocity_violation &&
+         lhs.force_control_safety_violation == rhs.force_control_safety_violation &&
+         lhs.joint_reflex == rhs.joint_reflex && lhs.cartesian_reflex == rhs.cartesian_reflex &&
+         lhs.max_goal_pose_deviation_violation == rhs.max_goal_pose_deviation_violation &&
+         lhs.max_path_pose_deviation_violation == rhs.max_path_pose_deviation_violation &&
+         lhs.cartesian_velocity_profile_safety_violation ==
+             rhs.cartesian_velocity_profile_safety_violation &&
+         lhs.joint_position_motion_generator_start_pose_invalid ==
+             rhs.joint_position_motion_generator_start_pose_invalid &&
+         lhs.joint_motion_generator_position_limits_violation ==
+             rhs.joint_motion_generator_position_limits_violation &&
+         lhs.joint_motion_generator_velocity_limits_violation ==
+             rhs.joint_motion_generator_velocity_limits_violation &&
+         lhs.joint_motion_generator_velocity_discontinuity ==
+             rhs.joint_motion_generator_velocity_discontinuity &&
+         lhs.joint_motion_generator_acceleration_discontinuity ==
+             rhs.joint_motion_generator_acceleration_discontinuity &&
+         lhs.cartesian_position_motion_generator_start_pose_invalid ==
+             rhs.cartesian_position_motion_generator_start_pose_invalid &&
+         lhs.cartesian_motion_generator_elbow_limit_violation ==
+             rhs.cartesian_motion_generator_elbow_limit_violation &&
+         lhs.cartesian_motion_generator_velocity_limits_violation ==
+             rhs.cartesian_motion_generator_velocity_limits_violation &&
+         lhs.cartesian_motion_generator_velocity_discontinuity ==
+             rhs.cartesian_motion_generator_velocity_discontinuity &&
+         lhs.cartesian_motion_generator_acceleration_discontinuity ==
+             rhs.cartesian_motion_generator_acceleration_discontinuity &&
+         lhs.cartesian_motion_generator_elbow_sign_inconsistent ==
+             rhs.cartesian_motion_generator_elbow_sign_inconsistent &&
+         lhs.cartesian_motion_generator_start_elbow_invalid ==
+             rhs.cartesian_motion_generator_start_elbow_invalid &&
+         lhs.force_controller_desired_force_tolerance_violation ==
+             rhs.force_controller_desired_force_tolerance_violation;
+}
+}

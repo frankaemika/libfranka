@@ -3,12 +3,26 @@
 #include <array>
 #include <ostream>
 
+#include <franka/errors.h>
+
 /**
  * @file robot_state.h
  * Contains the RobotState struct.
  */
 
 namespace franka {
+
+/**
+ * Describes FRANKA's current mode.
+ */
+enum class RobotMode : uint8_t {
+  kUserStopped,
+  kReady,
+  kGuiding,
+  kReflex,
+  kAutomaticErrorRecovery,
+  kOther
+};
 
 /**
  * Describes FRANKA's robot state.
@@ -135,6 +149,21 @@ struct RobotState {
    * the end effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Current error state.
+   */
+  Errors current_errors{};
+
+  /**
+   * Contains the errors that aborted the previous motion.
+   */
+  Errors last_motion_errors{};
+
+  /**
+   * Current FRANKA mode.
+   */
+  RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
    * Strictly increasing sequence number for each received robot state.

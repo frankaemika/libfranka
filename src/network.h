@@ -28,6 +28,8 @@ class Network {
 
   uint16_t udpPort() const noexcept;
 
+  void checkTcpConnection();
+
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
 

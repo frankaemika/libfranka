@@ -3,6 +3,9 @@
 #include <memory>
 #include <sstream>
 
+// Included for MSG_PEEK symbol not present in Poco
+#include <sys/socket.h>
+
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
@@ -37,6 +40,19 @@ Network::~Network() {
 
 uint16_t Network::udpPort() const noexcept {
   return udp_socket_.address().port();
+}
+
+void Network::checkTcpConnection() try {
+  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
+    std::array<uint8_t, 1> buffer;
+    int rv = tcp_socket_.receiveBytes(buffer.data(), static_cast<int>(buffer.size()), MSG_PEEK);
+
+    if (rv == 0) {
+      throw NetworkException("libfranka: server closed connection");
+    }
+  }
+} catch (const Poco::Exception& e) {
+  throw NetworkException("libfranka: "s + e.what());
 }
 
 void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {

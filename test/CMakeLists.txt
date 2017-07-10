@@ -25,6 +25,7 @@ list(APPEND TEST_DEPENDENCIES fcimodels)
 add_executable(run_all_tests
   control_loop_tests.cpp
   control_types_tests.cpp
+  errors_tests.cpp
   gripper_command_tests.cpp
   gripper_tests.cpp
   helpers.cpp
