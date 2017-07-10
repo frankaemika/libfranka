@@ -227,6 +227,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
+  converted.EE_T_K = robot_state.EE_T_K;
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
