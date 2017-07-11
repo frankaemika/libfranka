@@ -37,15 +37,36 @@ class Network;
 class Model {
  public:
   /**
-   * This object is obtained from @see Robot::loadModel function.
+   * Creates a new Model instance.
    *
-   * The constructor is for internal use only.
+   * This constructor is for internal use only.
    *
-   * @param[in] network for internal use.
+   * @see Robot::loadModel
+   *
+   * @param[in] network For internal use.
    *
    * @throw ModelException if the model library cannot be loaded.
    */
-  Model(franka::Network& network);
+  explicit Model(franka::Network& network);
+
+  /**
+   * Move-constructs a new Model instance.
+   *
+   * @param[in] model Other Model instance.
+   */
+  Model(Model&& model) noexcept;
+
+  /**
+   * Move-assigns this Model from another Model instance.
+   *
+   * @param[in] model Other Model instance.
+   *
+   * @return Model instance.
+   */
+  Model& operator=(Model&& model) noexcept;
+
+  Model(const Model&) = delete;
+  Model& operator=(const Model&) = delete;
 
   /**
    * Unloads the model library.
@@ -57,8 +78,8 @@ class Model {
    *
    * The pose is represented as a 4x4 matrix in column-major format.
    *
-   * @param[in] joint number of the desired joint.
-   * @param[in] robot_state state from which the pose should be calculated.
+   * @param[in] joint Number of the desired joint.
+   * @param[in] robot_state State from which the pose should be calculated.
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */

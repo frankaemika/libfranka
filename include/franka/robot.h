@@ -463,14 +463,13 @@ class Robot {
    */
 
   /**
-   * Loads the Model Library from FRANKA CONTROL. User claims ownership
-   * over the object and should free it when no longer in use.
+   * Loads the Model Library from FRANKA CONTROL.
+   *
+   * @return Model instance.
    *
    * @throw ModelException if the model library cannot be loaded.
-   *
-   * @return Pointer to an initialized model library.
    */
-  Model* loadModel();
+  Model loadModel();
 
   /**
    * Returns the software version reported by the connected server.

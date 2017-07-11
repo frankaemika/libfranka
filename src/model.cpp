@@ -13,9 +13,10 @@ namespace franka {
 
 Model::Model(Network& network) : library_{new ModelLibrary(network)} {}
 
-// Has to be declared here, as the ModelLibrary type is incomplete in the
-// header
+// Has to be declared here, as the ModelLibrary type is incomplete in the header
 Model::~Model() noexcept = default;
+Model::Model(Model&&) noexcept = default;
+Model& Model::operator=(Model&&) noexcept = default;
 
 std::array<double, 16> Model::jointPose(Frame joint, const franka::RobotState& robot_state) const {
   std::array<double, 16> output;

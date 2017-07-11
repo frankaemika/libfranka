@@ -3,6 +3,7 @@
 #include <chrono>
 #include <memory>
 
+#include <franka/model.h>
 #include <franka/robot.h>
 #include <research_interface/robot/rbk_types.h>
 #include <research_interface/robot/service_traits.h>
@@ -44,7 +45,7 @@ class Robot::Impl : public RobotControl {
   template <typename T, typename... TArgs>
   void executeCommand(TArgs... /* args */);
 
-  Model* loadModel();
+  Model loadModel();
 
  private:
   template <typename T>
