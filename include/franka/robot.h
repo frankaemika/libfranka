@@ -55,6 +55,23 @@ class Robot {
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+
+  /**
+   * Move-constructs a new Robot instance.
+   *
+   * @param[in] robot Other Robot instance.
+   */
+  Robot(Robot&& robot) noexcept;
+
+  /**
+   * Move-assigns this Robot from another Robot instance.
+   *
+   * @param[in] robot Other Robot instance.
+   *
+   * @return Model instance.
+   */
+  Robot& operator=(Robot&& robot) noexcept;
+
   /**
    * Closes the connection.
    */

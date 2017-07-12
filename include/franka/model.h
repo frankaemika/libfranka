@@ -65,9 +65,6 @@ class Model {
    */
   Model& operator=(Model&& model) noexcept;
 
-  Model(const Model&) = delete;
-  Model& operator=(const Model&) = delete;
-
   /**
    * Unloads the model library.
    */
@@ -143,6 +140,9 @@ class Model {
       double load_mass,
       const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const noexcept;
+
+  Model(const Model&) = delete;
+  Model& operator=(const Model&) = delete;
 
  private:
   std::unique_ptr<ModelLibrary> library_;
