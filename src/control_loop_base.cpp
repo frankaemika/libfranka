@@ -1,8 +1,9 @@
 #include "control_loop_base.h"
 
-#include <cstring>
-
 #include <pthread.h>
+
+#include <cstring>
+#include <fstream>
 
 #include <franka/exception.h>
 
@@ -15,7 +16,11 @@ namespace franka {
 
 ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_callback)
     : robot_(robot), control_callback_(std::move(control_callback)) {
-  setCurrentThreadToRealtime(robot_.realtimeConfig());
+  bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
+  if (throw_on_error && !hasRealtimeKernel()) {
+    throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
+  }
+  setCurrentThreadToRealtime(throw_on_error);
 }
 
 bool ControlLoopBase::spinOnce(const RobotState& robot_state,
@@ -28,16 +33,22 @@ bool ControlLoopBase::spinOnce(const RobotState& robot_state,
   return true;
 }
 
-void setCurrentThreadToRealtime(RealtimeConfig config) {
-  int policy = SCHED_FIFO;
-  struct sched_param thread_param;
+void setCurrentThreadToRealtime(bool throw_on_error) {
   constexpr int kThreadPriority = 20;
+  struct sched_param thread_param{};
   thread_param.sched_priority = kThreadPriority;
-  if (pthread_setschedparam(pthread_self(), policy, &thread_param) != 0) {
-    if (config == RealtimeConfig::kEnforce) {
+  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
+    if (throw_on_error) {
       throw RealtimeException("libfranka: unable to set realtime scheduling: "s + strerror(errno));
     }
   }
+}
+
+bool hasRealtimeKernel() {
+  std::ifstream realtime("/sys/kernel/realtime", std::ios_base::in);
+  bool is_realtime;
+  realtime >> is_realtime;
+  return is_realtime;
 }
 
 }  // namespace franka
