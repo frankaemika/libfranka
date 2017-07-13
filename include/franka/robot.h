@@ -55,6 +55,23 @@ class Robot {
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+
+  /**
+   * Move-constructs a new Robot instance.
+   *
+   * @param[in] robot Other Robot instance.
+   */
+  Robot(Robot&& robot) noexcept;
+
+  /**
+   * Move-assigns this Robot from another Robot instance.
+   *
+   * @param[in] robot Other Robot instance.
+   *
+   * @return Model instance.
+   */
+  Robot& operator=(Robot&& robot) noexcept;
+
   /**
    * Closes the connection.
    */
@@ -463,14 +480,13 @@ class Robot {
    */
 
   /**
-   * Loads the Model Library from FRANKA CONTROL. User claims ownership
-   * over the object and should free it when no longer in use.
+   * Loads the Model Library from FRANKA CONTROL.
+   *
+   * @return Model instance.
    *
    * @throw ModelException if the model library cannot be loaded.
-   *
-   * @return Pointer to an initialized model library.
    */
-  Model* loadModel();
+  Model loadModel();
 
   /**
    * Returns the software version reported by the connected server.

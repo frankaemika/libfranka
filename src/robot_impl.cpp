@@ -229,8 +229,8 @@ void Robot::Impl::stopController() {
   }
 }
 
-Model* Robot::Impl::loadModel() {
-  return new Model(*network_);
+Model Robot::Impl::loadModel() {
+  return Model(*network_);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
