@@ -24,11 +24,12 @@ class Network {
 
   template <typename T>
   T udpRead();
+
   int udpAvailableData();
 
   uint16_t udpPort() const noexcept;
 
-  void checkTcpConnection();
+  void tcpThrowIfConnectionClosed();
 
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();

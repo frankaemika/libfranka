@@ -24,22 +24,40 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  network_->checkTcpConnection();
+  network_->tcpThrowIfConnectionClosed();
 
-  bool was_commanding_robot = motionGeneratorRunning() || controllerRunning();
+  bool was_running_motion_generator = motionGeneratorRunning();
+  bool was_running_controller = controllerRunning();
+
   sendRobotCommand(motion_command, control_command);
-
   RobotState robot_state = convertRobotState(receiveRobotState());
-  if (was_commanding_robot) {
-    if (robot_state.robot_mode != RobotMode::kReady) {
-      if (robot_state.robot_mode == RobotMode::kReflex) {
-        throw ControlException("libfranka robot: motion aborted with error: " +
-                               static_cast<std::string>(robot_state.last_motion_errors));
-      } else {
-        throw ControlException("libfranka robot: motion aborted");
+
+  if (robot_state.robot_mode != RobotMode::kReady &&
+      (was_running_motion_generator || was_running_controller)) {
+    // If a motion generator was running and the robot state shows an error,
+    // we will receive a TCP response to the Move command.
+    if (was_running_motion_generator) {
+      try {
+        handleCommandResponse<research_interface::robot::Move>(
+            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+      } catch (const CommandException& e) {
+        // Rethrow as control exception to be consistent with starting/stopping of motions.
+        if (robot_state.robot_mode == RobotMode::kReflex) {
+          throw ControlException(e.what() + " "s +
+                                 static_cast<std::string>(robot_state.last_motion_errors));
+        }
+        throw ControlException(e.what());
       }
     }
+
+    if (robot_state.robot_mode == RobotMode::kReflex) {
+      throw ControlException("libfranka robot: control aborted with error: " +
+                             static_cast<std::string>(robot_state.last_motion_errors));
+    } else {
+      throw ControlException("libfranka robot: control aborted");
+    }
   }
+
   return robot_state;
 }
 
@@ -171,7 +189,6 @@ void Robot::Impl::startMotion(
             std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                       std::placeholders::_1));
       } catch (const CommandException& e) {
-        // Rethrow as control exception to be consistent with starting/stopping of motions.
         throw ControlException(e.what());
       }
     }
