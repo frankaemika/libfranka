@@ -10,7 +10,8 @@
 
 namespace franka {
 
-void setCurrentThreadToRealtime(RealtimeConfig config);
+void setCurrentThreadToRealtime(bool throw_on_error);
+bool hasRealtimeKernel();
 
 class ControlLoopBase {
  public:
