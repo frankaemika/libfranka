@@ -60,9 +60,8 @@ RobotState Robot::Impl::update(
     if (robot_state.last_motion_errors) {
       throw ControlException("libfranka robot: control aborted with error: " +
                              static_cast<std::string>(robot_state.last_motion_errors));
-    } else {
-      throw ControlException("libfranka robot: control aborted");
     }
+    throw ControlException("libfranka robot: control aborted");
   }
 
   return robot_state;
@@ -211,6 +210,7 @@ void Robot::Impl::startMotion(
   executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
 
+  RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
     research_interface::robot::Function function;
@@ -223,11 +223,15 @@ void Robot::Impl::startMotion(
             std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                       std::placeholders::_1));
       } catch (const CommandException& e) {
+        if (robot_state.last_motion_errors) {
+          throw ControlException(e.what() + " "s +
+                                 static_cast<std::string>(robot_state.last_motion_errors));
+        }
         throw ControlException(e.what());
       }
     }
 
-    update();
+    robot_state = update();
   }
 }
 
