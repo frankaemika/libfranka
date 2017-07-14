@@ -34,6 +34,11 @@ RobotState Robot::Impl::update(
 
   if (robot_state.robot_mode != RobotMode::kReady &&
       (was_running_motion_generator || was_running_controller)) {
+    // Wait until robot state shows stopped motion and controller.
+    while (motionGeneratorRunning() || controllerRunning()) {
+      receiveRobotState();
+    }
+
     // If a motion generator was running and the robot state shows an error,
     // we will receive a TCP response to the Move command.
     if (was_running_motion_generator) {
@@ -63,11 +68,12 @@ RobotState Robot::Impl::update(
 
 RobotState Robot::Impl::readOnce() {
   // Delete old robot states in the UDP buffer.
+  // TODO (fwalch): Use robot state with largest message_id, not newest.
   if (network_->udpAvailableData() >
       static_cast<int>(sizeof(research_interface::robot::RobotState))) {
     network_->udpRead<research_interface::robot::RobotState>();
   }
-  return convertRobotState(network_->udpRead<research_interface::robot::RobotState>());
+  return convertRobotState(receiveRobotState());
 }
 
 void Robot::Impl::sendRobotCommand(
