@@ -60,8 +60,8 @@ template <typename T>
 T Network::udpRead() try {
   std::array<uint8_t, sizeof(T)> buffer;
 
-  int bytes_received = udp_socket_.receiveFrom(buffer.data(), static_cast<int>(buffer.size()),
-                                               udp_server_address_);
+  int bytes_received =
+      udp_socket_.receiveFrom(buffer.data(), static_cast<int>(buffer.size()), udp_server_address_);
 
   if (bytes_received != buffer.size()) {
     throw ProtocolException("libfranka: incorrect object size");
