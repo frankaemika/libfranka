@@ -36,7 +36,7 @@ class MockServer {
   MockServer& queueResponse(std::function<TResponse()> create_response);
 
   template <typename T>
-  MockServer& sendRandomState(std::function<void(T&)> random_generator, T* sent_state);
+  MockServer& sendRandomState(std::function<void(T&)> random_generator, T* sent_state = nullptr);
 
   template <typename T>
   MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
@@ -139,7 +139,9 @@ MockServer<C>& MockServer<C>::sendRandomState(std::function<void(T&)> random_gen
   return onSendUDP<T>([=](T& state) {
     random_generator(state);
     state.message_id = ++sequence_number_;
-    *sent_state = state;
+    if (sent_state != nullptr) {
+      *sent_state = state;
+    }
   });
 }
 

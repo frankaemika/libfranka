@@ -45,7 +45,8 @@ TEST(Robot, CanReadRobotStateOnce) {
   Robot robot("127.0.0.1");
 
   research_interface::robot::RobotState sent_robot_state;
-  server
+  server.sendRandomState<research_interface::robot::RobotState>([](auto s) { randomRobotState(s); })
+      .sendRandomState<research_interface::robot::RobotState>([](auto s) { randomRobotState(s); })
       .sendRandomState<research_interface::robot::RobotState>([](auto s) { randomRobotState(s); },
                                                               &sent_robot_state)
       .spinOnce();
