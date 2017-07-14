@@ -41,13 +41,13 @@ TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
 }
 
 TEST(Robot, CanReadRobotStateOnce) {
-  research_interface::robot::RobotState sent_robot_state;
-  randomRobotState(sent_robot_state);
-
   MockServer<research_interface::robot::Connect> server;
   Robot robot("127.0.0.1");
 
-  server.onSendUDP<research_interface::robot::RobotState>([&]() { return sent_robot_state; })
+  research_interface::robot::RobotState sent_robot_state;
+  server
+      .sendRandomState<research_interface::robot::RobotState>([](auto s) { randomRobotState(s); },
+                                                              &sent_robot_state)
       .spinOnce();
 
   const RobotState& received_robot_state = robot.readOnce();

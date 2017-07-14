@@ -119,6 +119,8 @@ void MockServer<C>::serverThread() {
     ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on UDP socket";
   };
 
+  sendInitialState(udp_socket_wrapper);
+
   while (!shutdown_) {
     cv_.wait(lock, [this] { return continue_ || shutdown_; });
     while (!commands_.empty()) {
@@ -151,4 +153,14 @@ MockServer<C>& MockServer<C>::generic(
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("generic", generic_command);
   return *this;
+}
+
+template <typename C>
+void MockServer<C>::sendInitialState(Socket&) {}
+
+template <>
+void MockServer<research_interface::robot::Connect>::sendInitialState(Socket& udp_socket) {
+  research_interface::robot::RobotState state{};
+  state.message_id = ++sequence_number_;
+  udp_socket.sendBytes(&state, sizeof(state));
 }

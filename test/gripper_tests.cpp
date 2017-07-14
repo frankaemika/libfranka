@@ -40,13 +40,13 @@ TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {
 }
 
 TEST(Gripper, CanReadGripperStateOnce) {
-  research_interface::gripper::GripperState sent_gripper_state;
-  randomGripperState(sent_gripper_state);
-
   MockServer<research_interface::gripper::Connect> server;
   Gripper gripper("127.0.0.1");
 
-  server.onSendUDP<research_interface::gripper::GripperState>([&]() { return sent_gripper_state; })
+  research_interface::gripper::GripperState sent_gripper_state;
+  server
+      .sendRandomState<research_interface::gripper::GripperState>(
+          [](auto& s) { randomGripperState(s); }, &sent_gripper_state)
       .spinOnce();
 
   const GripperState& received_gripper_state = gripper.readOnce();

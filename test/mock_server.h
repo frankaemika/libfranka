@@ -36,7 +36,7 @@ class MockServer {
   MockServer& queueResponse(std::function<TResponse()> create_response);
 
   template <typename T>
-  MockServer& onSendUDP(std::function<T()> on_send_udp);
+  MockServer& sendRandomState(std::function<void(T&)> random_generator, T* sent_state);
 
   template <typename T>
   MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
@@ -71,8 +71,17 @@ class MockServer {
 
   MockServer& spinOnce();
 
+  template <typename T>
+  T randomState();
+
+  uint32_t sequence_number() const { return sequence_number_; }
+
  private:
   void serverThread();
+  void sendInitialState(Socket& udp_socket);
+
+  template <typename T>
+  MockServer& onSendUDP(std::function<T()> on_send_udp);
 
   std::condition_variable cv_;
   std::mutex mutex_;
@@ -81,6 +90,7 @@ class MockServer {
   bool shutdown_;
   bool continue_;
   bool initialized_;
+  uint32_t sequence_number_ = 0;
   static uint16_t port;
 
   const ConnectCallbackT on_connect_;
@@ -119,7 +129,18 @@ MockServer<C>& MockServer<C>::queueResponse(std::function<TResponse()> create_re
 template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::sendEmptyState() {
-  return onSendUDP<T>(std::function<void(T&)>());
+  return onSendUDP<T>([=](T& state) { state.message_id = ++sequence_number_; });
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendRandomState(std::function<void(T&)> random_generator,
+                                              T* sent_state) {
+  return onSendUDP<T>([=](T& state) {
+    random_generator(state);
+    state.message_id = ++sequence_number_;
+    *sent_state = state;
+  });
 }
 
 template <typename C>
@@ -139,6 +160,7 @@ template <typename T>
 MockServer<C>& MockServer<C>::onSendUDP(std::function<void(T&)> on_send_udp) {
   return onSendUDP<T>([=]() {
     T state{};
+    state.message_id = ++sequence_number_;
     if (on_send_udp) {
       on_send_udp(state);
     }

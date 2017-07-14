@@ -19,22 +19,38 @@ class Robot : public ::franka::Robot {
 };
 
 TEST(RobotImpl, CanReceiveRobotState) {
-  RobotState sent_robot_state;
-  randomRobotState(sent_robot_state);
-
   MockServer<research_interface::robot::Connect> server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
-  server.onSendUDP<RobotState>([&]() { return sent_robot_state; }).spinOnce();
+  RobotState sent_robot_state;
+  server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &sent_robot_state)
+      .spinOnce();
 
   auto received_robot_state = robot.update();
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
 }
 
-TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
-  RobotState sent_robot_state;
-  randomRobotState(sent_robot_state);
+TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
+  MockServer<research_interface::robot::Connect> server;
+  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 2; })
+      .spinOnce();
+
+  auto received_robot_state = robot.update();
+  EXPECT_EQ(2u, received_robot_state.sequence_number);
+
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
+      .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
+      .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 2; })
+      .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 3; })
+      .spinOnce();
+
+  received_robot_state = robot.update();
+  EXPECT_EQ(4u, received_robot_state.sequence_number);
+}
+
+TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
   MockServer<research_interface::robot::Connect> server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort, 200ms));
 
@@ -49,9 +65,11 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
     robot.reset(
         new Robot::Impl(std::make_unique<franka::Network>("127.0.0.1", kCommandPort, 200ms)));
 
-    server.sendEmptyState<RobotState>().spinOnce();
+    RobotState robot_state;
+    server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &robot_state)
+        .spinOnce();
 
-    testRobotStateIsZero(robot->update());
+    testRobotStatesAreEqual(franka::convertRobotState(robot_state), robot->update());
   }
 
   EXPECT_THROW(robot->update(), NetworkException);
