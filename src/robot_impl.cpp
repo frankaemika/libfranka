@@ -19,6 +19,8 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 
   connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
                                                                                    &ri_version_);
+
+  updateState(network_->udpRead<research_interface::robot::RobotState>());
 }
 
 RobotState Robot::Impl::update(
@@ -68,7 +70,6 @@ RobotState Robot::Impl::update(
 
 RobotState Robot::Impl::readOnce() {
   // Delete old robot states in the UDP buffer.
-  // TODO (fwalch): Use robot state with largest message_id, not newest.
   if (network_->udpAvailableData() >
       static_cast<int>(sizeof(research_interface::robot::RobotState))) {
     network_->udpRead<research_interface::robot::RobotState>();
@@ -78,7 +79,7 @@ RobotState Robot::Impl::readOnce() {
 
 void Robot::Impl::sendRobotCommand(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
-    const research_interface::robot::ControllerCommand* control_command) {
+    const research_interface::robot::ControllerCommand* control_command) const {
   if (motion_command != nullptr || control_command != nullptr) {
     research_interface::robot::RobotCommand robot_command{};
     robot_command.message_id = message_id_;
@@ -108,12 +109,39 @@ void Robot::Impl::sendRobotCommand(
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
-  research_interface::robot::RobotState robot_state =
-      network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState latest_accepted_robot_state;
+  latest_accepted_robot_state.message_id = message_id_;
+
+  // If robot states are already available on the socket, use the one with the most recent
+  // message ID.
+  while (network_->udpAvailableData() >=
+         static_cast<int>(sizeof(research_interface::robot::RobotState))) {
+    research_interface::robot::RobotState robot_state =
+        network_->udpRead<research_interface::robot::RobotState>();
+    uint32_t new_id = robot_state.message_id;
+    uint32_t old_id = latest_accepted_robot_state.message_id;
+    constexpr uint32_t kMaxDiff = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() * 0.1);
+
+    // Check if the received command is a new command/packet and handle overflow of the message_id.
+    if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
+      latest_accepted_robot_state = robot_state;
+    }
+  }
+
+  // No newer robot state was available, we need to wait.
+  if (latest_accepted_robot_state.message_id == message_id_) {
+    latest_accepted_robot_state = network_->udpRead<research_interface::robot::RobotState>();
+  }
+
+  updateState(latest_accepted_robot_state);
+
+  return latest_accepted_robot_state;
+}
+
+void Robot::Impl::updateState(const research_interface::robot::RobotState& robot_state) {
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
-  return robot_state;
 }
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
@@ -252,7 +280,7 @@ void Robot::Impl::stopController() {
   }
 }
 
-Model Robot::Impl::loadModel() {
+Model Robot::Impl::loadModel() const {
   return Model(*network_);
 }
 
