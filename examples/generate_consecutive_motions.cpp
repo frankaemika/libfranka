@@ -12,6 +12,15 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
+    // Set additional parameters always before the control loop, NEVER in the
+    // control loop
+    // Set collision behavior:
+    robot.setCollisionBehavior(
+        {{10.0, 10.0, 9.0, 9.0, 8.0, 7.0, 6.0}}, {{10.0, 10.0, 9.0, 9.0, 8.0, 7.0, 6.0}},
+        {{10.0, 10.0, 9.0, 9.0, 8.0, 7.0, 6.0}}, {{10.0, 10.0, 9.0, 9.0, 8.0, 7.0, 6.0}},
+        {{10.0, 10.0, 10.0, 12.5, 12.5, 12.5}}, {{10.0, 10.0, 10.0, 12.5, 12.5, 12.5}},
+        {{10.0, 10.0, 10.0, 12.5, 12.5, 12.5}}, {{10.0, 10.0, 10.0, 12.5, 12.5, 12.5}});
+
     for (int i = 0; i < 5; i++) {
       std::cout << "Executing motion." << std::endl;
       try {
