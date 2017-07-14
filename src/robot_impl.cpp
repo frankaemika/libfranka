@@ -49,7 +49,7 @@ RobotState Robot::Impl::update(
             network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
-        if (robot_state.robot_mode == RobotMode::kReflex) {
+        if (robot_state.last_motion_errors) {
           throw ControlException(e.what() + " "s +
                                  static_cast<std::string>(robot_state.last_motion_errors));
         }
@@ -57,7 +57,7 @@ RobotState Robot::Impl::update(
       }
     }
 
-    if (robot_state.robot_mode == RobotMode::kReflex) {
+    if (robot_state.last_motion_errors) {
       throw ControlException("libfranka robot: control aborted with error: " +
                              static_cast<std::string>(robot_state.last_motion_errors));
     } else {
