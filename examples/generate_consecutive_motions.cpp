@@ -24,19 +24,20 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 5; i++) {
       std::cout << "Executing motion." << std::endl;
       try {
-        auto initial_pose = robot.readOnce().q_d;
+        double time_max = 4.0;
+        double omega_max = 0.2;
         double time = 0.0;
-        robot.control([=, &time](const franka::RobotState&) -> franka::JointPositions {
-          double delta_angle = M_PI / 32 * (1 - std::cos(M_PI / 1.0 * time));
+        robot.control([=, &time](const franka::RobotState&) -> franka::JointVelocities {
+          double cycle = std::floor(std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
+          double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
 
           time += 0.001;
-          if (time > 2.0) {
+          if (time > 2 * time_max) {
             std::cout << std::endl << "Finished motion." << std::endl;
             return franka::Stop;
           }
 
-          return {{initial_pose[0], initial_pose[1], initial_pose[2], initial_pose[3],
-                   initial_pose[4], initial_pose[5], initial_pose[6] + delta_angle}};
+          return {{0.0, 0.0, omega, 0.0, 0.0, 0.0, 0.0}};
         });
       } catch (const franka::ControlException& e) {
         std::cout << e.what() << std::endl;
@@ -48,6 +49,8 @@ int main(int argc, char** argv) {
     std::cout << e.what() << std::endl;
     return -1;
   }
+
+  std::cout << "Finished." << std::endl;
 
   return 0;
 }
