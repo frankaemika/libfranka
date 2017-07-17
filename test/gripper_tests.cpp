@@ -26,14 +26,14 @@ TEST(Gripper, CannotConnectIfNoServerRunning) {
 }
 
 TEST(Gripper, CanPerformHandshake) {
-  MockServer<Connect> server;
+  GripperMockServer server;
 
   Gripper gripper("127.0.0.1");
   EXPECT_EQ(1, gripper.serverVersion());
 }
 
 TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {
-  MockServer<Connect> server([](const Connect::Request&) {
+  GripperMockServer server([](const Connect::Request&) {
     return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
   });
 
@@ -41,7 +41,7 @@ TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {
 }
 
 TEST(Gripper, CanReadGripperStateOnce) {
-  MockServer<Connect> server;
+  GripperMockServer server;
   Gripper gripper("127.0.0.1");
 
   GripperState sent_gripper_state;
@@ -54,7 +54,7 @@ TEST(Gripper, CanReadGripperStateOnce) {
 }
 
 TEST(Gripper, CanReceiveReorderedGripperStatesCorrectly) {
-  MockServer<Connect> server;
+  GripperMockServer server;
   Gripper gripper("127.0.0.1");
 
   server.onSendUDP<GripperState>([](GripperState& gripper_state) { gripper_state.message_id = 2; })
@@ -74,8 +74,8 @@ TEST(Gripper, CanReceiveReorderedGripperStatesCorrectly) {
 }
 
 TEST(Gripper, CanReceiveOverflowingGripperStatesCorrectly) {
-  MockServer<Connect> server(MockServer<Connect>::ConnectCallbackT(),
-                             std::numeric_limits<uint32_t>::max() - 2);
+  GripperMockServer server(GripperMockServer::ConnectCallbackT(),
+                           std::numeric_limits<uint32_t>::max() - 2);
   Gripper gripper("127.0.0.1");
 
   server

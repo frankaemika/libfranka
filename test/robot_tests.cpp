@@ -26,14 +26,14 @@ TEST(Robot, CannotConnectIfNoServerRunning) {
 }
 
 TEST(Robot, CanPerformHandshake) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
 
   Robot robot("127.0.0.1");
   EXPECT_EQ(1, robot.serverVersion());
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
-  MockServer<research_interface::robot::Connect> server([](const Connect::Request&) {
+  RobotMockServer server([](const Connect::Request&) {
     return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
   });
 
@@ -41,7 +41,7 @@ TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
 }
 
 TEST(Robot, CanReadRobotStateOnce) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot robot("127.0.0.1");
 
   research_interface::robot::RobotState sent_robot_state;
@@ -59,7 +59,7 @@ TEST(Robot, CanReadRobotState) {
     MOCK_METHOD1(invoke, bool(const RobotState&));
   };
 
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot robot("127.0.0.1");
 
   server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();

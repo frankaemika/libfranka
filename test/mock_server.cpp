@@ -7,13 +7,6 @@
 #include <Poco/Net/StreamSocket.h>
 #include <gtest/gtest.h>
 
-template <>
-uint16_t MockServer<research_interface::gripper::Connect>::port =
-    research_interface::gripper::kCommandPort;
-template <>
-uint16_t MockServer<research_interface::robot::Connect>::port =
-    research_interface::robot::kCommandPort;
-
 template <typename C>
 MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
     : block_{false},
@@ -81,7 +74,7 @@ void MockServer<C>::serverThread() {
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
 
-  srv = Poco::Net::ServerSocket({kHostname, port});  // does bind + listen
+  srv = Poco::Net::ServerSocket({kHostname, C::kCommandPort});  // does bind + listen
   initialized_ = true;
 
   cv_.notify_one();
@@ -103,10 +96,12 @@ void MockServer<C>::serverThread() {
   };
 
   uint16_t udp_port;
-  handleCommand<C>(tcp_socket_wrapper, [&, this](const typename C::Request& request) {
-    udp_port = request.udp_port;
-    return on_connect_ ? on_connect_(request) : typename C::Response(C::Status::kSuccess);
-  });
+  handleCommand<typename C::Connect>(
+      tcp_socket_wrapper, [&, this](const typename C::Connect::Request& request) {
+        udp_port = request.udp_port;
+        return on_connect_ ? on_connect_(request)
+                           : typename C::Connect::Response(C::Connect::Status::kSuccess);
+      });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});
   udp_socket.setBlocking(true);
@@ -120,7 +115,9 @@ void MockServer<C>::serverThread() {
     ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on UDP socket";
   };
 
-  sendInitialState(udp_socket_wrapper);
+  typename C::State state{};
+  state.message_id = ++sequence_number_;
+  udp_socket_wrapper.sendBytes(&state, sizeof(state));
 
   while (!shutdown_) {
     cv_.wait(lock, [this] { return continue_ || shutdown_; });
@@ -149,26 +146,7 @@ void MockServer<C>::serverThread() {
 template <typename C>
 MockServer<C>& MockServer<C>::generic(
     std::function<void(MockServer<C>::Socket&, MockServer<C>::Socket&)> generic_command) {
-  using namespace std::string_literals;
-
   std::lock_guard<std::mutex> _(mutex_);
   commands_.emplace("generic", generic_command);
   return *this;
-}
-
-template <typename C>
-void MockServer<C>::sendInitialState(Socket&) {}
-
-template <>
-void MockServer<research_interface::robot::Connect>::sendInitialState(Socket& udp_socket) {
-  research_interface::robot::RobotState state{};
-  state.message_id = ++sequence_number_;
-  udp_socket.sendBytes(&state, sizeof(state));
-}
-
-template <>
-void MockServer<research_interface::gripper::Connect>::sendInitialState(Socket& udp_socket) {
-  research_interface::gripper::GripperState state{};
-  state.message_id = ++sequence_number_;
-  udp_socket.sendBytes(&state, sizeof(state));
 }
