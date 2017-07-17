@@ -41,8 +41,8 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
   auto received_robot_state = robot.update();
   EXPECT_EQ(2u, received_robot_state.sequence_number);
 
-  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
-      .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
+      .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 2; })
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 3; })
       .spinOnce();
