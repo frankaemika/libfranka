@@ -165,4 +165,30 @@ void connect(Network& network, uint16_t* ri_version) {
   }
 }
 
+template <typename T>
+T receiveState(Network& network, uint32_t last_message_id) {
+  T latest_accepted_state;
+  latest_accepted_state.message_id = last_message_id;
+
+  // If states are already available on the socket, use the one with the most recent message ID.
+  while (network.udpAvailableData() >= static_cast<int>(sizeof(T))) {
+    T received_state = network.udpRead<T>();
+    uint32_t new_id = received_state.message_id;
+    uint32_t old_id = latest_accepted_state.message_id;
+    constexpr uint32_t kMaxDiff = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() * 0.1);
+
+    // Check if the received state is new and handle an overflow of the message ID.
+    if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
+      latest_accepted_state = received_state;
+    }
+  }
+
+  // No newer state was available, we need to wait.
+  if (latest_accepted_state.message_id == last_message_id) {
+    latest_accepted_state = network.udpRead<T>();
+  }
+
+  return latest_accepted_state;
+}
+
 }  // namespace franka

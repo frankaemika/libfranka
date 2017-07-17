@@ -48,6 +48,8 @@ Gripper::Gripper(const std::string& franka_address)
 
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
       *network_, &ri_version_);
+
+  message_id_ = network_->udpRead<research_interface::gripper::GripperState>().message_id;
 }
 
 Gripper::~Gripper() noexcept = default;
@@ -100,7 +102,11 @@ GripperState Gripper::readOnce() {
       static_cast<int>(sizeof(research_interface::gripper::GripperState))) {
     network_->udpRead<research_interface::gripper::GripperState>();
   }
-  return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
+
+  auto gripper_state =
+      receiveState<research_interface::gripper::GripperState>(*network_, message_id_);
+  message_id_ = gripper_state.message_id;
+  return convertGripperState(gripper_state);
 }
 
 }  // namespace franka

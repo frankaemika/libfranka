@@ -45,10 +45,8 @@ TEST(Gripper, CanReadGripperStateOnce) {
   Gripper gripper("127.0.0.1");
 
   GripperState sent_gripper_state;
-  server
-      .sendEmptyState<GripperState>()
-      .sendRandomState<GripperState>(
-          [](auto& s) { randomGripperState(s); }, &sent_gripper_state)
+  server.sendEmptyState<GripperState>()
+      .sendRandomState<GripperState>([](auto& s) { randomGripperState(s); }, &sent_gripper_state)
       .spinOnce();
 
   const franka::GripperState& received_gripper_state = gripper.readOnce();
@@ -76,20 +74,30 @@ TEST(Gripper, CanReceiveReorderedGripperStatesCorrectly) {
 }
 
 TEST(Gripper, CanReceiveOverflowingGripperStatesCorrectly) {
-  MockServer<Connect> server(MockServer<Connect>::ConnectCallbackT(), std::numeric_limits<uint32_t>::max() - 2);
+  MockServer<Connect> server(MockServer<Connect>::ConnectCallbackT(),
+                             std::numeric_limits<uint32_t>::max() - 2);
   Gripper gripper("127.0.0.1");
 
-  server.onSendUDP<GripperState>([](GripperState& gripper_state) { gripper_state.message_id = std::numeric_limits<uint32_t>::max(); })
+  server
+      .onSendUDP<GripperState>([](GripperState& gripper_state) {
+        gripper_state.message_id = std::numeric_limits<uint32_t>::max();
+      })
       .spinOnce();
   auto received_gripper_state = gripper.readOnce();
   EXPECT_EQ(std::numeric_limits<uint32_t>::max(), received_gripper_state.sequence_number);
 
-  server.onSendUDP<GripperState>([](GripperState& gripper_state) { gripper_state.message_id = std::numeric_limits<uint32_t>::max() + 1; })
+  server
+      .onSendUDP<GripperState>([](GripperState& gripper_state) {
+        gripper_state.message_id = std::numeric_limits<uint32_t>::max() + 1;
+      })
       .spinOnce();
   received_gripper_state = gripper.readOnce();
   EXPECT_EQ(0u, received_gripper_state.sequence_number);
 
-  server.onSendUDP<GripperState>([](GripperState& gripper_state) { gripper_state.message_id = std::numeric_limits<uint32_t>::max() + 2; })
+  server
+      .onSendUDP<GripperState>([](GripperState& gripper_state) {
+        gripper_state.message_id = std::numeric_limits<uint32_t>::max() + 2;
+      })
       .spinOnce();
   received_gripper_state = gripper.readOnce();
   EXPECT_EQ(1u, received_gripper_state.sequence_number);

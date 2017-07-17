@@ -108,33 +108,9 @@ void Robot::Impl::sendRobotCommand(
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
-  research_interface::robot::RobotState latest_accepted_robot_state;
-  latest_accepted_robot_state.message_id = message_id_;
-
-  // If robot states are already available on the socket, use the one with the most recent
-  // message ID.
-  while (network_->udpAvailableData() >=
-         static_cast<int>(sizeof(research_interface::robot::RobotState))) {
-    research_interface::robot::RobotState robot_state =
-        network_->udpRead<research_interface::robot::RobotState>();
-    uint32_t new_id = robot_state.message_id;
-    uint32_t old_id = latest_accepted_robot_state.message_id;
-    constexpr uint32_t kMaxDiff = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() * 0.1);
-
-    // Check if the received command is a new command/packet and handle overflow of the message_id.
-    if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
-      latest_accepted_robot_state = robot_state;
-    }
-  }
-
-  // No newer robot state was available, we need to wait.
-  if (latest_accepted_robot_state.message_id == message_id_) {
-    latest_accepted_robot_state = network_->udpRead<research_interface::robot::RobotState>();
-  }
-
-  updateState(latest_accepted_robot_state);
-
-  return latest_accepted_robot_state;
+  auto robot_state = receiveState<research_interface::robot::RobotState>(*network_, message_id_);
+  updateState(robot_state);
+  return robot_state;
 }
 
 void Robot::Impl::updateState(const research_interface::robot::RobotState& robot_state) {

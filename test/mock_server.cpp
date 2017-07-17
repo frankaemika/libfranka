@@ -165,3 +165,10 @@ void MockServer<research_interface::robot::Connect>::sendInitialState(Socket& ud
   state.message_id = ++sequence_number_;
   udp_socket.sendBytes(&state, sizeof(state));
 }
+
+template <>
+void MockServer<research_interface::gripper::Connect>::sendInitialState(Socket& udp_socket) {
+  research_interface::gripper::GripperState state{};
+  state.message_id = ++sequence_number_;
+  udp_socket.sendBytes(&state, sizeof(state));
+}

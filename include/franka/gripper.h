@@ -109,6 +109,7 @@ class Gripper {
   std::unique_ptr<Network> network_;
 
   uint16_t ri_version_;
+  uint32_t message_id_;
 };
 
 }  // namespace franka
