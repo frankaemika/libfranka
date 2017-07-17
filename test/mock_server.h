@@ -23,7 +23,7 @@ class MockServer {
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
 
-  MockServer(ConnectCallbackT on_connect = ConnectCallbackT());
+  MockServer(ConnectCallbackT on_connect = ConnectCallbackT(), uint32_t sequence_number = 0);
   ~MockServer();
 
   template <typename T>
@@ -90,7 +90,7 @@ class MockServer {
   bool shutdown_;
   bool continue_;
   bool initialized_;
-  uint32_t sequence_number_ = 0;
+  uint32_t sequence_number_;
   static uint16_t port;
 
   const ConnectCallbackT on_connect_;

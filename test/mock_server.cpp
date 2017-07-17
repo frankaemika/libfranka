@@ -15,12 +15,13 @@ uint16_t MockServer<research_interface::robot::Connect>::port =
     research_interface::robot::kCommandPort;
 
 template <typename C>
-MockServer<C>::MockServer(ConnectCallbackT on_connect)
+MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
     : block_{false},
       shutdown_{false},
       continue_{false},
       initialized_{false},
-      on_connect_(on_connect) {
+      sequence_number_{sequence_number},
+      on_connect_{on_connect} {
   std::unique_lock<std::mutex> lock(mutex_);
   server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 

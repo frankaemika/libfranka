@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cstring>
+#include <limits>
 
 #include <robot_impl.h>
 
@@ -48,6 +49,26 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
 
   received_robot_state = robot.update();
   EXPECT_EQ(4u, received_robot_state.sequence_number);
+}
+
+TEST(RobotImpl, CanReceiveOverflowingRobotStatesCorrectly) {
+  MockServer<research_interface::robot::Connect> server(MockServer<research_interface::robot::Connect>::ConnectCallbackT(), std::numeric_limits<uint32_t>::max() - 2);
+  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
+
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = std::numeric_limits<uint32_t>::max(); })
+      .spinOnce();
+  auto received_robot_state = robot.update();
+  EXPECT_EQ(std::numeric_limits<uint32_t>::max(), received_robot_state.sequence_number);
+
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = std::numeric_limits<uint32_t>::max() + 1; })
+      .spinOnce();
+  received_robot_state = robot.update();
+  EXPECT_EQ(0u, received_robot_state.sequence_number);
+
+  server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = std::numeric_limits<uint32_t>::max() + 2; })
+      .spinOnce();
+  received_robot_state = robot.update();
+  EXPECT_EQ(1u, received_robot_state.sequence_number);
 }
 
 TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
