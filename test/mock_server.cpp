@@ -150,3 +150,13 @@ MockServer<C>& MockServer<C>::generic(
   commands_.emplace("generic", generic_command);
   return *this;
 }
+
+template <typename C>
+void MockServer<C>::sendInitialState(Socket&) {}
+
+template <>
+void MockServer<RobotTypes>::sendInitialState(Socket& udp_socket) {
+  research_interface::robot::RobotState state{};
+  state.message_id = ++sequence_number_;
+  udp_socket.sendBytes(&state, sizeof(state));
+}

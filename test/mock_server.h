@@ -75,6 +75,7 @@ class MockServer {
 
  private:
   void serverThread();
+  void sendInitialState(Socket& udp_socket);
 
   template <typename T>
   MockServer& onSendUDP(std::function<T()> on_send_udp);

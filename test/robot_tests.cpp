@@ -40,20 +40,6 @@ TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
   EXPECT_THROW(Robot robot("127.0.0.1"), IncompatibleVersionException);
 }
 
-TEST(Robot, CanReadRobotStateOnce) {
-  RobotMockServer server;
-  Robot robot("127.0.0.1");
-
-  research_interface::robot::RobotState sent_robot_state;
-  server.sendEmptyState<research_interface::robot::RobotState>()
-      .sendRandomState<research_interface::robot::RobotState>([](auto s) { randomRobotState(s); },
-                                                              &sent_robot_state)
-      .spinOnce();
-
-  const RobotState& received_robot_state = robot.readOnce();
-  testRobotStatesAreEqual(sent_robot_state, received_robot_state);
-}
-
 TEST(Robot, CanReadRobotState) {
   struct MockCallback {
     MOCK_METHOD1(invoke, bool(const RobotState&));
