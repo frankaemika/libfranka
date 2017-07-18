@@ -115,9 +115,7 @@ void MockServer<C>::serverThread() {
     ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on UDP socket";
   };
 
-  typename C::State state{};
-  state.message_id = ++sequence_number_;
-  udp_socket_wrapper.sendBytes(&state, sizeof(state));
+  sendInitialState(udp_socket_wrapper);
 
   while (!shutdown_) {
     cv_.wait(lock, [this] { return continue_ || shutdown_; });
