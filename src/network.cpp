@@ -52,6 +52,7 @@ uint16_t Network::udpPort() const noexcept {
 }
 
 void Network::tcpThrowIfConnectionClosed() try {
+  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     std::array<uint8_t, 1> buffer;
     int rv = tcp_socket_.receiveBytes(buffer.data(), static_cast<int>(buffer.size()), MSG_PEEK);
@@ -65,6 +66,7 @@ void Network::tcpThrowIfConnectionClosed() try {
 }
 
 void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
+  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
   size_t bytes_read = 0;
   try {
     while (bytes_read < read_size) {
@@ -87,6 +89,7 @@ void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
 }
 
 int Network::udpAvailableData() {
+  std::lock_guard<std::recursive_mutex> _(udp_mutex_);
   return udp_socket_.available();
 }
 

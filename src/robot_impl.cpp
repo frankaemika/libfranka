@@ -203,22 +203,18 @@ void Robot::Impl::startMotion(
   RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
-    research_interface::robot::Function function;
-    if (network_->tcpReadResponse<research_interface::robot::Function>(&function)) {
-      if (function != research_interface::robot::Function::kMove) {
-        throw ProtocolException("libfranka robot: unexpected response!");
+    try {
+      if (network_->tcpReceiveResponse<research_interface::robot::Move>(
+              std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
+                        std::placeholders::_1))) {
+        break;
       }
-      try {
-        network_->tcpHandleResponse<research_interface::robot::Move>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
-                      std::placeholders::_1));
-      } catch (const CommandException& e) {
-        if (robot_state.robot_mode == RobotMode::kReflex) {
-          throw ControlException(e.what() + " "s +
-                                 static_cast<std::string>(robot_state.last_motion_errors));
-        }
-        throw ControlException(e.what());
+    } catch (const CommandException& e) {
+      if (robot_state.robot_mode == RobotMode::kReflex) {
+        throw ControlException(e.what() + " "s +
+                               static_cast<std::string>(robot_state.last_motion_errors));
       }
+      throw ControlException(e.what());
     }
 
     robot_state = update();
