@@ -171,7 +171,9 @@ T receiveState(Network& network, uint32_t last_message_id) {
   latest_accepted_state.message_id = last_message_id;
 
   // If states are already available on the socket, use the one with the most recent message ID.
-  while (network.udpAvailableData() >= static_cast<int>(sizeof(T))) {
+  // If there was no valid state on the socket, we need to wait.
+  while (network.udpAvailableData() >= static_cast<int>(sizeof(T)) ||
+         latest_accepted_state.message_id == last_message_id) {
     T received_state = network.udpRead<T>();
     uint32_t new_id = received_state.message_id;
     uint32_t old_id = latest_accepted_state.message_id;
@@ -181,11 +183,6 @@ T receiveState(Network& network, uint32_t last_message_id) {
     if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
       latest_accepted_state = received_state;
     }
-  }
-
-  // No newer state was available, we need to wait.
-  if (latest_accepted_state.message_id == last_message_id) {
-    latest_accepted_state = network.udpRead<T>();
   }
 
   return latest_accepted_state;
