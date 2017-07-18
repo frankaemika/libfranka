@@ -49,7 +49,7 @@ RobotState Robot::Impl::update(
             network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
-        if (robot_state.last_motion_errors) {
+        if (robot_state.robot_mode == RobotMode::kReflex) {
           throw ControlException(e.what() + " "s +
                                  static_cast<std::string>(robot_state.last_motion_errors));
         }
@@ -199,7 +199,7 @@ void Robot::Impl::startMotion(
             std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                       std::placeholders::_1));
       } catch (const CommandException& e) {
-        if (robot_state.last_motion_errors) {
+        if (robot_state.robot_mode == RobotMode::kReflex) {
           throw ControlException(e.what() + " "s +
                                  static_cast<std::string>(robot_state.last_motion_errors));
         }
