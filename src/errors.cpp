@@ -8,7 +8,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Errors::Errors(std::array<bool, 25> errors)
+Errors::Errors(std::array<bool, 27> errors)
     : joint_position_limits_violation(errors[0]),
       cartesian_position_limits_violation(errors[1]),
       self_collision_avoidance_violation(errors[2]),
@@ -32,7 +32,10 @@ Errors::Errors(std::array<bool, 25> errors)
       cartesian_motion_generator_acceleration_discontinuity(errors[20]),
       cartesian_motion_generator_elbow_sign_inconsistent(errors[21]),
       cartesian_motion_generator_start_elbow_invalid(errors[22]),
-      force_controller_desired_force_tolerance_violation(errors[23]) {}
+      force_controller_desired_force_tolerance_violation(errors[23]),
+      start_elbow_sign_inconsistent(errors[24]),
+      communication_constraints_violation(errors[25]),
+      power_limit_violation(errors[26]) {}
 
 Errors::operator bool() const noexcept {
   return joint_position_limits_violation || cartesian_position_limits_violation ||
@@ -52,7 +55,10 @@ Errors::operator bool() const noexcept {
          cartesian_motion_generator_acceleration_discontinuity ||
          cartesian_motion_generator_elbow_sign_inconsistent ||
          cartesian_motion_generator_start_elbow_invalid ||
-         force_controller_desired_force_tolerance_violation;
+         force_controller_desired_force_tolerance_violation ||
+          start_elbow_sign_inconsistent ||
+          communication_constraints_violation ||
+          power_limit_violation;
 }
 
 Errors::operator std::string() const {
@@ -111,6 +117,15 @@ Errors::operator std::string() const {
   error_string += force_controller_desired_force_tolerance_violation
                       ? "force_controller_desired_force_tolerance_violation, "
                       : "";
+  error_string += start_elbow_sign_inconsistent
+                  ? "start_elbow_sign_inconsistent, "
+                  : "";
+  error_string += communication_constraints_violation
+                  ? "communication_constraints_violation, "
+                  : "";
+  error_string += power_limit_violation
+                  ? "power_limit_violation, "
+                  : "";
 
   if (error_string.size() > 1) {
     error_string.erase(error_string.end() - 2, error_string.end());

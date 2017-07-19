@@ -19,7 +19,7 @@ struct Errors {
    * Sets the error according to values from the array
    * @param errors array of error flags
    */
-  Errors(std::array<bool, 25> errors);
+  Errors(std::array<bool, 27> errors);
 
   /**
    * Check if any error flag is set to true
@@ -137,6 +137,18 @@ struct Errors {
    * True if desired force exceeds the safety thresholds.
    */
   bool force_controller_desired_force_tolerance_violation{};
+  /**
+   * True if the start elbow sign was inconsistent. Applies only to motions started from DESK.
+   */
+  bool start_elbow_sign_inconsistent{};
+  /**
+   * True if minimum network communication quality could not be held during a motion.
+   */
+  bool communication_constraints_violation{};
+  /**
+   * True if commanded values would result in exceeding the power limit.
+   */
+  bool power_limit_violation{};
 };
 
 /**

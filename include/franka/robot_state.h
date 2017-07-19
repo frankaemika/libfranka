@@ -17,7 +17,8 @@ namespace franka {
  */
 enum class RobotMode : uint8_t {
   kUserStopped,
-  kReady,
+  kIdle,
+  kMove,
   kGuiding,
   kReflex,
   kAutomaticErrorRecovery,

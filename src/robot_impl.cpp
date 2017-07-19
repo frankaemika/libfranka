@@ -31,7 +31,7 @@ RobotState Robot::Impl::update(
 
   RobotState robot_state = convertRobotState(receiveRobotState());
   if (was_commanding_robot) {
-    if (robot_state.robot_mode != RobotMode::kReady) {
+    if (robot_state.robot_mode != RobotMode::kMove) {
       if (robot_state.robot_mode == RobotMode::kReflex) {
         throw ControlException("libfranka robot: motion aborted with error: " +
                                static_cast<std::string>(robot_state.last_motion_errors));
@@ -261,8 +261,9 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       converted.robot_mode = RobotMode::kUserStopped;
       break;
     case research_interface::robot::RobotMode::kIdle:
-    case research_interface::robot::RobotMode::kMove:
-      converted.robot_mode = RobotMode::kReady;
+      converted.robot_mode = RobotMode::kIdle;
+    case research_interface::robot::RobotMode::kMoveFci:
+      converted.robot_mode = RobotMode::kMove;
       break;
     case research_interface::robot::RobotMode::kGuiding:
       converted.robot_mode = RobotMode::kGuiding;
@@ -273,6 +274,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
       converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
       break;
+    case research_interface::robot::RobotMode::kMove:
     case research_interface::robot::RobotMode::kEmergency2:
     case research_interface::robot::RobotMode::kForce:
     case research_interface::robot::RobotMode::kMoveForce:
