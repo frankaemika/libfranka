@@ -55,10 +55,8 @@ Errors::operator bool() const noexcept {
          cartesian_motion_generator_acceleration_discontinuity ||
          cartesian_motion_generator_elbow_sign_inconsistent ||
          cartesian_motion_generator_start_elbow_invalid ||
-         force_controller_desired_force_tolerance_violation ||
-          start_elbow_sign_inconsistent ||
-          communication_constraints_violation ||
-          power_limit_violation;
+         force_controller_desired_force_tolerance_violation || start_elbow_sign_inconsistent ||
+         communication_constraints_violation || power_limit_violation;
 }
 
 Errors::operator std::string() const {
@@ -117,15 +115,10 @@ Errors::operator std::string() const {
   error_string += force_controller_desired_force_tolerance_violation
                       ? "force_controller_desired_force_tolerance_violation, "
                       : "";
-  error_string += start_elbow_sign_inconsistent
-                  ? "start_elbow_sign_inconsistent, "
-                  : "";
-  error_string += communication_constraints_violation
-                  ? "communication_constraints_violation, "
-                  : "";
-  error_string += power_limit_violation
-                  ? "power_limit_violation, "
-                  : "";
+  error_string += start_elbow_sign_inconsistent ? "start_elbow_sign_inconsistent, " : "";
+  error_string +=
+      communication_constraints_violation ? "communication_constraints_violation, " : "";
+  error_string += power_limit_violation ? "power_limit_violation, " : "";
 
   if (error_string.size() > 1) {
     error_string.erase(error_string.end() - 2, error_string.end());
