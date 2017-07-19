@@ -57,11 +57,14 @@ int main(int argc, char** argv) {
 
     size_t index = 0;
     robot.control([&](const franka::RobotState& robot_state) -> franka::JointPositions {
+      index += robot_state.ticks;
+
       if (index >= samples.size()) {
         return franka::Stop;
       }
+
       states.push_back(robot_state);
-      return samples[index++];
+      return samples[index];
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;

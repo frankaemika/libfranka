@@ -1,7 +1,5 @@
 #include "robot_impl.h"
 
-#include <franka/model.h>
-
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -31,8 +29,20 @@ RobotState Robot::Impl::update(
   bool was_running_motion_generator = motionGeneratorRunning();
   bool was_running_controller = controllerRunning();
 
-  sendRobotCommand(motion_command, control_command);
-  RobotState robot_state = convertRobotState(receiveRobotState());
+  bool sent_data = sendRobotCommand(motion_command, control_command);
+
+  uint32_t previous_message_id = message_id_;
+  research_interface::robot::RobotState received_robot_state = receiveRobotState();
+
+  unsigned int ticks;
+  if (sent_data) {
+    // TODO (fwalch): Handle overflow.
+    ticks = message_id_ - previous_message_id;
+  } else {
+    // The first robot state given to a control loop should always show zero ticks.
+    ticks = 0;
+  }
+  RobotState robot_state = convertRobotState(received_robot_state, ticks);
 
   if (robot_state.robot_mode != RobotMode::kReady &&
       (was_running_motion_generator || was_running_controller)) {
@@ -72,10 +82,16 @@ RobotState Robot::Impl::readOnce() {
   while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::robot::RobotState>();
   }
-  return convertRobotState(receiveRobotState());
+
+  uint32_t previous_message_id = message_id_;
+  research_interface::robot::RobotState received_robot_state = receiveRobotState();
+
+  // TODO (fwalch): Handle overflow.
+  unsigned int ticks = previous_message_id - message_id_;
+  return convertRobotState(received_robot_state, ticks);
 }
 
-void Robot::Impl::sendRobotCommand(
+bool Robot::Impl::sendRobotCommand(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) const {
   if (motion_command != nullptr || control_command != nullptr) {
@@ -103,7 +119,9 @@ void Robot::Impl::sendRobotCommand(
     }
 
     network_->udpSend<research_interface::robot::RobotCommand>(robot_command);
+    return true;
   }
+  return false;
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
@@ -282,7 +300,10 @@ Model Robot::Impl::loadModel() const {
   return Model(*network_);
 }
 
-RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
+RobotState convertRobotState(const research_interface::robot::RobotState& robot_state,
+                             unsigned int ticks) noexcept {
+  constexpr double kPeriod = 0.001;
+
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
@@ -304,6 +325,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
   converted.sequence_number = robot_state.message_id;
+  converted.ticks = ticks;
+  converted.time_step = kPeriod * ticks;
 
   switch (robot_state.robot_mode) {
     case research_interface::robot::RobotMode::kEmergency:

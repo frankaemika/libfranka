@@ -131,13 +131,15 @@ int main(int argc, char** argv) {
     std::vector<double> trajectory = generateTrajectory(std::stoi(argv[6]));
 
     robot.control(
-        [&](const franka::RobotState&) -> franka::JointVelocities {
+        [&](const franka::RobotState& robot_state) -> franka::JointVelocities {
+          index += robot_state.ticks;
+
           if (index >= trajectory.size()) {
             return franka::Stop;
           }
 
           std::array<double, 7> velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities[joint_number] = trajectory[index++];
+          velocities[joint_number] = trajectory[index];
 
           return {velocities};
         },

@@ -169,6 +169,20 @@ struct RobotState {
    * Strictly increasing sequence number for each received robot state.
    */
   uint32_t sequence_number{};
+
+  /**
+   * Time in [s] since the last received robot state, or zero if starting a control loop.
+   *
+   * @see ticks for the same value as a counter.
+   */
+  double time_step{};
+
+  /**
+   * Number of ticks since the last received robot state, or zero if starting a control loop.
+   *
+   * @see time_step for the same value in [s].
+   */
+  unsigned int ticks{};
 };
 
 /**

@@ -37,7 +37,7 @@ MockServer<C>::~MockServer() {
     ss << "Mock server did not process all commands. Unprocessed commands:" << std::endl;
     while (!commands_.empty()) {
       ss << commands_.front().first << std::endl;
-      commands_.pop();
+      commands_.pop_front();
     }
     ADD_FAILURE() << ss.str();
   }
@@ -47,10 +47,12 @@ template <typename C>
 MockServer<C>& MockServer<C>::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
+  commands_.emplace_back("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
     research_interface::robot::RobotCommand robot_command;
     udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
-    on_receive_robot_command(robot_command);
+    if (on_receive_robot_command) {
+      on_receive_robot_command(robot_command);
+    }
   });
   return *this;
 }
@@ -120,8 +122,11 @@ void MockServer<C>::serverThread() {
   while (!shutdown_) {
     cv_.wait(lock, [this] { return continue_ || shutdown_; });
     while (!commands_.empty()) {
-      commands_.front().second(tcp_socket_wrapper, udp_socket_wrapper);
-      commands_.pop();
+      auto callback = commands_.front().second;
+      commands_.pop_front();
+      lock.unlock();
+      callback(tcp_socket_wrapper, udp_socket_wrapper);
+      lock.lock();
     }
 
     continue_ = false;
@@ -145,7 +150,7 @@ template <typename C>
 MockServer<C>& MockServer<C>::generic(
     std::function<void(MockServer<C>::Socket&, MockServer<C>::Socket&)> generic_command) {
   std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("generic", generic_command);
+  commands_.emplace_back("generic", generic_command);
   return *this;
 }
 
