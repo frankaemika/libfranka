@@ -202,7 +202,7 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
       doForever(callback, commands_.begin() + new_commands);
       lock.unlock();
     }
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::yield();
   };
   commands_.emplace(it, "doForever", callback_wrapper);
   return *this;
