@@ -56,7 +56,7 @@ TEST(Robot, CanControlRobot) {
   using namespace research_interface;
 
   RobotMockServer server;
-  Robot robot("127.0.0.1");
+  Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
