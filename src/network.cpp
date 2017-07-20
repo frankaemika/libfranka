@@ -12,15 +12,25 @@ namespace franka {
 
 Network::Network(const std::string& franka_address,
                  uint16_t franka_port,
-                 std::chrono::milliseconds timeout) {
+                 std::chrono::milliseconds tcp_timeout,
+                 std::chrono::milliseconds udp_timeout) {
   try {
-    Poco::Timespan poco_timeout(1000l * timeout.count());
+    Poco::Timespan poco_timeout(1000l * tcp_timeout.count());
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
     tcp_socket_.setBlocking(true);
     tcp_socket_.setSendTimeout(poco_timeout);
     tcp_socket_.setReceiveTimeout(poco_timeout);
 
-    udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * timeout.count()});
+    // Activate TCP keepalive
+    tcp_socket_.setKeepAlive(true);
+    // After an idle time of 1 sec a keepalive probe is sent
+    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, 1);
+    // After 3 keepalive probes the connection is closed
+    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, 3);
+    // The time between the keepalive probes is set to 1 sec
+    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, 1);
+
+    udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_socket_.bind({"0.0.0.0", 0});
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
