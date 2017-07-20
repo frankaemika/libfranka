@@ -15,7 +15,7 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
       initialized_{false},
       sequence_number_{sequence_number},
       on_connect_{on_connect} {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::unique_lock<std::mutex> lock(command_mutex_);
   server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 
   cv_.wait(lock, [this] { return initialized_; });
@@ -26,7 +26,7 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
 template <typename C>
 MockServer<C>::~MockServer() {
   {
-    std::lock_guard<std::mutex> _(mutex_);
+    std::lock_guard<std::mutex> _(command_mutex_);
     shutdown_ = true;
   }
   cv_.notify_one();
@@ -46,7 +46,7 @@ MockServer<C>::~MockServer() {
 template <typename C>
 MockServer<C>& MockServer<C>::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
-  std::lock_guard<std::mutex> _(mutex_);
+  std::lock_guard<std::mutex> _(command_mutex_);
   commands_.emplace_back("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
     research_interface::robot::RobotCommand robot_command;
     udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
@@ -59,7 +59,7 @@ MockServer<C>& MockServer<C>::onReceiveRobotCommand(
 
 template <typename C>
 MockServer<C>& MockServer<C>::spinOnce() {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::unique_lock<std::mutex> lock(command_mutex_);
   continue_ = true;
   cv_.notify_one();
   if (block_) {
@@ -76,7 +76,7 @@ void MockServer<C>::ignoreUdpBuffer() {
 
 template <typename C>
 void MockServer<C>::serverThread() {
-  std::unique_lock<std::mutex> lock(mutex_);
+  std::unique_lock<std::mutex> lock(command_mutex_);
 
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
@@ -94,10 +94,12 @@ void MockServer<C>::serverThread() {
 
   Socket tcp_socket_wrapper;
   tcp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
+    std::lock_guard<std::mutex> _(tcp_mutex_);
     int rv = tcp_socket.sendBytes(data, size);
     ASSERT_EQ(static_cast<int>(size), rv) << "Send error on TCP socket";
   };
   tcp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
+    std::lock_guard<std::mutex> _(tcp_mutex_);
     int rv = tcp_socket.receiveBytes(data, size);
     ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on TCP socket";
   };
@@ -114,10 +116,12 @@ void MockServer<C>::serverThread() {
   udp_socket.setBlocking(true);
   Socket udp_socket_wrapper;
   udp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
+    std::lock_guard<std::mutex> _(udp_mutex_);
     int rv = udp_socket.sendTo(data, size, {remote_address.host(), udp_port});
     ASSERT_EQ(static_cast<int>(size), rv) << "Send error on UDP socket";
   };
   udp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
+    std::lock_guard<std::mutex> _(udp_mutex_);
     int rv = udp_socket.receiveFrom(data, size, remote_address);
     ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on UDP socket";
   };
@@ -156,7 +160,7 @@ void MockServer<C>::serverThread() {
 template <typename C>
 MockServer<C>& MockServer<C>::generic(
     std::function<void(MockServer<C>::Socket&, MockServer<C>::Socket&)> generic_command) {
-  std::lock_guard<std::mutex> _(mutex_);
+  std::lock_guard<std::mutex> _(command_mutex_);
   commands_.emplace_back("generic", generic_command);
   return *this;
 }
@@ -173,7 +177,7 @@ void MockServer<RobotTypes>::sendInitialState(Socket& udp_socket) {
 
 template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
-  std::lock_guard<std::mutex> _(mutex_);
+  std::lock_guard<std::mutex> _(command_mutex_);
   return doForever(callback, commands_.end());
 }
 
@@ -181,7 +185,7 @@ template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
                                         typename decltype(MockServer<C>::commands_)::iterator it) {
   auto callback_wrapper = [=](Socket&, Socket&) {
-    std::unique_lock<std::mutex> lock(mutex_);
+    std::unique_lock<std::mutex> lock(command_mutex_);
     size_t old_commands = commands_.size();
     lock.unlock();
     if (callback()) {
