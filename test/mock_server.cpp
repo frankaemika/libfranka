@@ -80,8 +80,9 @@ void MockServer<C>::serverThread() {
 
   const std::string kHostname = "localhost";
   Poco::Net::ServerSocket srv;
+  srv.bind({kHostname, C::kCommandPort}, true);
+  srv.listen();
 
-  srv = Poco::Net::ServerSocket({kHostname, C::kCommandPort});  // does bind + listen
   initialized_ = true;
 
   cv_.notify_one();
