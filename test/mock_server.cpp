@@ -70,6 +70,11 @@ MockServer<C>& MockServer<C>::spinOnce() {
 }
 
 template <typename C>
+void MockServer<C>::ignoreUdpBuffer() {
+  ignore_udp_buffer_ = true;
+}
+
+template <typename C>
 void MockServer<C>::serverThread() {
   std::unique_lock<std::mutex> lock(mutex_);
 
@@ -133,8 +138,10 @@ void MockServer<C>::serverThread() {
     cv_.notify_one();
   }
 
-  EXPECT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ))
-      << "UDP socket still has data";
+  if (!ignore_udp_buffer_) {
+    EXPECT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ))
+        << "UDP socket still has data";
+  }
 
   if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
     // Received something on the TCP socket.
@@ -162,4 +169,36 @@ void MockServer<RobotTypes>::sendInitialState(Socket& udp_socket) {
   research_interface::robot::RobotState state{};
   state.message_id = ++sequence_number_;
   udp_socket.sendBytes(&state, sizeof(state));
+}
+
+template <typename C>
+MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
+  std::lock_guard<std::mutex> _(mutex_);
+  return doForever(callback, commands_.end());
+}
+
+template <typename C>
+MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
+                                        typename decltype(MockServer<C>::commands_)::iterator it) {
+  auto callback_wrapper = [=](Socket&, Socket&) {
+    std::unique_lock<std::mutex> lock(mutex_);
+    size_t old_commands = commands_.size();
+    lock.unlock();
+    if (callback()) {
+      lock.lock();
+      size_t new_commands = commands_.size() - old_commands;
+
+      // Reorder the commands added by callback to the front.
+      decltype(commands_) commands(commands_.cbegin() + old_commands, commands_.cend());
+      commands.insert(commands.end(), commands_.cbegin(), commands_.cbegin() + old_commands);
+      commands_ = commands;
+
+      // Insert after the new commands added by callback.
+      doForever(callback, commands_.begin() + new_commands);
+      lock.unlock();
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+  };
+  commands_.emplace(it, "doForever", callback_wrapper);
+  return *this;
 }

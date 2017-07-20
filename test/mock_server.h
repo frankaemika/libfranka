@@ -74,7 +74,9 @@ class MockServer {
   template <typename T>
   T randomState();
 
-  uint32_t sequence_number() const { return sequence_number_; }
+  uint32_t sequenceNumber() const { return sequence_number_; }
+
+  void ignoreUdpBuffer();
 
  private:
   void serverThread();
@@ -91,6 +93,7 @@ class MockServer {
   bool continue_;
   bool initialized_;
   uint32_t sequence_number_;
+  bool ignore_udp_buffer_ = false;
 
   const ConnectCallbackT on_connect_;
   std::deque<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
@@ -145,33 +148,6 @@ MockServer<C>& MockServer<C>::sendRandomState(std::function<void(T&)> random_gen
       *sent_state = state;
     }
   });
-}
-
-template <typename C>
-MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
-  return doForever(callback, commands_.end());
-}
-
-template <typename C>
-MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
-                                        typename decltype(MockServer<C>::commands_)::iterator it) {
-  std::lock_guard<std::mutex> _(mutex_);
-  auto callback_wrapper = [=](Socket&, Socket&) {
-    size_t old_commands = commands_.size();
-    if (callback()) {
-      size_t new_commands = commands_.size() - old_commands;
-
-      // Reorder the commands added by callback to the front.
-      decltype(commands_) commands(commands_.cbegin() + old_commands, commands_.cend());
-      commands.insert(commands.end(), commands_.cbegin(), commands_.cbegin() + old_commands);
-      commands_ = commands;
-
-      // Insert after the new commands added by callback.
-      doForever(callback, commands_.begin() + new_commands);
-    }
-  };
-  commands_.emplace(it, "doForever", callback_wrapper);
-  return *this;
 }
 
 template <typename C>
