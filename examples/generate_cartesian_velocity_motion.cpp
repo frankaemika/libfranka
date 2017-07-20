@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
     double angle = M_PI / 4.0;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState& robot_state) -> franka::CartesianVelocities {
-      time += robot_state.time_step;
+      time += robot_state.timeStep();
 
       if (time > 2 * time_max) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;

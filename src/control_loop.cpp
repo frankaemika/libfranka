@@ -22,6 +22,9 @@ ControlLoop::~ControlLoop() noexcept {
 
 void ControlLoop::operator()() {
   RobotState robot_state = robot_.update();
+  // The first robot state given to a control loop should always show zero ticks.
+  robot_state.ticks = 0;
+
   research_interface::robot::ControllerCommand command{};
   while (spinOnce(robot_state, &command)) {
     robot_state = robot_.update(nullptr, &command);

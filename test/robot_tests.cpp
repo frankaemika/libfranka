@@ -99,10 +99,10 @@ TEST(Robot, CanControlRobot) {
       [&](const RobotState& robot_state) -> JointPositions {
         if (count == 0) {
           EXPECT_EQ(0u, robot_state.ticks);
-          EXPECT_EQ(0.0, robot_state.time_step);
+          EXPECT_EQ(0.0, robot_state.timeStep());
         } else {
           EXPECT_GE(robot_state.ticks, 1u);
-          EXPECT_GE(robot_state.time_step, 0.001);
+          EXPECT_GE(robot_state.timeStep(), 0.001);
         }
         if (++count < 5) {
           return joint_positions;

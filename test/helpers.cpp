@@ -86,7 +86,6 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.current_errors, actual.current_errors);
   EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
   EXPECT_EQ(expected.sequence_number, actual.sequence_number);
-  EXPECT_EQ(expected.time_step, actual.time_step);
   EXPECT_EQ(expected.ticks, actual.ticks);
 }
 

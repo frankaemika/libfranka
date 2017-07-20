@@ -15,7 +15,7 @@
 namespace franka {
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state,
-                             unsigned int ticks) noexcept;
+                             uint32_t previous_message_id) noexcept;
 
 class Robot::Impl : public RobotControl {
  public:
@@ -52,7 +52,7 @@ class Robot::Impl : public RobotControl {
   template <typename T>
   void handleCommandResponse(const typename T::Response& response) const;
 
-  bool sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
+  void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
                         const research_interface::robot::ControllerCommand* control_command) const;
   research_interface::robot::RobotState receiveRobotState();
   void updateState(const research_interface::robot::RobotState& robot_state);

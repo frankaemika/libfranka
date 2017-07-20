@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     double radius = 0.3;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState& robot_state) -> franka::CartesianPose {
-      time += robot_state.time_step;
+      time += robot_state.timeStep();
 
       if (time > 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;

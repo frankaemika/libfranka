@@ -101,7 +101,7 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
     server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &robot_state)
         .spinOnce();
 
-    testRobotStatesAreEqual(franka::convertRobotState(robot_state, 0), robot->update());
+    testRobotStatesAreEqual(franka::convertRobotState(robot_state, 1), robot->update());
   }
 
   EXPECT_THROW(robot->update(), NetworkException);
@@ -195,16 +195,11 @@ TEST(RobotImpl, ReadsCorrectPeriodsDuringMotion) {
         robot_state.controller_mode = ControllerMode::kJointPosition;
         robot_state.robot_mode = RobotMode::kMove;
       })
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
-        robot_state.controller_mode = ControllerMode::kJointPosition;
-        robot_state.robot_mode = RobotMode::kMove;
-      })
       .spinOnce();
 
   auto robot_state = robot.update();
-  EXPECT_EQ(0.0, robot_state.time_step);
-  EXPECT_EQ(0u, robot_state.ticks);
+  EXPECT_EQ(0.001, robot_state.timeStep());
+  EXPECT_EQ(1u, robot_state.ticks);
 
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
@@ -228,7 +223,7 @@ TEST(RobotImpl, ReadsCorrectPeriodsDuringMotion) {
 
   MotionGeneratorCommand motion_command{};
   robot_state = robot.update(&motion_command, nullptr);
-  EXPECT_EQ(0.003, robot_state.time_step);
+  EXPECT_EQ(0.003, robot_state.timeStep());
   EXPECT_EQ(3u, robot_state.ticks);
 }
 

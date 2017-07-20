@@ -17,6 +17,11 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 }  // anonymous namespace
 
+double RobotState::timeStep() const noexcept {
+  constexpr double kPeriod = 0.001;
+  return kPeriod * ticks;
+}
+
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
   ostream << "{O_T_EE: " << robot_state.O_T_EE << ", elbow: " << robot_state.elbow
           << ", O_T_EE_d: " << robot_state.O_T_EE_d << ", elbow_d: " << robot_state.elbow_d
@@ -32,7 +37,8 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", K_F_ext_hat_K: " << robot_state.K_F_ext_hat_K
           << ", current_errors: " << robot_state.current_errors
           << ", last_motion_errors: " << robot_state.last_motion_errors
-          << ", sequence_number: " << robot_state.sequence_number << "}";
+          << ", sequence_number: " << robot_state.sequence_number
+          << ", ticks: " << robot_state.ticks << "}";
   return ostream;
 }
 

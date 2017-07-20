@@ -72,6 +72,9 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update();
+  // The first robot state given to a control loop should always show zero ticks.
+  robot_state.ticks = 0;
+
   research_interface::robot::MotionGeneratorCommand motion_command{};
   if (control_callback_) {
     research_interface::robot::ControllerCommand control_command{};
