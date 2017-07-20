@@ -187,6 +187,9 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
                                         typename decltype(MockServer<C>::commands_)::iterator it) {
   auto callback_wrapper = [=](Socket&, Socket&) {
     std::unique_lock<std::mutex> lock(command_mutex_);
+    if (shutdown_) {
+      return;
+    }
     size_t old_commands = commands_.size();
     lock.unlock();
     if (callback()) {
