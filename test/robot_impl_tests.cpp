@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <cstring>
 #include <limits>
 
@@ -510,6 +511,9 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
+  std::atomic_flag send = ATOMIC_FLAG_INIT;
+  send.test_and_set();
+
   server
       .onSendUDP<RobotState>([=](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
@@ -520,12 +524,24 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
       .waitForCommand<Move>(
           [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
       .queueResponse<Move::Response>([]() { return Move::Response(Move::Status::kRejected); })
+      .doForever([&]() {
+        bool continue_sending = send.test_and_set();
+        if (continue_sending) {
+          server.onSendUDP<RobotState>([](RobotState& robot_state) {
+            robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+            robot_state.controller_mode = ControllerMode::kMotorPD;
+            robot_state.robot_mode = RobotMode::kIdle;
+          });
+        }
+        return continue_sending;
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.startMotion(Move::ControllerMode::kMotorPD,
                                  Move::MotionGeneratorMode::kCartesianVelocity,
                                  maximum_path_deviation, maximum_goal_pose_deviation),
                ControlException);
+  send.clear();
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
