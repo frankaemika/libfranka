@@ -23,13 +23,9 @@ Network::Network(const std::string& franka_address,
     tcp_socket_.setReceiveTimeout(poco_timeout);
 
     if (std::get<0>(tcp_keepalive)) {
-      // Activate TCP keepalive
       tcp_socket_.setKeepAlive(true);
-      // After an idle time of 1 sec a keepalive probe is sent
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
-      // After 3 keepalive probes the connection is closed
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
-      // The time between the keepalive probes is set to 1 sec
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
     }
 
