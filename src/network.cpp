@@ -13,7 +13,8 @@ namespace franka {
 Network::Network(const std::string& franka_address,
                  uint16_t franka_port,
                  std::chrono::milliseconds tcp_timeout,
-                 std::chrono::milliseconds udp_timeout) {
+                 std::chrono::milliseconds udp_timeout,
+                 std::tuple<bool, int, int, int> tcp_keepalive) {
   try {
     Poco::Timespan poco_timeout(1000l * tcp_timeout.count());
     tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
@@ -21,14 +22,16 @@ Network::Network(const std::string& franka_address,
     tcp_socket_.setSendTimeout(poco_timeout);
     tcp_socket_.setReceiveTimeout(poco_timeout);
 
-    // Activate TCP keepalive
-    tcp_socket_.setKeepAlive(true);
-    // After an idle time of 1 sec a keepalive probe is sent
-    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, 1);
-    // After 3 keepalive probes the connection is closed
-    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, 3);
-    // The time between the keepalive probes is set to 1 sec
-    tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, 1);
+    if (std::get<0>(tcp_keepalive)) {
+      // Activate TCP keepalive
+      tcp_socket_.setKeepAlive(true);
+      // After an idle time of 1 sec a keepalive probe is sent
+      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
+      // After 3 keepalive probes the connection is closed
+      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
+      // The time between the keepalive probes is set to 1 sec
+      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
+    }
 
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_socket_.bind({"0.0.0.0", 0});
