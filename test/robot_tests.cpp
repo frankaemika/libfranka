@@ -113,6 +113,7 @@ TEST(Robot, CanControlRobot) {
       ControllerMode::kJointImpedance);
 
   ASSERT_NE(0u, stopped_message_id);
+  ASSERT_EQ(5, count);
 
   // Receive the robot commands sent in the motion loop.
   for (int i = 0; i < count - 1; i++) {
@@ -137,6 +138,4 @@ TEST(Robot, CanControlRobot) {
 
   // Ignore remaining RobotCommands that might have been sent to the server.
   server.ignoreUdpBuffer();
-
-  EXPECT_EQ(5, count);
 }
