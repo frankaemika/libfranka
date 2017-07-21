@@ -12,6 +12,8 @@ int main(int argc, char** argv) {
 
     size_t count = 0;
     robot.read([&count](const franka::RobotState& robot_state) {
+      // Printing to std::cout adds a delay. This is acceptable for a read loop such as this,
+      // but should not be done in a control loop.
       std::cout << robot_state << std::endl;
       return count++ < 100;
     });
