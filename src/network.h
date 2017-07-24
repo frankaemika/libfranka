@@ -19,7 +19,9 @@ class Network {
  public:
   explicit Network(const std::string& franka_address,
                    uint16_t franka_port,
-                   std::chrono::milliseconds timeout = std::chrono::seconds(5));
+                   std::chrono::milliseconds tcp_timeout = std::chrono::seconds(60),
+                   std::chrono::milliseconds udp_timeout = std::chrono::seconds(1),
+                   std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
   ~Network();
 
   template <typename T>
