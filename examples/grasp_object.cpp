@@ -4,7 +4,11 @@
 
 #include <franka/exception.h>
 #include <franka/gripper.h>
-#include <franka/gripper_state.h>
+
+/**
+ * @example grasp_object.cpp
+ * An example showing how to control FRANKA's gripper.
+ */
 
 int main(int argc, char** argv) {
   if (argc != 4) {

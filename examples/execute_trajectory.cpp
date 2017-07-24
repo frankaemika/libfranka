@@ -4,7 +4,13 @@
 #include <iterator>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example execute_trajectory.cpp
+ * An example showing how to execute a joint trajectory loaded from a CSV file.
+ */
 
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
