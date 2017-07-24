@@ -3,7 +3,15 @@
 #include <iostream>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example motion_with_control.cpp
+ * An example showing how to use a joint velocity motion generator and torque control.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
+ */
 
 namespace {
 

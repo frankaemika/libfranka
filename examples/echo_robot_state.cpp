@@ -1,5 +1,12 @@
-#include <franka/robot.h>
 #include <iostream>
+
+#include <franka/exception.h>
+#include <franka/robot.h>
+
+/**
+ * @example echo_robot_state.cpp
+ * An example showing how to continuously read FRANKA's current state.
+ */
 
 int main(int argc, char** argv) {
   if (argc != 2) {

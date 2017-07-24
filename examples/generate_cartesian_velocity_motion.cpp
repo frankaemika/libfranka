@@ -1,7 +1,15 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example generate_cartesian_velocity_motion.cpp
+ * An example showing how to generate a Cartesian velocity motion.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
+ */
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -37,12 +45,6 @@ int main(int argc, char** argv) {
         lower_torque_thresholds_nominal, upper_torque_thresholds_nominal,
         lower_force_thresholds_acceleration, upper_force_thresholds_acceleration,
         lower_force_thresholds_nominal, upper_force_thresholds_nominal);
-
-    // Set a dynamic load:
-    double load_mass = 0.0;
-    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
-    robot.setLoad(load_mass, load_translation, load_inertia);
 
     double time_max = 4.0;
     double v_max = 0.1;

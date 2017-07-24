@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 
+#include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <research_interface/robot/service_types.h>
