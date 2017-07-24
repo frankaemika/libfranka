@@ -42,7 +42,7 @@ uint16_t Network::udpPort() const noexcept {
   return udp_socket_.address().port();
 }
 
-void Network::checkTcpConnection() try {
+void Network::tcpThrowIfConnectionClosed() try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     std::array<uint8_t, 1> buffer;
     int rv = tcp_socket_.receiveBytes(buffer.data(), static_cast<int>(buffer.size()), MSG_PEEK);

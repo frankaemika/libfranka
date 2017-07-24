@@ -48,11 +48,12 @@ int main(int argc, char** argv) {
 
     // Set additional parameters always before the control loop, NEVER in the
     // control loop
-    // Set a dynamic load:
-    double load_mass = 0.1;
-    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
-    robot.setLoad(load_mass, load_translation, load_inertia);
+    // Set collision behavior:
+    robot.setCollisionBehavior(
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Set the cartesian impedance:
     robot.setCartesianImpedance({{1500, 1500, 1500, 150, 150, 150}});
