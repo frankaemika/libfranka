@@ -90,6 +90,6 @@ TEST(RobotState, CanConvertWithMessageId) {
   EXPECT_EQ(1u, converted.ticks);
 
   original.message_id = 12;
-  converted = convertRobotState(original, 0);
-  EXPECT_EQ(1u, converted.ticks);
+  converted = convertRobotState(original, 3);
+  EXPECT_EQ(9u, converted.ticks);
 }
