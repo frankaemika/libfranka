@@ -6,6 +6,12 @@
 
 #include <franka/robot.h>
 
+/**
+ * @example execute_trajectory.cpp
+ * An example showing how to set a dynamic load and execute a joint trajectory loaded from a CSV
+ * file.
+ */
+
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";

@@ -3,6 +3,13 @@
 
 #include <franka/robot.h>
 
+/**
+ * @example generate_joint_velocity_motion.cpp
+ * An example showing how to generate a joint velocity motion.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
+ */
+
 int main(int argc, char** argv) {
   if (argc != 2) {
     std::cerr << "Usage: ./generate_joint_velocity_motion <robot-hostname>" << std::endl;

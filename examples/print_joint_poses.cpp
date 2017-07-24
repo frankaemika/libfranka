@@ -3,6 +3,11 @@
 
 #include <franka/model.h>
 
+/**
+ * @example print_joint_poses.cpp
+ * An example showing how to use the FRANKA model library.
+ */
+
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";

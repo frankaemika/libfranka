@@ -6,6 +6,11 @@
 #include <franka/gripper.h>
 #include <franka/gripper_state.h>
 
+/**
+ * @example grasp_object.cpp
+ * An example showing how to control FRANKA's gripper.
+ */
+
 int main(int argc, char** argv) {
   if (argc != 4) {
     std::cerr << "Usage: ./grasp_object <gripper-hostname> <homing> <object-width>" << std::endl;

@@ -1,6 +1,11 @@
 #include <franka/robot.h>
 #include <iostream>
 
+/**
+ * @example echo_robot_state.cpp
+ * An example showing how to continuously read FRANKA's current state.
+ */
+
 int main(int argc, char** argv) {
   if (argc != 2) {
     std::cerr << "Usage: ./echo_robot_state <robot-hostname>" << std::endl;
