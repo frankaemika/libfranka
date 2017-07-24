@@ -246,7 +246,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
 TYPED_TEST_CASE(Command, CommandTypes);
 
 TYPED_TEST(Command, CanSendAndReceiveSuccess) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
@@ -263,7 +263,7 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
 }
 
 TYPED_TEST(Command, CanSendAndReceiveAbort) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
@@ -280,7 +280,7 @@ TYPED_TEST(Command, CanSendAndReceiveAbort) {
 }
 
 TYPED_TEST(Command, CanSendAndReceiveRejected) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 
@@ -297,7 +297,7 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
 }
 
 TYPED_TEST(Command, CanSendAndReceivePreempted) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
 

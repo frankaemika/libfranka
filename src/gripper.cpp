@@ -95,11 +95,11 @@ void Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() {
-  // Delete old gripper states in the UDP buffer.
-  if (network_->udpAvailableData() >
-      static_cast<int>(sizeof(research_interface::gripper::GripperState))) {
+  // Delete old data from the UDP buffer.
+  while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::gripper::GripperState>();
   }
+
   return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
 }
 
