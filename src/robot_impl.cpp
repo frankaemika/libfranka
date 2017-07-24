@@ -309,8 +309,15 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
   converted.sequence_number = robot_state.message_id;
-  // TODO (fwalch): Handle overflow.
-  converted.ticks = robot_state.message_id - previous_message_id;
+
+  // We only accept valid (i.e. newer) robot states in receiveRobotState(),
+  // so here we can detect overflows by a simple comparison.
+  if (robot_state.message_id > previous_message_id) {
+    converted.ticks = robot_state.message_id - previous_message_id;
+  } else {
+    converted.ticks = std::numeric_limits<uint32_t>::max() - previous_message_id +
+                      robot_state.message_id + 1;
+  }
 
   switch (robot_state.robot_mode) {
     case research_interface::robot::RobotMode::kEmergency:

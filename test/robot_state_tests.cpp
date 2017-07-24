@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <franka/robot_state.h>
+#include <robot_impl.h>
 
 #include "helpers.h"
 
@@ -60,4 +61,35 @@ TEST(RobotState, CanAssign) {
   robot_state2 = robot_state;
 
   testRobotStatesAreEqual(robot_state, robot_state2);
+}
+
+TEST(RobotState, CanConvert) {
+  research_interface::robot::RobotState original;
+  randomRobotState(original);
+
+  RobotState converted = convertRobotState(original, original.message_id - 1);
+  testRobotStatesAreEqual(original, converted);
+  EXPECT_EQ(1u, converted.ticks);
+}
+
+TEST(RobotState, CanConvertWithOverflowingMessageId) {
+  research_interface::robot::RobotState original{};
+  original.message_id = 0;
+  RobotState converted = convertRobotState(original, std::numeric_limits<uint32_t>::max());
+  EXPECT_EQ(1u, converted.ticks);
+
+  original.message_id = 1;
+  converted = convertRobotState(original, std::numeric_limits<uint32_t>::max() - 1);
+  EXPECT_EQ(3u, converted.ticks);
+}
+
+TEST(RobotState, CanConvertWithMessageId) {
+  research_interface::robot::RobotState original{};
+  original.message_id = 1;
+  RobotState converted = convertRobotState(original, 0);
+  EXPECT_EQ(1u, converted.ticks);
+
+  original.message_id = 12;
+  converted = convertRobotState(original, 0);
+  EXPECT_EQ(1u, converted.ticks);
 }
