@@ -315,8 +315,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   if (robot_state.message_id > previous_message_id) {
     converted.ticks = robot_state.message_id - previous_message_id;
   } else {
-    converted.ticks = std::numeric_limits<uint32_t>::max() - previous_message_id +
-                      robot_state.message_id + 1;
+    converted.ticks =
+        (std::numeric_limits<uint32_t>::max() - previous_message_id) + (robot_state.message_id + 1);
   }
 
   switch (robot_state.robot_mode) {

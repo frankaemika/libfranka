@@ -171,14 +171,16 @@ struct RobotState {
   uint32_t sequence_number{};
 
   /**
-   * Number of ticks since the last received robot state, or zero if starting a control loop.
+   * Number of ticks since the last received robot state, or zero in the first iteration of a
+   * control loop.
    *
    * @see timeStep for the same value in [s].
    */
   unsigned int ticks{};
 
   /**
-   * Time in [s] since the last received robot state, or zero if starting a control loop.
+   * Time in [s] since the last received robot state, or zero in the first iteration of a control
+   * loop.
    *
    * @see ticks for the same value as a counter.
    *
