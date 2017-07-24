@@ -1,5 +1,6 @@
-#include <franka/robot.h>
 #include <iostream>
+
+#include <franka/robot.h>
 
 /**
  * @example echo_robot_state.cpp
