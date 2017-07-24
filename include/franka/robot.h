@@ -25,6 +25,9 @@ class Model;
  * @note
  * Before using this functionality, make sure FRANKA's brakes have been released.
  *
+ * @warning
+ * The members of Robot are <b>not threadsafe</b>!
+ *
  * @par End effector frame
  * While the end effector parameters are set in a configuration file, it is
  * possible to change the end effector frame with Robot::setEE.
