@@ -2,6 +2,7 @@
 
 #include <functional>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 #include "helpers.h"

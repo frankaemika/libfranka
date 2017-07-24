@@ -1,11 +1,12 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 /**
  * @example generate_joint_pose_motion.cpp
- * An example showing how to set FRANKA's collision behavior and generate a joint pose motion.
+ * An example showing how to generate a joint pose motion.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */

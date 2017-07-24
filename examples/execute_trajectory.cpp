@@ -4,12 +4,12 @@
 #include <iterator>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 /**
  * @example execute_trajectory.cpp
- * An example showing how to set a dynamic load and execute a joint trajectory loaded from a CSV
- * file.
+ * An example showing how to execute a joint trajectory loaded from a CSV file.
  */
 
 template <class T, size_t N>

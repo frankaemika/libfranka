@@ -1,6 +1,7 @@
 #include <iostream>
 #include <iterator>
 
+#include <franka/exception.h>
 #include <franka/model.h>
 
 /**

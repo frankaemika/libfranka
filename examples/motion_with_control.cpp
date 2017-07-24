@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 /**

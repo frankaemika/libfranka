@@ -4,7 +4,6 @@
 
 #include <franka/exception.h>
 #include <franka/gripper.h>
-#include <franka/gripper_state.h>
 
 /**
  * @example grasp_object.cpp

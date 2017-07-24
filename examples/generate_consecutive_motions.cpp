@@ -1,7 +1,16 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example generate_consecutive_motions.cpp
+ * An example showing how to execute consecutive motions with error recovery.
+ *
+ * @warning Before executing this example, make sure there is enough space in front and to the side
+ * of the robot.
+ */
 
 int main(int argc, char** argv) {
   if (argc != 2) {

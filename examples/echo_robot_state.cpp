@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
 
 /**

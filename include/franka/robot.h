@@ -6,7 +6,6 @@
 
 #include <franka/command_types.h>
 #include <franka/control_types.h>
-#include <franka/exception.h>
 #include <franka/robot_state.h>
 
 /**
