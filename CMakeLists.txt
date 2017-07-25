@@ -46,6 +46,7 @@ add_library(franka SHARED
   src/control_loop.cpp
   src/control_loop_base.cpp
   src/control_types.cpp
+  src/duration.cpp
   src/errors.cpp
   src/gripper.cpp
   src/gripper_state.cpp

@@ -31,9 +31,7 @@ RobotState Robot::Impl::update(
 
   sendRobotCommand(motion_command, control_command);
 
-  uint32_t previous_message_id = message_id_;
-  research_interface::robot::RobotState received_robot_state = receiveRobotState();
-  RobotState robot_state = convertRobotState(received_robot_state, previous_message_id);
+  RobotState robot_state = convertRobotState(receiveRobotState());
 
   if (robot_state.robot_mode != RobotMode::kReady &&
       (was_running_motion_generator || was_running_controller)) {
@@ -74,9 +72,7 @@ RobotState Robot::Impl::readOnce() {
     network_->udpRead<research_interface::robot::RobotState>();
   }
 
-  uint32_t previous_message_id = message_id_;
-  research_interface::robot::RobotState received_robot_state = receiveRobotState();
-  return convertRobotState(received_robot_state, previous_message_id);
+  return convertRobotState(receiveRobotState());
 }
 
 void Robot::Impl::sendRobotCommand(
@@ -121,12 +117,8 @@ research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
          latest_accepted_state.message_id == message_id_) {
     research_interface::robot::RobotState received_state =
         network_->udpRead<research_interface::robot::RobotState>();
-    uint32_t new_id = received_state.message_id;
-    uint32_t old_id = latest_accepted_state.message_id;
-    constexpr uint32_t kMaxDiff = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() * 0.1);
 
-    // Check if the received state is new and handle an overflow of the message ID.
-    if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
+    if (received_state.message_id > latest_accepted_state.message_id) {
       latest_accepted_state = received_state;
     }
   }
@@ -286,8 +278,7 @@ Model Robot::Impl::loadModel() const {
   return Model(*network_);
 }
 
-RobotState convertRobotState(const research_interface::robot::RobotState& robot_state,
-                             uint32_t previous_message_id) noexcept {
+RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
@@ -308,16 +299,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
-  converted.sequence_number = robot_state.message_id;
-
-  // We only accept valid (i.e. newer) robot states in receiveRobotState(),
-  // so here we can detect overflows by a simple comparison.
-  if (robot_state.message_id > previous_message_id) {
-    converted.ticks = robot_state.message_id - previous_message_id;
-  } else {
-    converted.ticks =
-        (std::numeric_limits<uint32_t>::max() - previous_message_id) + (robot_state.message_id + 1);
-  }
+  converted.time = Duration(robot_state.message_id);
 
   switch (robot_state.robot_mode) {
     case research_interface::robot::RobotMode::kEmergency:

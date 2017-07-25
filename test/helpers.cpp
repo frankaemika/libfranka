@@ -62,7 +62,7 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   }
   EXPECT_FALSE(actual.current_errors);
   EXPECT_FALSE(actual.last_motion_errors);
-  EXPECT_EQ(0u, actual.sequence_number);
+  EXPECT_EQ(0u, actual.time.ms());
 }
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
@@ -85,8 +85,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
   EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
-  EXPECT_EQ(expected.sequence_number, actual.sequence_number);
-  EXPECT_EQ(expected.ticks, actual.ticks);
+  EXPECT_EQ(expected.time, actual.time);
 }
 
 void testRobotStatesAreEqual(const research_interface::robot::RobotState& expected,
@@ -110,7 +109,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
   EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
-  EXPECT_EQ(expected.message_id, actual.sequence_number);
+  EXPECT_EQ(expected.message_id, actual.time.ms());
 }
 
 double randomDouble() {
@@ -183,7 +182,7 @@ void randomRobotState(franka::RobotState& robot_state) {
   }
   robot_state.last_motion_errors = franka::Errors(errors);
 
-  robot_state.sequence_number = static_cast<uint32_t>(std::rand());
+  robot_state.time = franka::Duration(static_cast<uint64_t>(std::rand()));
 }
 
 void randomRobotState(research_interface::robot::RobotState& robot_state) {

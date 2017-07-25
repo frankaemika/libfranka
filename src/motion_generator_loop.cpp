@@ -72,17 +72,17 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update();
-  // The first robot state given to a control loop should always show zero ticks.
-  robot_state.ticks = 0;
+  Duration start_time = robot_state.time;
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
   if (control_callback_) {
     research_interface::robot::ControllerCommand control_command{};
-    while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
+    while (spinOnce(robot_state, robot_state.time - start_time, &motion_command) &&
+           spinOnce(robot_state, robot_state.time - start_time, &control_command)) {
       robot_state = robot_.update(&motion_command, &control_command);
     }
   } else {
-    while (spinOnce(robot_state, &motion_command)) {
+    while (spinOnce(robot_state, robot_state.time - start_time, &motion_command)) {
       robot_state = robot_.update(&motion_command);
     }
   }
@@ -90,8 +90,9 @@ void MotionGeneratorLoop<T>::operator()() {
 
 template <typename T>
 bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
+                                      franka::Duration time_step,
                                       research_interface::robot::MotionGeneratorCommand* command) {
-  T motion_output = motion_callback_(robot_state);
+  T motion_output = motion_callback_(robot_state, time_step);
   if (motion_output.stop()) {
     return false;
   }

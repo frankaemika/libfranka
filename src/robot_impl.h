@@ -14,8 +14,7 @@
 
 namespace franka {
 
-RobotState convertRobotState(const research_interface::robot::RobotState& robot_state,
-                             uint32_t previous_message_id) noexcept;
+RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept;
 
 class Robot::Impl : public RobotControl {
  public:
@@ -64,7 +63,7 @@ class Robot::Impl : public RobotControl {
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;
-  uint32_t message_id_;
+  uint64_t message_id_;
 };
 
 template <typename T>

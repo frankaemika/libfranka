@@ -41,7 +41,7 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "current_errors");
   EXPECT_PRED2(stringContains, output, "last_motion_errors");
-  EXPECT_PRED2(stringContains, output, "sequence_number");
+  EXPECT_PRED2(stringContains, output, "time");
 }
 
 TEST(RobotState, CanCopyConstruct) {
@@ -67,29 +67,6 @@ TEST(RobotState, CanConvert) {
   research_interface::robot::RobotState original;
   randomRobotState(original);
 
-  RobotState converted = convertRobotState(original, original.message_id - 1);
+  RobotState converted = convertRobotState(original);
   testRobotStatesAreEqual(original, converted);
-  EXPECT_EQ(1u, converted.ticks);
-}
-
-TEST(RobotState, CanConvertWithOverflowingMessageId) {
-  research_interface::robot::RobotState original{};
-  original.message_id = 0;
-  RobotState converted = convertRobotState(original, std::numeric_limits<uint32_t>::max());
-  EXPECT_EQ(1u, converted.ticks);
-
-  original.message_id = 1;
-  converted = convertRobotState(original, std::numeric_limits<uint32_t>::max() - 1);
-  EXPECT_EQ(3u, converted.ticks);
-}
-
-TEST(RobotState, CanConvertWithMessageId) {
-  research_interface::robot::RobotState original{};
-  original.message_id = 1;
-  RobotState converted = convertRobotState(original, 0);
-  EXPECT_EQ(1u, converted.ticks);
-
-  original.message_id = 12;
-  converted = convertRobotState(original, 3);
-  EXPECT_EQ(9u, converted.ticks);
 }

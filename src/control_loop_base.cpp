@@ -24,8 +24,9 @@ ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_ca
 }
 
 bool ControlLoopBase::spinOnce(const RobotState& robot_state,
+                               franka::Duration time_step,
                                research_interface::robot::ControllerCommand* command) {
-  Torques control_output = control_callback_(robot_state);
+  Torques control_output = control_callback_(robot_state, time_step);
   if (control_output.stop()) {
     return false;
   }

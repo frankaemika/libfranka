@@ -40,7 +40,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   auto received_robot_state = robot.update();
-  EXPECT_EQ(2u, received_robot_state.sequence_number);
+  EXPECT_EQ(2u, received_robot_state.time.ms());
 
   server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
@@ -49,37 +49,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   received_robot_state = robot.update();
-  EXPECT_EQ(4u, received_robot_state.sequence_number);
-}
-
-TEST(RobotImpl, CanReceiveOverflowingRobotStatesCorrectly) {
-  RobotMockServer server(RobotMockServer::ConnectCallbackT(),
-                         std::numeric_limits<uint32_t>::max() - 2);
-  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max();
-      })
-      .spinOnce();
-  auto received_robot_state = robot.update();
-  EXPECT_EQ(std::numeric_limits<uint32_t>::max(), received_robot_state.sequence_number);
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max() + 1;
-      })
-      .spinOnce();
-  received_robot_state = robot.update();
-  EXPECT_EQ(0u, received_robot_state.sequence_number);
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max() + 2;
-      })
-      .spinOnce();
-  received_robot_state = robot.update();
-  EXPECT_EQ(1u, received_robot_state.sequence_number);
+  EXPECT_EQ(4u, received_robot_state.time.ms());
 }
 
 TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
@@ -101,7 +71,7 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
     server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &robot_state)
         .spinOnce();
 
-    testRobotStatesAreEqual(franka::convertRobotState(robot_state, 1), robot->update());
+    testRobotStatesAreEqual(franka::convertRobotState(robot_state), robot->update());
   }
 
   EXPECT_THROW(robot->update(), NetworkException);
@@ -163,7 +133,7 @@ TEST(RobotImpl, CanStartMotion) {
   EXPECT_NO_THROW(robot.update(&motion_command, nullptr));
 }
 
-TEST(RobotImpl, ReadsCorrectPeriodsDuringMotion) {
+TEST(RobotImpl, ReadsCorrectTimeDuringMotion) {
   RobotMockServer server;
   Move::Deviation maximum_path_deviation{0, 1, 2};
   Move::Deviation maximum_goal_pose_deviation{3, 4, 5};
@@ -198,8 +168,7 @@ TEST(RobotImpl, ReadsCorrectPeriodsDuringMotion) {
       .spinOnce();
 
   auto robot_state = robot.update();
-  EXPECT_EQ(0.001, robot_state.timeStep());
-  EXPECT_EQ(1u, robot_state.ticks);
+  EXPECT_EQ(server.sequenceNumber(), robot_state.time.ms());
 
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
@@ -223,8 +192,7 @@ TEST(RobotImpl, ReadsCorrectPeriodsDuringMotion) {
 
   MotionGeneratorCommand motion_command{};
   robot_state = robot.update(&motion_command, nullptr);
-  EXPECT_EQ(0.003, robot_state.timeStep());
-  EXPECT_EQ(3u, robot_state.ticks);
+  EXPECT_EQ(server.sequenceNumber(), robot_state.time.ms());
 }
 
 TEST(RobotImpl, CanStartMotionWithController) {

@@ -3,6 +3,7 @@
 #include <array>
 #include <ostream>
 
+#include <franka/duration.h>
 #include <franka/errors.h>
 
 /**
@@ -166,27 +167,9 @@ struct RobotState {
   RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
-   * Strictly increasing sequence number for each received robot state.
+   * Strictly increasing time for each received robot state.
    */
-  uint32_t sequence_number{};
-
-  /**
-   * Number of ticks since the last received robot state, or zero in the first iteration of a
-   * control loop.
-   *
-   * @see timeStep for the same value in [s].
-   */
-  unsigned int ticks{};
-
-  /**
-   * Time in [s] since the last received robot state, or zero in the first iteration of a control
-   * loop.
-   *
-   * @see ticks for the same value as a counter.
-   *
-   * @return Time in [s] since the last received robot state, or zero if starting a control loop.
-   */
-  double timeStep() const noexcept;
+  Duration time{};
 };
 
 /**

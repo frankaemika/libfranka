@@ -31,8 +31,9 @@ int main(int argc, char** argv) {
 
     auto initial_pose = robot.readOnce().q_d;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState& robot_state) -> franka::JointPositions {
-      time += robot_state.timeStep();
+    robot.control([=, &time](const franka::RobotState&,
+                             franka::Duration time_step) -> franka::JointPositions {
+      time += time_step.s();
 
       if (time > 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;

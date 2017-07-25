@@ -36,8 +36,9 @@ int main(int argc, char** argv) {
         double time_max = 4.0;
         double omega_max = 0.2;
         double time = 0.0;
-        robot.control([=, &time](const franka::RobotState& robot_state) -> franka::JointVelocities {
-          time += robot_state.timeStep();
+        robot.control([=, &time](const franka::RobotState&,
+                                 franka::Duration time_step) -> franka::JointVelocities {
+          time += time_step.s();
 
           if (time > 2 * time_max) {
             std::cout << std::endl << "Finished motion." << std::endl;
