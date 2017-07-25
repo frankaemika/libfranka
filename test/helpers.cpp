@@ -299,7 +299,7 @@ void testControllerCommandsAreEqual(const research_interface::robot::ControllerC
 }
 
 void randomGripperState(franka::GripperState& gripper_state) {
-  gripper_state.sequence_number = static_cast<uint32_t>(std::rand());
+  gripper_state.time = franka::Duration(static_cast<uint64_t>(std::rand()));
   gripper_state.temperature = static_cast<uint16_t>(std::rand());
   gripper_state.is_grasped = randomBool();
   gripper_state.max_width = randomDouble();
@@ -318,7 +318,7 @@ void randomGripperState(research_interface::gripper::GripperState& gripper_state
 
 void testGripperStatesAreEqual(const franka::GripperState& expected,
                                const franka::GripperState& actual) {
-  EXPECT_EQ(expected.sequence_number, actual.sequence_number);
+  EXPECT_EQ(expected.time, actual.time);
   EXPECT_EQ(expected.width, actual.width);
   EXPECT_EQ(expected.max_width, actual.max_width);
   EXPECT_EQ(expected.is_grasped, actual.is_grasped);
@@ -327,7 +327,7 @@ void testGripperStatesAreEqual(const franka::GripperState& expected,
 
 void testGripperStatesAreEqual(const research_interface::gripper::GripperState& expected,
                                const franka::GripperState& actual) {
-  EXPECT_EQ(expected.message_id, actual.sequence_number);
+  EXPECT_EQ(expected.message_id, actual.time.ms());
   EXPECT_EQ(expected.width, actual.width);
   EXPECT_EQ(expected.max_width, actual.max_width);
   EXPECT_EQ(expected.is_grasped, actual.is_grasped);
