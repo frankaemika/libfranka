@@ -16,6 +16,7 @@ using franka::Stop;
 using franka::Torques;
 
 using research_interface::robot::ControllerCommand;
+using research_interface::robot::MotionGeneratorCommand;
 
 using std::placeholders::_1;
 using std::placeholders::_2;
@@ -87,4 +88,37 @@ TEST(ControlLoop, SpinWithStoppingCallback) {
   loop();
 
   testRobotStateIsZero(robot_state);
+}
+
+TEST(ControlLoop, GetsCorrectTimeStep) {
+  NiceMock<MockRobotControl> robot;
+
+  MockControlCallback control_callback;
+  RobotState robot_state{};
+  robot_state.time = Duration(10);
+  Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
+
+  size_t control_count = 0;
+  EXPECT_CALL(control_callback, invoke(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const RobotState&, Duration duration) -> Torques {
+        EXPECT_EQ(ticks.at(control_count), duration.ms());
+
+        if (++control_count == ticks.size()) {
+          return Stop;
+        }
+        return zero_torques;
+      }));
+  size_t robot_count = 0;
+  EXPECT_CALL(robot, update(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const MotionGeneratorCommand*, const ControllerCommand*) {
+        robot_state.time += Duration(ticks.at(robot_count));
+        robot_count++;
+        return robot_state;
+      }));
+
+  ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
+  loop();
 }

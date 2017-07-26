@@ -295,3 +295,115 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
 
   testRobotStateIsZero(robot_state);
 }
+
+TYPED_TEST(MotionGeneratorLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback) {
+  NiceMock<MockRobotControl> robot;
+
+  NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;
+  ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
+
+  MockControlCallback control_callback;
+  RobotState robot_state{};
+  robot_state.time = Duration(10);
+  Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
+
+  size_t control_count = 0;
+  EXPECT_CALL(control_callback, invoke(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const RobotState&, Duration duration) -> Torques {
+        EXPECT_EQ(ticks.at(control_count), duration.ms());
+
+        if (++control_count == ticks.size()) {
+          return Stop;
+        }
+        return zero_torques;
+      }));
+  size_t robot_count = 0;
+  EXPECT_CALL(robot, update(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const MotionGeneratorCommand*, const ControllerCommand*) {
+        robot_state.time += Duration(ticks.at(robot_count));
+        robot_count++;
+        return robot_state;
+      }));
+
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+  loop();
+}
+
+TYPED_TEST(MotionGeneratorLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) {
+  NiceMock<MockRobotControl> robot;
+
+  NiceMock<MockControlCallback> control_callback;
+  Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(zero_torques));
+
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  RobotState robot_state{};
+  robot_state.time = Duration(10);
+  std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
+
+  size_t control_count = 0;
+  EXPECT_CALL(motion_callback, invoke(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(
+          Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
+            EXPECT_EQ(ticks.at(control_count), duration.ms());
+
+            if (++control_count == ticks.size()) {
+              return Stop;
+            }
+            return this->createMotion();
+          }));
+  size_t robot_count = 0;
+  EXPECT_CALL(robot, update(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const MotionGeneratorCommand*, const ControllerCommand*) {
+        robot_state.time += Duration(ticks.at(robot_count));
+        robot_count++;
+        return robot_state;
+      }));
+
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+  loop();
+}
+
+TYPED_TEST(MotionGeneratorLoops, GetsCorrectTimeStepWithMotionCallback) {
+  NiceMock<MockRobotControl> robot;
+
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  RobotState robot_state{};
+  robot_state.time = Duration(10);
+  std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
+
+  size_t control_count = 0;
+  EXPECT_CALL(motion_callback, invoke(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(
+          Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
+            EXPECT_EQ(ticks.at(control_count), duration.ms());
+
+            if (++control_count == ticks.size()) {
+              return Stop;
+            }
+            return this->createMotion();
+          }));
+  size_t robot_count = 0;
+  EXPECT_CALL(robot, update(_, _))
+      .Times(ticks.size())
+      .WillRepeatedly(Invoke([&](const MotionGeneratorCommand*, const ControllerCommand*) {
+        robot_state.time += Duration(ticks.at(robot_count));
+        robot_count++;
+        return robot_state;
+      }));
+
+  typename TestFixture::Loop loop(
+      robot, ControllerMode::kJointImpedance,
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+  loop();
+}
