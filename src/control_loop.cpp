@@ -22,9 +22,10 @@ ControlLoop::~ControlLoop() noexcept {
 
 void ControlLoop::operator()() {
   RobotState robot_state = robot_.update();
-  Duration start_time = robot_state.time;
+  Duration previous_time = robot_state.time;
   research_interface::robot::ControllerCommand command{};
-  while (spinOnce(robot_state, robot_state.time - start_time, &command)) {
+  while (spinOnce(robot_state, robot_state.time - previous_time, &command)) {
+    previous_time = robot_state.time;
     robot_state = robot_.update(nullptr, &command);
   }
 }
