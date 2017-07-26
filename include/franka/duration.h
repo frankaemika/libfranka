@@ -31,22 +31,14 @@ class Duration {
   Duration(std::chrono::duration<uint64_t, std::milli> duration) noexcept;
 
   /**
-   * Copy-constructs a new Duration instance.
+   * Creates a copy of a Duration instance.
    */
   Duration(const Duration&) = default;
-  /**
-   * Copy-assigns from another Duration instance.
-   */
-  Duration& operator=(const Duration&) = default;
 
   /**
-   * Move-constructs a new Duration instance.
+   * Assigns the contents of one Duration to another.
    */
-  Duration(Duration&&) = default;
-  /**
-   * Move-assigns from another Duration instance.
-   */
-  Duration& operator=(Duration&&) = default;
+  Duration& operator=(const Duration&) = default;
 
   /**
    * Returns the stored duration as an std::chrono::duration.
