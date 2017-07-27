@@ -4,7 +4,13 @@
 #include <iterator>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example execute_trajectory.cpp
+ * An example showing how to execute a joint trajectory loaded from a CSV file.
+ */
 
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
@@ -42,11 +48,12 @@ int main(int argc, char** argv) {
 
     // Set additional parameters always before the control loop, NEVER in the
     // control loop
-    // Set a dynamic load:
-    double load_mass = 0.1;
-    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
-    robot.setLoad(load_mass, load_translation, load_inertia);
+    // Set collision behavior:
+    robot.setCollisionBehavior(
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     // Set the cartesian impedance:
     robot.setCartesianImpedance({{1500, 1500, 1500, 150, 150, 150}});
@@ -55,12 +62,16 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
-    robot.control([&](const franka::RobotState& robot_state) -> franka::JointPositions {
+    robot.control([&](const franka::RobotState& robot_state,
+                      franka::Duration time_step) -> franka::JointPositions {
+      index += time_step.ms();
+
       if (index >= samples.size()) {
         return franka::Stop;
       }
+
       states.push_back(robot_state);
-      return samples[index++];
+      return samples[index];
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;

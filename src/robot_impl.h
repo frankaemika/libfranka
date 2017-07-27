@@ -40,30 +40,31 @@ class Robot::Impl : public RobotControl {
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs... /* args */);
+  void executeCommand(TArgs... /* args */) const;
 
-  Model loadModel();
+  Model loadModel() const;
 
  private:
   template <typename T>
-  void handleCommandResponse(const typename T::Response& response);
+  void handleCommandResponse(const typename T::Response& response) const;
 
   void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
-                        const research_interface::robot::ControllerCommand* control_command);
+                        const research_interface::robot::ControllerCommand* control_command) const;
   research_interface::robot::RobotState receiveRobotState();
+  void updateState(const research_interface::robot::RobotState& robot_state);
 
   std::unique_ptr<Network> network_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  research_interface::robot::MotionGeneratorMode motion_generator_mode_{};
-  research_interface::robot::ControllerMode controller_mode_{};
-  uint32_t message_id_{};
+  research_interface::robot::MotionGeneratorMode motion_generator_mode_;
+  research_interface::robot::ControllerMode controller_mode_;
+  uint64_t message_id_;
 };
 
 template <typename T>
-void Robot::Impl::handleCommandResponse(const typename T::Response& response) {
+void Robot::Impl::handleCommandResponse(const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
@@ -86,7 +87,7 @@ void Robot::Impl::handleCommandResponse(const typename T::Response& response) {
 
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
-    const research_interface::robot::Move::Response& response) {
+    const research_interface::robot::Move::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
@@ -124,7 +125,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 }
 
 template <typename T, typename... TArgs>
-void Robot::Impl::executeCommand(TArgs... args) {
+void Robot::Impl::executeCommand(TArgs... args) const {
   typename T::Request request(std::forward<TArgs>(args)...);
   network_->tcpSendRequest<T>(request);
 
@@ -138,7 +139,7 @@ inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianL
                                         int32_t,
                                         VirtualWallCuboid*>(
     int32_t id,
-    VirtualWallCuboid* virtual_wall_cuboid) {
+    VirtualWallCuboid* virtual_wall_cuboid) const {
   research_interface::robot::GetCartesianLimit::Request request(id);
   network_->tcpSendRequest<research_interface::robot::GetCartesianLimit>(request);
 

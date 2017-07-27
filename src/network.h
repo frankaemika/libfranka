@@ -19,16 +19,19 @@ class Network {
  public:
   explicit Network(const std::string& franka_address,
                    uint16_t franka_port,
-                   std::chrono::milliseconds timeout = std::chrono::seconds(5));
+                   std::chrono::milliseconds tcp_timeout = std::chrono::seconds(60),
+                   std::chrono::milliseconds udp_timeout = std::chrono::seconds(1),
+                   std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
   ~Network();
 
   template <typename T>
   T udpRead();
+
   int udpAvailableData();
 
   uint16_t udpPort() const noexcept;
 
-  void checkTcpConnection();
+  void tcpThrowIfConnectionClosed();
 
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse();
@@ -58,14 +61,13 @@ class Network {
 template <typename T>
 T Network::udpRead() try {
   std::array<uint8_t, sizeof(T)> buffer;
-  do {
-    int bytes_received = udp_socket_.receiveFrom(buffer.data(), static_cast<int>(buffer.size()),
-                                                 udp_server_address_);
 
-    if (bytes_received != buffer.size()) {
-      throw ProtocolException("libfranka: incorrect object size");
-    }
-  } while (udp_socket_.available() > 0);
+  int bytes_received =
+      udp_socket_.receiveFrom(buffer.data(), static_cast<int>(buffer.size()), udp_server_address_);
+
+  if (bytes_received != buffer.size()) {
+    throw ProtocolException("libfranka: incorrect object size");
+  }
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {

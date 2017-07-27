@@ -1,7 +1,5 @@
 #include "robot_impl.h"
 
-#include <franka/model.h>
-
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -19,42 +17,62 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 
   connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
                                                                                    &ri_version_);
+
+  updateState(network_->udpRead<research_interface::robot::RobotState>());
 }
 
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  network_->checkTcpConnection();
+  network_->tcpThrowIfConnectionClosed();
 
   bool was_commanding_robot = motionGeneratorRunning() || controllerRunning();
   sendRobotCommand(motion_command, control_command);
 
   RobotState robot_state = convertRobotState(receiveRobotState());
-  if (was_commanding_robot) {
-    if (robot_state.robot_mode != RobotMode::kMove) {
-      if (robot_state.robot_mode == RobotMode::kReflex) {
-        throw ControlException("libfranka robot: motion aborted with error: " +
-                               static_cast<std::string>(robot_state.last_motion_errors));
-      } else {
-        throw ControlException("libfranka robot: motion aborted");
-      }
+
+  if (robot_state.robot_mode != RobotMode::kMove && was_commanding_robot) {
+    // Wait until robot state shows stopped motion and controller.
+    while (motionGeneratorRunning() || controllerRunning()) {
+      receiveRobotState();
     }
+
+    // If a motion generator was running and the robot state shows an error,
+    // we will receive a TCP response to the Move command.
+    try {
+      handleCommandResponse<research_interface::robot::Move>(
+          network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+    } catch (const CommandException& e) {
+      // Rethrow as control exception to be consistent with starting/stopping of motions.
+      if (robot_state.robot_mode == RobotMode::kReflex) {
+        throw ControlException(e.what() + " "s +
+                               static_cast<std::string>(robot_state.last_motion_errors));
+      }
+      throw ControlException(e.what());
+    }
+
+    if (robot_state.last_motion_errors) {
+      throw ControlException("libfranka robot: control aborted with error: " +
+                             static_cast<std::string>(robot_state.last_motion_errors));
+    }
+    throw ControlException("libfranka robot: control aborted");
   }
+
   return robot_state;
 }
 
 RobotState Robot::Impl::readOnce() {
-  // Delete old robot states in the UDP buffer.
-  if (network_->udpAvailableData() >
-      static_cast<int>(sizeof(research_interface::robot::RobotState))) {
+  // Delete old data from the UDP buffer.
+  while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::robot::RobotState>();
   }
-  return convertRobotState(network_->udpRead<research_interface::robot::RobotState>());
+
+  return convertRobotState(receiveRobotState());
 }
 
 void Robot::Impl::sendRobotCommand(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
-    const research_interface::robot::ControllerCommand* control_command) {
+    const research_interface::robot::ControllerCommand* control_command) const {
   if (motion_command != nullptr || control_command != nullptr) {
     research_interface::robot::RobotCommand robot_command{};
     robot_command.message_id = message_id_;
@@ -84,12 +102,30 @@ void Robot::Impl::sendRobotCommand(
 }
 
 research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
-  research_interface::robot::RobotState robot_state =
-      network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState latest_accepted_state;
+  latest_accepted_state.message_id = message_id_;
+
+  // If states are already available on the socket, use the one with the most recent message ID.
+  // If there was no valid state on the socket, we need to wait.
+  while (network_->udpAvailableData() >=
+             static_cast<int>(sizeof(research_interface::robot::RobotState)) ||
+         latest_accepted_state.message_id == message_id_) {
+    research_interface::robot::RobotState received_state =
+        network_->udpRead<research_interface::robot::RobotState>();
+
+    if (received_state.message_id > latest_accepted_state.message_id) {
+      latest_accepted_state = received_state;
+    }
+  }
+
+  updateState(latest_accepted_state);
+  return latest_accepted_state;
+}
+
+void Robot::Impl::updateState(const research_interface::robot::RobotState& robot_state) {
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
-  return robot_state;
 }
 
 Robot::ServerVersion Robot::Impl::serverVersion() const noexcept {
@@ -169,6 +205,7 @@ void Robot::Impl::startMotion(
   executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
 
+  RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
     research_interface::robot::Function function;
@@ -181,12 +218,15 @@ void Robot::Impl::startMotion(
             std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                       std::placeholders::_1));
       } catch (const CommandException& e) {
-        // Rethrow as control exception to be consistent with starting/stopping of motions.
+        if (robot_state.robot_mode == RobotMode::kReflex) {
+          throw ControlException(e.what() + " "s +
+                                 static_cast<std::string>(robot_state.last_motion_errors));
+        }
         throw ControlException(e.what());
       }
     }
 
-    update();
+    robot_state = update();
   }
 }
 
@@ -211,7 +251,7 @@ void Robot::Impl::stopMotion() {
       network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
 }
 
-Model Robot::Impl::loadModel() {
+Model Robot::Impl::loadModel() const {
   return Model(*network_);
 }
 
@@ -236,7 +276,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
-  converted.sequence_number = robot_state.message_id;
+  converted.time = Duration(robot_state.message_id);
 
   switch (robot_state.robot_mode) {
     case research_interface::robot::RobotMode::kEmergency:

@@ -1,7 +1,15 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example generate_cartesian_velocity_motion.cpp
+ * An example showing how to generate a Cartesian velocity motion.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
+ */
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -38,27 +46,24 @@ int main(int argc, char** argv) {
         lower_force_thresholds_acceleration, upper_force_thresholds_acceleration,
         lower_force_thresholds_nominal, upper_force_thresholds_nominal);
 
-    // Set a dynamic load:
-    double load_mass = 0.0;
-    std::array<double, 3> load_translation{{0.0, 0.0, 0.0}};
-    std::array<double, 9> load_inertia{{0.01, 0.0, 0.0, 0.0, 0.01, 0.0, 0.0, 0.0, 0.01}};
-    robot.setLoad(load_mass, load_translation, load_inertia);
-
     double time_max = 4.0;
     double v_max = 0.1;
     double angle = M_PI / 4.0;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState&) -> franka::CartesianVelocities {
+    robot.control([=, &time](const franka::RobotState&,
+                             franka::Duration time_step) -> franka::CartesianVelocities {
+      time += time_step.s();
+
+      if (time > 2 * time_max) {
+        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+        return franka::Stop;
+      }
+
       double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double v = cycle * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
       double v_x = std::cos(angle) * v;
       double v_z = -std::sin(angle) * v;
 
-      time += 0.001;
-      if (time > 2 * time_max) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::Stop;
-      }
       return {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
     });
   } catch (const franka::Exception& e) {

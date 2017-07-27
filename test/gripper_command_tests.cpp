@@ -120,7 +120,7 @@ using CommandTypes = ::testing::Types<Homing, Move, Grasp, Stop>;
 TYPED_TEST_CASE(GripperCommand, CommandTypes);
 
 TYPED_TEST(GripperCommand, CanSendAndReceiveSuccess) {
-  MockServer<research_interface::gripper::Connect> server;
+  GripperMockServer server;
   Gripper gripper("127.0.0.1");
 
   server
@@ -136,7 +136,7 @@ TYPED_TEST(GripperCommand, CanSendAndReceiveSuccess) {
 }
 
 TYPED_TEST(GripperCommand, CanSendAndReceiveFail) {
-  MockServer<research_interface::gripper::Connect> server;
+  GripperMockServer server;
   Gripper gripper("127.0.0.1");
 
   server
@@ -152,7 +152,7 @@ TYPED_TEST(GripperCommand, CanSendAndReceiveFail) {
 }
 
 TYPED_TEST(GripperCommand, CanSendAndReceiveUnsucessful) {
-  MockServer<research_interface::gripper::Connect> server;
+  GripperMockServer server;
   Gripper gripper("127.0.0.1");
 
   server

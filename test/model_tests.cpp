@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 
+#include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
 #include <research_interface/robot/service_types.h>
@@ -57,7 +58,7 @@ struct Model : public ::testing::Test {
     model_library_interface = nullptr;
   }
 
-  MockServer<research_interface::robot::Connect> server{};
+  RobotMockServer server{};
   franka::Robot robot{"127.0.0.1"};
 
  private:
@@ -65,7 +66,7 @@ struct Model : public ::testing::Test {
 };
 
 TEST(InvalidModel, ThrowsIfNoModelReceived) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   franka::Robot robot("127.0.0.1");
 
   server
@@ -77,7 +78,7 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
 }
 
 TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
-  MockServer<research_interface::robot::Connect> server;
+  RobotMockServer server;
   franka::Robot robot("127.0.0.1");
 
   std::array<char, 10> buffer{};

@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <ostream>
 
+#include <franka/duration.h>
+
 /**
  * @file gripper_state.h
  * Contains the GripperState struct.
@@ -39,9 +41,9 @@ struct GripperState {
   uint16_t temperature{};
 
   /**
-   * Strictly increasing sequence number for each received gripper state.
+   * Strictly increasing time for each received gripper state.
    */
-  uint32_t sequence_number{};
+  Duration time{};
 };
 
 /**

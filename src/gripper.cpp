@@ -33,7 +33,7 @@ GripperState convertGripperState(
   converted.max_width = gripper_state.max_width;
   converted.is_grasped = gripper_state.is_grasped;
   converted.temperature = gripper_state.temperature;
-  converted.sequence_number = gripper_state.message_id;
+  converted.time = Duration(gripper_state.message_id);
   return converted;
 }
 
@@ -95,11 +95,11 @@ void Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() {
-  // Delete old gripper states in the UDP buffer.
-  if (network_->udpAvailableData() >
-      static_cast<int>(sizeof(research_interface::gripper::GripperState))) {
+  // Delete old data from the UDP buffer.
+  while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::gripper::GripperState>();
   }
+
   return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
 }
 

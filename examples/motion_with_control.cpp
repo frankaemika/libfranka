@@ -3,7 +3,15 @@
 #include <iostream>
 #include <vector>
 
+#include <franka/exception.h>
 #include <franka/robot.h>
+
+/**
+ * @example motion_with_control.cpp
+ * An example showing how to use a joint velocity motion generator and torque control.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
+ */
 
 namespace {
 
@@ -28,7 +36,7 @@ class Controller {
     for (size_t i = 0; i < 7; i++) {
       tau_J_d[i] = K_P_[i] * (state.q_d[i] - state.q[i]) + K_D_[i] * (dq_d_[i] - getDQFiltered(i));
     }
-    return franka::Torques{tau_J_d};
+    return tau_J_d;
   }
 
   void updateDQFilter(const franka::RobotState& state) {
@@ -117,22 +125,33 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    uint index = 0;
+    // Set additional parameters always before the control loop, NEVER in the
+    // control loop
+    // Set collision behavior:
+    robot.setCollisionBehavior(
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
+
+    size_t index = 0;
     int joint_number = std::stoi(argv[5]);
-    std::vector<double> trajectory = generateTrajectory(std::stoi(argv[6]));
+    std::vector<double> trajectory = generateTrajectory(std::stod(argv[6]));
 
     robot.control(
-        [&](const franka::RobotState&) -> franka::JointVelocities {
+        [&](const franka::RobotState&, franka::Duration time_step) -> franka::JointVelocities {
+          index += time_step.ms();
+
           if (index >= trajectory.size()) {
             return franka::Stop;
           }
 
           std::array<double, 7> velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities[joint_number] = trajectory[index++];
+          velocities[joint_number] = trajectory[index];
 
-          return {velocities};
+          return velocities;
         },
-        [&](const franka::RobotState& robot_state) -> franka::Torques {
+        [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
           return controller.step(robot_state);
         });
   } catch (const franka::Exception& e) {
