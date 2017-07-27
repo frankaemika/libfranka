@@ -28,7 +28,8 @@ TEST(Errors, CanGetNamesOfErrors) {
 
   franka::Errors errors(error_flags);
 
-  std::string expected = R"({"joint_position_limits_violation", "self_collision_avoidance_violation"})";
+  std::string expected =
+      R"({"joint_position_limits_violation", "self_collision_avoidance_violation"})";
   EXPECT_EQ(expected, static_cast<std::string>(errors));
 }
 
