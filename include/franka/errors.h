@@ -140,7 +140,7 @@ struct Errors {
 };
 
 /**
- * Streams the Error struct using its std::string representation.
+ * Streams the Error struct in JSON format.
  */
 std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
 
