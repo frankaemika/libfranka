@@ -11,9 +11,6 @@ class RobotControl {
  public:
   virtual ~RobotControl() = default;
 
-  virtual void startController() = 0;
-  virtual void stopController() = 0;
-
   virtual void startMotion(
       research_interface::robot::Move::ControllerMode controller_mode,
       research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,

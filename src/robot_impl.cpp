@@ -131,6 +131,10 @@ void Robot::Impl::startMotion(
     case decltype(motion_generator_mode)::kCartesianVelocity:
       state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianVelocity;
       break;
+    case decltype(motion_generator_mode)::kIdle:
+      // Idle motion generator is implemented using the external joint velocity generator
+      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointVelocity;
+      break;
     default:
       throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
   }
@@ -154,6 +158,12 @@ void Robot::Impl::startMotion(
       break;
     default:
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
+  }
+
+  if (state_motion_generator_mode == decltype(state_motion_generator_mode)::kIdle &&
+      state_controller_mode != decltype(state_controller_mode)::kExternalController) {
+    throw std::invalid_argument(
+        "libfranka robot: Idle motion generator without an external controller.");
   }
 
   executeCommand<research_interface::robot::Move>(
@@ -199,34 +209,6 @@ void Robot::Impl::stopMotion() {
   }
   handleCommandResponse<research_interface::robot::Move>(
       network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
-}
-
-void Robot::Impl::startController() {
-  if (controllerRunning()) {
-    throw ControlException("libfranka robot: attempted to start multiple controllers!");
-    return;
-  }
-
-  executeCommand<research_interface::robot::SetControllerMode>(
-      research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
-
-  while (!controllerRunning()) {
-    update();
-  }
-}
-
-void Robot::Impl::stopController() {
-  if (!controllerRunning()) {
-    return;
-  }
-
-  executeCommand<research_interface::robot::SetControllerMode>(
-      research_interface::robot::SetControllerMode::ControllerMode::kJointImpedance);
-
-  research_interface::robot::ControllerCommand command{};
-  while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    update(nullptr, &command);
-  }
 }
 
 Model Robot::Impl::loadModel() {

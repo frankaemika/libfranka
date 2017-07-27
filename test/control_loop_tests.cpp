@@ -3,10 +3,9 @@
 
 #include <gmock/gmock.h>
 
-#include "control_loop.h"
-
 #include "helpers.h"
 #include "mock_robot_control.h"
+#include "motion_loop.h"
 
 using namespace ::testing;
 
@@ -15,11 +14,12 @@ using franka::Stop;
 using franka::Torques;
 
 using research_interface::robot::ControllerCommand;
+using research_interface::robot::Move;
 
-class ControlLoop : public franka::ControlLoop {
+class ControlLoop : public franka::MotionLoop<franka::Torques> {
  public:
-  using franka::ControlLoop::ControlLoop;
-  using franka::ControlLoopBase::spinOnce;
+  using franka::MotionLoop<franka::Torques>::MotionLoop;
+  using franka::MotionLoop<franka::Torques>::controllerSpinOnce;
 };
 
 struct MockControlCallback {
@@ -28,15 +28,17 @@ struct MockControlCallback {
 
 TEST(ControlLoop, CanNotConstructWithoutCallback) {
   MockRobotControl robot;
-  EXPECT_THROW(ControlLoop(robot, ControlLoop::ControlCallback()), std::invalid_argument);
+  EXPECT_THROW(ControlLoop(robot, ControlLoop::ControlCallback(), nullptr), std::invalid_argument);
 }
 
 TEST(ControlLoop, CanConstructWithCallback) {
   MockRobotControl robot;
   {
     InSequence _;
-    EXPECT_CALL(robot, startController());
-    EXPECT_CALL(robot, stopController());
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   Move::MotionGeneratorMode::kIdle, ControlLoop::kDefaultDeviation,
+                                   ControlLoop::kDefaultDeviation));
+    EXPECT_CALL(robot, stopMotion());
   }
 
   StrictMock<MockControlCallback> control_callback;
@@ -59,7 +61,7 @@ TEST(ControlLoop, SpinOnce) {
       robot, std::bind(&MockControlCallback::invoke, &control_callback, std::placeholders::_1));
 
   ControllerCommand command;
-  EXPECT_TRUE(loop.spinOnce(robot_state, &command));
+  EXPECT_TRUE(loop.controllerSpinOnce(robot_state, &command));
   EXPECT_EQ(torques.tau_J, command.tau_J_d);
 }
 
@@ -75,7 +77,7 @@ TEST(ControlLoop, SpinWithStoppingCallback) {
 
   // Use ASSERT to abort on failure because loop() further down
   // would block otherwise
-  ASSERT_FALSE(loop.spinOnce(robot_state, nullptr));
+  ASSERT_FALSE(loop.controllerSpinOnce(robot_state, nullptr));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(control_callback, invoke(_)).WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));

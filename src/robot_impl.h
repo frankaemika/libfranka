@@ -32,9 +32,6 @@ class Robot::Impl : public RobotControl {
   bool controllerRunning() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
-  void startController() override;
-  void stopController() override;
-
   void startMotion(
       research_interface::robot::Move::ControllerMode controller_mode,
       research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,

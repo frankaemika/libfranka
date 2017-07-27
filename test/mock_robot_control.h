@@ -6,9 +6,6 @@
 
 class MockRobotControl : public franka::RobotControl {
  public:
-  MOCK_METHOD0(startController, void());
-  MOCK_METHOD0(stopController, void());
-
   MOCK_METHOD4(startMotion,
                void(research_interface::robot::Move::ControllerMode controller_mode,
                     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
