@@ -72,14 +72,19 @@ MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update();
+  Duration previous_time = robot_state.time;
+
   research_interface::robot::MotionGeneratorCommand motion_command{};
   if (control_callback_) {
     research_interface::robot::ControllerCommand control_command{};
-    while (spinOnce(robot_state, &motion_command) && spinOnce(robot_state, &control_command)) {
+    while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command) &&
+           spinOnce(robot_state, robot_state.time - previous_time, &control_command)) {
+      previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command, &control_command);
     }
   } else {
-    while (spinOnce(robot_state, &motion_command)) {
+    while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command)) {
+      previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command);
     }
   }
@@ -87,8 +92,9 @@ void MotionGeneratorLoop<T>::operator()() {
 
 template <typename T>
 bool MotionGeneratorLoop<T>::spinOnce(const RobotState& robot_state,
+                                      franka::Duration time_step,
                                       research_interface::robot::MotionGeneratorCommand* command) {
-  T motion_output = motion_callback_(robot_state);
+  T motion_output = motion_callback_(robot_state, time_step);
   if (motion_output.stop()) {
     return false;
   }

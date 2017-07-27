@@ -1,8 +1,8 @@
 #pragma once
 
 #include <condition_variable>
+#include <deque>
 #include <mutex>
-#include <queue>
 #include <string>
 #include <thread>
 
@@ -51,10 +51,13 @@ class MockServer {
   template <typename T>
   MockServer& sendRandomState(std::function<void(T&)> random_generator, T* sent_state = nullptr);
 
+  MockServer& doForever(std::function<bool()> callback);
+
   template <typename T>
   MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
 
-  MockServer& onReceiveRobotCommand(ReceiveRobotCommandCallbackT on_receive_robot_command);
+  MockServer& onReceiveRobotCommand(
+      ReceiveRobotCommandCallbackT on_receive_robot_command = ReceiveRobotCommandCallbackT());
 
   MockServer& generic(std::function<void(Socket&, Socket&)> generic_command);
 
@@ -71,7 +74,9 @@ class MockServer {
   template <typename T>
   T randomState();
 
-  uint32_t sequence_number() const { return sequence_number_; }
+  uint32_t sequenceNumber() const { return sequence_number_; }
+
+  void ignoreUdpBuffer();
 
  private:
   void serverThread();
@@ -81,16 +86,22 @@ class MockServer {
   MockServer& onSendUDP(std::function<T()> on_send_udp);
 
   std::condition_variable cv_;
-  std::mutex mutex_;
+  std::mutex command_mutex_;
+  std::mutex tcp_mutex_;
+  std::mutex udp_mutex_;
   std::thread server_thread_;
   bool block_;
   bool shutdown_;
   bool continue_;
   bool initialized_;
   uint32_t sequence_number_;
+  bool ignore_udp_buffer_ = false;
 
   const ConnectCallbackT on_connect_;
-  std::queue<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
+  std::deque<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
+
+  MockServer& doForever(std::function<bool()> callback,
+                        typename decltype(MockServer::commands_)::iterator it);
 };
 
 template <typename C>
@@ -98,13 +109,13 @@ template <typename TResponse>
 MockServer<C>& MockServer<C>::sendResponse(std::function<TResponse()> create_response) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(mutex_);
+  std::lock_guard<std::mutex> _(command_mutex_);
   block_ = true;
-  commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
-                    [=](Socket& tcp_socket, Socket&) {
-                      TResponse response = create_response();
-                      tcp_socket.sendBytes(&response, sizeof(response));
-                    });
+  commands_.emplace_back("sendResponse<"s + typeid(TResponse).name() + ">",
+                         [=](Socket& tcp_socket, Socket&) {
+                           TResponse response = create_response();
+                           tcp_socket.sendBytes(&response, sizeof(response));
+                         });
   return *this;
 }
 
@@ -113,12 +124,12 @@ template <typename TResponse>
 MockServer<C>& MockServer<C>::queueResponse(std::function<TResponse()> create_response) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("sendResponse<"s + typeid(TResponse).name() + ">",
-                    [=](Socket& tcp_socket, Socket&) {
-                      TResponse response = create_response();
-                      tcp_socket.sendBytes(&response, sizeof(response));
-                    });
+  std::lock_guard<std::mutex> _(command_mutex_);
+  commands_.emplace_back("sendResponse<"s + typeid(TResponse).name() + ">",
+                         [=](Socket& tcp_socket, Socket&) {
+                           TResponse response = create_response();
+                           tcp_socket.sendBytes(&response, sizeof(response));
+                         });
   return *this;
 }
 
@@ -144,8 +155,8 @@ MockServer<C>& MockServer<C>::sendRandomState(std::function<void(T&)> random_gen
 template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::onSendUDP(std::function<T()> on_send_udp) {
-  std::lock_guard<std::mutex> _(mutex_);
-  commands_.emplace("onSendUDP", [=](Socket&, Socket& udp_socket) {
+  std::lock_guard<std::mutex> _(command_mutex_);
+  commands_.emplace_back("onSendUDP", [=](Socket&, Socket& udp_socket) {
     T state = on_send_udp();
     udp_socket.sendBytes(&state, sizeof(state));
   });
@@ -184,10 +195,10 @@ MockServer<C>& MockServer<C>::waitForCommand(
     std::function<typename T::Response(const typename T::Request&)> callback) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(mutex_);
+  std::lock_guard<std::mutex> _(command_mutex_);
   std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " +
                      typeid(typename T::Response).name();
-  commands_.emplace(name, [this, callback](Socket& tcp_socket, Socket&) {
+  commands_.emplace_back(name, [this, callback](Socket& tcp_socket, Socket&) {
     handleCommand<T>(tcp_socket, callback);
   });
   return *this;

@@ -4,6 +4,7 @@
 #include <functional>
 
 #include <franka/control_types.h>
+#include <franka/duration.h>
 #include <franka/robot_state.h>
 #include <research_interface/robot/rbk_types.h>
 
@@ -14,7 +15,7 @@ namespace franka {
 template <typename T>
 class MotionGeneratorLoop : public ControlLoopBase {
  public:
-  using MotionGeneratorCallback = std::function<T(const RobotState&)>;
+  using MotionGeneratorCallback = std::function<T(const RobotState&, franka::Duration)>;
   static constexpr research_interface::robot::Move::Deviation kDefaultDeviation{10.0, 3.12,
                                                                                 2 * M_PI};
 
@@ -33,6 +34,7 @@ class MotionGeneratorLoop : public ControlLoopBase {
  protected:
   using ControlLoopBase::spinOnce;
   bool spinOnce(const RobotState& robot_state,
+                franka::Duration time_step,
                 research_interface::robot::MotionGeneratorCommand* command);
 
  private:

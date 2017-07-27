@@ -63,7 +63,7 @@ class Robot::Impl : public RobotControl {
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;
-  uint32_t message_id_;
+  uint64_t message_id_;
 };
 
 template <typename T>

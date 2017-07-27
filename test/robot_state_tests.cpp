@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include <franka/robot_state.h>
+#include <robot_impl.h>
 
 #include "helpers.h"
 
@@ -40,7 +41,7 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "current_errors");
   EXPECT_PRED2(stringContains, output, "last_motion_errors");
-  EXPECT_PRED2(stringContains, output, "sequence_number");
+  EXPECT_PRED2(stringContains, output, "time");
 }
 
 TEST(RobotState, CanCopyConstruct) {
@@ -60,4 +61,12 @@ TEST(RobotState, CanAssign) {
   robot_state2 = robot_state;
 
   testRobotStatesAreEqual(robot_state, robot_state2);
+}
+
+TEST(RobotState, CanConvert) {
+  research_interface::robot::RobotState original;
+  randomRobotState(original);
+
+  RobotState converted = convertRobotState(original);
+  testRobotStatesAreEqual(original, converted);
 }

@@ -62,12 +62,16 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
-    robot.control([&](const franka::RobotState& robot_state) -> franka::JointPositions {
+    robot.control([&](const franka::RobotState& robot_state,
+                      franka::Duration time_step) -> franka::JointPositions {
+      index += time_step.ms();
+
       if (index >= samples.size()) {
         return franka::Stop;
       }
+
       states.push_back(robot_state);
-      return samples[index++];
+      return samples[index];
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;

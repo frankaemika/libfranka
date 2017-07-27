@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <thread>
 
 #include <franka/exception.h>
@@ -18,7 +19,7 @@ int main(int argc, char** argv) {
 
   try {
     franka::Gripper gripper(argv[1]);
-    double grasping_width = atof(argv[3]);
+    double grasping_width = std::stod(argv[3]);
 
     std::stringstream ss(argv[2]);
     bool homing;

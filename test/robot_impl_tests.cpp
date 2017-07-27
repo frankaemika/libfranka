@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <atomic>
 #include <cstring>
 #include <limits>
 
@@ -39,7 +40,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   auto received_robot_state = robot.update();
-  EXPECT_EQ(2u, received_robot_state.sequence_number);
+  EXPECT_EQ(2u, received_robot_state.time.ms());
 
   server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
@@ -48,37 +49,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   received_robot_state = robot.update();
-  EXPECT_EQ(4u, received_robot_state.sequence_number);
-}
-
-TEST(RobotImpl, CanReceiveOverflowingRobotStatesCorrectly) {
-  RobotMockServer server(RobotMockServer::ConnectCallbackT(),
-                         std::numeric_limits<uint32_t>::max() - 2);
-  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max();
-      })
-      .spinOnce();
-  auto received_robot_state = robot.update();
-  EXPECT_EQ(std::numeric_limits<uint32_t>::max(), received_robot_state.sequence_number);
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max() + 1;
-      })
-      .spinOnce();
-  received_robot_state = robot.update();
-  EXPECT_EQ(0u, received_robot_state.sequence_number);
-
-  server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
-        robot_state.message_id = std::numeric_limits<uint32_t>::max() + 2;
-      })
-      .spinOnce();
-  received_robot_state = robot.update();
-  EXPECT_EQ(1u, received_robot_state.sequence_number);
+  EXPECT_EQ(4u, received_robot_state.time.ms());
 }
 
 TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
@@ -441,6 +412,9 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
+  std::atomic_flag send = ATOMIC_FLAG_INIT;
+  send.test_and_set();
+
   server
       .onSendUDP<RobotState>([=](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
@@ -451,12 +425,24 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
       .waitForCommand<Move>(
           [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
       .queueResponse<Move::Response>([]() { return Move::Response(Move::Status::kRejected); })
+      .doForever([&]() {
+        bool continue_sending = send.test_and_set();
+        if (continue_sending) {
+          server.onSendUDP<RobotState>([](RobotState& robot_state) {
+            robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+            robot_state.controller_mode = ControllerMode::kMotorPD;
+            robot_state.robot_mode = RobotMode::kIdle;
+          });
+        }
+        return continue_sending;
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.startMotion(Move::ControllerMode::kMotorPD,
                                  Move::MotionGeneratorMode::kCartesianVelocity,
                                  maximum_path_deviation, maximum_goal_pose_deviation),
                ControlException);
+  send.clear();
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 

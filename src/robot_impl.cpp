@@ -1,7 +1,5 @@
 #include "robot_impl.h"
 
-#include <franka/model.h>
-
 #include <sstream>
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot
@@ -32,6 +30,7 @@ RobotState Robot::Impl::update(
   bool was_running_controller = controllerRunning();
 
   sendRobotCommand(motion_command, control_command);
+
   RobotState robot_state = convertRobotState(receiveRobotState());
 
   if (robot_state.robot_mode != RobotMode::kReady &&
@@ -72,6 +71,7 @@ RobotState Robot::Impl::readOnce() {
   while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::robot::RobotState>();
   }
+
   return convertRobotState(receiveRobotState());
 }
 
@@ -117,12 +117,8 @@ research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
          latest_accepted_state.message_id == message_id_) {
     research_interface::robot::RobotState received_state =
         network_->udpRead<research_interface::robot::RobotState>();
-    uint32_t new_id = received_state.message_id;
-    uint32_t old_id = latest_accepted_state.message_id;
-    constexpr uint32_t kMaxDiff = static_cast<uint32_t>(std::numeric_limits<uint32_t>::max() * 0.1);
 
-    // Check if the received state is new and handle an overflow of the message ID.
-    if ((new_id > old_id) ? (new_id - old_id) < kMaxDiff : (old_id - new_id) > kMaxDiff) {
+    if (received_state.message_id > latest_accepted_state.message_id) {
       latest_accepted_state = received_state;
     }
   }
@@ -303,7 +299,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
-  converted.sequence_number = robot_state.message_id;
+  converted.time = Duration(robot_state.message_id);
 
   switch (robot_state.robot_mode) {
     case research_interface::robot::RobotMode::kEmergency:
