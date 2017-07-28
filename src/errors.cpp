@@ -58,58 +58,61 @@ Errors::operator bool() const noexcept {
 Errors::operator std::string() const {
   std::string error_string = "{";
 
-  error_string += joint_position_limits_violation ? "joint_position_limits_violation, " : "";
+  error_string += joint_position_limits_violation ? "\"joint_position_limits_violation\", " : "";
   error_string +=
-      cartesian_position_limits_violation ? "cartesian_position_limits_violation, " : "";
-  error_string += self_collision_avoidance_violation ? "self_collision_avoidance_violation, " : "";
-  error_string += joint_velocity_violation ? "joint_velocity_violation, " : "";
-  error_string += cartesian_velocity_violation ? "cartesian_velocity_violation, " : "";
-  error_string += force_control_safety_violation ? "force_control_safety_violation, " : "";
-  error_string += joint_reflex ? "joint_reflex, " : "";
-  error_string += cartesian_reflex ? "cartesian_reflex, " : "";
-  error_string += max_goal_pose_deviation_violation ? "max_goal_pose_deviation_violation, " : "";
-  error_string += max_path_pose_deviation_violation ? "max_path_pose_deviation_violation, " : "";
+      cartesian_position_limits_violation ? "\"cartesian_position_limits_violation\", " : "";
+  error_string +=
+      self_collision_avoidance_violation ? "\"self_collision_avoidance_violation\", " : "";
+  error_string += joint_velocity_violation ? "\"joint_velocity_violation\", " : "";
+  error_string += cartesian_velocity_violation ? "\"cartesian_velocity_violation\", " : "";
+  error_string += force_control_safety_violation ? "\"force_control_safety_violation\", " : "";
+  error_string += joint_reflex ? "\"joint_reflex\", " : "";
+  error_string += cartesian_reflex ? "\"cartesian_reflex\", " : "";
+  error_string +=
+      max_goal_pose_deviation_violation ? "\"max_goal_pose_deviation_violation\", " : "";
+  error_string +=
+      max_path_pose_deviation_violation ? "\"max_path_pose_deviation_violation\", " : "";
   error_string += cartesian_velocity_profile_safety_violation
-                      ? "cartesian_velocity_profile_safety_violation, "
+                      ? "\"cartesian_velocity_profile_safety_violation\", "
                       : "";
   error_string += joint_position_motion_generator_start_pose_invalid
-                      ? "joint_position_motion_generator_start_pose_invalid, "
+                      ? "\"joint_position_motion_generator_start_pose_invalid\", "
                       : "";
   error_string += joint_motion_generator_position_limits_violation
-                      ? "joint_motion_generator_position_limits_violation, "
+                      ? "\"joint_motion_generator_position_limits_violation\", "
                       : "";
   error_string += joint_motion_generator_velocity_limits_violation
-                      ? "joint_motion_generator_velocity_limits_violation, "
+                      ? "\"joint_motion_generator_velocity_limits_violation\", "
                       : "";
   error_string += joint_motion_generator_velocity_discontinuity
-                      ? "joint_motion_generator_velocity_discontinuity, "
+                      ? "\"joint_motion_generator_velocity_discontinuity\", "
                       : "";
   error_string += joint_motion_generator_acceleration_discontinuity
-                      ? "joint_motion_generator_acceleration_discontinuity, "
+                      ? "\"joint_motion_generator_acceleration_discontinuity\", "
                       : "";
   error_string += cartesian_position_motion_generator_start_pose_invalid
-                      ? "cartesian_position_motion_generator_start_pose_invalid, "
+                      ? "\"cartesian_position_motion_generator_start_pose_invalid\", "
                       : "";
   error_string += cartesian_motion_generator_elbow_limit_violation
-                      ? "cartesian_motion_generator_elbow_limit_violation, "
+                      ? "\"cartesian_motion_generator_elbow_limit_violation\", "
                       : "";
   error_string += cartesian_motion_generator_velocity_limits_violation
-                      ? "cartesian_motion_generator_velocity_limits_violation, "
+                      ? "\"cartesian_motion_generator_velocity_limits_violation\", "
                       : "";
   error_string += cartesian_motion_generator_velocity_discontinuity
-                      ? "cartesian_motion_generator_velocity_discontinuity, "
+                      ? "\"cartesian_motion_generator_velocity_discontinuity\", "
                       : "";
   error_string += cartesian_motion_generator_acceleration_discontinuity
-                      ? "cartesian_motion_generator_acceleration_discontinuity, "
+                      ? "\"cartesian_motion_generator_acceleration_discontinuity\", "
                       : "";
   error_string += cartesian_motion_generator_elbow_sign_inconsistent
-                      ? "cartesian_motion_generator_elbow_sign_inconsistent, "
+                      ? "\"cartesian_motion_generator_elbow_sign_inconsistent\", "
                       : "";
   error_string += cartesian_motion_generator_start_elbow_invalid
-                      ? "cartesian_motion_generator_start_elbow_invalid, "
+                      ? "\"cartesian_motion_generator_start_elbow_invalid\", "
                       : "";
   error_string += force_controller_desired_force_tolerance_violation
-                      ? "force_controller_desired_force_tolerance_violation, "
+                      ? "\"force_controller_desired_force_tolerance_violation\", "
                       : "";
 
   if (error_string.size() > 1) {
