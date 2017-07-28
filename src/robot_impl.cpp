@@ -31,7 +31,8 @@ RobotState Robot::Impl::update(
 
   RobotState robot_state = convertRobotState(receiveRobotState());
 
-  if (robot_state.robot_mode != RobotMode::kMove && was_commanding_robot) {
+  if (was_commanding_robot && (robot_state.robot_mode != RobotMode::kMove &&
+                               robot_state.robot_mode != RobotMode::kMoveWithController)) {
     // Wait until robot state shows stopped motion and controller.
     while (motionGeneratorRunning() || controllerRunning()) {
       receiveRobotState();
@@ -196,7 +197,7 @@ void Robot::Impl::startMotion(
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
   }
 
-  if (state_motion_generator_mode == decltype(state_motion_generator_mode)::kIdle &&
+  if (motion_generator_mode == decltype(motion_generator_mode)::kIdle &&
       state_controller_mode != decltype(state_controller_mode)::kExternalController) {
     throw std::invalid_argument(
         "libfranka robot: Idle motion generator without an external controller.");
@@ -278,15 +279,18 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.last_motion_errors = robot_state.reflex_reason;
   converted.time = Duration(robot_state.message_id);
 
+  converted.robot_mode = RobotMode::kOther;
   switch (robot_state.robot_mode) {
-    case research_interface::robot::RobotMode::kEmergency:
-      converted.robot_mode = RobotMode::kUserStopped;
+    case research_interface::robot::RobotMode::kOther:
+      converted.robot_mode = RobotMode::kOther;
       break;
     case research_interface::robot::RobotMode::kIdle:
       converted.robot_mode = RobotMode::kIdle;
     case research_interface::robot::RobotMode::kMove:
-    case research_interface::robot::RobotMode::kMoveFci:
       converted.robot_mode = RobotMode::kMove;
+      break;
+    case research_interface::robot::RobotMode::kMoveWithController:
+      converted.robot_mode = RobotMode::kMoveWithController;
       break;
     case research_interface::robot::RobotMode::kGuiding:
       converted.robot_mode = RobotMode::kGuiding;
@@ -294,14 +298,10 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
     case research_interface::robot::RobotMode::kReflex:
       converted.robot_mode = RobotMode::kReflex;
       break;
+    case research_interface::robot::RobotMode::kUserStopped:
+      converted.robot_mode = RobotMode::kUserStopped;
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
       converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
-      break;
-    case research_interface::robot::RobotMode::kEmergency2:
-    case research_interface::robot::RobotMode::kForce:
-    case research_interface::robot::RobotMode::kMoveForce:
-    case research_interface::robot::RobotMode::kRcuInputError:
-      converted.robot_mode = RobotMode::kOther;
       break;
   }
 
