@@ -2,7 +2,8 @@
 
 #include <utility>
 
-#include "motion_loop.h"
+#include "control_loop.h"
+#include "motion_generator_loop.h"
 #include "network.h"
 #include "robot_impl.h"
 
@@ -23,68 +24,71 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
 }
 
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
-  MotionLoop<Torques> loop(*impl_, std::move(control_callback));
+  ControlLoop loop(*impl_, std::move(control_callback));
   loop();
 }
 
 void Robot::control(
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
     std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
-  MotionLoop<JointPositions> loop(*impl_, std::move(control_callback),
-                                  std::move(motion_generator_callback));
+  MotionGeneratorLoop<JointPositions> loop(*impl_, std::move(control_callback),
+                                           std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
-  MotionLoop<JointPositions> loop(*impl_, controller_mode, std::move(motion_generator_callback));
+  MotionGeneratorLoop<JointPositions> loop(*impl_, controller_mode,
+                                           std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
     std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
-  MotionLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                   std::move(motion_generator_callback));
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, std::move(control_callback),
+                                            std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
-  MotionLoop<JointVelocities> loop(*impl_, controller_mode, std::move(motion_generator_callback));
+  MotionGeneratorLoop<JointVelocities> loop(*impl_, controller_mode,
+                                            std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
     std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
-  MotionLoop<CartesianPose> loop(*impl_, std::move(control_callback),
-                                 std::move(motion_generator_callback));
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, std::move(control_callback),
+                                          std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
-  MotionLoop<CartesianPose> loop(*impl_, controller_mode, std::move(motion_generator_callback));
+  MotionGeneratorLoop<CartesianPose> loop(*impl_, controller_mode,
+                                          std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                         motion_generator_callback,
                     std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
-  MotionLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
-                                       std::move(motion_generator_callback));
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
+                                                std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                         motion_generator_callback,
                     ControllerMode controller_mode) {
-  MotionLoop<CartesianVelocities> loop(*impl_, controller_mode,
-                                       std::move(motion_generator_callback));
+  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, controller_mode,
+                                                std::move(motion_generator_callback));
   loop();
 }
 

@@ -43,6 +43,8 @@ add_subdirectory(lib/research-interface-common)
 
 ## Library
 add_library(franka SHARED
+  src/control_loop.cpp
+  src/control_loop_base.cpp
   src/control_types.cpp
   src/duration.cpp
   src/errors.cpp
@@ -52,7 +54,7 @@ add_library(franka SHARED
   src/library_loader.cpp
   src/model.cpp
   src/model_library.cpp
-  src/motion_loop.cpp
+  src/motion_generator_loop.cpp
   src/network.cpp
   src/robot.cpp
   src/robot_impl.cpp
