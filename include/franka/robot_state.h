@@ -173,7 +173,7 @@ struct RobotState {
 };
 
 /**
- * Streams the RobotState in JSON format: {"field_name_1": [0,0,0,0,0,0,0],
+ * Streams the robot state as JSON object: {"field_name_1": [0,0,0,0,0,0,0],
  * "field_name_2": [0,0,0,0,0,0], ...}
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
