@@ -15,9 +15,12 @@ using namespace research_interface::robot;
 using franka::ControlException;
 using franka::NetworkException;
 
-class Robot : public ::franka::Robot {
- public:
-  using ::franka::Robot::Impl;
+struct Robot : public ::franka::Robot {
+  struct Impl : public ::franka::Robot::Impl {
+    using ::franka::Robot::Impl::Impl;
+    using ::franka::Robot::Impl::controllerRunning;
+    using ::franka::Robot::Impl::motionGeneratorRunning;
+  };
 };
 
 TEST(RobotImpl, CanReceiveRobotState) {

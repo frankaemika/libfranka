@@ -32,8 +32,6 @@ class Robot::Impl : public RobotControl {
   RobotState readOnce();
 
   ServerVersion serverVersion() const noexcept;
-  bool motionGeneratorRunning() const noexcept;
-  bool controllerRunning() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
   void startController() override;
@@ -53,6 +51,10 @@ class Robot::Impl : public RobotControl {
   void executeCommand(const typename T::Request& request);
 
   Model loadModel();
+
+ protected:
+  bool motionGeneratorRunning() const noexcept;
+  bool controllerRunning() const noexcept;
 
  private:
   RobotState updateUnsafe(
