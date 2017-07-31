@@ -25,7 +25,6 @@ class GripperCommand : public ::testing::Test {
   bool compare(const typename T::Request& request_one, const typename T::Request& request_two);
   typename T::Response createResponse(const typename T::Request& request,
                                       const typename T::Status status);
-  void checkUnsuccessful(Gripper& gripper);
 };
 
 template <typename T>
@@ -75,8 +74,7 @@ template <>
 bool GripperCommand<Move>::executeCommand(Gripper& gripper) {
   double width = 0.05;
   double speed = 0.1;
-  gripper.move(width, speed);
-  return true;
+  return gripper.move(width, speed);
 }
 
 template <>
@@ -89,30 +87,18 @@ bool GripperCommand<Grasp>::executeCommand(Gripper& gripper) {
 
 template <>
 bool GripperCommand<Stop>::executeCommand(Gripper& gripper) {
-  gripper.stop();
-  return true;
+  return gripper.stop();
 }
 
 template <>
 bool GripperCommand<Homing>::executeCommand(Gripper& gripper) {
-  gripper.homing();
-  return true;
+  return gripper.homing();
 }
 
 template <typename T>
 typename T::Response GripperCommand<T>::createResponse(const typename T::Request&,
                                                        const typename T::Status status) {
   return typename T::Response(status);
-}
-
-template <typename T>
-void GripperCommand<T>::checkUnsuccessful(Gripper& gripper) {
-  EXPECT_THROW(executeCommand(gripper), CommandException);
-}
-
-template <>
-void GripperCommand<Grasp>::checkUnsuccessful(Gripper& gripper) {
-  EXPECT_FALSE(executeCommand(gripper));
 }
 
 using CommandTypes = ::testing::Types<Homing, Move, Grasp, Stop>;
@@ -164,5 +150,5 @@ TYPED_TEST(GripperCommand, CanSendAndReceiveUnsucessful) {
           })
       .spinOnce();
 
-  TestFixture::checkUnsuccessful(gripper);
+  EXPECT_FALSE(TestFixture::executeCommand(gripper));
 }
