@@ -27,6 +27,8 @@ class Robot::Impl : public RobotControl {
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) override;
 
+  void throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) override;
+
   RobotState readOnce();
 
   ServerVersion serverVersion() const noexcept;
@@ -37,12 +39,12 @@ class Robot::Impl : public RobotControl {
   void startController() override;
   void stopController() override;
 
-  void startMotion(
+  uint32_t startMotion(
       research_interface::robot::Move::ControllerMode controller_mode,
       research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
       const research_interface::robot::Move::Deviation& maximum_path_deviation,
       const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) override;
-  void stopMotion() override;
+  void stopMotion(uint32_t motion_id) override;
 
   template <typename T, typename... TArgs>
   void executeCommand(TArgs... /* args */);
@@ -56,6 +58,7 @@ class Robot::Impl : public RobotControl {
   RobotState updateUnsafe(
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr);
+  void throwOnMotionErrorUnsafe(const RobotState& robot_state, const uint32_t* motion_id);
 
   template <typename T>
   void handleCommandResponse(const typename T::Response& response) const;
@@ -76,7 +79,6 @@ class Robot::Impl : public RobotControl {
   uint64_t message_id_;
 
   std::atomic<uint32_t> command_id_{0};
-  uint32_t move_command_id_;
 };
 
 template <typename T>

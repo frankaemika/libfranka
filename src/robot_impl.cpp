@@ -33,27 +33,32 @@ RobotState Robot::Impl::updateUnsafe(
     const research_interface::robot::ControllerCommand* control_command) {
   network_->tcpThrowIfConnectionClosed();
 
-  bool was_running_motion_generator = motionGeneratorRunning();
-  bool was_running_controller = controllerRunning();
-
   sendRobotCommand(motion_command, control_command);
 
-  RobotState robot_state = convertRobotState(receiveRobotState());
+  return convertRobotState(receiveRobotState());
+}
 
-  if (robot_state.robot_mode != RobotMode::kReady &&
-      (was_running_motion_generator || was_running_controller)) {
+void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) {
+  std::lock_guard<std::mutex> _(mutex_);
+  throwOnMotionErrorUnsafe(robot_state, motion_id);
+}
+
+void Robot::Impl::throwOnMotionErrorUnsafe(const RobotState& robot_state,
+                                           const uint32_t* motion_id) {
+  if (robot_state.robot_mode != RobotMode::kReady) {
     // Wait until robot state shows stopped motion and controller.
     while (motionGeneratorRunning() || controllerRunning()) {
       receiveRobotState();
     }
 
-    // If a motion generator was running and the robot state shows an error,
-    // we will receive a TCP response to the Move command.
-    if (was_running_motion_generator) {
+    // TODO (fwalch): Change from uint32_t* to uint32_t when RCU 16 changes are in.
+    if (motion_id != nullptr) {
+      // If a motion generator was running and the robot state shows an error,
+      // we will receive a TCP response to the Move command.
       try {
         handleCommandResponse<research_interface::robot::Move>(
-            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(
-                move_command_id_));
+            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(*motion_id,
+                                                                                  true));
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
         if (robot_state.robot_mode == RobotMode::kReflex) {
@@ -70,8 +75,6 @@ RobotState Robot::Impl::updateUnsafe(
     }
     throw ControlException("libfranka robot: control aborted");
   }
-
-  return robot_state;
 }
 
 RobotState Robot::Impl::readOnce() {
@@ -159,7 +162,7 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
-void Robot::Impl::startMotion(
+uint32_t Robot::Impl::startMotion(
     research_interface::robot::Move::ControllerMode controller_mode,
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
@@ -210,14 +213,14 @@ void Robot::Impl::startMotion(
 
   executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
-  move_command_id_ = command_id_;
+  const uint32_t move_command_id = command_id_;
 
   RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
     try {
       if (network_->tcpReceiveResponse<research_interface::robot::Move>(
-              move_command_id_,
+              move_command_id,
               std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                         std::placeholders::_1))) {
         break;
@@ -231,10 +234,13 @@ void Robot::Impl::startMotion(
     }
 
     robot_state = updateUnsafe();
+    throwOnMotionErrorUnsafe(robot_state, &move_command_id);
   }
+
+  return move_command_id;
 }
 
-void Robot::Impl::stopMotion() {
+void Robot::Impl::stopMotion(uint32_t motion_id) {
   std::lock_guard<std::mutex> _(mutex_);
   if (!motionGeneratorRunning()) {
     return;
@@ -253,7 +259,7 @@ void Robot::Impl::stopMotion() {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(move_command_id_));
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id, true));
 }
 
 void Robot::Impl::startController() {
@@ -267,7 +273,8 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    updateUnsafe();
+    auto robot_state = updateUnsafe();
+    throwOnMotionErrorUnsafe(robot_state, nullptr);
   }
 }
 
@@ -282,7 +289,8 @@ void Robot::Impl::stopController() {
 
   research_interface::robot::ControllerCommand command{};
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    updateUnsafe(nullptr, &command);
+    auto robot_state = updateUnsafe(nullptr, &command);
+    throwOnMotionErrorUnsafe(robot_state, nullptr);
   }
 }
 

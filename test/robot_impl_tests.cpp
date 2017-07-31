@@ -483,8 +483,9 @@ TEST(RobotImpl, CanStopMotion) {
       })
       .spinOnce();
 
-  robot.startMotion(Move::ControllerMode::kMotorPD, Move::MotionGeneratorMode::kCartesianVelocity,
-                    maximum_path_deviation, maximum_goal_pose_deviation);
+  auto id = robot.startMotion(Move::ControllerMode::kMotorPD,
+                              Move::MotionGeneratorMode::kCartesianVelocity, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
 
   server
@@ -513,7 +514,7 @@ TEST(RobotImpl, CanStopMotion) {
       })
       .spinOnce();
 
-  robot.stopMotion();
+  robot.stopMotion(id);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
@@ -542,9 +543,9 @@ TEST(RobotImpl, CanStopMotionWithController) {
       })
       .spinOnce();
 
-  robot.startMotion(Move::ControllerMode::kExternalController,
-                    Move::MotionGeneratorMode::kCartesianVelocity, maximum_path_deviation,
-                    maximum_goal_pose_deviation);
+  auto id = robot.startMotion(Move::ControllerMode::kExternalController,
+                              Move::MotionGeneratorMode::kCartesianVelocity, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -571,7 +572,7 @@ TEST(RobotImpl, CanStopMotionWithController) {
           [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); })
       .spinOnce();
 
-  robot.stopMotion();
+  robot.stopMotion(id);
   EXPECT_FALSE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -674,8 +675,9 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
       })
       .spinOnce();
 
-  robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
-                    maximum_path_deviation, maximum_goal_pose_deviation);
+  auto id = robot.startMotion(Move::ControllerMode::kJointPosition,
+                              Move::MotionGeneratorMode::kJointPosition, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
 
   MotionGeneratorCommand motion_command{};
@@ -692,7 +694,8 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
+  auto robot_state = robot.update(&motion_command, nullptr);
+  EXPECT_THROW(robot.throwOnMotionError(robot_state, &id), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
@@ -730,7 +733,8 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  EXPECT_THROW(robot.update(nullptr, &control_command), ControlException);
+  auto robot_state = robot.update(nullptr, &control_command);
+  EXPECT_THROW(robot.throwOnMotionError(robot_state, nullptr), ControlException);
   EXPECT_FALSE(robot.controllerRunning());
 }
 
@@ -761,8 +765,9 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
         .spinOnce();
 
     EXPECT_FALSE(robot.motionGeneratorRunning());
-    robot.startMotion(Move::ControllerMode::kMotorPD, Move::MotionGeneratorMode::kCartesianVelocity,
-                      maximum_path_deviation, maximum_goal_pose_deviation);
+    auto id = robot.startMotion(Move::ControllerMode::kMotorPD,
+                                Move::MotionGeneratorMode::kCartesianVelocity,
+                                maximum_path_deviation, maximum_goal_pose_deviation);
     EXPECT_TRUE(robot.motionGeneratorRunning());
 
     server
@@ -792,7 +797,7 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
         })
         .spinOnce();
 
-    robot.stopMotion();
+    robot.stopMotion(id);
     EXPECT_FALSE(robot.motionGeneratorRunning());
   }
 }
@@ -818,8 +823,9 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
       })
       .spinOnce();
 
-  robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
-                    maximum_path_deviation, maximum_goal_pose_deviation);
+  auto id = robot.startMotion(Move::ControllerMode::kJointPosition,
+                              Move::MotionGeneratorMode::kJointPosition, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
 
   MotionGeneratorCommand motion_command{};
@@ -836,7 +842,8 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
+  auto robot_state = robot.update(&motion_command, nullptr);
+  EXPECT_THROW(robot.throwOnMotionError(robot_state, &id), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 
   server
@@ -890,7 +897,8 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  EXPECT_THROW(robot.update(nullptr, &control_command), ControlException);
+  auto robot_state = robot.update(nullptr, &control_command);
+  EXPECT_THROW(robot.throwOnMotionError(robot_state, nullptr), ControlException);
   EXPECT_FALSE(robot.controllerRunning());
 
   server
