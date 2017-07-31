@@ -56,7 +56,7 @@ Gripper::ServerVersion Gripper::serverVersion() const noexcept {
   return ri_version_;
 }
 
-void Gripper::homing() {
+void Gripper::homing() const {
   using research_interface::gripper::Homing;
   network_->tcpSendRequest<Homing>({});
   Homing::Response response = network_->tcpBlockingReceiveResponse<Homing>();
@@ -66,7 +66,7 @@ void Gripper::homing() {
   }
 }
 
-bool Gripper::grasp(double width, double speed, double force) {
+bool Gripper::grasp(double width, double speed, double force) const {
   using research_interface::gripper::Grasp;
   network_->tcpSendRequest<Grasp>({width, speed, force});
   Grasp::Response response = network_->tcpBlockingReceiveResponse<Grasp>();
@@ -74,7 +74,7 @@ bool Gripper::grasp(double width, double speed, double force) {
   return handleCommandResponse<Grasp>(response);
 }
 
-void Gripper::move(double width, double speed) {
+void Gripper::move(double width, double speed) const {
   using research_interface::gripper::Move;
   network_->tcpSendRequest<Move>({width, speed});
   Move::Response response = network_->tcpBlockingReceiveResponse<Move>();
@@ -84,7 +84,7 @@ void Gripper::move(double width, double speed) {
   }
 }
 
-void Gripper::stop() {
+void Gripper::stop() const {
   using research_interface::gripper::Stop;
   network_->tcpSendRequest<Stop>({});
   Stop::Response response = network_->tcpBlockingReceiveResponse<Stop>();
@@ -94,7 +94,7 @@ void Gripper::stop() {
   }
 }
 
-GripperState Gripper::readOnce() {
+GripperState Gripper::readOnce() const {
   // Delete old data from the UDP buffer.
   while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::gripper::GripperState>();

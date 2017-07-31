@@ -51,7 +51,7 @@ class Gripper {
    *
    * @see GripperState
    */
-  void homing();
+  void homing() const;
 
   /**
    * Grasp an object.
@@ -64,7 +64,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool grasp(double width, double speed, double force);
+  bool grasp(double width, double speed, double force) const;
 
   /**
    * Moves the gripper fingers to a specified width.
@@ -74,14 +74,14 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  void move(double width, double speed);
+  void move(double width, double speed) const;
 
   /**
    * Stops applying force.
    *
    * @throw CommandException if an error occurred.
    */
-  void stop();
+  void stop() const;
 
   /**
    * Waits for a gripper state update and returns it.
@@ -93,7 +93,7 @@ class Gripper {
    *
    * @see GripperState
    */
-  GripperState readOnce();
+  GripperState readOnce() const;
 
   /**
    * Returns the software version reported by the connected server.
