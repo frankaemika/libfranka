@@ -45,10 +45,10 @@ class Robot::Impl : public RobotControl {
   void stopMotion(uint32_t motion_id) override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs... /* args */);
+  uint32_t executeCommand(TArgs... /* args */);
 
   template <typename T>
-  void executeCommand(const typename T::Request& request);
+  uint32_t executeCommand(const typename T::Request& request);
 
   Model loadModel();
 
@@ -76,8 +76,8 @@ class Robot::Impl : public RobotControl {
   uint16_t ri_version_;
 
   std::mutex mutex_;
-  std::atomic<research_interface::robot::MotionGeneratorMode> motion_generator_mode_;
-  std::atomic<research_interface::robot::ControllerMode> controller_mode_;
+  research_interface::robot::MotionGeneratorMode motion_generator_mode_;
+  research_interface::robot::ControllerMode controller_mode_;
   uint64_t message_id_;
 
   std::atomic<uint32_t> command_id_{0};
@@ -145,36 +145,37 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 }
 
 template <typename T, typename... TArgs>
-void Robot::Impl::executeCommand(TArgs... args) {
-  command_id_++;
+uint32_t Robot::Impl::executeCommand(TArgs... args) {
+  uint32_t command_id = command_id_++;
 
-  typename T::Request request(command_id_, std::forward<TArgs>(args)...);
-  executeCommand<T>(request);
+  typename T::Request request(command_id, std::forward<TArgs>(args)...);
+  return executeCommand<T>(request);
 }
 
 template <typename T>
-void Robot::Impl::executeCommand(const typename T::Request& request) {
+uint32_t Robot::Impl::executeCommand(const typename T::Request& request) {
   network_->tcpSendRequest<T>(request);
   typename T::Response response =
       network_->tcpBlockingReceiveResponse<T>(request.header.command_id);
 
   handleCommandResponse<T>(response);
+  return request.header.command_id;
 }
 
 template <>
-inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianLimit,
-                                        int32_t,
-                                        VirtualWallCuboid*>(
+inline uint32_t Robot::Impl::executeCommand<research_interface::robot::GetCartesianLimit,
+                                            int32_t,
+                                            VirtualWallCuboid*>(
     int32_t id,
     VirtualWallCuboid* virtual_wall_cuboid) {
-  command_id_++;
+  uint32_t command_id = command_id_++;
 
-  research_interface::robot::GetCartesianLimit::Request request(command_id_, id);
+  research_interface::robot::GetCartesianLimit::Request request(command_id, id);
   network_->tcpSendRequest<research_interface::robot::GetCartesianLimit>(request);
 
   research_interface::robot::GetCartesianLimit::Response response =
       network_->tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>(
-          command_id_);
+          command_id);
   virtual_wall_cuboid->p_frame = response.object_frame;
   virtual_wall_cuboid->p_max = response.object_p_max;
   virtual_wall_cuboid->p_min = response.object_p_min;
@@ -182,6 +183,7 @@ inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianL
   virtual_wall_cuboid->id = id;
 
   handleCommandResponse<research_interface::robot::GetCartesianLimit>(response);
+  return command_id;
 }
 
 }  // namespace franka

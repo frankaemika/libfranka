@@ -211,9 +211,8 @@ uint32_t Robot::Impl::startMotion(
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
   }
 
-  executeCommand<research_interface::robot::Move>(
+  const uint32_t move_command_id = executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
-  const uint32_t move_command_id = command_id_;
 
   RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
