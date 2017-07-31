@@ -52,7 +52,7 @@ uint16_t Network::udpPort() const noexcept {
 }
 
 void Network::tcpThrowIfConnectionClosed() try {
-  std::unique_lock<std::recursive_mutex> lock(tcp_mutex_, std::try_to_lock);
+  std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {
     return;
   }
@@ -69,7 +69,11 @@ void Network::tcpThrowIfConnectionClosed() try {
 }
 
 void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
-  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
+  std::lock_guard<std::mutex> _(tcp_mutex_);
+  return tcpReceiveIntoBufferUnsafe(buffer, read_size);
+}
+
+void Network::tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size) {
   size_t bytes_read = 0;
   try {
     while (bytes_read < read_size) {
@@ -92,7 +96,7 @@ void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
 }
 
 int Network::udpAvailableData() {
-  std::lock_guard<std::recursive_mutex> _(udp_mutex_);
+  std::lock_guard<std::mutex> _(udp_mutex_);
   return udp_socket_.available();
 }
 

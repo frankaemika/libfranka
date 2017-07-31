@@ -6,6 +6,7 @@
 #include <functional>
 #include <mutex>
 #include <sstream>
+#include <thread>
 
 #include <franka/exception.h>
 
@@ -49,20 +50,22 @@ class Network {
   void tcpSendRequest(TArgs&&... args);
 
  private:
+  void tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size);
+
   template <typename T>
-  bool tcpPeekHeader(T* header);
+  bool tcpPeekHeaderUnsafe(T* header);
 
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
 
-  std::recursive_mutex udp_mutex_;
-  std::recursive_mutex tcp_mutex_;
+  std::mutex udp_mutex_;
+  std::mutex tcp_mutex_;
 };
 
 template <typename T>
 T Network::udpRead() try {
-  std::lock_guard<std::recursive_mutex> _(udp_mutex_);
+  std::lock_guard<std::mutex> _(udp_mutex_);
 
   std::array<uint8_t, sizeof(T)> buffer;
 
@@ -81,7 +84,7 @@ T Network::udpRead() try {
 
 template <typename T>
 void Network::udpSend(const T& data) try {
-  std::lock_guard<std::recursive_mutex> _(udp_mutex_);
+  std::lock_guard<std::mutex> _(udp_mutex_);
 
   int bytes_sent = udp_socket_.sendTo(&data, sizeof(data), udp_server_address_);
   if (bytes_sent != sizeof(data)) {
@@ -94,7 +97,7 @@ void Network::udpSend(const T& data) try {
 
 template <typename T, typename... TArgs>
 void Network::tcpSendRequest(TArgs&&... args) try {
-  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
+  std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::Request request(std::forward<TArgs>(args)...);
   tcp_socket_.sendBytes(&request, sizeof(request));
@@ -104,9 +107,7 @@ void Network::tcpSendRequest(TArgs&&... args) try {
 }
 
 template <typename T>
-bool Network::tcpPeekHeader(T* header) try {
-  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
-
+bool Network::tcpPeekHeaderUnsafe(T* header) try {
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ) &&
       tcp_socket_.available() >= static_cast<int>(sizeof(T))) {
     int rv = tcp_socket_.receiveBytes(header, sizeof(T), MSG_PEEK);
@@ -124,16 +125,16 @@ bool Network::tcpPeekHeader(T* header) try {
 template <typename T>
 bool Network::tcpReceiveResponse(uint32_t command_id,
                                  std::function<void(const typename T::Response&)> handler) {
-  std::lock_guard<std::recursive_mutex> _(tcp_mutex_);
+  std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::Header header;
-  if (!tcpPeekHeader(&header) || header.command != T::kCommand || header.command_id != command_id) {
+  if (!tcpPeekHeaderUnsafe(&header) || header.command != T::kCommand || header.command_id != command_id) {
     return false;
   }
 
   // We received the header, so now we have to block and wait for the rest of the message.
   std::array<uint8_t, sizeof(typename T::Response)> buffer;
-  tcpReceiveIntoBuffer(buffer.data(), buffer.size());
+  tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
 
   typename T::Response response = *reinterpret_cast<typename T::Response*>(buffer.data());
 
@@ -146,17 +147,19 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
   std::array<uint8_t, sizeof(typename T::Response)> buffer;
 
   // Wait until we receive a packet with the right function header.
-  std::unique_lock<std::recursive_mutex> lock(tcp_mutex_, std::defer_lock);
+  std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   typename T::Header header;
   while (true) {
     lock.lock();
-    if (tcpPeekHeader(&header) && header.command == T::kCommand &&
+    if (tcpPeekHeaderUnsafe(&header) && header.command == T::kCommand &&
         header.command_id == command_id) {
       break;
     }
     lock.unlock();
+    std::this_thread::yield();
+    // TODO (fwalch): avoid busy waiting?
   }
-  tcpReceiveIntoBuffer(buffer.data(), buffer.size());
+  tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
   return *reinterpret_cast<const typename T::Response*>(buffer.data());
 }
 
