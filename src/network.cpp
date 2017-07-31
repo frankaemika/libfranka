@@ -96,7 +96,6 @@ void Network::tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size) {
 }
 
 int Network::udpAvailableData() {
-  std::lock_guard<std::mutex> _(udp_mutex_);
   return udp_socket_.available();
 }
 

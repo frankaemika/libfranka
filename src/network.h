@@ -59,14 +59,11 @@ class Network {
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
 
-  std::mutex udp_mutex_;
   std::mutex tcp_mutex_;
 };
 
 template <typename T>
 T Network::udpRead() try {
-  std::lock_guard<std::mutex> _(udp_mutex_);
-
   std::array<uint8_t, sizeof(T)> buffer;
 
   int bytes_received =
@@ -84,8 +81,6 @@ T Network::udpRead() try {
 
 template <typename T>
 void Network::udpSend(const T& data) try {
-  std::lock_guard<std::mutex> _(udp_mutex_);
-
   int bytes_sent = udp_socket_.sendTo(&data, sizeof(data), udp_server_address_);
   if (bytes_sent != sizeof(data)) {
     throw NetworkException("libfranka: could not send UDP data");
