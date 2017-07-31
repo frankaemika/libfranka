@@ -43,9 +43,12 @@ class Robot::Impl : public RobotControl {
   void stopMotion() override;
 
   template <typename T, typename... TArgs>
-  void executeCommand(TArgs... /* args */) const;
+  void executeCommand(TArgs... /* args */);
 
-  Model loadModel() const;
+  template <typename T>
+  void executeCommand(const typename T::Request& request);
+
+  Model loadModel();
 
  private:
   template <typename T>
@@ -61,9 +64,13 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
+  uint32_t move_command_id_;
+
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;
   uint64_t message_id_;
+
+  uint32_t command_id_ = 0;
 };
 
 template <typename T>
@@ -128,11 +135,18 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 }
 
 template <typename T, typename... TArgs>
-void Robot::Impl::executeCommand(TArgs... args) const {
-  typename T::Request request(std::forward<TArgs>(args)...);
-  network_->tcpSendRequest<T>(request);
+void Robot::Impl::executeCommand(TArgs... args) {
+  command_id_++;
 
-  typename T::Response response = network_->tcpBlockingReceiveResponse<T>();
+  typename T::Request request(command_id_, std::forward<TArgs>(args)...);
+  executeCommand<T>(request);
+}
+
+template <typename T>
+void Robot::Impl::executeCommand(const typename T::Request& request) {
+  network_->tcpSendRequest<T>(request);
+  typename T::Response response =
+      network_->tcpBlockingReceiveResponse<T>(request.header.command_id);
 
   handleCommandResponse<T>(response);
 }
@@ -142,12 +156,15 @@ inline void Robot::Impl::executeCommand<research_interface::robot::GetCartesianL
                                         int32_t,
                                         VirtualWallCuboid*>(
     int32_t id,
-    VirtualWallCuboid* virtual_wall_cuboid) const {
-  research_interface::robot::GetCartesianLimit::Request request(id);
+    VirtualWallCuboid* virtual_wall_cuboid) {
+  command_id_++;
+
+  research_interface::robot::GetCartesianLimit::Request request(command_id_, id);
   network_->tcpSendRequest<research_interface::robot::GetCartesianLimit>(request);
 
   research_interface::robot::GetCartesianLimit::Response response =
-      network_->tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>();
+      network_->tcpBlockingReceiveResponse<research_interface::robot::GetCartesianLimit>(
+          command_id_);
   virtual_wall_cuboid->p_frame = response.object_frame;
   virtual_wall_cuboid->p_max = response.object_p_max;
   virtual_wall_cuboid->p_min = response.object_p_min;

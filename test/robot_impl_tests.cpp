@@ -96,7 +96,7 @@ TEST(RobotImpl, CanStartMotion) {
         EXPECT_EQ(Move::ControllerMode::kJointPosition, request.controller_mode);
         EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
         EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
-        return Move::Response(Move::Status::kMotionStarted);
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
       })
       .spinOnce();
 
@@ -152,7 +152,7 @@ TEST(RobotImpl, CanStartMotionWithController) {
         EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
         EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
         EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
-        return Move::Response(Move::Status::kMotionStarted);
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
       })
       .spinOnce();
 
@@ -191,7 +191,8 @@ TEST(RobotImpl, CanStartController) {
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kExternalController, request.mode);
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -239,8 +240,9 @@ TEST(RobotImpl, CanNotStartMultipleMotions) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([](const Move::Request& request) {
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   EXPECT_NO_THROW(robot.startMotion(Move::ControllerMode::kJointImpedance,
@@ -262,8 +264,9 @@ TEST(RobotImpl, CanNotStartMultipleControllers) {
         robot_state.robot_mode = RobotMode::kIdle;
       })
       .spinOnce()
-      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request&) {
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -291,8 +294,9 @@ TEST(RobotImpl, CanSendMotionGeneratorCommand) {
         robot_state.message_id = message_id;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([](const Move::Request& request) {
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kJointImpedance,
@@ -332,8 +336,9 @@ TEST(RobotImpl, CanSendControllerCommand) {
         robot_state.message_id = message_id;
       })
       .spinOnce()
-      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request&) {
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -375,8 +380,9 @@ TEST(RobotImpl, CanSendMotionGeneratorAndControlCommand) {
         robot_state.message_id = message_id;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([](const Move::Request& request) {
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kExternalController,
@@ -409,6 +415,8 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
   randomRobotCommand(sent_command);
   sent_command.motion.motion_generation_finished = false;
 
+  uint32_t move_command_id;
+
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
@@ -422,9 +430,12 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
         robot_state.robot_mode = RobotMode::kIdle;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
-      .queueResponse<Move::Response>([]() { return Move::Response(Move::Status::kRejected); })
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
+      })
+      .queueResponse<Move::Response>(
+          [&]() { return Move::Response(move_command_id, Move::Status::kRejected); })
       .doForever([&]() {
         bool continue_sending = send.test_and_set();
         if (continue_sending) {
@@ -454,6 +465,8 @@ TEST(RobotImpl, CanStopMotion) {
   randomRobotCommand(sent_command);
   sent_command.motion.motion_generation_finished = false;
 
+  uint32_t move_command_id;
+
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
@@ -464,8 +477,10 @@ TEST(RobotImpl, CanStopMotion) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kMotorPD, Move::MotionGeneratorMode::kCartesianVelocity,
@@ -490,7 +505,8 @@ TEST(RobotImpl, CanStopMotion) {
         robot_state.controller_mode = ControllerMode::kMotorPD;
         robot_state.robot_mode = RobotMode::kMove;
       })
-      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
+      .sendResponse<Move::Response>(
+          [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand& command) {
         EXPECT_TRUE(command.motion.motion_generation_finished);
@@ -509,6 +525,8 @@ TEST(RobotImpl, CanStopMotionWithController) {
   randomRobotCommand(sent_command);
   sent_command.motion.motion_generation_finished = false;
 
+  uint32_t move_command_id;
+
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
   server
@@ -518,8 +536,10 @@ TEST(RobotImpl, CanStopMotionWithController) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kExternalController,
@@ -547,7 +567,8 @@ TEST(RobotImpl, CanStopMotionWithController) {
         robot_state.robot_mode = RobotMode::kIdle;
       })
       .spinOnce()
-      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
+      .sendResponse<Move::Response>(
+          [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); })
       .spinOnce();
 
   robot.stopMotion();
@@ -569,7 +590,8 @@ TEST(RobotImpl, CanStopMotionWithController) {
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kJointImpedance, request.mode);
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -594,8 +616,9 @@ TEST(RobotImpl, CanStopController) {
         robot_state.robot_mode = RobotMode::kIdle;
       })
       .spinOnce()
-      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request&) {
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -619,8 +642,9 @@ TEST(RobotImpl, CanStopController) {
         robot_state.robot_mode = RobotMode::kIdle;
       })
       .spinOnce()
-      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request&) {
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+      .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -636,6 +660,7 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
 
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
+  uint32_t move_command_id;
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
@@ -643,8 +668,10 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [=](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
@@ -659,7 +686,8 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
         robot_state.errors[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
-      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move::Response>(
+          [&]() { return Move::Response(move_command_id, Move::Status::kAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -683,7 +711,8 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kExternalController, request.mode);
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -717,6 +746,7 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
   for (int i = 0; i < 3; i++) {
+    uint32_t move_command_id;
     server
         .onSendUDP<RobotState>([](RobotState& robot_state) {
           robot_state.motion_generator_mode = MotionGeneratorMode::kCartesianVelocity;
@@ -724,8 +754,10 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
           robot_state.robot_mode = RobotMode::kMove;
         })
         .spinOnce()
-        .waitForCommand<Move>(
-            [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+        .waitForCommand<Move>([&](const Move::Request& request) {
+          move_command_id = request.header.command_id;
+          return Move::Response(move_command_id, Move::Status::kMotionStarted);
+        })
         .spinOnce();
 
     EXPECT_FALSE(robot.motionGeneratorRunning());
@@ -752,7 +784,8 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
           robot_state.controller_mode = ControllerMode::kMotorPD;
           robot_state.robot_mode = RobotMode::kMove;
         })
-        .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); })
+        .sendResponse<Move::Response>(
+            [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); })
         .spinOnce()
         .onReceiveRobotCommand([](const RobotCommand& command) {
           EXPECT_TRUE(command.motion.motion_generation_finished);
@@ -771,6 +804,7 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
 
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort));
 
+  uint32_t move_command_id;
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
@@ -778,8 +812,10 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [=](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
@@ -794,7 +830,8 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
         robot_state.errors[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
-      .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move::Response>(
+          [&]() { return Move::Response(move_command_id, Move::Status::kAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -809,8 +846,9 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [=](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([=](const Move::Request& request) {
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kJointPosition, Move::MotionGeneratorMode::kJointPosition,
@@ -833,7 +871,8 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kExternalController, request.mode);
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 
@@ -862,7 +901,8 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
       .spinOnce()
       .waitForCommand<SetControllerMode>([](const SetControllerMode::Request& request) {
         EXPECT_EQ(SetControllerMode::ControllerMode::kExternalController, request.mode);
-        return SetControllerMode::Response(SetControllerMode::Status::kSuccess);
+        return SetControllerMode::Response(request.header.command_id,
+                                           SetControllerMode::Status::kSuccess);
       })
       .spinOnce();
 

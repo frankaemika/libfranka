@@ -44,14 +44,15 @@ class Gripper {
 
   /**
    * Performs homing of the gripper.
+   *
    * After changing the gripper fingers, a homing needs to be done.
    * This is needed to estimate the maximum grasping width.
    *
    * @throw CommandException if an error occurred.
    *
-   * @see GripperState
+   * @see GripperState for the maximum grasping width.
    */
-  void homing() const;
+  void homing();
 
   /**
    * Grasp an object.
@@ -64,7 +65,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool grasp(double width, double speed, double force) const;
+  bool grasp(double width, double speed, double force);
 
   /**
    * Moves the gripper fingers to a specified width.
@@ -74,14 +75,14 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  void move(double width, double speed) const;
+  void move(double width, double speed);
 
   /**
-   * Stops applying force.
+   * Stops a currently running gripper move or grasp.
    *
    * @throw CommandException if an error occurred.
    */
-  void stop() const;
+  void stop();
 
   /**
    * Waits for a gripper state update and returns it.
@@ -90,8 +91,6 @@ class Gripper {
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   *
-   * @see GripperState
    */
   GripperState readOnce() const;
 
@@ -109,6 +108,7 @@ class Gripper {
   std::unique_ptr<Network> network_;
 
   uint16_t ri_version_;
+  uint32_t command_id_ = 0;
 };
 
 }  // namespace franka

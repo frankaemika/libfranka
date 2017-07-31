@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <memory>
 
 #include <franka/robot.h>
@@ -16,17 +17,7 @@ namespace franka {
 /**
  * Enumerates FRANKA's seven joints, the flange and the end effector.
  */
-enum Frame : uint8_t {
-  kJoint1,
-  kJoint2,
-  kJoint3,
-  kJoint4,
-  kJoint5,
-  kJoint6,
-  kJoint7,
-  kFlange,
-  kEndEffector
-};
+enum Frame { kJoint1, kJoint2, kJoint3, kJoint4, kJoint5, kJoint6, kJoint7, kFlange, kEndEffector };
 
 class ModelLibrary;
 class Network;
@@ -44,10 +35,11 @@ class Model {
    * @see Robot::loadModel
    *
    * @param[in] network For internal use.
+   * @param[in] command_id For internal use.
    *
    * @throw ModelException if the model library cannot be loaded.
    */
-  explicit Model(franka::Network& network);
+  explicit Model(franka::Network& network, uint32_t command_id);
 
   /**
    * Move-constructs a new Model instance.

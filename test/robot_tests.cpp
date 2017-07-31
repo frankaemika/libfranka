@@ -30,8 +30,9 @@ TEST(Robot, CanPerformHandshake) {
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
-  RobotMockServer server([](const Connect::Request&) {
-    return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
+  RobotMockServer server([](const Connect::Request& request) {
+    return Connect::Response(request.header.command_id,
+                             Connect::Status::kIncompatibleLibraryVersion);
   });
 
   EXPECT_THROW(Robot robot("127.0.0.1"), IncompatibleVersionException);
@@ -59,6 +60,8 @@ TEST(Robot, CanControlRobot) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
+  uint32_t move_command_id;
+
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
 
@@ -70,7 +73,8 @@ TEST(Robot, CanControlRobot) {
         robot_state.robot_mode = robot::RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>([&](const Move::Request&) {
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
         server
             .doForever([&]() {
               bool continue_sending = send.test_and_set();
@@ -89,8 +93,9 @@ TEST(Robot, CanControlRobot) {
               robot_state.robot_mode = robot::RobotMode::kIdle;
               stopped_message_id = robot_state.message_id;
             })
-            .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); });
-        return Move::Response(Move::Status::kMotionStarted);
+            .sendResponse<Move::Response>(
+                [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); });
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
       })
       .spinOnce();
 

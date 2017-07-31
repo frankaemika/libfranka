@@ -15,8 +15,8 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
     throw std::invalid_argument("libfranka robot: Invalid argument");
   }
 
-  connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
-                                                                                   &ri_version_);
+  connect<research_interface::robot::Connect, research_interface::robot::kVersion>(
+      *network_, command_id_++, &ri_version_);
 
   updateState(network_->udpRead<research_interface::robot::RobotState>());
 }
@@ -45,7 +45,8 @@ RobotState Robot::Impl::update(
     if (was_running_motion_generator) {
       try {
         handleCommandResponse<research_interface::robot::Move>(
-            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(
+                move_command_id_));
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
         if (robot_state.robot_mode == RobotMode::kReflex) {
@@ -199,12 +200,14 @@ void Robot::Impl::startMotion(
 
   executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
+  move_command_id_ = command_id_;
 
   RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
     try {
       if (network_->tcpReceiveResponse<research_interface::robot::Move>(
+              move_command_id_,
               std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
                         std::placeholders::_1))) {
         break;
@@ -239,7 +242,7 @@ void Robot::Impl::stopMotion() {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(move_command_id_));
 }
 
 void Robot::Impl::startController() {
@@ -270,8 +273,8 @@ void Robot::Impl::stopController() {
   }
 }
 
-Model Robot::Impl::loadModel() const {
-  return Model(*network_);
+Model Robot::Impl::loadModel() {
+  return Model(*network_, command_id_++);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

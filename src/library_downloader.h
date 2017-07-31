@@ -10,7 +10,7 @@ namespace franka {
 
 class LibraryDownloader {
  public:
-  LibraryDownloader(Network& network);
+  LibraryDownloader(Network& network, uint32_t command_id);
 
   const std::string& path() const noexcept;
 
