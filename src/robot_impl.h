@@ -1,7 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <chrono>
 #include <memory>
+#include <mutex>
 
 #include <franka/model.h>
 #include <franka/robot.h>
@@ -51,6 +53,10 @@ class Robot::Impl : public RobotControl {
   Model loadModel();
 
  private:
+  RobotState updateUnsafe(
+      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
+      const research_interface::robot::ControllerCommand* control_command = nullptr);
+
   template <typename T>
   void handleCommandResponse(const typename T::Response& response) const;
 
@@ -64,13 +70,13 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  uint32_t move_command_id_;
-
-  research_interface::robot::MotionGeneratorMode motion_generator_mode_;
-  research_interface::robot::ControllerMode controller_mode_;
+  std::mutex mutex_;
+  std::atomic<research_interface::robot::MotionGeneratorMode> motion_generator_mode_;
+  std::atomic<research_interface::robot::ControllerMode> controller_mode_;
   uint64_t message_id_;
 
-  uint32_t command_id_ = 0;
+  std::atomic<uint32_t> command_id_{0};
+  uint32_t move_command_id_;
 };
 
 template <typename T>

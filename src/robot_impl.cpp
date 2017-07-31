@@ -24,6 +24,13 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
+  std::lock_guard<std::mutex> _(mutex_);
+  return updateUnsafe(motion_command, control_command);
+}
+
+RobotState Robot::Impl::updateUnsafe(
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
   network_->tcpThrowIfConnectionClosed();
 
   bool was_running_motion_generator = motionGeneratorRunning();
@@ -68,6 +75,8 @@ RobotState Robot::Impl::update(
 }
 
 RobotState Robot::Impl::readOnce() {
+  std::lock_guard<std::mutex> _(mutex_);
+
   // Delete old data from the UDP buffer.
   while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::robot::RobotState>();
@@ -155,6 +164,7 @@ void Robot::Impl::startMotion(
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) {
+  std::lock_guard<std::mutex> _(mutex_);
   if (motionGeneratorRunning()) {
     throw ControlException("libfranka robot: attempted to start multiple motion generators!");
   }
@@ -220,11 +230,12 @@ void Robot::Impl::startMotion(
       throw ControlException(e.what());
     }
 
-    robot_state = update();
+    robot_state = updateUnsafe();
   }
 }
 
 void Robot::Impl::stopMotion() {
+  std::lock_guard<std::mutex> _(mutex_);
   if (!motionGeneratorRunning()) {
     return;
   }
@@ -246,6 +257,7 @@ void Robot::Impl::stopMotion() {
 }
 
 void Robot::Impl::startController() {
+  std::lock_guard<std::mutex> _(mutex_);
   if (controllerRunning()) {
     throw ControlException("libfranka robot: attempted to start multiple controllers!");
     return;
@@ -255,11 +267,12 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    update();
+    updateUnsafe();
   }
 }
 
 void Robot::Impl::stopController() {
+  std::lock_guard<std::mutex> _(mutex_);
   if (!controllerRunning()) {
     return;
   }
@@ -269,7 +282,7 @@ void Robot::Impl::stopController() {
 
   research_interface::robot::ControllerCommand command{};
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    update(nullptr, &command);
+    updateUnsafe(nullptr, &command);
   }
 }
 
