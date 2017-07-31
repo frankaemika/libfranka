@@ -123,7 +123,8 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::Header header;
-  if (!tcpPeekHeaderUnsafe(&header) || header.command != T::kCommand || header.command_id != command_id) {
+  if (!tcpPeekHeaderUnsafe(&header) || header.command != T::kCommand ||
+      header.command_id != command_id) {
     return false;
   }
 
