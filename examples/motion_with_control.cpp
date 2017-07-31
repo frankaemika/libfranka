@@ -83,9 +83,9 @@ std::vector<double> generateTrajectory(double a_max) {
     } else if (t <= (kAccelerationTime + kConstantVelocityTime)) {
       a = 0;
     } else {
-      const double kTimeDecelerating =
+      const double deceleration_time =
           (kAccelerationTime + kConstantVelocityTime) - t;  // time spent in the deceleration phase
-      a = -pow(sin(kTimeDecelerating * M_PI / kAccelerationTime), 2) * a_max;
+      a = -pow(sin(deceleration_time * M_PI / kAccelerationTime), 2) * a_max;
     }
     v += a * kTimeStep;
     t += kTimeStep;
