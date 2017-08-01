@@ -60,10 +60,8 @@ Gripper::ServerVersion Gripper::serverVersion() const noexcept {
   return ri_version_;
 }
 
-void Gripper::homing() {
-  if (!executeCommand<research_interface::gripper::Homing>(*network_, command_id_)) {
-    throw CommandException("libfranka gripper: Homing command unsuccessful!");
-  }
+bool Gripper::homing() {
+  return executeCommand<research_interface::gripper::Homing>(*network_, command_id_);
 }
 
 bool Gripper::grasp(double width, double speed, double force) {
@@ -71,16 +69,12 @@ bool Gripper::grasp(double width, double speed, double force) {
                                                             force);
 }
 
-void Gripper::move(double width, double speed) {
-  if (!executeCommand<research_interface::gripper::Move>(*network_, command_id_, width, speed)) {
-    throw CommandException("libfranka gripper: Move command unsuccessful!");
-  }
+bool Gripper::move(double width, double speed) {
+  return executeCommand<research_interface::gripper::Move>(*network_, command_id_, width, speed);
 }
 
-void Gripper::stop() {
-  if (!executeCommand<research_interface::gripper::Stop>(*network_, command_id_)) {
-    throw CommandException("libfranka gripper: Stop command unsuccessful!");
-  }
+bool Gripper::stop() {
+  return executeCommand<research_interface::gripper::Stop>(*network_, command_id_);
 }
 
 GripperState Gripper::readOnce() const {

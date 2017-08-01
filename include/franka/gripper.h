@@ -48,14 +48,16 @@ class Gripper {
    * After changing the gripper fingers, a homing needs to be done.
    * This is needed to estimate the maximum grasping width.
    *
+   * @return True if command was successful, false otherwise.
+   *
    * @throw CommandException if an error occurred.
    *
    * @see GripperState for the maximum grasping width.
    */
-  void homing();
+  bool homing();
 
   /**
-   * Grasp an object.
+   * Grasps an object.
    *
    * @param[in] width Size of the object to grasp. [m]
    * @param[in] speed Closing speed. [m/s]
@@ -73,16 +75,20 @@ class Gripper {
    * @param[in] width Intended opening width. [m]
    * @param[in] speed Closing speed. [m/s]
    *
+   * @return True if command was successful, false otherwise.
+   *
    * @throw CommandException if an error occurred.
    */
-  void move(double width, double speed);
+  bool move(double width, double speed);
 
   /**
    * Stops a currently running gripper move or grasp.
    *
+   * @return True if command was successful, false otherwise.
+   *
    * @throw CommandException if an error occurred.
    */
-  void stop();
+  bool stop();
 
   /**
    * Waits for a gripper state update and returns it.
