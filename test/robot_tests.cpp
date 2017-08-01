@@ -150,9 +150,7 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
-  server
-      .sendEmptyState<robot::RobotState>()
-      .spinOnce();
+  server.sendEmptyState<robot::RobotState>().spinOnce();
 
   std::mutex mutex;
   std::condition_variable cv;
@@ -160,8 +158,7 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   auto thread = std::thread([&]() {
     robot.read([&](const RobotState&) {
       read_started = true;
-      EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()),
-                   InvalidOperationException);
+      EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
       std::unique_lock<std::mutex> lock(mutex);
       cv.wait(lock, [&]() { return !run; });
       return false;
