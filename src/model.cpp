@@ -12,8 +12,9 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 namespace franka {
 
 Frame operator++(Frame& frame, int /* dummy */) noexcept {
+  Frame original = frame;
   frame = static_cast<Frame>(static_cast<std::underlying_type_t<Frame>>(frame) + 1);
-  return frame;
+  return original;
 }
 
 Model::Model(Network& network) : library_{new ModelLibrary(network)} {}

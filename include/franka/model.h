@@ -33,9 +33,9 @@ enum class Frame {
  *
  * For example, incrementing Frame::kJoint2 results in Frame::kJoint3.
  *
- * @parameter[in] frame Frame to increment.
+ * @param[in] frame Frame to increment.
  *
- * @return Incremented Frame.
+ * @return Original Frame.
  */
 Frame operator++(Frame& frame, int /* dummy */) noexcept;
 
