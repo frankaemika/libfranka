@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <mutex>
@@ -51,7 +52,7 @@ class MockServer {
   template <typename T>
   MockServer& sendRandomState(std::function<void(T&)> random_generator, T* sent_state = nullptr);
 
-  MockServer& doForever(std::function<bool()> callback);
+  MockServer& doForever(std::function<bool()> callback, std::atomic_bool* started = nullptr);
 
   template <typename T>
   MockServer& onSendUDP(std::function<void(T&)> on_send_udp);
@@ -101,6 +102,7 @@ class MockServer {
   std::deque<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
 
   MockServer& doForever(std::function<bool()> callback,
+                        std::atomic_bool* started,
                         typename decltype(MockServer::commands_)::iterator it);
 };
 

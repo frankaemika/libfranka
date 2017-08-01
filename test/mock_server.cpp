@@ -178,13 +178,14 @@ void MockServer<RobotTypes>::sendInitialState(Socket& udp_socket) {
 }
 
 template <typename C>
-MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
+MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback, std::atomic_bool* started) {
   std::lock_guard<std::mutex> _(command_mutex_);
-  return doForever(callback, commands_.end());
+  return doForever(callback, started, commands_.end());
 }
 
 template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
+                                        std::atomic_bool* started,
                                         typename decltype(MockServer<C>::commands_)::iterator it) {
   auto callback_wrapper = [=](Socket&, Socket&) {
     std::unique_lock<std::mutex> lock(command_mutex_);
@@ -195,6 +196,9 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
     lock.unlock();
     if (callback()) {
       lock.lock();
+      if (started != nullptr) {
+        commands_.emplace_back("setStart", [=](Socket&, Socket&) { started->store(true); });
+      }
       size_t new_commands = commands_.size() - old_commands;
 
       // Reorder the commands added by callback to the front.
@@ -203,7 +207,7 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
       commands_ = commands;
 
       // Insert after the new commands added by callback.
-      doForever(callback, commands_.begin() + new_commands);
+      doForever(callback, nullptr, commands_.begin() + new_commands);
       lock.unlock();
     }
     std::this_thread::yield();
