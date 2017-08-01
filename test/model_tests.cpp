@@ -217,7 +217,7 @@ TEST_F(Model, CanGetJointPoses) {
 
   franka::Model model(robot.loadModel());
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint = static_cast<franka::Frame>(joint + 1)) {
+       joint++) {
     auto pose = model.jointPose(joint, robot_state);
     EXPECT_EQ(expected_pose, pose);
   }
