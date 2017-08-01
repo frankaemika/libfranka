@@ -23,11 +23,10 @@ class Model;
  * gives access to the model library and allows to execute commands,
  * motions, and torque control.
  *
+ * The members of this class are threadsafe.
+ *
  * @note
  * Before using this functionality, make sure FRANKA's brakes have been released.
- *
- * @warning
- * The members of Robot are <b>not threadsafe</b>!
  *
  * @par End effector frame
  * While the end effector parameters are set in a configuration file, it is
@@ -82,9 +81,12 @@ class Robot {
 
   /**
    * @name Motion generation and torque control
+   *
    * The callbacks given to the control functions are called with a fixed
    * frequency of 1 \f$[KHz]\f$ and therefore need to be able to compute
    * outputs within this time frame.
+   *
+   * Only one of these methods can be active at the same time.
    * @{
    */
 
@@ -92,6 +94,7 @@ class Robot {
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] control_callback Callback function for torque control.
    *
@@ -108,6 +111,7 @@ class Robot {
    * Starts a control loop for a joint position motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -127,6 +131,7 @@ class Robot {
    * Starts a control loop for a joint position motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -146,6 +151,7 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -165,6 +171,7 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -184,6 +191,7 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -203,6 +211,7 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -222,6 +231,7 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -241,6 +251,7 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Can not be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -263,6 +274,8 @@ class Robot {
   /**
    * Starts a loop for reading the current robot state.
    *
+   * Can not be executed while a control or motion generator loop is running.
+   *
    * @param[in] read_callback Callback function for robot state reading.
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
@@ -272,6 +285,8 @@ class Robot {
 
   /**
    * Waits for a robot state update and returns it.
+   *
+   * Can not be executed while a control or motion generator loop is running.
    *
    * @return Current robot state.
    *
@@ -284,6 +299,7 @@ class Robot {
 
   /**
    * @name Commands
+   *
    * Commands are executed by communicating with FRANKA CONTROL over the network.
    * These functions should therefore not be called from within control or motion generator loops.
    * @{

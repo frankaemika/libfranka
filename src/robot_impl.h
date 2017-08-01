@@ -34,6 +34,8 @@ class Robot::Impl : public RobotControl {
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
+  std::mutex& mutex() noexcept;
+
   void startController() override;
   void stopController() override;
 
@@ -57,11 +59,6 @@ class Robot::Impl : public RobotControl {
   bool controllerRunning() const noexcept;
 
  private:
-  RobotState updateUnsafe(
-      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
-      const research_interface::robot::ControllerCommand* control_command = nullptr);
-  void throwOnMotionErrorUnsafe(const RobotState& robot_state, const uint32_t* motion_id);
-
   template <typename T>
   void handleCommandResponse(const typename T::Response& response) const;
 
@@ -75,10 +72,11 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
 
-  std::mutex mutex_;
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;
   uint64_t message_id_;
+
+  std::mutex mutex_;
 
   std::atomic<uint32_t> command_id_{0};
 };

@@ -24,13 +24,6 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  std::lock_guard<std::mutex> _(mutex_);
-  return updateUnsafe(motion_command, control_command);
-}
-
-RobotState Robot::Impl::updateUnsafe(
-    const research_interface::robot::MotionGeneratorCommand* motion_command,
-    const research_interface::robot::ControllerCommand* control_command) {
   network_->tcpThrowIfConnectionClosed();
 
   sendRobotCommand(motion_command, control_command);
@@ -39,12 +32,6 @@ RobotState Robot::Impl::updateUnsafe(
 }
 
 void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) {
-  std::lock_guard<std::mutex> _(mutex_);
-  throwOnMotionErrorUnsafe(robot_state, motion_id);
-}
-
-void Robot::Impl::throwOnMotionErrorUnsafe(const RobotState& robot_state,
-                                           const uint32_t* motion_id) {
   if (robot_state.robot_mode != RobotMode::kReady) {
     // Wait until robot state shows stopped motion and controller.
     while (motionGeneratorRunning() || controllerRunning()) {
@@ -78,7 +65,9 @@ void Robot::Impl::throwOnMotionErrorUnsafe(const RobotState& robot_state,
 }
 
 RobotState Robot::Impl::readOnce() {
-  std::lock_guard<std::mutex> _(mutex_);
+  if (motionGeneratorRunning() || controllerRunning()) {
+    throw ControlException("libfranka robot: Can not execute readOnce() while motion is running.");
+  }
 
   // Delete old data from the UDP buffer.
   while (network_->udpAvailableData() > 0) {
@@ -162,12 +151,15 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
+std::mutex& Robot::Impl::mutex() noexcept {
+  return mutex_;
+}
+
 uint32_t Robot::Impl::startMotion(
     research_interface::robot::Move::ControllerMode controller_mode,
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) {
-  std::lock_guard<std::mutex> _(mutex_);
   if (motionGeneratorRunning()) {
     throw ControlException("libfranka robot: attempted to start multiple motion generators!");
   }
@@ -232,15 +224,14 @@ uint32_t Robot::Impl::startMotion(
       throw ControlException(e.what());
     }
 
-    robot_state = updateUnsafe();
-    throwOnMotionErrorUnsafe(robot_state, &move_command_id);
+    robot_state = update();
+    throwOnMotionError(robot_state, &move_command_id);
   }
 
   return move_command_id;
 }
 
 void Robot::Impl::stopMotion(uint32_t motion_id) {
-  std::lock_guard<std::mutex> _(mutex_);
   if (!motionGeneratorRunning()) {
     return;
   }
@@ -262,7 +253,6 @@ void Robot::Impl::stopMotion(uint32_t motion_id) {
 }
 
 void Robot::Impl::startController() {
-  std::lock_guard<std::mutex> _(mutex_);
   if (controllerRunning()) {
     throw ControlException("libfranka robot: attempted to start multiple controllers!");
     return;
@@ -272,13 +262,12 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    auto robot_state = updateUnsafe();
-    throwOnMotionErrorUnsafe(robot_state, nullptr);
+    auto robot_state = update();
+    throwOnMotionError(robot_state, nullptr);
   }
 }
 
 void Robot::Impl::stopController() {
-  std::lock_guard<std::mutex> _(mutex_);
   if (!controllerRunning()) {
     return;
   }
@@ -288,8 +277,8 @@ void Robot::Impl::stopController() {
 
   research_interface::robot::ControllerCommand command{};
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    auto robot_state = updateUnsafe(nullptr, &command);
-    throwOnMotionErrorUnsafe(robot_state, nullptr);
+    auto robot_state = update(nullptr, &command);
+    throwOnMotionError(robot_state, nullptr);
   }
 }
 
