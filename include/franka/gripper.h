@@ -14,6 +14,7 @@
 namespace franka {
 
 class Network;
+class Lock;
 
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
@@ -112,9 +113,9 @@ class Gripper {
 
  private:
   std::unique_ptr<Network> network_;
+  std::unique_ptr<Lock> lock_;
 
   uint16_t ri_version_;
-  uint32_t command_id_ = 0;
 };
 
 }  // namespace franka

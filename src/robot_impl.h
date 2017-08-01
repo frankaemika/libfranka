@@ -3,7 +3,6 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
-#include <mutex>
 
 #include <franka/model.h>
 #include <franka/robot.h>
@@ -33,8 +32,6 @@ class Robot::Impl : public RobotControl {
 
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
-
-  std::mutex& mutex() noexcept;
 
   void startController() override;
   void stopController() override;
@@ -75,8 +72,6 @@ class Robot::Impl : public RobotControl {
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;
   uint64_t message_id_;
-
-  std::mutex mutex_;
 
   std::atomic<uint32_t> command_id_{0};
 };
@@ -144,9 +139,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 
 template <typename T, typename... TArgs>
 uint32_t Robot::Impl::executeCommand(TArgs... args) {
-  uint32_t command_id = command_id_++;
-
-  typename T::Request request(command_id, std::forward<TArgs>(args)...);
+  typename T::Request request(command_id_++, std::forward<TArgs>(args)...);
   return executeCommand<T>(request);
 }
 

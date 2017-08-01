@@ -55,14 +55,14 @@ bool GripperCommand<Move>::compare(const Move::Request& request_one,
 
 template <typename T>
 typename T::Request GripperCommand<T>::getExpected() {
-  return typename T::Request(2);
+  return typename T::Request(1);
 }
 
 template <>
 Move::Request GripperCommand<Move>::getExpected() {
   double width = 0.05;
   double speed = 0.1;
-  return Move::Request(2, width, speed);
+  return Move::Request(1, width, speed);
 }
 
 template <>
@@ -70,7 +70,7 @@ Grasp::Request GripperCommand<Grasp>::getExpected() {
   double width = 0.05;
   double speed = 0.1;
   double force = 400.0;
-  return Grasp::Request(2, width, speed, force);
+  return Grasp::Request(1, width, speed, force);
 }
 
 template <>
