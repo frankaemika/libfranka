@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <franka/command_types.h>
@@ -17,7 +18,6 @@
 namespace franka {
 
 class Model;
-class Lock;
 
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current robot state,
@@ -71,7 +71,7 @@ class Robot {
    *
    * @param[in] robot Other Robot instance.
    *
-   * @return Model instance.
+   * @return Robot instance.
    */
   Robot& operator=(Robot&& robot) noexcept;
 
@@ -541,7 +541,7 @@ class Robot {
 
  private:
   std::unique_ptr<Impl> impl_;
-  std::unique_ptr<Lock> lock_;
+  std::unique_ptr<std::mutex> mutex_;
 };
 
 }  // namespace franka

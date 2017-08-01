@@ -1,7 +1,9 @@
 #pragma once
 
+#include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <franka/gripper_state.h>
@@ -14,7 +16,6 @@
 namespace franka {
 
 class Network;
-class Lock;
 
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
@@ -37,6 +38,22 @@ class Gripper {
    * @throw ProtocolException if data received from the host is invalid.
    */
   explicit Gripper(const std::string& franka_address);
+
+  /**
+   * Move-constructs a new Gripper instance.
+   *
+   * @param[in] gripper Other Gripper instance.
+   */
+  Gripper(Gripper&& gripper) noexcept;
+
+  /**
+   * Move-assigns this Gripper from another Gripper instance.
+   *
+   * @param[in] gripper Other Gripper instance.
+   *
+   * @return Model instance.
+   */
+  Gripper& operator=(Gripper&& gripper) noexcept;
 
   /**
    * Closes the connection.
@@ -113,7 +130,8 @@ class Gripper {
 
  private:
   std::unique_ptr<Network> network_;
-  std::unique_ptr<Lock> lock_;
+  std::unique_ptr<std::mutex> mutex_;
+  std::unique_ptr<std::atomic<uint64_t>> command_id_;
 
   uint16_t ri_version_;
 };
