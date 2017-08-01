@@ -56,14 +56,12 @@ Gripper::ServerVersion Gripper::serverVersion() const noexcept {
   return ri_version_;
 }
 
-void Gripper::homing() const {
+bool Gripper::homing() const {
   using research_interface::gripper::Homing;
   network_->tcpSendRequest<Homing>({});
   Homing::Response response = network_->tcpBlockingReceiveResponse<Homing>();
 
-  if (!handleCommandResponse<Homing>(response)) {
-    throw CommandException("libfranka gripper: command unsuccessful!");
-  }
+  return handleCommandResponse<Homing>(response);
 }
 
 bool Gripper::grasp(double width, double speed, double force) const {
@@ -74,24 +72,20 @@ bool Gripper::grasp(double width, double speed, double force) const {
   return handleCommandResponse<Grasp>(response);
 }
 
-void Gripper::move(double width, double speed) const {
+bool Gripper::move(double width, double speed) const {
   using research_interface::gripper::Move;
   network_->tcpSendRequest<Move>({width, speed});
   Move::Response response = network_->tcpBlockingReceiveResponse<Move>();
 
-  if (!handleCommandResponse<Move>(response)) {
-    throw CommandException("libfranka gripper: command unsuccessful!");
-  }
+  return handleCommandResponse<Move>(response);
 }
 
-void Gripper::stop() const {
+bool Gripper::stop() const {
   using research_interface::gripper::Stop;
   network_->tcpSendRequest<Stop>({});
   Stop::Response response = network_->tcpBlockingReceiveResponse<Stop>();
 
-  if (!handleCommandResponse<Stop>(response)) {
-    throw CommandException("libfranka gripper: command unsuccessful!");
-  }
+  return handleCommandResponse<Stop>(response);
 }
 
 GripperState Gripper::readOnce() const {
