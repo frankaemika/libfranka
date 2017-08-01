@@ -56,7 +56,8 @@ TEST(Gripper, ThrowsIfConflictingOperationIsRunning) {
             }
             return continue_sending;
           },
-          &started_sending).spinOnce();
+          &started_sending)
+      .spinOnce();
 
   while (!started_sending) {
     std::this_thread::yield();

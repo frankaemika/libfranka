@@ -47,7 +47,7 @@ Gripper::Gripper(const std::string& franka_address)
     : network_{std::make_unique<Network>(franka_address,
                                          research_interface::gripper::kCommandPort)},
       mutex_{new std::mutex},
-    command_id_{new std::atomic<uint64_t>(0)} {
+      command_id_{new std::atomic<uint64_t>(0)} {
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
       *network_, (*command_id_)++, &ri_version_);
 }

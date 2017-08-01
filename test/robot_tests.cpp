@@ -176,7 +176,8 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
     robot.read([&](const RobotState&) {
       if (!running) {
         running = true;
-        EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
+        EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()),
+                     InvalidOperationException);
       }
       std::this_thread::yield();
       return run.load();
