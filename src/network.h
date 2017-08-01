@@ -40,7 +40,7 @@ class Network {
   void tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size);
 
   template <typename T>
-  typename T::Response tcpBlockingReceiveResponse(uint32_t command_id, bool discard = false);
+  typename T::Response tcpBlockingReceiveResponse(uint32_t command_id);
 
   template <typename T>
   bool tcpReceiveResponse(uint32_t command_id,
@@ -139,7 +139,7 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
 }
 
 template <typename T>
-typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id, bool discard) {
+typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
   std::array<uint8_t, sizeof(typename T::Response)> buffer;
 
   // Wait until we receive a packet with the right header.
@@ -147,16 +147,9 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id, bo
   typename T::Header header;
   while (true) {
     lock.lock();
-    if (tcpPeekHeaderUnsafe(&header) && header.command == T::kCommand) {
-      if (header.command_id == command_id) {
-        break;
-      }
-
-      if (discard) {
-        // Remove data from socket even if it matches just the command type, but not the command_id.
-        // This can be useful to discard old responses of long-running  commands such as Move.
-        tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
-      }
+    if (tcpPeekHeaderUnsafe(&header) && header.command == T::kCommand &&
+        header.command_id == command_id) {
+      break;
     }
     lock.unlock();
     std::this_thread::yield();
@@ -171,7 +164,7 @@ void connect(Network& network, uint32_t command_id, uint16_t* ri_version) {
   typename T::Request connect_request(command_id, network.udpPort());
   network.tcpSendRequest<T>(connect_request);
 
-  typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>(command_id, true);
+  typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>(command_id);
   switch (connect_response.status) {
     case (T::Status::kIncompatibleLibraryVersion): {
       std::stringstream message;

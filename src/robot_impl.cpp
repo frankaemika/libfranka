@@ -44,8 +44,7 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32
       // we will receive a TCP response to the Move command.
       try {
         handleCommandResponse<research_interface::robot::Move>(
-            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(*motion_id,
-                                                                                  true));
+            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(*motion_id));
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
         if (robot_state.robot_mode == RobotMode::kReflex) {
@@ -245,7 +244,7 @@ void Robot::Impl::stopMotion(uint32_t motion_id) {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id, true));
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
 }
 
 void Robot::Impl::startController() {
