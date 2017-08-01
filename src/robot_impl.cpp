@@ -268,6 +268,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.q = robot_state.q;
   converted.dq = robot_state.dq;
   converted.q_d = robot_state.q_d;
+  converted.dq_d = robot_state.dq_d;
   converted.joint_contact = robot_state.joint_contact;
   converted.cartesian_contact = robot_state.cartesian_contact;
   converted.joint_collision = robot_state.joint_collision;

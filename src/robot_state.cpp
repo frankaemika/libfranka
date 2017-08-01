@@ -23,6 +23,7 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"EE_T_K\": " << robot_state.EE_T_K << ", \"tau_J\": " << robot_state.tau_J
           << ", \"dtau_J\": " << robot_state.dtau_J << ", \"q\": " << robot_state.q
           << ", \"dq\": " << robot_state.dq << ", \"q_d\": " << robot_state.q_d
+          << ", \"dq_d\": " << robot_state.dq_d
           << ", \"joint_contact\": " << robot_state.joint_contact
           << ", \"cartesian_contact\": " << robot_state.cartesian_contact
           << ", \"joint_collision\": " << robot_state.joint_collision

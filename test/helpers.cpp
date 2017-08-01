@@ -39,6 +39,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.q_d.size(); i++) {
     EXPECT_EQ(0.0, actual.q_d[i]);
   }
+  for (size_t i = 0; i < actual.dq_d.size(); i++) {
+    EXPECT_EQ(0.0, actual.dq_d[i]);
+  }
   for (size_t i = 0; i < actual.joint_contact.size(); i++) {
     EXPECT_EQ(0.0, actual.joint_contact[i]);
   }
@@ -76,6 +79,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.q, actual.q);
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
+  EXPECT_EQ(expected.dq_d, actual.dq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -100,6 +104,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.q, actual.q);
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
+  EXPECT_EQ(expected.dq_d, actual.dq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -150,6 +155,9 @@ void randomRobotState(franka::RobotState& robot_state) {
   }
   for (size_t i = 0; i < robot_state.q_d.size(); i++) {
     robot_state.q_d[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
+    robot_state.dq_d[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
     robot_state.joint_contact[i] = randomDouble();
@@ -218,6 +226,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.q_d.size(); i++) {
     robot_state.q_d[i] = randomDouble();
   }
+  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
+    robot_state.dq_d[i] = randomDouble();
+  }
   for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
     robot_state.joint_contact[i] = randomDouble();
   }
@@ -260,9 +271,6 @@ void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) 
   for (size_t i = 0; i < robot_command.motion.dq_d.size(); i++) {
     robot_command.motion.dq_d[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.ddq_d.size(); i++) {
-    robot_command.motion.ddq_d[i] = randomDouble();
-  }
   for (size_t i = 0; i < robot_command.motion.O_T_EE_d.size(); i++) {
     robot_command.motion.O_T_EE_d[i] = randomDouble();
   }
@@ -285,7 +293,6 @@ void testMotionGeneratorCommandsAreEqual(
     const research_interface::robot::MotionGeneratorCommand& actual) {
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
-  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);

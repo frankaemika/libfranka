@@ -97,6 +97,12 @@ struct RobotState {
   std::array<double, 7> q_d{};
 
   /**
+   * \f$\dot{q}_d\f$
+   * Desired link side velocity. Unit: \f$[\frac{rad}{s}]\f$
+   */
+  std::array<double, 7> dq_d{};
+
+  /**
    * Indicates which contact level is activated in which joint. After contact
    * disappears, value turns to zero.
    *
