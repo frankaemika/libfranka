@@ -142,7 +142,7 @@ template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id, bool discard) {
   std::array<uint8_t, sizeof(typename T::Response)> buffer;
 
-  // Wait until we receive a packet with the right function header.
+  // Wait until we receive a packet with the right header.
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   typename T::Header header;
   while (true) {
@@ -153,7 +153,8 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id, bo
       }
 
       if (discard) {
-        // Remove data from socket even if it doesn't match our command_id.
+        // Remove data from socket even if it matches just the command type, but not the command_id.
+        // This can be useful to discard old responses of long-running  commands such as Move.
         tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
       }
     }

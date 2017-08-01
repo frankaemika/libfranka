@@ -146,45 +146,29 @@ TEST(Robot, CanControlRobot) {
 
 TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   std::atomic_bool run(true);
-  std::atomic_bool started_sending(false);
 
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
   server
-      .doForever(
-          [&]() {
-            bool continue_sending = run.load();
-            if (continue_sending) {
-              server.onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
-                robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
-                robot_state.controller_mode = robot::ControllerMode::kJointImpedance;
-                robot_state.robot_mode = robot::RobotMode::kIdle;
-              });
-            }
-            return continue_sending;
-          },
-          &started_sending)
+      .sendEmptyState<robot::RobotState>()
       .spinOnce();
 
-  while (!started_sending) {
-    std::this_thread::yield();
-  }
-
-  std::atomic_bool running(false);
+  std::mutex mutex;
+  std::condition_variable cv;
+  std::atomic_bool read_started(false);
   auto thread = std::thread([&]() {
     robot.read([&](const RobotState&) {
-      if (!running) {
-        running = true;
-        EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()),
-                     InvalidOperationException);
-      }
-      std::this_thread::yield();
-      return run.load();
+      read_started = true;
+      EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()),
+                   InvalidOperationException);
+      std::unique_lock<std::mutex> lock(mutex);
+      cv.wait(lock, [&]() { return !run; });
+      return false;
     });
   });
 
-  while (!running) {
+  while (!read_started) {
     std::this_thread::yield();
   }
 
@@ -214,7 +198,9 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   EXPECT_THROW(robot.readOnce(), InvalidOperationException);
 
   server.ignoreUdpBuffer();
+
   run = false;
+  cv.notify_one();
 
   if (thread.joinable()) {
     thread.join();
