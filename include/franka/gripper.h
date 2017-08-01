@@ -20,6 +20,9 @@ class Network;
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
  * and allows to execute gripper commands.
+ *
+ * @note
+ * The members of this class are threadsafe.
  */
 class Gripper {
  public:

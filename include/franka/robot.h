@@ -24,10 +24,8 @@ class Model;
  * gives access to the model library and allows to execute commands,
  * motions, and torque control.
  *
- * The members of this class are threadsafe.
- *
  * @note
- * Before using this functionality, make sure FRANKA's brakes have been released.
+ * The members of this class are threadsafe.
  *
  * @par End effector frame
  * While the end effector parameters are set in a configuration file, it is
