@@ -222,3 +222,9 @@ TEST_F(Model, CanGetJointPoses) {
     EXPECT_EQ(expected_pose, pose);
   }
 }
+
+TEST(Frame, CanIncrement) {
+  franka::Frame frame = franka::Frame::kJoint3;
+  EXPECT_EQ(franka::Frame::kJoint3, frame++);
+  EXPECT_EQ(franka::Frame::kJoint4, frame);
+}

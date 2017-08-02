@@ -31,7 +31,7 @@ enum class Frame {
 /**
  * Post-increments the given Frame by one.
  *
- * For example, incrementing Frame::kJoint2 results in Frame::kJoint3.
+ * For example, Frame::kJoint2++ results in Frame::kJoint3.
  *
  * @param[in] frame Frame to increment.
  *
