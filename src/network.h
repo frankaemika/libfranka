@@ -147,13 +147,12 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
   typename T::Header header;
   while (true) {
     lock.lock();
+    tcp_socket_.poll(Poco::Timespan(0, 1e4), Poco::Net::Socket::SELECT_READ);
     if (tcpPeekHeaderUnsafe(&header) && header.command == T::kCommand &&
         header.command_id == command_id) {
       break;
     }
     lock.unlock();
-    std::this_thread::yield();
-    // TODO (fwalch): avoid busy waiting?
   }
   tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
   return *reinterpret_cast<const typename T::Response*>(buffer.data());
