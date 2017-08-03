@@ -17,8 +17,7 @@ Frame operator++(Frame& frame, int /* dummy */) noexcept {
   return original;
 }
 
-Model::Model(Network& network, uint32_t command_id)
-    : library_{new ModelLibrary(network, command_id)} {}
+Model::Model(Network& network) : library_{new ModelLibrary(network)} {}
 
 // Has to be declared here, as the ModelLibrary type is incomplete in the header
 Model::~Model() noexcept = default;

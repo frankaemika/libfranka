@@ -56,11 +56,10 @@ class Model {
    * @see Robot::loadModel
    *
    * @param[in] network For internal use.
-   * @param[in] command_id For internal use.
    *
    * @throw ModelException if the model library cannot be loaded.
    */
-  explicit Model(franka::Network& network, uint32_t command_id);
+  explicit Model(franka::Network& network);
 
   /**
    * Move-constructs a new Model instance.

@@ -4,8 +4,8 @@
 
 namespace franka {
 
-ModelLibrary::ModelLibrary(franka::Network& network, uint32_t command_id)
-    : loader_(LibraryDownloader(network, command_id).path()),
+ModelLibrary::ModelLibrary(franka::Network& network)
+    : loader_(LibraryDownloader(network).path()),
       mass{reinterpret_cast<decltype(&M_NE_file)>(loader_.getSymbol("M_NE_file"))},
       joint1{reinterpret_cast<decltype(&O_T_J1_file)>(loader_.getSymbol("O_T_J1_file"))},
       joint2{reinterpret_cast<decltype(&O_T_J2_file)>(loader_.getSymbol("O_T_J2_file"))},

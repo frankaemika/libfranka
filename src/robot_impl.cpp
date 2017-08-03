@@ -15,8 +15,8 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
     throw std::invalid_argument("libfranka robot: Invalid argument");
   }
 
-  connect<research_interface::robot::Connect, research_interface::robot::kVersion>(
-      *network_, command_id_++, &ri_version_);
+  connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
+                                                                                   &ri_version_);
 
   updateState(network_->udpRead<research_interface::robot::RobotState>());
 }
@@ -278,7 +278,7 @@ void Robot::Impl::stopController() {
 }
 
 Model Robot::Impl::loadModel() {
-  return Model(*network_, command_id_++);
+  return Model(*network_);
 }
 
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {

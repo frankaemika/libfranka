@@ -10,7 +10,7 @@ namespace franka {
 
 class ModelLibrary {
  public:
-  ModelLibrary(Network& network, uint32_t command_id);
+  ModelLibrary(Network& network);
 
  private:
   LibraryLoader loader_;

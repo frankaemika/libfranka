@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -134,7 +133,6 @@ class Gripper {
  private:
   std::unique_ptr<Network> network_;
   std::unique_ptr<std::mutex> mutex_;
-  std::unique_ptr<std::atomic<uint64_t>> command_id_;
 
   uint16_t ri_version_;
 };

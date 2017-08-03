@@ -49,6 +49,12 @@ class Network {
   template <typename T, typename... TArgs>
   void tcpSendRequest(TArgs&&... args);
 
+  template <typename T>
+  typename T::Response executeCommand(const typename T::Request& request);
+
+  template <typename T, typename... TArgs>
+  typename T::Response executeCommand(TArgs... args);
+
  private:
   void tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size);
 
@@ -60,7 +66,21 @@ class Network {
   Poco::Net::SocketAddress udp_server_address_;
 
   std::mutex tcp_mutex_;
+
+  uint32_t command_id_{0};
 };
+
+template <typename T, typename... TArgs>
+typename T::Response Network::executeCommand(TArgs... args) {
+  typename T::Request request(command_id_++, args...);
+  return executeCommand<T>(request);
+}
+
+template <typename T>
+typename T::Response Network::executeCommand(const typename T::Request& request) {
+  tcpSendRequest<T>(request);
+  return tcpBlockingReceiveResponse<T>(request.header.command_id);
+}
 
 template <typename T>
 T Network::udpRead() try {
@@ -159,11 +179,8 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
 }
 
 template <typename T, uint16_t kLibraryVersion>
-void connect(Network& network, uint32_t command_id, uint16_t* ri_version) {
-  typename T::Request connect_request(command_id, network.udpPort());
-  network.tcpSendRequest<T>(connect_request);
-
-  typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>(command_id);
+void connect(Network& network, uint16_t* ri_version) {
+  typename T::Response connect_response = network.executeCommand<T>(network.udpPort());
   switch (connect_response.status) {
     case (T::Status::kIncompatibleLibraryVersion): {
       std::stringstream message;

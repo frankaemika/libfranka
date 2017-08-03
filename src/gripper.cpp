@@ -12,11 +12,8 @@ namespace franka {
 namespace {
 
 template <typename T, typename... TArgs>
-bool executeCommand(Network& network, uint64_t command_id, TArgs&&... args) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-
-  network.tcpSendRequest<T>(command_id, std::forward<TArgs>(args)...);
-  typename T::Response response = network.tcpBlockingReceiveResponse<T>(command_id);
+bool executeCommand(Network& network, TArgs&&... args) {
+  typename T::Response response = network.executeCommand<T>(std::forward<TArgs>(args)...);
 
   switch (response.status) {
     case T::Status::kSuccess:
@@ -46,10 +43,9 @@ GripperState convertGripperState(
 Gripper::Gripper(const std::string& franka_address)
     : network_{std::make_unique<Network>(franka_address,
                                          research_interface::gripper::kCommandPort)},
-      mutex_{new std::mutex},
-      command_id_{new std::atomic<uint64_t>(0)} {
+      mutex_{new std::mutex} {
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
-      *network_, (*command_id_)++, &ri_version_);
+      *network_, &ri_version_);
 }
 
 Gripper::~Gripper() noexcept = default;
@@ -61,21 +57,19 @@ Gripper::ServerVersion Gripper::serverVersion() const noexcept {
 }
 
 bool Gripper::homing() {
-  return executeCommand<research_interface::gripper::Homing>(*network_, (*command_id_)++);
+  return executeCommand<research_interface::gripper::Homing>(*network_);
 }
 
 bool Gripper::grasp(double width, double speed, double force) {
-  return executeCommand<research_interface::gripper::Grasp>(*network_, (*command_id_)++, width,
-                                                            speed, force);
+  return executeCommand<research_interface::gripper::Grasp>(*network_, width, speed, force);
 }
 
 bool Gripper::move(double width, double speed) {
-  return executeCommand<research_interface::gripper::Move>(*network_, (*command_id_)++, width,
-                                                           speed);
+  return executeCommand<research_interface::gripper::Move>(*network_, width, speed);
 }
 
 bool Gripper::stop() {
-  return executeCommand<research_interface::gripper::Stop>(*network_, (*command_id_)++);
+  return executeCommand<research_interface::gripper::Stop>(*network_);
 }
 
 GripperState Gripper::readOnce() const {
