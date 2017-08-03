@@ -116,6 +116,7 @@ class Gripper {
    * @return Current gripper state.
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw InvalidOperationException if another readOnce is already running.
    * @throw ProtocolException if received data has invalid format.
    */
   GripperState readOnce() const;

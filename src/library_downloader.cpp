@@ -10,29 +10,6 @@
 
 namespace franka {
 
-template <>
-typename research_interface::robot::LoadModelLibrary::Response Network::tcpBlockingReceiveResponse<
-    research_interface::robot::LoadModelLibrary>(uint32_t command_id) {
-  using research_interface::robot::LoadModelLibrary;
-
-  std::array<uint8_t, sizeof(typename LoadModelLibrary::Response)> buffer;
-
-  // Wait until we receive a packet with the right header.
-  std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
-  typename LoadModelLibrary::Header header;
-  while (true) {
-    lock.lock();
-    tcp_socket_.poll(Poco::Timespan(0, 1e4), Poco::Net::Socket::SELECT_READ);
-    if (tcpPeekHeaderUnsafe(&header) && header.command == LoadModelLibrary::kCommand &&
-        header.command_id == command_id) {
-      break;
-    }
-    lock.unlock();
-  }
-  tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
-  return *reinterpret_cast<const typename LoadModelLibrary::Response*>(buffer.data());
-}
-
 LibraryDownloader::LibraryDownloader(Network& network) {
   using research_interface::robot::LoadModelLibrary;
 

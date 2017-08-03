@@ -64,10 +64,6 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32
 }
 
 RobotState Robot::Impl::readOnce() {
-  if (motionGeneratorRunning() || controllerRunning()) {
-    throw ControlException("libfranka robot: Can not execute readOnce() while motion is running.");
-  }
-
   // Delete old data from the UDP buffer.
   while (network_->udpAvailableData() > 0) {
     network_->udpRead<research_interface::robot::RobotState>();
@@ -257,8 +253,7 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    auto robot_state = update();
-    throwOnMotionError(robot_state, nullptr);
+    throwOnMotionError(update(), nullptr);
   }
 }
 

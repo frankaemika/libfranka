@@ -6,7 +6,6 @@
 #include <functional>
 #include <mutex>
 #include <sstream>
-#include <thread>
 
 #include <franka/exception.h>
 
