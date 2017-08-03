@@ -539,7 +539,7 @@ class Robot {
 
  private:
   std::unique_ptr<Impl> impl_;
-  std::unique_ptr<std::mutex> mutex_;
+  std::unique_ptr<std::mutex> control_mutex_;
 };
 
 }  // namespace franka
