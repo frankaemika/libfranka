@@ -16,14 +16,7 @@ namespace franka {
 /**
  * Describes FRANKA's current mode.
  */
-enum class RobotMode : uint8_t {
-  kUserStopped,
-  kReady,
-  kGuiding,
-  kReflex,
-  kAutomaticErrorRecovery,
-  kOther
-};
+enum class RobotMode { kUserStopped, kReady, kGuiding, kReflex, kAutomaticErrorRecovery, kOther };
 
 /**
  * Describes FRANKA's robot state.
