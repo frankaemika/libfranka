@@ -43,7 +43,7 @@ GripperState convertGripperState(
 Gripper::Gripper(const std::string& franka_address)
     : network_{std::make_unique<Network>(franka_address,
                                          research_interface::gripper::kCommandPort)},
-      mutex_{new std::mutex} {
+      read_mutex_{new std::mutex} {
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
       *network_, &ri_version_);
 }
@@ -73,7 +73,7 @@ bool Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() const {
-  std::unique_lock<std::mutex> l(*mutex_, std::try_to_lock);
+  std::unique_lock<std::mutex> l(*read_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
         "libfranka gripper: Cannot perform this operation while another controller or motion "
