@@ -13,7 +13,8 @@ namespace {
 
 template <typename T, typename... TArgs>
 bool executeCommand(Network& network, TArgs&&... args) {
-  typename T::Response response = network.executeCommand<T>(std::forward<TArgs>(args)...);
+  uint32_t command_id = network.tcpSendRequest<T>(std::forward<TArgs>(args)...);
+  typename T::Response response = network.tcpBlockingReceiveResponse<T>(command_id);
 
   switch (response.status) {
     case T::Status::kSuccess:
