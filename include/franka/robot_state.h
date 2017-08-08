@@ -16,7 +16,8 @@ namespace franka {
 /**
  * Describes FRANKA's current mode.
  */
-enum class RobotMode : uint8_t {
+
+enum class RobotMode {
   kUserStopped,
   kIdle,
   kMove,

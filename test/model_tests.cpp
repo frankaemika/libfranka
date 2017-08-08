@@ -239,7 +239,7 @@ TEST_F(Model, CanGetJointPoses) {
 
   franka::Model model(robot.loadModel());
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint = static_cast<franka::Frame>(joint + 1)) {
+       joint++) {
     auto pose = model.jointPose(joint, robot_state);
     EXPECT_EQ(expected_pose, pose);
   }
@@ -296,8 +296,71 @@ TEST_F(Model, CanGetBodyJacobian) {
 
   franka::Model model(robot.loadModel());
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint = static_cast<franka::Frame>(joint + 1)) {
+       joint++) {
     auto jacobian = model.bodyJacobian(joint, robot_state);
     EXPECT_EQ(expected_jacobian, jacobian);
   }
+}
+
+TEST_F(Model, CanGetZeroJacobian) {
+  franka::RobotState robot_state;
+  randomRobotState(robot_state);
+
+  std::array<double, 42> expected_jacobian;
+  for (unsigned int i = 0; i < expected_jacobian.size(); i++) {
+    expected_jacobian[i] = i;
+  }
+
+  MockModel mock;
+  EXPECT_CALL(mock, O_J_J1(_))
+      .WillOnce(WithArgs<0>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J2(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J3(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J4(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J5(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J6(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J7(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J8(robot_state.q.data(), _))
+      .WillOnce(WithArgs<1>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+  EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), robot_state.O_T_EE.data(), _))
+      .WillOnce(WithArgs<2>(Invoke([=](double* output) {
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
+
+  model_library_interface = &mock;
+
+  franka::Model model(robot.loadModel());
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
+       joint++) {
+    auto jacobian = model.zeroJacobian(joint, robot_state);
+    EXPECT_EQ(expected_jacobian, jacobian);
+  }
+}
+
+TEST(Frame, CanIncrement) {
+  franka::Frame frame = franka::Frame::kJoint3;
+  EXPECT_EQ(franka::Frame::kJoint3, frame++);
+  EXPECT_EQ(franka::Frame::kJoint4, frame);
 }
