@@ -16,18 +16,40 @@ class ModelLibrary {
   LibraryLoader loader_;
 
  public:
-  const std::function<decltype(M_NE_file)> mass;
-  const std::function<decltype(O_T_J1_file)> joint1;
-  const std::function<decltype(O_T_J2_file)> joint2;
-  const std::function<decltype(O_T_J3_file)> joint3;
-  const std::function<decltype(O_T_J4_file)> joint4;
-  const std::function<decltype(O_T_J5_file)> joint5;
-  const std::function<decltype(O_T_J6_file)> joint6;
-  const std::function<decltype(O_T_J7_file)> joint7;
-  const std::function<decltype(O_T_J8_file)> flange;
-  const std::function<decltype(O_T_J9_file)> ee;
-  const std::function<decltype(c_NE_file)> coriolis;
-  const std::function<decltype(g_NE_file)> gravity;
+  const std::function<decltype(Ji_J_J1)> body_jacobian_joint1;
+  const std::function<decltype(Ji_J_J2)> body_jacobian_joint2;
+  const std::function<decltype(Ji_J_J3)> body_jacobian_joint3;
+  const std::function<decltype(Ji_J_J4)> body_jacobian_joint4;
+  const std::function<decltype(Ji_J_J5)> body_jacobian_joint5;
+  const std::function<decltype(Ji_J_J6)> body_jacobian_joint6;
+  const std::function<decltype(Ji_J_J7)> body_jacobian_joint7;
+  const std::function<decltype(Ji_J_J8)> body_jacobian_flange;
+  const std::function<decltype(Ji_J_J9)> body_jacobian_ee;
+
+  const std::function<decltype(M_NE)> mass;
+
+  const std::function<decltype(O_J_J1)> zero_jacobian_joint1;
+  const std::function<decltype(O_J_J2)> zero_jacobian_joint2;
+  const std::function<decltype(O_J_J3)> zero_jacobian_joint3;
+  const std::function<decltype(O_J_J4)> zero_jacobian_joint4;
+  const std::function<decltype(O_J_J5)> zero_jacobian_joint5;
+  const std::function<decltype(O_J_J6)> zero_jacobian_joint6;
+  const std::function<decltype(O_J_J7)> zero_jacobian_joint7;
+  const std::function<decltype(O_J_J8)> zero_jacobian_flange;
+  const std::function<decltype(O_J_J9)> zero_jacobian_ee;
+
+  const std::function<decltype(O_T_J1)> joint1;
+  const std::function<decltype(O_T_J2)> joint2;
+  const std::function<decltype(O_T_J3)> joint3;
+  const std::function<decltype(O_T_J4)> joint4;
+  const std::function<decltype(O_T_J5)> joint5;
+  const std::function<decltype(O_T_J6)> joint6;
+  const std::function<decltype(O_T_J7)> joint7;
+  const std::function<decltype(O_T_J8)> flange;
+  const std::function<decltype(O_T_J9)> ee;
+
+  const std::function<decltype(c_NE)> coriolis;
+  const std::function<decltype(g_NE)> gravity;
 };
 
 }  // namespace franka
