@@ -230,7 +230,7 @@ TEST_F(Model, CanGetJointPoses) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
       })));
-  EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), robot_state.O_T_EE.data(), _))
+  EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
       })));
@@ -240,7 +240,7 @@ TEST_F(Model, CanGetJointPoses) {
   franka::Model model(robot.loadModel());
   for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
        joint++) {
-    auto pose = model.jointPose(joint, robot_state);
+    auto pose = model.pose(joint, robot_state);
     EXPECT_EQ(expected_pose, pose);
   }
 }
@@ -287,7 +287,7 @@ TEST_F(Model, CanGetBodyJacobian) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));
-  EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), robot_state.O_T_EE.data(), _))
+  EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));
@@ -344,7 +344,7 @@ TEST_F(Model, CanGetZeroJacobian) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));
-  EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), robot_state.O_T_EE.data(), _))
+  EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));

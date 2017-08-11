@@ -24,7 +24,7 @@ Model::~Model() noexcept = default;
 Model::Model(Model&&) noexcept = default;
 Model& Model::operator=(Model&&) noexcept = default;
 
-std::array<double, 16> Model::jointPose(Frame frame, const franka::RobotState& robot_state) const {
+std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_state) const {
   std::array<double, 16> output;
 
   std::array<double, 7>::const_pointer q = robot_state.q.data();
@@ -55,7 +55,7 @@ std::array<double, 16> Model::jointPose(Frame frame, const franka::RobotState& r
       library_->flange(q, output.data());
       break;
     case Frame::kEndEffector:
-      library_->ee(q, robot_state.O_T_EE.data(), output.data());
+      library_->ee(q, robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
@@ -96,7 +96,7 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
       library_->body_jacobian_flange(q, output.data());
       break;
     case Frame::kEndEffector:
-      library_->body_jacobian_ee(q, robot_state.O_T_EE.data(), output.data());
+      library_->body_jacobian_ee(q, robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
@@ -137,7 +137,7 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
       library_->zero_jacobian_flange(q, output.data());
       break;
     case Frame::kEndEffector:
-      library_->zero_jacobian_ee(q, robot_state.O_T_EE.data(), output.data());
+      library_->zero_jacobian_ee(q, robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");

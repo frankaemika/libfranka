@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     franka::Model model(robot.loadModel());
     for (franka::Frame frame = franka::Frame::kJoint1; frame <= franka::Frame::kEndEffector;
          frame++) {
-      std::cout << model.jointPose(frame, state) << std::endl;
+      std::cout << model.pose(frame, state) << std::endl;
     }
   } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;

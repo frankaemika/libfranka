@@ -91,7 +91,7 @@ class Model {
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */
-  std::array<double, 16> jointPose(Frame frame, const franka::RobotState& robot_state) const;
+  std::array<double, 16> pose(Frame frame, const franka::RobotState& robot_state) const;
 
   /**
    * Gets the 6x7 Jacobian for the given frame, relative to that frame.
