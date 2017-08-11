@@ -29,8 +29,8 @@ struct Errors {
 
   /**
    * Creates a string with names of active errors:
-   * "{active_error_name2, active_error_name_2, ... active_error_name_n}"
-   * If no errors are active, the string contains empty braces: "{}"
+   * "[active_error_name2, active_error_name_2, ... active_error_name_n]"
+   * If no errors are active, the string contains empty braces: "[]"
    * @return string with names of active errors
    */
   explicit operator std::string() const;

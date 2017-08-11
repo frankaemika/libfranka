@@ -18,6 +18,7 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 }
 
 std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
+  ostream << "\"";
   switch (robot_mode) {
     case (RobotMode::kUserStopped):
       ostream << "User stopped";
@@ -38,6 +39,7 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
       ostream << "Other";
       break;
   }
+  ostream << "\"";
   return ostream;
 }
 
