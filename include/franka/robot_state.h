@@ -47,11 +47,33 @@ struct RobotState {
   std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
 
   /**
+ * \f$^{F}T_{EE}\f$
+ * End effector frame pose in flange frame.
+ * Pose is represented as a 4x4 matrix in column-major format.
+ */
+  std::array<double, 16> F_T_EE{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * \f$^{EE}T_{K}\f$
    * K frame pose in end effector frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured mass of the external load.
+   */
+  double m_load{};
+
+  /**
+   * Configured center of mass of the external load w.r.t. F frame.
+   */
+  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured rotational inertia matrix of the external load w.r.t. center of mass.
+   */
+  std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Elbow pose.
