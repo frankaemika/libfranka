@@ -7,6 +7,7 @@
 namespace franka {
 
 namespace {
+
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
@@ -15,6 +16,31 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "]";
   return ostream;
 }
+
+std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
+  switch (robot_mode) {
+    case (RobotMode::kUserStopped):
+      ostream << "User stopped";
+      break;
+    case (RobotMode::kReady):
+      ostream << "Ready";
+      break;
+    case (RobotMode::kGuiding):
+      ostream << "Guiding";
+      break;
+    case (RobotMode::kReflex):
+      ostream << "Reflex";
+      break;
+    case (RobotMode::kAutomaticErrorRecovery):
+      ostream << "Automatic error recovery";
+      break;
+    case (RobotMode::kOther):
+      ostream << "Other";
+      break;
+  }
+  return ostream;
+}
+
 }  // anonymous namespace
 
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
@@ -35,6 +61,7 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"K_F_ext_hat_K\": " << robot_state.K_F_ext_hat_K
           << ", \"current_errors\": " << robot_state.current_errors
           << ", \"last_motion_errors\": " << robot_state.last_motion_errors
+          << ", \"robot_mode\": " << robot_state.robot_mode
           << ", \"time\": " << robot_state.time.ms() << "}";
   return ostream;
 }
