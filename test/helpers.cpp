@@ -15,8 +15,18 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.O_T_EE_d.size(); i++) {
     EXPECT_EQ(0.0, actual.O_T_EE_d[i]);
   }
-  for (size_t i = 0; i < actual.O_T_EE_d.size(); i++) {
+  for (size_t i = 0; i < actual.EE_T_K.size(); i++) {
     EXPECT_EQ(0.0, actual.EE_T_K[i]);
+  }
+  for (size_t i = 0; i < actual.F_T_EE.size(); i++) {
+    EXPECT_EQ(0.0, actual.F_T_EE[i]);
+  }
+  EXPECT_EQ(0.0, actual.m_load);
+  for (size_t i = 0; i < actual.F_x_Cload.size(); i++) {
+    EXPECT_EQ(0.0, actual.F_x_Cload[i]);
+  }
+  for (size_t i = 0; i < actual.I_load.size(); i++) {
+    EXPECT_EQ(0.0, actual.I_load[i]);
   }
   for (size_t i = 0; i < actual.elbow.size(); i++) {
     EXPECT_EQ(0.0, actual.elbow[i]);
@@ -71,7 +81,11 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
+  EXPECT_EQ(expected.F_T_EE, actual.F_T_EE);
   EXPECT_EQ(expected.EE_T_K, actual.EE_T_K);
+  EXPECT_EQ(expected.m_load, actual.m_load);
+  EXPECT_EQ(expected.F_x_Cload, actual.F_x_Cload);
+  EXPECT_EQ(expected.I_load, actual.I_load);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
@@ -89,6 +103,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
   EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
+  EXPECT_EQ(expected.robot_mode, actual.robot_mode);
   EXPECT_EQ(expected.time, actual.time);
 }
 
@@ -96,7 +111,11 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
                              const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
+  EXPECT_EQ(expected.F_T_EE, actual.F_T_EE);
   EXPECT_EQ(expected.EE_T_K, actual.EE_T_K);
+  EXPECT_EQ(expected.m_load, actual.m_load);
+  EXPECT_EQ(expected.F_x_Cload, actual.F_x_Cload);
+  EXPECT_EQ(expected.I_load, actual.I_load);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
@@ -115,6 +134,33 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
   EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
   EXPECT_EQ(expected.message_id, actual.time.ms());
+
+  switch (expected.robot_mode) {
+    case research_interface::robot::RobotMode::kOther:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kOther);
+      break;
+    case research_interface::robot::RobotMode::kIdle:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kIdle);
+      break;
+    case research_interface::robot::RobotMode::kMove:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kMove);
+      break;
+    case research_interface::robot::RobotMode::kMoveWithController:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kMoveWithController);
+      break;
+    case research_interface::robot::RobotMode::kGuiding:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kGuiding);
+      break;
+    case research_interface::robot::RobotMode::kReflex:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kReflex);
+      break;
+    case research_interface::robot::RobotMode::kUserStopped:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kUserStopped);
+      break;
+    case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
+      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kAutomaticErrorRecovery);
+      break;
+  }
 }
 
 double randomDouble() {
@@ -132,8 +178,18 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
     robot_state.O_T_EE_d[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
+  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
     robot_state.EE_T_K[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
+    robot_state.F_T_EE[i] = randomDouble();
+  }
+  robot_state.m_load = randomDouble();
+  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
+    robot_state.F_x_Cload[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
+    robot_state.I_load[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.elbow.size(); i++) {
     robot_state.elbow[i] = randomDouble();
@@ -202,8 +258,18 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
     robot_state.O_T_EE_d[i] = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
+  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
     robot_state.EE_T_K[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
+    robot_state.F_T_EE[i] = randomDouble();
+  }
+  robot_state.m_load = randomDouble();
+  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
+    robot_state.F_x_Cload[i] = randomDouble();
+  }
+  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
+    robot_state.I_load[i] = randomDouble();
   }
   for (size_t i = 0; i < robot_state.elbow.size(); i++) {
     robot_state.elbow[i] = randomDouble();

@@ -25,6 +25,10 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "O_T_EE");
   EXPECT_PRED2(stringContains, output, "O_T_EE_d");
   EXPECT_PRED2(stringContains, output, "EE_T_K");
+  EXPECT_PRED2(stringContains, output, "F_T_EE");
+  EXPECT_PRED2(stringContains, output, "m_load");
+  EXPECT_PRED2(stringContains, output, "F_x_Cload");
+  EXPECT_PRED2(stringContains, output, "I_load");
   EXPECT_PRED2(stringContains, output, "elbow");
   EXPECT_PRED2(stringContains, output, "elbow_d");
   EXPECT_PRED2(stringContains, output, "tau_J");

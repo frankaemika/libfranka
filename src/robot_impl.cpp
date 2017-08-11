@@ -260,7 +260,11 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
+  converted.F_T_EE = robot_state.F_T_EE;
   converted.EE_T_K = robot_state.EE_T_K;
+  converted.m_load = robot_state.m_load;
+  converted.F_x_Cload = robot_state.F_x_Cload;
+  converted.I_load = robot_state.I_load;
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
@@ -287,6 +291,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       break;
     case research_interface::robot::RobotMode::kIdle:
       converted.robot_mode = RobotMode::kIdle;
+      break;
     case research_interface::robot::RobotMode::kMove:
       converted.robot_mode = RobotMode::kMove;
       break;
@@ -301,6 +306,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       break;
     case research_interface::robot::RobotMode::kUserStopped:
       converted.robot_mode = RobotMode::kUserStopped;
+      break;
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
       converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
       break;

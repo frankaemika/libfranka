@@ -60,7 +60,7 @@ Errors::operator bool() const noexcept {
 }
 
 Errors::operator std::string() const {
-  std::string error_string = "{";
+  std::string error_string = "[";
 
   error_string += joint_position_limits_violation ? "\"joint_position_limits_violation\", " : "";
   error_string +=
@@ -127,7 +127,7 @@ Errors::operator std::string() const {
     error_string.erase(error_string.end() - 2, error_string.end());
   }
 
-  error_string += "}";
+  error_string += "]";
 
   return error_string;
 }
