@@ -18,14 +18,14 @@ namespace franka {
  */
 
 enum class RobotMode {
-  kUserStopped,
+  kOther,
   kIdle,
   kMove,
   kMoveWithController,
   kGuiding,
   kReflex,
-  kAutomaticErrorRecovery,
-  kOther
+  kUserStopped,
+  kAutomaticErrorRecovery
 };
 
 /**

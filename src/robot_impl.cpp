@@ -291,6 +291,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       break;
     case research_interface::robot::RobotMode::kIdle:
       converted.robot_mode = RobotMode::kIdle;
+      break;
     case research_interface::robot::RobotMode::kMove:
       converted.robot_mode = RobotMode::kMove;
       break;
@@ -305,6 +306,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       break;
     case research_interface::robot::RobotMode::kUserStopped:
       converted.robot_mode = RobotMode::kUserStopped;
+      break;
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
       converted.robot_mode = RobotMode::kAutomaticErrorRecovery;
       break;
