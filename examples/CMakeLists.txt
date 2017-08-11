@@ -24,6 +24,7 @@ set(EXAMPLES
   grasp_object
   motion_with_control
   print_joint_poses
+  joint_impedance_control
 )
 
 foreach(example ${EXAMPLES})
