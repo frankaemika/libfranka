@@ -2,6 +2,7 @@
 #include <array>
 #include <atomic>
 #include <cmath>
+#include <functional>
 #include <iostream>
 #include <iterator>
 #include <mutex>
@@ -37,9 +38,9 @@ int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 5) {
     std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>"
-              << " <radius>"
-              << " <vel_max>"
-              << " <print_rate>" << std::endl;
+              << " <radius in [m]>"
+              << " <vel_max in [m/s]>"
+              << " <print_rate in [Hz]>" << std::endl;
     return -1;
   }
 
@@ -92,10 +93,10 @@ int main(int argc, char** argv) {
               }
               // print data to console
               std::cout << std::endl
-                        << "tau_error: " << tau_error << std::endl
-                        << "tau_commanded: " << tau_d_actual << std::endl
-                        << "tau_measured: " << robot_state.tau_J << std::endl
-                        << "root mean square of tau_error: " << error_rms << std::endl
+                        << "tau_error[Nm]: " << tau_error << std::endl
+                        << "tau_commanded[Nm]: " << tau_d_actual << std::endl
+                        << "tau_measured[Nm]: " << robot_state.tau_J << std::endl
+                        << "root mean square of tau_error[Nm]: " << error_rms << std::endl
                         << "-----------------------";
               torques_mutex.unlock();
             }
@@ -115,73 +116,79 @@ int main(int argc, char** argv) {
     double time(0.0);
     double run_time(20.0);
 
+    // define callback function to send Cartesian pose goals to get inverse kinematics solved
+    std::function<franka::CartesianPose(const franka::RobotState&, franka::Duration)>
+        cartesian_pose_callback = [&](const franka::RobotState& /*state*/,
+                                      franka::Duration period) -> franka::CartesianPose {
+      // update time
+      time += period.s();
+      if (time > run_time + acceleration_time) {
+        running = false;
+        return franka::Stop;
+      }
+      // compute Cartesain velocity
+      if (vel_current < vel_max && time < run_time) {
+        vel_current += period.s() * std::fabs(vel_max / acceleration_time);
+      }
+      if (vel_current > 0.0 && time > run_time) {
+        vel_current -= period.s() * std::fabs(vel_max / acceleration_time);
+      }
+      vel_current = std::fmax(vel_current, 0.0);
+      vel_current = std::fmin(vel_current, vel_max);
+
+      // compute new angle for our circular trajectory
+      angle += period.s() * vel_current / std::fabs(radius);
+      if (angle > 2 * M_PI) {
+        angle -= 2 * M_PI;
+      }
+
+      // copmute relative y and z positions of desired pose
+      double delta_y = radius * (1 - std::cos(angle));
+      double delta_z = radius * std::sin(angle);
+      std::array<double, 16> pose_desired = initial_pose;
+      pose_desired[13] += delta_y;
+      pose_desired[14] += delta_z;
+
+      // send desired pose
+      return pose_desired;
+    };
+
+    // define callback for the joint torque control loop
+    std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
+        impedance_control_callback =
+            [&](const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
+      // stop moving when not running anymore
+      if (!running) {
+        return franka::Stop;
+      }
+
+      // read current coriolis terms from model
+      std::array<double, 7> coriolis = model.coriolis(
+          state, {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
+
+      // compute torque command from joint impedance control law
+      // Note: The answer to our Cartesian pose inverse kinematics is always in state.q_d
+      // with one time step delay
+      std::array<double, 7> tau_d = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+      for (size_t i = 0; i < 7; ++i) {
+        tau_d[i] =
+            k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
+      }
+
+      // update data to print
+      if (torques_mutex.try_lock()) {
+        robot_state = state;
+        tau_d_last = tau_d;
+        gravity = model.gravity(state, 0.0, {{0.0, 0.0, 0.0}});
+        torques_mutex.unlock();
+      }
+
+      // send torque command
+      return tau_d;
+    };
+
     // start real-time control loop
-    robot.control(
-        // callback function to send Cartesian pose goals to get inverse kinematics solved
-        [&](const franka::RobotState& /*state*/, franka::Duration period) -> franka::CartesianPose {
-          // update time
-          time += period.s();
-          if (time > run_time + acceleration_time) {
-            running = false;
-            return franka::Stop;
-          }
-          // compute Cartesain velocity
-          if (vel_current < vel_max && time < run_time) {
-            vel_current += period.s() * std::fabs(vel_max / acceleration_time);
-          }
-          if (vel_current > 0.0 && time > run_time) {
-            vel_current -= period.s() * std::fabs(vel_max / acceleration_time);
-          }
-          vel_current = std::fmax(vel_current, 0.0);
-          vel_current = std::fmin(vel_current, vel_max);
-
-          // compute new angle for our circular trajectory
-          angle += period.s() * vel_current / std::fabs(radius);
-          if (angle > 2 * M_PI) {
-            angle -= 2 * M_PI;
-          }
-
-          // copmute relative y and z positions of desired pose
-          double delta_y = radius * (1 - std::cos(angle));
-          double delta_z = radius * std::sin(angle);
-          std::array<double, 16> pose_desired = initial_pose;
-          pose_desired[13] += delta_y;
-          pose_desired[14] += delta_z;
-
-          // send desired pose
-          return pose_desired;
-        },
-        // callback for the joint torque control loop
-        [&](const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
-          // stop moving when not running anymore
-          if (!running) {
-            return franka::Stop;
-          }
-
-          // read current coriolis terms from model
-          std::array<double, 7> coriolis = model.coriolis(
-              state, {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
-
-          // compute torque command from joint impedance control law
-          // Note: The answer to our Cartesian pose inverse kinematics is always in state.q_d
-          // with one time step delay
-          std::array<double, 7> tau_d = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-          for (size_t i = 0; i < 7; ++i) {
-            tau_d[i] =
-                k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
-          }
-
-          // update data to print
-          if (torques_mutex.try_lock()) {
-            robot_state = state;
-            tau_d_last = tau_d;
-            gravity = model.gravity(state, 0.0, {{0.0, 0.0, 0.0}});
-            torques_mutex.unlock();
-          }
-
-          // send torque command
-          return tau_d;
-        });
+    robot.control(cartesian_pose_callback, impedance_control_callback);
 
   } catch (const franka::Exception& ex) {
     // stop all threads when an exception was thrown
