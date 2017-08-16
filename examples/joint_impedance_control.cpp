@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
     franka::Robot robot(argv[1]);
     // load the kinematics and dynamics model
     franka::Model model = robot.loadModel();
-    // read the initial pose to start the meotion from there
+    // read the initial pose to start the motion from there
     std::array<double, 16> initial_pose = robot.readOnce().O_T_EE;
 
     double time(0.0);
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
         running = false;
         return franka::Stop;
       }
-      // compute Cartesain velocity
+      // compute Cartesian velocity
       if (vel_current < vel_max && time < run_time) {
         vel_current += period.s() * std::fabs(vel_max / acceleration_time);
       }
@@ -142,7 +142,7 @@ int main(int argc, char** argv) {
         angle -= 2 * M_PI;
       }
 
-      // copmute relative y and z positions of desired pose
+      // compute relative y and z positions of desired pose
       double delta_y = radius * (1 - std::cos(angle));
       double delta_z = radius * std::sin(angle);
       std::array<double, 16> pose_desired = initial_pose;
