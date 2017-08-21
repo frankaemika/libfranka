@@ -93,7 +93,7 @@ class Robot {
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] control_callback Callback function for torque control.
    *
@@ -111,7 +111,7 @@ class Robot {
    * Starts a control loop for a joint position motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -132,7 +132,7 @@ class Robot {
    * Starts a control loop for a joint position motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -153,7 +153,7 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -174,7 +174,7 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -195,7 +195,7 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -216,7 +216,7 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -237,7 +237,7 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
@@ -258,7 +258,7 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
-   * Can not be executed while another control or motion generator loop is active.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
@@ -282,7 +282,7 @@ class Robot {
   /**
    * Starts a loop for reading the current robot state.
    *
-   * Can not be executed while a control or motion generator loop is running.
+   * Cannot be executed while a control or motion generator loop is running.
    *
    * @param[in] read_callback Callback function for robot state reading.
    *
@@ -295,7 +295,7 @@ class Robot {
   /**
    * Waits for a robot state update and returns it.
    *
-   * Can not be executed while a control or motion generator loop is running.
+   * Cannot be executed while a control or motion generator loop is running.
    *
    * @return Current robot state.
    *
