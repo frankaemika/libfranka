@@ -56,14 +56,14 @@ struct RobotState {
   double m_load{};
 
   /**
-   * Configured center of mass of the external load w.r.t.\ flange frame.
-   */
-  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
-
-  /**
    * Configured rotational inertia matrix of the external load w.r.t.\ center of mass.
    */
   std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured center of mass of the external load w.r.t.\ flange frame.
+   */
+  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Elbow pose.
@@ -98,16 +98,16 @@ struct RobotState {
   std::array<double, 7> q{};
 
   /**
-   * \f$\dot{q}\f$
-   * Measured link side velocity. Unit: \f$[\frac{rad}{s}]\f$
-   */
-  std::array<double, 7> dq{};
-
-  /**
    * \f$q_d\f$
    * Desired link side position. Unit: \f$[rad]\f$
    */
   std::array<double, 7> q_d{};
+
+  /**
+   * \f$\dot{q}\f$
+   * Measured link side velocity. Unit: \f$[\frac{rad}{s}]\f$
+   */
+  std::array<double, 7> dq{};
 
   /**
    * \f$\dot{q}_d\f$
