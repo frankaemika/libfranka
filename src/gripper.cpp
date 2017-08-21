@@ -73,12 +73,7 @@ bool Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() const {
-  std::unique_lock<std::mutex> l(*read_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka gripper: Cannot perform this operation while another controller or motion "
-        "generator is running.");
-  }
+  std::lock_guard<std::mutex> _(*read_mutex_);
 
   // Delete old data from the UDP buffer.
   while (network_->udpAvailableData() > 0) {
