@@ -21,7 +21,6 @@ enum class RobotMode {
   kOther,
   kIdle,
   kMove,
-  kMoveWithController,
   kGuiding,
   kReflex,
   kUserStopped,

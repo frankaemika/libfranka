@@ -29,9 +29,6 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
     case (RobotMode::kMove):
       ostream << "Move";
       break;
-    case (RobotMode::kMoveWithController):
-      ostream << "Move with controller";
-      break;
     case (RobotMode::kGuiding):
       ostream << "Guiding";
       break;

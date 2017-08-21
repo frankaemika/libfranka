@@ -31,8 +31,7 @@ RobotState Robot::Impl::update(
 
   RobotState robot_state = convertRobotState(receiveRobotState());
 
-  if (was_commanding_robot && (robot_state.robot_mode != RobotMode::kMove &&
-                               robot_state.robot_mode != RobotMode::kMoveWithController)) {
+  if (was_commanding_robot && robot_state.robot_mode != RobotMode::kMove) {
     // Wait until robot state shows stopped motion and controller.
     while (motionGeneratorRunning() || controllerRunning()) {
       receiveRobotState();
@@ -294,9 +293,6 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       break;
     case research_interface::robot::RobotMode::kMove:
       converted.robot_mode = RobotMode::kMove;
-      break;
-    case research_interface::robot::RobotMode::kMoveWithController:
-      converted.robot_mode = RobotMode::kMoveWithController;
       break;
     case research_interface::robot::RobotMode::kGuiding:
       converted.robot_mode = RobotMode::kGuiding;

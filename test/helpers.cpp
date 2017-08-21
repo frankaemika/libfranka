@@ -145,9 +145,6 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
     case research_interface::robot::RobotMode::kMove:
       EXPECT_EQ(actual.robot_mode, franka::RobotMode::kMove);
       break;
-    case research_interface::robot::RobotMode::kMoveWithController:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kMoveWithController);
-      break;
     case research_interface::robot::RobotMode::kGuiding:
       EXPECT_EQ(actual.robot_mode, franka::RobotMode::kGuiding);
       break;
