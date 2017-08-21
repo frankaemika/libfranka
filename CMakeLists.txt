@@ -65,6 +65,7 @@ add_library(Franka::Franka ALIAS franka)
 set_target_properties(franka PROPERTIES
   VERSION ${libfranka_VERSION}
   SOVERSION ${libfranka_VERSION_MAJOR}
+  EXPORT_NAME Franka
 )
 
 target_include_directories(franka PUBLIC
