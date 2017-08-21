@@ -32,6 +32,7 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "q");
   EXPECT_PRED2(stringContains, output, "dq");
   EXPECT_PRED2(stringContains, output, "q_d");
+  EXPECT_PRED2(stringContains, output, "dq_d");
   EXPECT_PRED2(stringContains, output, "joint_contact");
   EXPECT_PRED2(stringContains, output, "cartesian_contact");
   EXPECT_PRED2(stringContains, output, "joint_collision");
