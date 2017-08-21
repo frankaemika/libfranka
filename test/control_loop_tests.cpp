@@ -42,10 +42,10 @@ TEST(ControlLoop, CanConstructWithCallback) {
   MockRobotControl robot;
   {
     InSequence _;
-    EXPECT_CALL(
-        robot,
-        startMotion(Move::ControllerMode::kExternalController, Move::MotionGeneratorMode::kIdle,
-                    control_loop::kDefaultDeviation, control_loop::kDefaultDeviation));
+    EXPECT_CALL(robot,
+                startMotion(Move::ControllerMode::kExternalController,
+                            Move::MotionGeneratorMode::kJointVelocity,
+                            control_loop::kDefaultDeviation, control_loop::kDefaultDeviation));
     EXPECT_CALL(robot, stopMotion());
   }
 

@@ -167,10 +167,6 @@ void Robot::Impl::startMotion(
     case decltype(motion_generator_mode)::kCartesianVelocity:
       state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianVelocity;
       break;
-    case decltype(motion_generator_mode)::kIdle:
-      // Idle motion generator is implemented using the external joint velocity generator
-      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointVelocity;
-      break;
     default:
       throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
   }
@@ -194,12 +190,6 @@ void Robot::Impl::startMotion(
       break;
     default:
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
-  }
-
-  if (motion_generator_mode == decltype(motion_generator_mode)::kIdle &&
-      state_controller_mode != decltype(state_controller_mode)::kExternalController) {
-    throw std::invalid_argument(
-        "libfranka robot: Idle motion generator without an external controller.");
   }
 
   executeCommand<research_interface::robot::Move>(

@@ -193,7 +193,7 @@ TEST(RobotImpl, CanStartExternalControllerMotion) {
       })
       .spinOnce()
       .waitForCommand<Move>([=](const Move::Request& request) {
-        EXPECT_EQ(Move::MotionGeneratorMode::kIdle, request.motion_generator_mode);
+        EXPECT_EQ(Move::MotionGeneratorMode::kJointVelocity, request.motion_generator_mode);
         EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
         EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
         EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
@@ -202,8 +202,8 @@ TEST(RobotImpl, CanStartExternalControllerMotion) {
       .spinOnce();
 
   EXPECT_NO_THROW(robot.startMotion(Move::ControllerMode::kExternalController,
-                                    Move::MotionGeneratorMode::kIdle, maximum_path_deviation,
-                                    maximum_goal_pose_deviation));
+                                    Move::MotionGeneratorMode::kJointVelocity,
+                                    maximum_path_deviation, maximum_goal_pose_deviation));
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -250,10 +250,10 @@ TEST(RobotImpl, CanNotStartMultipleMotions) {
                                  maximum_goal_pose_deviation),
                ControlException);
 
-  EXPECT_THROW(
-      robot.startMotion(Move::ControllerMode::kExternalController, Move::MotionGeneratorMode::kIdle,
-                        maximum_path_deviation, maximum_goal_pose_deviation),
-      ControlException);
+  EXPECT_THROW(robot.startMotion(Move::ControllerMode::kExternalController,
+                                 Move::MotionGeneratorMode::kJointVelocity, maximum_path_deviation,
+                                 maximum_goal_pose_deviation),
+               ControlException);
 }
 
 TEST(RobotImpl, CanSendMotionGeneratorCommand) {
@@ -323,7 +323,7 @@ TEST(RobotImpl, CanSendControllerCommand) {
       })
       .spinOnce()
       .waitForCommand<Move>([=](const Move::Request& request) {
-        EXPECT_EQ(Move::MotionGeneratorMode::kIdle, request.motion_generator_mode);
+        EXPECT_EQ(Move::MotionGeneratorMode::kJointVelocity, request.motion_generator_mode);
         EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
         EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
         EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
@@ -332,8 +332,8 @@ TEST(RobotImpl, CanSendControllerCommand) {
       .spinOnce();
 
   EXPECT_NO_THROW(robot.startMotion(Move::ControllerMode::kExternalController,
-                                    Move::MotionGeneratorMode::kIdle, maximum_path_deviation,
-                                    maximum_goal_pose_deviation));
+                                    Move::MotionGeneratorMode::kJointVelocity,
+                                    maximum_path_deviation, maximum_goal_pose_deviation));
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -622,7 +622,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
       })
       .spinOnce()
       .waitForCommand<Move>([=](const Move::Request& request) {
-        EXPECT_EQ(Move::MotionGeneratorMode::kIdle, request.motion_generator_mode);
+        EXPECT_EQ(Move::MotionGeneratorMode::kJointVelocity, request.motion_generator_mode);
         EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
         EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
         EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
@@ -631,8 +631,8 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
       .spinOnce();
 
   EXPECT_NO_THROW(robot.startMotion(Move::ControllerMode::kExternalController,
-                                    Move::MotionGeneratorMode::kIdle, maximum_path_deviation,
-                                    maximum_goal_pose_deviation));
+                                    Move::MotionGeneratorMode::kJointVelocity,
+                                    maximum_path_deviation, maximum_goal_pose_deviation));
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
