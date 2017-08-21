@@ -103,6 +103,14 @@ int main(int argc, char** argv) {
   try {
     // Connect to robot
     franka::Robot robot(argv[1]);
+
+    // Set collision behavior:
+    robot.setCollisionBehavior(
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
+        {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
+
     // Load the kinematics and dynamics model
     franka::Model model = robot.loadModel();
 
