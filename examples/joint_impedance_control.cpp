@@ -1,4 +1,3 @@
-#include <unistd.h>
 #include <array>
 #include <atomic>
 #include <cmath>

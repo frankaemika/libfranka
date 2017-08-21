@@ -22,9 +22,9 @@ set(EXAMPLES
   generate_joint_pose_motion
   generate_joint_velocity_motion
   grasp_object
+  joint_impedance_control
   motion_with_control
   print_joint_poses
-  joint_impedance_control
 )
 
 foreach(example ${EXAMPLES})
