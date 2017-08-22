@@ -135,29 +135,31 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
   EXPECT_EQ(expected.message_id, actual.time.ms());
 
+  franka::RobotMode expected_robot_mode;
   switch (expected.robot_mode) {
     case research_interface::robot::RobotMode::kOther:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kOther);
+      expected_robot_mode = franka::RobotMode::kOther;
       break;
     case research_interface::robot::RobotMode::kIdle:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kIdle);
+      expected_robot_mode = franka::RobotMode::kIdle;
       break;
     case research_interface::robot::RobotMode::kMove:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kMove);
+      expected_robot_mode = franka::RobotMode::kMove;
       break;
     case research_interface::robot::RobotMode::kGuiding:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kGuiding);
+      expected_robot_mode = franka::RobotMode::kGuiding;
       break;
     case research_interface::robot::RobotMode::kReflex:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kReflex);
+      expected_robot_mode = franka::RobotMode::kReflex;
       break;
     case research_interface::robot::RobotMode::kUserStopped:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kUserStopped);
+      expected_robot_mode = franka::RobotMode::kUserStopped;
       break;
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
-      EXPECT_EQ(actual.robot_mode, franka::RobotMode::kAutomaticErrorRecovery);
+      expected_robot_mode = franka::RobotMode::kAutomaticErrorRecovery;
       break;
   }
+  EXPECT_EQ(expected_robot_mode, actual.robot_mode);
 }
 
 double randomDouble() {
