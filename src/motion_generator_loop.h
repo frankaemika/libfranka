@@ -41,6 +41,7 @@ class MotionGeneratorLoop : public ControlLoopBase {
   void convertMotion(const T& motion, research_interface::robot::MotionGeneratorCommand* command);
 
   const MotionGeneratorCallback motion_callback_;
+  uint32_t motion_id_;
 };
 
 template class MotionGeneratorLoop<JointPositions>;

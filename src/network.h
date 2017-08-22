@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <mutex>
 #include <sstream>
-#include <unordered_set>
 
 #include <franka/exception.h>
 
@@ -17,49 +17,95 @@ namespace franka {
 
 class Network {
  public:
-  explicit Network(const std::string& franka_address,
-                   uint16_t franka_port,
-                   std::chrono::milliseconds tcp_timeout = std::chrono::seconds(60),
-                   std::chrono::milliseconds udp_timeout = std::chrono::seconds(1),
-                   std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
+  Network(const std::string& franka_address,
+          uint16_t franka_port,
+          std::chrono::milliseconds tcp_timeout = std::chrono::seconds(60),
+          std::chrono::milliseconds udp_timeout = std::chrono::seconds(1),
+          std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
   ~Network();
-
-  template <typename T>
-  T udpRead();
-
-  int udpAvailableData();
 
   uint16_t udpPort() const noexcept;
 
-  void tcpThrowIfConnectionClosed();
+  template <typename T>
+  T udpBlockingReceive();
 
   template <typename T>
-  typename T::Response tcpBlockingReceiveResponse();
+  bool udpReceive(T* data);
 
   template <typename T>
   void udpSend(const T& data);
 
-  template <typename T>
-  void tcpSendRequest(const typename T::Request& request);
-
-  template <typename T>
-  bool tcpReadResponse(T* function);
-
-  template <typename T>
-  bool tcpHandleResponse(std::function<void(const typename T::Response&)> handler);
+  void tcpThrowIfConnectionClosed();
 
   void tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size);
 
+  template <typename T>
+  typename T::Response tcpBlockingReceiveResponse(uint32_t command_id);
+
+  template <typename T>
+  bool tcpReceiveResponse(uint32_t command_id,
+                          std::function<void(const typename T::Response&)> handler);
+
+  template <typename T, typename... TArgs>
+  void tcpSendRequest(TArgs&&... args);
+
+  template <typename T>
+  typename T::Response executeCommand(const typename T::Request& request);
+
+  template <typename T, typename... TArgs>
+  typename T::Response executeCommand(TArgs... args);
+
  private:
+  template <typename T>
+  T udpBlockingReceiveUnsafe();
+
+  void tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size);
+
+  template <typename T>
+  bool tcpPeekHeaderUnsafe(T* header);
+
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
+  uint16_t udp_port_;
 
-  std::vector<uint8_t> read_buffer_;
+  std::mutex tcp_mutex_;
+  std::mutex udp_mutex_;
+
+  uint32_t command_id_{0};
 };
 
+template <typename T, typename... TArgs>
+typename T::Response Network::executeCommand(TArgs... args) {
+  typename T::Request request(command_id_++, args...);
+  return executeCommand<T>(request);
+}
+
 template <typename T>
-T Network::udpRead() try {
+typename T::Response Network::executeCommand(const typename T::Request& request) {
+  tcpSendRequest<T>(request);
+  return tcpBlockingReceiveResponse<T>(request.header.command_id);
+}
+
+template <typename T>
+bool Network::udpReceive(T* data) {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+
+  if (udp_socket_.available() >= static_cast<int>(sizeof(T))) {
+    *data = udpBlockingReceiveUnsafe<T>();
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+T Network::udpBlockingReceive() {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+  return udpBlockingReceiveUnsafe<T>();
+}
+
+template <typename T>
+T Network::udpBlockingReceiveUnsafe() try {
   std::array<uint8_t, sizeof(T)> buffer;
 
   int bytes_received =
@@ -72,11 +118,13 @@ T Network::udpRead() try {
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-  throw NetworkException("libfranka: UDP read: "s + e.what());
+  throw NetworkException("libfranka: UDP receive: "s + e.what());
 }
 
 template <typename T>
 void Network::udpSend(const T& data) try {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+
   int bytes_sent = udp_socket_.sendTo(&data, sizeof(data), udp_server_address_);
   if (bytes_sent != sizeof(data)) {
     throw NetworkException("libfranka: could not send UDP data");
@@ -86,8 +134,11 @@ void Network::udpSend(const T& data) try {
   throw NetworkException("libfranka: UDP send: "s + e.what());
 }
 
-template <typename T>
-void Network::tcpSendRequest(const typename T::Request& request) try {
+template <typename T, typename... TArgs>
+void Network::tcpSendRequest(TArgs&&... args) try {
+  std::lock_guard<std::mutex> _(tcp_mutex_);
+
+  typename T::Request request(std::forward<TArgs>(args)...);
   tcp_socket_.sendBytes(&request, sizeof(request));
 } catch (const Poco::Exception& e) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
@@ -95,18 +146,13 @@ void Network::tcpSendRequest(const typename T::Request& request) try {
 }
 
 template <typename T>
-bool Network::tcpReadResponse(T* function) try {
-  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
-    size_t offset = read_buffer_.size();
-    int bytes_available = tcp_socket_.available();
-    read_buffer_.resize(offset + bytes_available);
-    tcpReceiveIntoBuffer(&read_buffer_[offset], bytes_available);
-
-    if (read_buffer_.size() < sizeof(T)) {
-      return false;
+bool Network::tcpPeekHeaderUnsafe(T* header) try {
+  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ) &&
+      tcp_socket_.available() >= static_cast<int>(sizeof(T))) {
+    int rv = tcp_socket_.receiveBytes(header, sizeof(T), MSG_PEEK);
+    if (rv != sizeof(T)) {
+      throw NetworkException("libfranka: Could not read data.");
     }
-
-    *function = *reinterpret_cast<T*>(read_buffer_.data());
     return true;
   }
   return false;
@@ -116,39 +162,49 @@ bool Network::tcpReadResponse(T* function) try {
 }
 
 template <typename T>
-bool Network::tcpHandleResponse(std::function<void(const typename T::Response&)> handler) {
-  if (read_buffer_.size() < sizeof(typename T::Response)) {
+bool Network::tcpReceiveResponse(uint32_t command_id,
+                                 std::function<void(const typename T::Response&)> handler) {
+  std::lock_guard<std::mutex> _(tcp_mutex_);
+
+  typename T::Header header;
+  if (!tcpPeekHeaderUnsafe(&header) || header.command != T::kCommand ||
+      header.command_id != command_id) {
     return false;
   }
 
-  typename T::Response response = *reinterpret_cast<typename T::Response*>(read_buffer_.data());
+  // We received the header, so now we have to block and wait for the rest of the message.
+  std::array<uint8_t, sizeof(typename T::Response)> buffer;
+  tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
 
-  size_t remaining_bytes = read_buffer_.size() - sizeof(response);
-  std::memmove(read_buffer_.data(), &read_buffer_[sizeof(response)], remaining_bytes);
-  read_buffer_.resize(remaining_bytes);
+  typename T::Response response = *reinterpret_cast<typename T::Response*>(buffer.data());
 
   handler(response);
   return true;
 }
 
 template <typename T>
-typename T::Response Network::tcpBlockingReceiveResponse() {
+typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
   std::array<uint8_t, sizeof(typename T::Response)> buffer;
-  tcpReceiveIntoBuffer(buffer.data(), buffer.size());
-  typename T::Response const* response =
-      reinterpret_cast<const typename T::Response*>(buffer.data());
-  if (response->function != T::kFunction) {
-    throw ProtocolException("libfranka: received response of wrong type");
+
+  // Wait until we receive a packet with the right header.
+  std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
+  typename T::Header header;
+  while (true) {
+    lock.lock();
+    tcp_socket_.poll(Poco::Timespan(0, 1e4), Poco::Net::Socket::SELECT_READ);
+    if (tcpPeekHeaderUnsafe(&header) && header.command == T::kCommand &&
+        header.command_id == command_id) {
+      break;
+    }
+    lock.unlock();
   }
-  return *response;
+  tcpReceiveIntoBufferUnsafe(buffer.data(), buffer.size());
+  return *reinterpret_cast<const typename T::Response*>(buffer.data());
 }
 
 template <typename T, uint16_t kLibraryVersion>
 void connect(Network& network, uint16_t* ri_version) {
-  typename T::Request connect_request(network.udpPort());
-  network.tcpSendRequest<T>(connect_request);
-
-  typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>();
+  typename T::Response connect_response = network.executeCommand<T>(network.udpPort());
   switch (connect_response.status) {
     case (T::Status::kIncompatibleLibraryVersion): {
       std::stringstream message;

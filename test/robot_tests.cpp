@@ -2,6 +2,8 @@
 
 #include <atomic>
 #include <functional>
+#include <thread>
+#include <utility>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
@@ -14,6 +16,7 @@ using ::testing::Return;
 
 using research_interface::robot::Connect;
 using research_interface::robot::Move;
+using namespace research_interface;
 
 using namespace franka;
 
@@ -30,8 +33,9 @@ TEST(Robot, CanPerformHandshake) {
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
-  RobotMockServer server([](const Connect::Request&) {
-    return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
+  RobotMockServer server([](const Connect::Request& request) {
+    return Connect::Response(request.header.command_id,
+                             Connect::Status::kIncompatibleLibraryVersion);
   });
 
   EXPECT_THROW(Robot robot("127.0.0.1"), IncompatibleVersionException);
@@ -53,11 +57,36 @@ TEST(Robot, CanReadRobotState) {
   robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
 }
 
-TEST(Robot, CanControlRobot) {
-  using namespace research_interface;
+TEST(Robot, CanReadRobotStateAfterInstanceMove) {
+  struct MockCallback {
+    MOCK_METHOD1(invoke, bool(const RobotState&));
+  };
+  MockCallback callback;
+  RobotMockServer server;
 
+  Robot robot("127.0.0.1");
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
+  robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+
+  // Move constructor
+  Robot robot2(std::move(robot));
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
+  robot2.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+
+  // Move assignment
+  robot = std::move(robot2);
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
+  robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+}
+
+TEST(Robot, CanControlRobot) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
+
+  uint32_t move_command_id;
 
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
@@ -70,7 +99,8 @@ TEST(Robot, CanControlRobot) {
         robot_state.robot_mode = robot::RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>([&](const Move::Request&) {
+      .waitForCommand<Move>([&](const Move::Request& request) {
+        move_command_id = request.header.command_id;
         server
             .doForever([&]() {
               bool continue_sending = send.test_and_set();
@@ -89,8 +119,9 @@ TEST(Robot, CanControlRobot) {
               robot_state.robot_mode = robot::RobotMode::kIdle;
               stopped_message_id = robot_state.message_id;
             })
-            .sendResponse<Move::Response>([]() { return Move::Response(Move::Status::kSuccess); });
-        return Move::Response(Move::Status::kMotionStarted);
+            .sendResponse<Move::Response>(
+                [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); });
+        return Move::Response(move_command_id, Move::Status::kMotionStarted);
       })
       .spinOnce();
 
@@ -137,4 +168,64 @@ TEST(Robot, CanControlRobot) {
 
   // Ignore remaining RobotCommands that might have been sent to the server.
   server.ignoreUdpBuffer();
+}
+
+TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
+  std::atomic_bool run(true);
+
+  RobotMockServer server;
+  Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
+
+  server.sendEmptyState<robot::RobotState>().spinOnce();
+
+  std::mutex mutex;
+  std::condition_variable cv;
+  std::atomic_bool read_started(false);
+  auto thread = std::thread([&]() {
+    robot.read([&](const RobotState&) {
+      read_started = true;
+      EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
+      std::unique_lock<std::mutex> lock(mutex);
+      cv.wait(lock, [&]() { return !run; });
+      return false;
+    });
+  });
+
+  while (!read_started) {
+    std::this_thread::yield();
+  }
+
+  EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<JointPositions(const RobotState&, Duration)>(),
+                             std::function<Torques(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<JointVelocities(const RobotState&, Duration)>(),
+                             std::function<Torques(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<CartesianPose(const RobotState&, Duration)>(),
+                             std::function<Torques(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<CartesianVelocities(const RobotState&, Duration)>(),
+                             std::function<Torques(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<JointPositions(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<JointVelocities(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<CartesianPose(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.control(std::function<CartesianVelocities(const RobotState&, Duration)>()),
+               InvalidOperationException);
+  EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
+  EXPECT_THROW(robot.readOnce(), InvalidOperationException);
+
+  server.ignoreUdpBuffer();
+
+  run = false;
+  cv.notify_one();
+
+  if (thread.joinable()) {
+    thread.join();
+  }
 }

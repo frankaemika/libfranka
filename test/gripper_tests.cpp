@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 
+#include <atomic>
 #include <functional>
-#include <limits>
 
 #include <franka/exception.h>
 #include <franka/gripper.h>
@@ -34,8 +34,8 @@ TEST(Gripper, CanPerformHandshake) {
 
 TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {
   GripperMockServer server([](const Connect::Request&) {
-    return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
+    return Connect::Response(0, Connect::Status::kIncompatibleLibraryVersion);
   });
 
-  EXPECT_THROW(Gripper gripper("127.0.0.1"), IncompatibleVersionException);
+  EXPECT_THROW(Gripper("127.0.0.1"), IncompatibleVersionException);
 }

@@ -31,6 +31,7 @@ Network::Network(const std::string& franka_address,
 
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_socket_.bind({"0.0.0.0", 0});
+    udp_port_ = udp_socket_.address().port();
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
@@ -48,10 +49,14 @@ Network::~Network() {
 }
 
 uint16_t Network::udpPort() const noexcept {
-  return udp_socket_.address().port();
+  return udp_port_;
 }
 
 void Network::tcpThrowIfConnectionClosed() try {
+  std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
+  if (!lock.owns_lock()) {
+    return;
+  }
   if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ)) {
     std::array<uint8_t, 1> buffer;
     int rv = tcp_socket_.receiveBytes(buffer.data(), static_cast<int>(buffer.size()), MSG_PEEK);
@@ -65,6 +70,11 @@ void Network::tcpThrowIfConnectionClosed() try {
 }
 
 void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
+  std::lock_guard<std::mutex> _(tcp_mutex_);
+  return tcpReceiveIntoBufferUnsafe(buffer, read_size);
+}
+
+void Network::tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size) {
   size_t bytes_read = 0;
   try {
     while (bytes_read < read_size) {
@@ -84,10 +94,6 @@ void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
   } catch (const Poco::Exception& e) {
     throw NetworkException("libfranka: FRANKA connection closed");
   }
-}
-
-int Network::udpAvailableData() {
-  return udp_socket_.available();
 }
 
 }  // namespace franka
