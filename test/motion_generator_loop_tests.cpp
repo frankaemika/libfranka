@@ -135,8 +135,9 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionAndControllerCallback) {
     InSequence _;
     EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation));
-    EXPECT_CALL(robot, stopMotion());
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(100));
+    EXPECT_CALL(robot, stopMotion(100));
     EXPECT_CALL(robot, stopController());
   }
 
@@ -153,8 +154,9 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionCallbackAndControllerMode
     InSequence _;
     EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation));
-    EXPECT_CALL(robot, stopMotion());
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, stopMotion(200));
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot, ControllerMode::kCartesianImpedance,

@@ -2,6 +2,7 @@
 
 #include <sstream>
 
+#include <franka/exception.h>
 #include <research_interface/gripper/types.h>
 
 #include "network.h"
@@ -10,15 +11,15 @@ namespace franka {
 
 namespace {
 
-template <typename T>
-bool handleCommandResponse(const typename T::Response& response) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+template <typename T, typename... TArgs>
+bool executeCommand(Network& network, TArgs&&... args) {
+  typename T::Response response = network.executeCommand<T>(std::forward<TArgs>(args)...);
 
   switch (response.status) {
     case T::Status::kSuccess:
       return true;
     case T::Status::kFail:
-      throw CommandException("libfranka gripper: command failed!");
+      throw CommandException("libfranka gripper: Command failed!");
     case T::Status::kUnsuccessful:
       return false;
     default:
@@ -42,59 +43,42 @@ GripperState convertGripperState(
 Gripper::Gripper(const std::string& franka_address)
     : network_{
           std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort)} {
-  if (!network_) {
-    throw std::invalid_argument("libfranka gripper: Invalid argument");
-  }
-
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
       *network_, &ri_version_);
 }
 
 Gripper::~Gripper() noexcept = default;
+Gripper::Gripper(Gripper&&) noexcept = default;
+Gripper& Gripper::operator=(Gripper&&) noexcept = default;
 
 Gripper::ServerVersion Gripper::serverVersion() const noexcept {
   return ri_version_;
 }
 
-bool Gripper::homing() const {
-  using research_interface::gripper::Homing;
-  network_->tcpSendRequest<Homing>({});
-  Homing::Response response = network_->tcpBlockingReceiveResponse<Homing>();
-
-  return handleCommandResponse<Homing>(response);
+bool Gripper::homing() {
+  return executeCommand<research_interface::gripper::Homing>(*network_);
 }
 
-bool Gripper::grasp(double width, double speed, double force) const {
-  using research_interface::gripper::Grasp;
-  network_->tcpSendRequest<Grasp>({width, speed, force});
-  Grasp::Response response = network_->tcpBlockingReceiveResponse<Grasp>();
-
-  return handleCommandResponse<Grasp>(response);
+bool Gripper::grasp(double width, double speed, double force) {
+  return executeCommand<research_interface::gripper::Grasp>(*network_, width, speed, force);
 }
 
-bool Gripper::move(double width, double speed) const {
-  using research_interface::gripper::Move;
-  network_->tcpSendRequest<Move>({width, speed});
-  Move::Response response = network_->tcpBlockingReceiveResponse<Move>();
-
-  return handleCommandResponse<Move>(response);
+bool Gripper::move(double width, double speed) {
+  return executeCommand<research_interface::gripper::Move>(*network_, width, speed);
 }
 
-bool Gripper::stop() const {
-  using research_interface::gripper::Stop;
-  network_->tcpSendRequest<Stop>({});
-  Stop::Response response = network_->tcpBlockingReceiveResponse<Stop>();
-
-  return handleCommandResponse<Stop>(response);
+bool Gripper::stop() {
+  return executeCommand<research_interface::gripper::Stop>(*network_);
 }
 
 GripperState Gripper::readOnce() const {
+  research_interface::gripper::GripperState gripper_state;
   // Delete old data from the UDP buffer.
-  while (network_->udpAvailableData() > 0) {
-    network_->udpRead<research_interface::gripper::GripperState>();
+  while (network_->udpReceive<decltype(gripper_state)>(&gripper_state)) {
   }
 
-  return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
+  gripper_state = network_->udpBlockingReceive<decltype(gripper_state)>();
+  return convertGripperState(gripper_state);
 }
 
 }  // namespace franka

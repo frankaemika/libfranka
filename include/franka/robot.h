@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include <franka/command_types.h>
@@ -24,10 +25,7 @@ class Model;
  * motions, and torque control.
  *
  * @note
- * Before using this functionality, make sure FRANKA's brakes have been released.
- *
- * @warning
- * The members of Robot are <b>not threadsafe</b>!
+ * The members of this class are threadsafe.
  *
  * @par End effector frame
  * While the end effector parameters are set in a configuration file, it is
@@ -62,18 +60,18 @@ class Robot {
   /**
    * Move-constructs a new Robot instance.
    *
-   * @param[in] robot Other Robot instance.
+   * @param[in] other Other Robot instance.
    */
-  Robot(Robot&& robot) noexcept;
+  Robot(Robot&& other) noexcept;
 
   /**
    * Move-assigns this Robot from another Robot instance.
    *
-   * @param[in] robot Other Robot instance.
+   * @param[in] other Other Robot instance.
    *
-   * @return Model instance.
+   * @return Robot instance.
    */
-  Robot& operator=(Robot&& robot) noexcept;
+  Robot& operator=(Robot&& other) noexcept;
 
   /**
    * Closes the connection.
@@ -82,9 +80,12 @@ class Robot {
 
   /**
    * @name Motion generation and torque control
+   *
    * The callbacks given to the control functions are called with a fixed
    * frequency of 1 \f$[KHz]\f$ and therefore need to be able to compute
    * outputs within this time frame.
+   *
+   * Only one of these methods can be active at the same time.
    * @{
    */
 
@@ -92,10 +93,12 @@ class Robot {
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -108,11 +111,13 @@ class Robot {
    * Starts a control loop for a joint position motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -127,11 +132,13 @@ class Robot {
    * Starts a control loop for a joint position motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -146,11 +153,13 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -165,11 +174,13 @@ class Robot {
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -184,11 +195,13 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -203,11 +216,13 @@ class Robot {
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -222,11 +237,13 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -241,11 +258,13 @@ class Robot {
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
@@ -263,8 +282,11 @@ class Robot {
   /**
    * Starts a loop for reading the current robot state.
    *
+   * Cannot be executed while a control or motion generator loop is running.
+   *
    * @param[in] read_callback Callback function for robot state reading.
    *
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    */
@@ -273,8 +295,11 @@ class Robot {
   /**
    * Waits for a robot state update and returns it.
    *
+   * Cannot be executed while a control or motion generator loop is running.
+   *
    * @return Current robot state.
    *
+   * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
    *
@@ -284,6 +309,7 @@ class Robot {
 
   /**
    * @name Commands
+   *
    * Commands are executed by communicating with FRANKA CONTROL over the network.
    * These functions should therefore not be called from within control or motion generator loops.
    * @{
@@ -513,6 +539,7 @@ class Robot {
 
  private:
   std::unique_ptr<Impl> impl_;
+  std::mutex control_mutex_;
 };
 
 }  // namespace franka
