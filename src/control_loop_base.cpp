@@ -38,7 +38,9 @@ bool ControlLoopBase::spinOnce(const RobotState& robot_state,
 
 ControlLoopBase::~ControlLoopBase() noexcept {
   try {
-    robot_.stopMotion();
+    if (motion_id_ != 0) {
+      robot_.stopMotion(motion_id_);
+    }
   } catch (...) {
   }
 }

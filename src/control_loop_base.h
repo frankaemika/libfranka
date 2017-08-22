@@ -33,6 +33,7 @@ class ControlLoopBase {
 
   RobotControl& robot_;
   const ControlCallback control_callback_;
+  uint32_t motion_id_ = 0;
 };
 
 }  // namespace franka

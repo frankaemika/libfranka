@@ -18,6 +18,9 @@ class Network;
 /**
  * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
  * and allows to execute gripper commands.
+ *
+ * @note
+ * The members of this class are threadsafe.
  */
 class Gripper {
  public:
@@ -38,12 +41,29 @@ class Gripper {
   explicit Gripper(const std::string& franka_address);
 
   /**
+   * Move-constructs a new Gripper instance.
+   *
+   * @param[in] gripper Other Gripper instance.
+   */
+  Gripper(Gripper&& gripper) noexcept;
+
+  /**
+   * Move-assigns this Gripper from another Gripper instance.
+   *
+   * @param[in] gripper Other Gripper instance.
+   *
+   * @return Model instance.
+   */
+  Gripper& operator=(Gripper&& gripper) noexcept;
+
+  /**
    * Closes the connection.
    */
   ~Gripper() noexcept;
 
   /**
    * Performs homing of the gripper.
+   *
    * After changing the gripper fingers, a homing needs to be done.
    * This is needed to estimate the maximum grasping width.
    *
@@ -51,9 +71,9 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    *
-   * @see GripperState
+   * @see GripperState for the maximum grasping width.
    */
-  bool homing() const;
+  bool homing();
 
   /**
    * Grasps an object.
@@ -66,7 +86,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool grasp(double width, double speed, double force) const;
+  bool grasp(double width, double speed, double force);
 
   /**
    * Moves the gripper fingers to a specified width.
@@ -78,16 +98,16 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool move(double width, double speed) const;
+  bool move(double width, double speed);
 
   /**
-   * Stops applying force.
+   * Stops a currently running gripper move or grasp.
    *
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
-  bool stop() const;
+  bool stop();
 
   /**
    * Waits for a gripper state update and returns it.
@@ -95,9 +115,8 @@ class Gripper {
    * @return Current gripper state.
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw InvalidOperationException if another readOnce is already running.
    * @throw ProtocolException if received data has invalid format.
-   *
-   * @see GripperState
    */
   GripperState readOnce() const;
 

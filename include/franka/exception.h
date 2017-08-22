@@ -69,4 +69,11 @@ struct RealtimeException : public Exception {
   using Exception::Exception;
 };
 
+/**
+ * InvalidOperationException is thrown if an operation cannot be performed.
+ */
+struct InvalidOperationException : public Exception {
+  using Exception::Exception;
+};
+
 }  // namespace franka

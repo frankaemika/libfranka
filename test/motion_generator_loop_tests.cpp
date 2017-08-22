@@ -109,7 +109,6 @@ TYPED_TEST_CASE(MotionGeneratorLoops, MotionTypes);
 
 TYPED_TEST(MotionGeneratorLoops, CanNotConstructWithoutMotionCallback) {
   StrictMock<MockRobotControl> robot;
-  EXPECT_CALL(robot, stopMotion()).Times(2);
 
   EXPECT_THROW(typename TestFixture::Loop loop(robot,
                                                [](const RobotState&, Duration) {
@@ -125,7 +124,6 @@ TYPED_TEST(MotionGeneratorLoops, CanNotConstructWithoutMotionCallback) {
 
 TYPED_TEST(MotionGeneratorLoops, CanNotConstructWithoutControlCallback) {
   StrictMock<MockRobotControl> robot;
-  EXPECT_CALL(robot, stopMotion());
 
   EXPECT_THROW(typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
                                                std::bind(&TestFixture::createMotion, this)),
@@ -138,8 +136,9 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionAndControllerCallback) {
     InSequence _;
     EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation));
-    EXPECT_CALL(robot, stopMotion());
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(100));
+    EXPECT_CALL(robot, stopMotion(100));
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot,
@@ -155,8 +154,9 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionCallbackAndControllerMode
     InSequence _;
     EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation));
-    EXPECT_CALL(robot, stopMotion());
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, stopMotion(200));
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot, ControllerMode::kCartesianImpedance,

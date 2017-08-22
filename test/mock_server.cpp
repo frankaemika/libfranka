@@ -110,7 +110,8 @@ void MockServer<C>::serverThread() {
       tcp_socket_wrapper, [&, this](const typename C::Connect::Request& request) {
         udp_port = request.udp_port;
         return on_connect_ ? on_connect_(request)
-                           : typename C::Connect::Response(C::Connect::Status::kSuccess);
+                           : typename C::Connect::Response(request.header.command_id,
+                                                           C::Connect::Status::kSuccess);
       });
 
   Poco::Net::DatagramSocket udp_socket({kHostname, 0});

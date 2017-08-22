@@ -18,9 +18,9 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
 
-  robot.startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
-                    MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
-                    kDefaultDeviation);
+  motion_id_ = robot.startMotion(
+      research_interface::robot::Move::ControllerMode::kExternalController,
+      MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation, kDefaultDeviation);
 }
 
 template <typename T>
@@ -48,13 +48,15 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     default:
       throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
   }
-  robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode, kDefaultDeviation,
-                    kDefaultDeviation);
+  motion_id_ = robot.startMotion(mode, MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                                 kDefaultDeviation, kDefaultDeviation);
 }
 
 template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update();
+  robot_.throwOnMotionError(robot_state, motion_id_);
+
   Duration previous_time = robot_state.time;
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
@@ -64,11 +66,13 @@ void MotionGeneratorLoop<T>::operator()() {
            spinOnce(robot_state, robot_state.time - previous_time, &control_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command, &control_command);
+      robot_.throwOnMotionError(robot_state, motion_id_);
     }
   } else {
     while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command);
+      robot_.throwOnMotionError(robot_state, motion_id_);
     }
   }
 }

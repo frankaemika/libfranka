@@ -32,9 +32,7 @@ struct MockControlCallback {
 };
 
 TEST(ControlLoop, CanNotConstructWithoutCallback) {
-  MockRobotControl robot;
-  EXPECT_CALL(robot, stopMotion());
-
+  StrictMock<MockRobotControl> robot;
   EXPECT_THROW(control_loop(robot, control_loop::ControlCallback()), std::invalid_argument);
 }
 
@@ -46,7 +44,6 @@ TEST(ControlLoop, CanConstructWithCallback) {
                 startMotion(Move::ControllerMode::kExternalController,
                             Move::MotionGeneratorMode::kJointVelocity,
                             control_loop::kDefaultDeviation, control_loop::kDefaultDeviation));
-    EXPECT_CALL(robot, stopMotion());
   }
 
   StrictMock<MockControlCallback> control_callback;
