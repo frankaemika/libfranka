@@ -60,18 +60,18 @@ class Robot {
   /**
    * Move-constructs a new Robot instance.
    *
-   * @param[in] robot Other Robot instance.
+   * @param[in] other Other Robot instance.
    */
-  Robot(Robot&& robot) noexcept;
+  Robot(Robot&& other) noexcept;
 
   /**
    * Move-assigns this Robot from another Robot instance.
    *
-   * @param[in] robot Other Robot instance.
+   * @param[in] other Other Robot instance.
    *
    * @return Robot instance.
    */
-  Robot& operator=(Robot&& robot) noexcept;
+  Robot& operator=(Robot&& other) noexcept;
 
   /**
    * Closes the connection.
@@ -539,7 +539,7 @@ class Robot {
 
  private:
   std::unique_ptr<Impl> impl_;
-  std::unique_ptr<std::mutex> control_mutex_;
+  std::mutex control_mutex_;
 };
 
 }  // namespace franka

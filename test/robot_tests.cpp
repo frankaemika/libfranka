@@ -3,6 +3,7 @@
 #include <atomic>
 #include <functional>
 #include <thread>
+#include <utility>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
@@ -53,6 +54,31 @@ TEST(Robot, CanReadRobotState) {
   MockCallback callback;
   EXPECT_CALL(callback, invoke(_));
 
+  robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+}
+
+TEST(Robot, CanReadRobotStateAfterInstanceMove) {
+  struct MockCallback {
+    MOCK_METHOD1(invoke, bool(const RobotState&));
+  };
+  MockCallback callback;
+  RobotMockServer server;
+
+  Robot robot("127.0.0.1");
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
+  robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+
+  // Move constructor
+  Robot robot2(std::move(robot));
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
+  robot2.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
+
+  // Move assignment
+  robot = std::move(robot2);
+  server.sendEmptyState<research_interface::robot::RobotState>().spinOnce();
+  EXPECT_CALL(callback, invoke(_));
   robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
 }
 
