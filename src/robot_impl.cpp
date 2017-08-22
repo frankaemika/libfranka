@@ -283,7 +283,11 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
+  converted.F_T_EE = robot_state.F_T_EE;
   converted.EE_T_K = robot_state.EE_T_K;
+  converted.m_load = robot_state.m_load;
+  converted.F_x_Cload = robot_state.F_x_Cload;
+  converted.I_load = robot_state.I_load;
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
@@ -291,6 +295,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.q = robot_state.q;
   converted.dq = robot_state.dq;
   converted.q_d = robot_state.q_d;
+  converted.dq_d = robot_state.dq_d;
   converted.joint_contact = robot_state.joint_contact;
   converted.cartesian_contact = robot_state.cartesian_contact;
   converted.joint_collision = robot_state.joint_collision;
