@@ -3,7 +3,6 @@
 #include <utility>
 
 #include "control_loop.h"
-#include "motion_generator_loop.h"
 #include "network.h"
 #include "robot_impl.h"
 
@@ -44,7 +43,10 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
         "is running.");
   }
 
-  ControlLoop loop(*impl_, std::move(control_callback));
+  ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
+                                    [](const RobotState&, Duration) -> JointVelocities {
+                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+                                    });
   loop();
 }
 
@@ -58,8 +60,8 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<JointPositions> loop(*impl_, std::move(control_callback),
-                                           std::move(motion_generator_callback));
+  ControlLoop<JointPositions> loop(*impl_, std::move(control_callback),
+                                   std::move(motion_generator_callback));
   loop();
 }
 
@@ -73,8 +75,7 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<JointPositions> loop(*impl_, controller_mode,
-                                           std::move(motion_generator_callback));
+  ControlLoop<JointPositions> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
@@ -88,8 +89,8 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                            std::move(motion_generator_callback));
+  ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
+                                    std::move(motion_generator_callback));
   loop();
 }
 
@@ -103,8 +104,7 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<JointVelocities> loop(*impl_, controller_mode,
-                                            std::move(motion_generator_callback));
+  ControlLoop<JointVelocities> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
@@ -118,8 +118,8 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, std::move(control_callback),
-                                          std::move(motion_generator_callback));
+  ControlLoop<CartesianPose> loop(*impl_, std::move(control_callback),
+                                  std::move(motion_generator_callback));
   loop();
 }
 
@@ -133,8 +133,7 @@ void Robot::control(
         "is running.");
   }
 
-  MotionGeneratorLoop<CartesianPose> loop(*impl_, controller_mode,
-                                          std::move(motion_generator_callback));
+  ControlLoop<CartesianPose> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
@@ -148,8 +147,8 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&, franka:
         "is running.");
   }
 
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
-                                                std::move(motion_generator_callback));
+  ControlLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
+                                        std::move(motion_generator_callback));
   loop();
 }
 
@@ -163,8 +162,8 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&, franka:
         "is running.");
   }
 
-  MotionGeneratorLoop<CartesianVelocities> loop(*impl_, controller_mode,
-                                                std::move(motion_generator_callback));
+  ControlLoop<CartesianVelocities> loop(*impl_, controller_mode,
+                                        std::move(motion_generator_callback));
   loop();
 }
 
