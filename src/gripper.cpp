@@ -41,9 +41,8 @@ GripperState convertGripperState(
 }  // anonymous namespace
 
 Gripper::Gripper(const std::string& franka_address)
-    : network_{std::make_unique<Network>(franka_address,
-                                         research_interface::gripper::kCommandPort)},
-      read_mutex_{new std::mutex} {
+    : network_{
+          std::make_unique<Network>(franka_address, research_interface::gripper::kCommandPort)} {
   connect<research_interface::gripper::Connect, research_interface::gripper::kVersion>(
       *network_, &ri_version_);
 }
@@ -73,14 +72,13 @@ bool Gripper::stop() {
 }
 
 GripperState Gripper::readOnce() const {
-  std::lock_guard<std::mutex> _(*read_mutex_);
-
+  research_interface::gripper::GripperState gripper_state;
   // Delete old data from the UDP buffer.
-  while (network_->udpAvailableData() > 0) {
-    network_->udpRead<research_interface::gripper::GripperState>();
+  while (network_->udpReceive<decltype(gripper_state)>(&gripper_state)) {
   }
 
-  return convertGripperState(network_->udpRead<research_interface::gripper::GripperState>());
+  gripper_state = network_->udpBlockingReceive<decltype(gripper_state)>();
+  return convertGripperState(gripper_state);
 }
 
 }  // namespace franka

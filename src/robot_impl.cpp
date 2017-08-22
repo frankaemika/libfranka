@@ -18,7 +18,7 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
   connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
                                                                                    &ri_version_);
 
-  updateState(network_->udpRead<research_interface::robot::RobotState>());
+  updateState(network_->udpBlockingReceive<research_interface::robot::RobotState>());
 }
 
 RobotState Robot::Impl::update(
@@ -65,8 +65,8 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32
 
 RobotState Robot::Impl::readOnce() {
   // Delete old data from the UDP buffer.
-  while (network_->udpAvailableData() > 0) {
-    network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState robot_state;
+  while (network_->udpReceive<decltype(robot_state)>(&robot_state)) {
   }
 
   return convertRobotState(receiveRobotState());
@@ -108,13 +108,16 @@ research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
   latest_accepted_state.message_id = message_id_;
 
   // If states are already available on the socket, use the one with the most recent message ID.
-  // If there was no valid state on the socket, we need to wait.
-  while (network_->udpAvailableData() >=
-             static_cast<int>(sizeof(research_interface::robot::RobotState)) ||
-         latest_accepted_state.message_id == message_id_) {
-    research_interface::robot::RobotState received_state =
-        network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState received_state{};
+  while (network_->udpReceive(&received_state)) {
+    if (received_state.message_id > latest_accepted_state.message_id) {
+      latest_accepted_state = received_state;
+    }
+  }
 
+  // If there was no valid state on the socket, we need to wait.
+  while (latest_accepted_state.message_id == message_id_) {
+    received_state = network_->udpBlockingReceive<decltype(received_state)>();
     if (received_state.message_id > latest_accepted_state.message_id) {
       latest_accepted_state = received_state;
     }

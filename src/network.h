@@ -26,10 +26,11 @@ class Network {
 
   uint16_t udpPort() const noexcept;
 
-  int udpAvailableData();
+  template <typename T>
+  T udpBlockingReceive();
 
   template <typename T>
-  T udpRead();
+  bool udpReceive(T* data);
 
   template <typename T>
   void udpSend(const T& data);
@@ -55,6 +56,9 @@ class Network {
   typename T::Response executeCommand(TArgs... args);
 
  private:
+  template <typename T>
+  T udpBlockingReceiveUnsafe();
+
   void tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size);
 
   template <typename T>
@@ -63,8 +67,10 @@ class Network {
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
   Poco::Net::SocketAddress udp_server_address_;
+  uint16_t udp_port_;
 
   std::mutex tcp_mutex_;
+  std::mutex udp_mutex_;
 
   uint32_t command_id_{0};
 };
@@ -82,7 +88,24 @@ typename T::Response Network::executeCommand(const typename T::Request& request)
 }
 
 template <typename T>
-T Network::udpRead() try {
+bool Network::udpReceive(T* data) {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+
+  if (udp_socket_.available() >= static_cast<int>(sizeof(T))) {
+    *data = udpBlockingReceiveUnsafe<T>();
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+T Network::udpBlockingReceive() {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+  return udpBlockingReceiveUnsafe<T>();
+}
+
+template <typename T>
+T Network::udpBlockingReceiveUnsafe() try {
   std::array<uint8_t, sizeof(T)> buffer;
 
   int bytes_received =
@@ -95,11 +118,13 @@ T Network::udpRead() try {
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-  throw NetworkException("libfranka: UDP read: "s + e.what());
+  throw NetworkException("libfranka: UDP receive: "s + e.what());
 }
 
 template <typename T>
 void Network::udpSend(const T& data) try {
+  std::lock_guard<std::mutex> _(udp_mutex_);
+
   int bytes_sent = udp_socket_.sendTo(&data, sizeof(data), udp_server_address_);
   if (bytes_sent != sizeof(data)) {
     throw NetworkException("libfranka: could not send UDP data");

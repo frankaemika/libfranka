@@ -31,6 +31,7 @@ Network::Network(const std::string& franka_address,
 
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_socket_.bind({"0.0.0.0", 0});
+    udp_port_ = udp_socket_.address().port();
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
@@ -48,7 +49,7 @@ Network::~Network() {
 }
 
 uint16_t Network::udpPort() const noexcept {
-  return udp_socket_.address().port();
+  return udp_port_;
 }
 
 void Network::tcpThrowIfConnectionClosed() try {
@@ -93,10 +94,6 @@ void Network::tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size) {
   } catch (const Poco::Exception& e) {
     throw NetworkException("libfranka: FRANKA connection closed");
   }
-}
-
-int Network::udpAvailableData() {
-  return udp_socket_.available();
 }
 
 }  // namespace franka

@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <mutex>
 #include <string>
 
 #include <franka/gripper_state.h>
@@ -133,7 +132,6 @@ class Gripper {
 
  private:
   std::unique_ptr<Network> network_;
-  std::unique_ptr<std::mutex> read_mutex_;
 
   uint16_t ri_version_;
 };
