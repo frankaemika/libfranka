@@ -10,9 +10,10 @@ ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
 
-  motion_id_ = robot.startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
-                    research_interface::robot::Move::MotionGeneratorMode::kJointVelocity,
-                    kDefaultDeviation, kDefaultDeviation);
+  motion_id_ =
+      robot.startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
+                        research_interface::robot::Move::MotionGeneratorMode::kJointVelocity,
+                        kDefaultDeviation, kDefaultDeviation);
 }
 
 void ControlLoop::operator()() {

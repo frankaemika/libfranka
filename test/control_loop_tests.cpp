@@ -21,7 +21,7 @@ using research_interface::robot::MotionGeneratorCommand;
 using std::placeholders::_1;
 using std::placeholders::_2;
 
-class control_loop : public franka::ControlLoop {
+class ControlLoop : public franka::ControlLoop {
  public:
   using franka::ControlLoop::ControlLoop;
   using franka::ControlLoop::spinOnce;
@@ -33,23 +33,22 @@ struct MockControlCallback {
 
 TEST(ControlLoop, CanNotConstructWithoutCallback) {
   StrictMock<MockRobotControl> robot;
-  EXPECT_THROW(control_loop(robot, control_loop::ControlCallback()), std::invalid_argument);
+  EXPECT_THROW(ControlLoop(robot, ControlLoop::ControlCallback()), std::invalid_argument);
 }
 
 TEST(ControlLoop, CanConstructWithCallback) {
   MockRobotControl robot;
   {
     InSequence _;
-    EXPECT_CALL(robot,
-                startMotion(Move::ControllerMode::kExternalController,
-                            Move::MotionGeneratorMode::kJointVelocity,
-                            control_loop::kDefaultDeviation, control_loop::kDefaultDeviation));
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   Move::MotionGeneratorMode::kJointVelocity,
+                                   ControlLoop::kDefaultDeviation, ControlLoop::kDefaultDeviation));
   }
 
   StrictMock<MockControlCallback> control_callback;
 
   EXPECT_NO_THROW(
-      control_loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2)));
+      ControlLoop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2)));
 }
 
 TEST(ControlLoop, SpinOnce) {
@@ -62,7 +61,7 @@ TEST(ControlLoop, SpinOnce) {
   Duration duration(1);
   EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(torques));
 
-  control_loop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
+  ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
 
   ControllerCommand command;
   EXPECT_TRUE(loop.spinOnce(robot_state, duration, &command));
@@ -78,7 +77,7 @@ TEST(ControlLoop, SpinWithStoppingCallback) {
   Duration zero_duration(0);
   EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
 
-  control_loop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
+  ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
 
   // Use ASSERT to abort on failure because loop() further down
   // would block otherwise
@@ -121,6 +120,6 @@ TEST(ControlLoop, GetsCorrectTimeStep) {
         return robot_state;
       }));
 
-  control_loop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
+  ControlLoop loop(robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2));
   loop();
 }

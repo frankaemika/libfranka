@@ -658,8 +658,8 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
       .spinOnce();
 
   auto id = robot.startMotion(Move::ControllerMode::kExternalController,
-                                    Move::MotionGeneratorMode::kJointVelocity,
-                                    maximum_path_deviation, maximum_goal_pose_deviation);
+                              Move::MotionGeneratorMode::kJointVelocity, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -824,15 +824,15 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request& request) {
-          EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
-          return Move::Response(request.header.command_id, Move::Status::kMotionStarted); })
+      .waitForCommand<Move>([](const Move::Request& request) {
+        EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   auto id = robot.startMotion(Move::ControllerMode::kExternalController,
-                    Move::MotionGeneratorMode::kCartesianVelocity, maximum_path_deviation,
-                    maximum_goal_pose_deviation);
+                              Move::MotionGeneratorMode::kCartesianVelocity, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
   EXPECT_TRUE(robot.motionGeneratorRunning());
   EXPECT_TRUE(robot.controllerRunning());
 
@@ -864,11 +864,11 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>(
-          [](const Move::Request& request) {
-          EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
+      .waitForCommand<Move>([](const Move::Request& request) {
+        EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
 
-          return Move::Response(request.header.command_id, Move::Status::kMotionStarted); })
+        return Move::Response(request.header.command_id, Move::Status::kMotionStarted);
+      })
       .spinOnce();
 
   robot.startMotion(Move::ControllerMode::kExternalController,
