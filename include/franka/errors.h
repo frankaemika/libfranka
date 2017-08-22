@@ -19,7 +19,7 @@ struct Errors {
    * Sets the error according to values from the array
    * @param errors array of error flags
    */
-  Errors(std::array<bool, 27> errors);
+  Errors(std::array<bool, 32> errors);
 
   /**
    * Check if any error flag is set to true
@@ -133,6 +133,28 @@ struct Errors {
    * True if the first elbow value in Cartesian motion generators is too far from initial one.
    */
   bool cartesian_motion_generator_start_elbow_invalid{};
+  /**
+   * True if the joint position limits would be exceeded after IK calculation.
+   */
+  bool cartesian_motion_generator_joint_position_limits_violation{};
+  /**
+   * True if the joint velocity limits would be exceeded after IK calculation.
+   */
+  bool cartesian_motion_generator_joint_velocity_limits_violation{};
+  /**
+   * True if the joint velocity in Cartesian motion generators is discontinuous after IK
+   * calculation.
+   */
+  bool cartesian_motion_generator_joint_velocity_discontinuity{};
+  /**
+   * True if the joint acceleration in Cartesian motion generators is discontinuous after IK
+   * calculation.
+   */
+  bool cartesian_motion_generator_joint_acceleration_discontinuity{};
+  /**
+   * True if the cartesian pose is not a valid transformation matrix.
+   */
+  bool cartesian_position_motion_generator_invalid_frame{};
   /**
    * True if desired force exceeds the safety thresholds.
    */

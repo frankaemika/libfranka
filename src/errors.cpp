@@ -8,7 +8,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Errors::Errors(std::array<bool, 27> errors)
+Errors::Errors(std::array<bool, 32> errors)
     : joint_position_limits_violation(errors[0]),
       cartesian_position_limits_violation(errors[1]),
       self_collision_avoidance_violation(errors[2]),
@@ -32,6 +32,11 @@ Errors::Errors(std::array<bool, 27> errors)
       cartesian_motion_generator_acceleration_discontinuity(errors[20]),
       cartesian_motion_generator_elbow_sign_inconsistent(errors[21]),
       cartesian_motion_generator_start_elbow_invalid(errors[22]),
+      cartesian_motion_generator_joint_position_limits_violation(errors[27]),
+      cartesian_motion_generator_joint_velocity_limits_violation(errors[28]),
+      cartesian_motion_generator_joint_velocity_discontinuity(errors[29]),
+      cartesian_motion_generator_joint_acceleration_discontinuity(errors[30]),
+      cartesian_position_motion_generator_invalid_frame(errors[31]),
       force_controller_desired_force_tolerance_violation(errors[23]),
       start_elbow_sign_inconsistent(errors[24]),
       communication_constraints_violation(errors[25]),
@@ -56,7 +61,12 @@ Errors::operator bool() const noexcept {
          cartesian_motion_generator_elbow_sign_inconsistent ||
          cartesian_motion_generator_start_elbow_invalid ||
          force_controller_desired_force_tolerance_violation || start_elbow_sign_inconsistent ||
-         communication_constraints_violation || power_limit_violation;
+         communication_constraints_violation || power_limit_violation ||
+         cartesian_motion_generator_joint_position_limits_violation ||
+         cartesian_motion_generator_joint_velocity_limits_violation ||
+         cartesian_motion_generator_joint_velocity_discontinuity ||
+         cartesian_motion_generator_joint_acceleration_discontinuity ||
+         cartesian_position_motion_generator_invalid_frame;
 }
 
 Errors::operator std::string() const {
@@ -114,6 +124,21 @@ Errors::operator std::string() const {
                       : "";
   error_string += cartesian_motion_generator_start_elbow_invalid
                       ? "\"cartesian_motion_generator_start_elbow_invalid\", "
+                      : "";
+  error_string += cartesian_motion_generator_joint_position_limits_violation
+                      ? "\"cartesian_motion_generator_joint_position_limits_violation\", "
+                      : "";
+  error_string += cartesian_motion_generator_joint_velocity_limits_violation
+                      ? "\"cartesian_motion_generator_joint_velocity_limits_violation\", "
+                      : "";
+  error_string += cartesian_motion_generator_joint_velocity_discontinuity
+                      ? "\"cartesian_motion_generator_joint_velocity_discontinuity\", "
+                      : "";
+  error_string += cartesian_motion_generator_joint_acceleration_discontinuity
+                      ? "\"cartesian_motion_generator_joint_acceleration_discontinuity\", "
+                      : "";
+  error_string += cartesian_position_motion_generator_invalid_frame
+                      ? "\"cartesian_position_motion_generator_invalid_frame_flag\", "
                       : "";
   error_string += force_controller_desired_force_tolerance_violation
                       ? "\"force_controller_desired_force_tolerance_violation\", "
