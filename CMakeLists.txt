@@ -60,10 +60,12 @@ add_library(franka SHARED
   src/robot_impl.cpp
   src/robot_state.cpp
 )
+add_library(Franka::Franka ALIAS franka)
 
 set_target_properties(franka PROPERTIES
   VERSION ${libfranka_VERSION}
   SOVERSION ${libfranka_VERSION_MAJOR}
+  EXPORT_NAME Franka
 )
 
 target_include_directories(franka PUBLIC
@@ -115,6 +117,14 @@ install(EXPORT FrankaTargets
 )
 
 ## Subprojects
+
+# Ignore find_package(Franka) in subprojects.
+macro(find_package)
+  if(NOT "${ARGV0}" STREQUAL Franka)
+    _find_package(${ARGV})
+  endif()
+endmacro()
+
 option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)
   enable_testing()
