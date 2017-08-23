@@ -8,7 +8,7 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-Errors::Errors(std::array<bool, 32> errors)
+Errors::Errors(std::array<bool, 33> errors)
     : joint_position_limits_violation(errors[0]),
       cartesian_position_limits_violation(errors[1]),
       self_collision_avoidance_violation(errors[2]),
@@ -38,6 +38,7 @@ Errors::Errors(std::array<bool, 32> errors)
       cartesian_motion_generator_joint_acceleration_discontinuity(errors[30]),
       cartesian_position_motion_generator_invalid_frame(errors[31]),
       force_controller_desired_force_tolerance_violation(errors[23]),
+      controller_torque_discontinuity(errors[32]),
       start_elbow_sign_inconsistent(errors[24]),
       communication_constraints_violation(errors[25]),
       power_limit_violation(errors[26]) {}
@@ -66,7 +67,8 @@ Errors::operator bool() const noexcept {
          cartesian_motion_generator_joint_velocity_limits_violation ||
          cartesian_motion_generator_joint_velocity_discontinuity ||
          cartesian_motion_generator_joint_acceleration_discontinuity ||
-         cartesian_position_motion_generator_invalid_frame;
+         cartesian_position_motion_generator_invalid_frame ||
+         controller_torque_discontinuity;
 }
 
 Errors::operator std::string() const {
@@ -139,6 +141,9 @@ Errors::operator std::string() const {
                       : "";
   error_string += cartesian_position_motion_generator_invalid_frame
                       ? "\"cartesian_position_motion_generator_invalid_frame_flag\", "
+                      : "";
+  error_string += controller_torque_discontinuity
+                      ? "\"controller_torque_discontinuity\", "
                       : "";
   error_string += force_controller_desired_force_tolerance_violation
                       ? "\"force_controller_desired_force_tolerance_violation\", "

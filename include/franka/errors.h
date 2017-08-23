@@ -19,7 +19,7 @@ struct Errors {
    * Sets the error according to values from the array
    * @param errors array of error flags
    */
-  Errors(std::array<bool, 32> errors);
+  Errors(std::array<bool, 33> errors);
 
   /**
    * Check if any error flag is set to true
@@ -159,6 +159,10 @@ struct Errors {
    * True if desired force exceeds the safety thresholds.
    */
   bool force_controller_desired_force_tolerance_violation{};
+  /**
+   * True if the torque set by the external controller is discontinuous.
+   */
+  bool controller_torque_discontinuity{};
   /**
    * True if the start elbow sign was inconsistent. Applies only to motions started from DESK.
    */
