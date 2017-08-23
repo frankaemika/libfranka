@@ -55,19 +55,19 @@ Gripper::ServerVersion Gripper::serverVersion() const noexcept {
   return ri_version_;
 }
 
-bool Gripper::homing() {
+bool Gripper::homing() const {
   return executeCommand<research_interface::gripper::Homing>(*network_);
 }
 
-bool Gripper::grasp(double width, double speed, double force) {
+bool Gripper::grasp(double width, double speed, double force) const {
   return executeCommand<research_interface::gripper::Grasp>(*network_, width, speed, force);
 }
 
-bool Gripper::move(double width, double speed) {
+bool Gripper::move(double width, double speed) const {
   return executeCommand<research_interface::gripper::Move>(*network_, width, speed);
 }
 
-bool Gripper::stop() {
+bool Gripper::stop() const {
   return executeCommand<research_interface::gripper::Stop>(*network_);
 }
 
