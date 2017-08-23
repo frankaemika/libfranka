@@ -67,8 +67,7 @@ Errors::operator bool() const noexcept {
          cartesian_motion_generator_joint_velocity_limits_violation ||
          cartesian_motion_generator_joint_velocity_discontinuity ||
          cartesian_motion_generator_joint_acceleration_discontinuity ||
-         cartesian_position_motion_generator_invalid_frame ||
-         controller_torque_discontinuity;
+         cartesian_position_motion_generator_invalid_frame || controller_torque_discontinuity;
 }
 
 Errors::operator std::string() const {
@@ -142,9 +141,7 @@ Errors::operator std::string() const {
   error_string += cartesian_position_motion_generator_invalid_frame
                       ? "\"cartesian_position_motion_generator_invalid_frame_flag\", "
                       : "";
-  error_string += controller_torque_discontinuity
-                      ? "\"controller_torque_discontinuity\", "
-                      : "";
+  error_string += controller_torque_discontinuity ? "\"controller_torque_discontinuity\", " : "";
   error_string += force_controller_desired_force_tolerance_violation
                       ? "\"force_controller_desired_force_tolerance_violation\", "
                       : "";
