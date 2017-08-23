@@ -18,7 +18,7 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
   connect<research_interface::robot::Connect, research_interface::robot::kVersion>(*network_,
                                                                                    &ri_version_);
 
-  updateState(network_->udpRead<research_interface::robot::RobotState>());
+  updateState(network_->udpBlockingReceive<research_interface::robot::RobotState>());
 }
 
 RobotState Robot::Impl::update(
@@ -26,26 +26,25 @@ RobotState Robot::Impl::update(
     const research_interface::robot::ControllerCommand* control_command) {
   network_->tcpThrowIfConnectionClosed();
 
-  bool was_running_motion_generator = motionGeneratorRunning();
-  bool was_running_controller = controllerRunning();
-
   sendRobotCommand(motion_command, control_command);
 
-  RobotState robot_state = convertRobotState(receiveRobotState());
+  return convertRobotState(receiveRobotState());
+}
 
-  if (robot_state.robot_mode != RobotMode::kReady &&
-      (was_running_motion_generator || was_running_controller)) {
+void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) {
+  if (robot_state.robot_mode != RobotMode::kReady) {
     // Wait until robot state shows stopped motion and controller.
     while (motionGeneratorRunning() || controllerRunning()) {
       receiveRobotState();
     }
 
-    // If a motion generator was running and the robot state shows an error,
-    // we will receive a TCP response to the Move command.
-    if (was_running_motion_generator) {
+    // TODO (fwalch): Change from uint32_t* to uint32_t when RCU 16 changes are in.
+    if (motion_id != nullptr) {
+      // If a motion generator was running and the robot state shows an error,
+      // we will receive a TCP response to the Move command.
       try {
         handleCommandResponse<research_interface::robot::Move>(
-            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+            network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(*motion_id));
       } catch (const CommandException& e) {
         // Rethrow as control exception to be consistent with starting/stopping of motions.
         if (robot_state.robot_mode == RobotMode::kReflex) {
@@ -62,14 +61,12 @@ RobotState Robot::Impl::update(
     }
     throw ControlException("libfranka robot: control aborted");
   }
-
-  return robot_state;
 }
 
 RobotState Robot::Impl::readOnce() {
   // Delete old data from the UDP buffer.
-  while (network_->udpAvailableData() > 0) {
-    network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState robot_state;
+  while (network_->udpReceive<decltype(robot_state)>(&robot_state)) {
   }
 
   return convertRobotState(receiveRobotState());
@@ -111,13 +108,16 @@ research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
   latest_accepted_state.message_id = message_id_;
 
   // If states are already available on the socket, use the one with the most recent message ID.
-  // If there was no valid state on the socket, we need to wait.
-  while (network_->udpAvailableData() >=
-             static_cast<int>(sizeof(research_interface::robot::RobotState)) ||
-         latest_accepted_state.message_id == message_id_) {
-    research_interface::robot::RobotState received_state =
-        network_->udpRead<research_interface::robot::RobotState>();
+  research_interface::robot::RobotState received_state{};
+  while (network_->udpReceive(&received_state)) {
+    if (received_state.message_id > latest_accepted_state.message_id) {
+      latest_accepted_state = received_state;
+    }
+  }
 
+  // If there was no valid state on the socket, we need to wait.
+  while (latest_accepted_state.message_id == message_id_) {
+    received_state = network_->udpBlockingReceive<decltype(received_state)>();
     if (received_state.message_id > latest_accepted_state.message_id) {
       latest_accepted_state = received_state;
     }
@@ -149,7 +149,7 @@ RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
 
-void Robot::Impl::startMotion(
+uint32_t Robot::Impl::startMotion(
     research_interface::robot::Move::ControllerMode controller_mode,
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
@@ -197,35 +197,35 @@ void Robot::Impl::startMotion(
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
   }
 
-  executeCommand<research_interface::robot::Move>(
+  const uint32_t move_command_id = executeCommand<research_interface::robot::Move>(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
 
   RobotState robot_state{};
   while (motion_generator_mode_ != state_motion_generator_mode ||
          controller_mode_ != state_controller_mode) {
-    research_interface::robot::Function function;
-    if (network_->tcpReadResponse<research_interface::robot::Function>(&function)) {
-      if (function != research_interface::robot::Function::kMove) {
-        throw ProtocolException("libfranka robot: unexpected response!");
+    try {
+      if (network_->tcpReceiveResponse<research_interface::robot::Move>(
+              move_command_id,
+              std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
+                        std::placeholders::_1))) {
+        break;
       }
-      try {
-        network_->tcpHandleResponse<research_interface::robot::Move>(
-            std::bind(&Robot::Impl::handleCommandResponse<research_interface::robot::Move>, this,
-                      std::placeholders::_1));
-      } catch (const CommandException& e) {
-        if (robot_state.robot_mode == RobotMode::kReflex) {
-          throw ControlException(e.what() + " "s +
-                                 static_cast<std::string>(robot_state.last_motion_errors));
-        }
-        throw ControlException(e.what());
+    } catch (const CommandException& e) {
+      if (robot_state.robot_mode == RobotMode::kReflex) {
+        throw ControlException(e.what() + " "s +
+                               static_cast<std::string>(robot_state.last_motion_errors));
       }
+      throw ControlException(e.what());
     }
 
     robot_state = update();
+    throwOnMotionError(robot_state, &move_command_id);
   }
+
+  return move_command_id;
 }
 
-void Robot::Impl::stopMotion() {
+void Robot::Impl::stopMotion(uint32_t motion_id) {
   if (!motionGeneratorRunning()) {
     return;
   }
@@ -243,7 +243,7 @@ void Robot::Impl::stopMotion() {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>());
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
 }
 
 void Robot::Impl::startController() {
@@ -256,7 +256,7 @@ void Robot::Impl::startController() {
       research_interface::robot::SetControllerMode::ControllerMode::kExternalController);
 
   while (!controllerRunning()) {
-    update();
+    throwOnMotionError(update(), nullptr);
   }
 }
 
@@ -270,11 +270,12 @@ void Robot::Impl::stopController() {
 
   research_interface::robot::ControllerCommand command{};
   while (controller_mode_ != research_interface::robot::ControllerMode::kJointImpedance) {
-    update(nullptr, &command);
+    auto robot_state = update(nullptr, &command);
+    throwOnMotionError(robot_state, nullptr);
   }
 }
 
-Model Robot::Impl::loadModel() const {
+Model Robot::Impl::loadModel() {
   return Model(*network_);
 }
 
@@ -282,7 +283,11 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
+  converted.F_T_EE = robot_state.F_T_EE;
   converted.EE_T_K = robot_state.EE_T_K;
+  converted.m_load = robot_state.m_load;
+  converted.F_x_Cload = robot_state.F_x_Cload;
+  converted.I_load = robot_state.I_load;
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
@@ -290,6 +295,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.q = robot_state.q;
   converted.dq = robot_state.dq;
   converted.q_d = robot_state.q_d;
+  converted.dq_d = robot_state.dq_d;
   converted.joint_contact = robot_state.joint_contact;
   converted.cartesian_contact = robot_state.cartesian_contact;
   converted.joint_collision = robot_state.joint_collision;

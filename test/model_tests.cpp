@@ -48,9 +48,11 @@ struct Model : public ::testing::Test {
 
     server
         .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
-          server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
-            return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
-          });
+          server.handleCommand<LoadModelLibrary>(
+              tcp_socket, [&](const LoadModelLibrary::Request& request) {
+                return LoadModelLibrary::Response(
+                    request.header.command_id, LoadModelLibrary::Status::kSuccess, buffer.size());
+              });
           tcp_socket.sendBytes(buffer.data(), buffer.size());
         })
         .spinOnce();
@@ -70,8 +72,10 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
   franka::Robot robot("127.0.0.1");
 
   server
-      .waitForCommand<LoadModelLibrary>(
-          [&](auto) { return LoadModelLibrary::Response(LoadModelLibrary::Status::kError, 0); })
+      .waitForCommand<LoadModelLibrary>([&](const LoadModelLibrary::Request& request) {
+        return LoadModelLibrary::Response(request.header.command_id,
+                                          LoadModelLibrary::Status::kError, 0);
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.loadModel(), franka::ModelException);
@@ -84,9 +88,11 @@ TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
   std::array<char, 10> buffer{};
   server
       .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
-        server.handleCommand<LoadModelLibrary>(tcp_socket, [&](auto) {
-          return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
-        });
+        server.handleCommand<LoadModelLibrary>(
+            tcp_socket, [&](const LoadModelLibrary::Request& request) {
+              return LoadModelLibrary::Response(request.header.command_id,
+                                                LoadModelLibrary::Status::kSuccess, buffer.size());
+            });
         tcp_socket.sendBytes(buffer.data(), buffer.size());
       })
       .spinOnce();

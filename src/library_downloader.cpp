@@ -13,10 +13,8 @@ namespace franka {
 LibraryDownloader::LibraryDownloader(Network& network) {
   using research_interface::robot::LoadModelLibrary;
 
-  LoadModelLibrary::Request request(LoadModelLibrary::Architecture::kX64,
-                                    LoadModelLibrary::System::kLinux);
-  network.tcpSendRequest<LoadModelLibrary::Request>(request);
-  LoadModelLibrary::Response response = network.tcpBlockingReceiveResponse<LoadModelLibrary>();
+  LoadModelLibrary::Response response = network.executeCommand<LoadModelLibrary>(
+      LoadModelLibrary::Architecture::kX64, LoadModelLibrary::System::kLinux);
   if (response.status != LoadModelLibrary::Status::kSuccess) {
     throw ModelException("libfranka: Server reports error when loading model library.");
   }
