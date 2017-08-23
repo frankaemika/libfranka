@@ -210,7 +210,6 @@ uint32_t Robot::Impl::startMotion(
     }
 
     robot_state = update();
-    throwOnMotionError(robot_state, move_command_id);
   }
 
   return move_command_id;
