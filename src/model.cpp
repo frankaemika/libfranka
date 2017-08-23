@@ -26,36 +26,33 @@ Model& Model::operator=(Model&&) noexcept = default;
 
 std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_state) const {
   std::array<double, 16> output;
-
-  std::array<double, 7>::const_pointer q = robot_state.q.data();
-
   switch (frame) {
     case Frame::kJoint1:
-      library_->joint1(q, output.data());
+      library_->joint1(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint2:
-      library_->joint2(q, output.data());
+      library_->joint2(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint3:
-      library_->joint3(q, output.data());
+      library_->joint3(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint4:
-      library_->joint4(q, output.data());
+      library_->joint4(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint5:
-      library_->joint5(q, output.data());
+      library_->joint5(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint6:
-      library_->joint6(q, output.data());
+      library_->joint6(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint7:
-      library_->joint7(q, output.data());
+      library_->joint7(robot_state.q.data(), output.data());
       break;
     case Frame::kFlange:
-      library_->flange(q, output.data());
+      library_->flange(robot_state.q.data(), output.data());
       break;
     case Frame::kEndEffector:
-      library_->ee(q, robot_state.F_T_EE.data(), output.data());
+      library_->ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
@@ -67,36 +64,33 @@ std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_
 std::array<double, 42> Model::bodyJacobian(Frame frame,
                                            const franka::RobotState& robot_state) const {
   std::array<double, 42> output;
-
-  std::array<double, 7>::const_pointer q = robot_state.q.data();
-
   switch (frame) {
     case Frame::kJoint1:
       library_->body_jacobian_joint1(output.data());
       break;
     case Frame::kJoint2:
-      library_->body_jacobian_joint2(q, output.data());
+      library_->body_jacobian_joint2(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint3:
-      library_->body_jacobian_joint3(q, output.data());
+      library_->body_jacobian_joint3(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint4:
-      library_->body_jacobian_joint4(q, output.data());
+      library_->body_jacobian_joint4(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint5:
-      library_->body_jacobian_joint5(q, output.data());
+      library_->body_jacobian_joint5(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint6:
-      library_->body_jacobian_joint6(q, output.data());
+      library_->body_jacobian_joint6(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint7:
-      library_->body_jacobian_joint7(q, output.data());
+      library_->body_jacobian_joint7(robot_state.q.data(), output.data());
       break;
     case Frame::kFlange:
-      library_->body_jacobian_flange(q, output.data());
+      library_->body_jacobian_flange(robot_state.q.data(), output.data());
       break;
     case Frame::kEndEffector:
-      library_->body_jacobian_ee(q, robot_state.F_T_EE.data(), output.data());
+      library_->body_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
@@ -108,36 +102,33 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
 std::array<double, 42> Model::zeroJacobian(Frame frame,
                                            const franka::RobotState& robot_state) const {
   std::array<double, 42> output;
-
-  std::array<double, 7>::const_pointer q = robot_state.q.data();
-
   switch (frame) {
     case Frame::kJoint1:
       library_->zero_jacobian_joint1(output.data());
       break;
     case Frame::kJoint2:
-      library_->zero_jacobian_joint2(q, output.data());
+      library_->zero_jacobian_joint2(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint3:
-      library_->zero_jacobian_joint3(q, output.data());
+      library_->zero_jacobian_joint3(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint4:
-      library_->zero_jacobian_joint4(q, output.data());
+      library_->zero_jacobian_joint4(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint5:
-      library_->zero_jacobian_joint5(q, output.data());
+      library_->zero_jacobian_joint5(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint6:
-      library_->zero_jacobian_joint6(q, output.data());
+      library_->zero_jacobian_joint6(robot_state.q.data(), output.data());
       break;
     case Frame::kJoint7:
-      library_->zero_jacobian_joint7(q, output.data());
+      library_->zero_jacobian_joint7(robot_state.q.data(), output.data());
       break;
     case Frame::kFlange:
-      library_->zero_jacobian_flange(q, output.data());
+      library_->zero_jacobian_flange(robot_state.q.data(), output.data());
       break;
     case Frame::kEndEffector:
-      library_->zero_jacobian_ee(q, robot_state.F_T_EE.data(), output.data());
+      library_->zero_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
@@ -171,6 +162,7 @@ std::array<double, 7> franka::Model::coriolis(
 
   return output;
 }
+
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
     double load_mass,
