@@ -73,7 +73,7 @@ class Gripper {
    *
    * @see GripperState for the maximum grasping width.
    */
-  bool homing();
+  bool homing() const;
 
   /**
    * Grasps an object.
@@ -86,7 +86,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool grasp(double width, double speed, double force);
+  bool grasp(double width, double speed, double force) const;
 
   /**
    * Moves the gripper fingers to a specified width.
@@ -98,7 +98,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool move(double width, double speed);
+  bool move(double width, double speed) const;
 
   /**
    * Stops a currently running gripper move or grasp.
@@ -107,7 +107,7 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool stop();
+  bool stop() const;
 
   /**
    * Waits for a gripper state update and returns it.
