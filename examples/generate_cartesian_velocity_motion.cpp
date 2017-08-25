@@ -21,9 +21,6 @@ int main(int argc, char** argv) {
 
     // Set additional parameters always before the control loop, NEVER in the
     // control loop
-    // Set the cartesian impedance:
-    robot.setCartesianImpedance({{1500, 1500, 1500, 150, 150, 150}});
-
     // Set the joint impedance:
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
