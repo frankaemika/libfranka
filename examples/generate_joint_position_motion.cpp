@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
 
       double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
 
-      return {{initial_position[0], initial_position[1], initial_position[2], initial_position[3] + delta_angle,
-               initial_position[4] + delta_angle, initial_position[5], initial_position[6] + delta_angle}};
+      return {{initial_position[0], initial_position[1], initial_position[2],
+               initial_position[3] + delta_angle, initial_position[4] + delta_angle,
+               initial_position[5], initial_position[6] + delta_angle}};
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
