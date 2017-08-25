@@ -49,12 +49,6 @@ class Network {
   template <typename T, typename... TArgs>
   uint32_t tcpSendRequest(TArgs&&... args);
 
-  template <typename T>
-  typename T::Response executeCommand(const typename T::Request& request);
-
-  template <typename T, typename... TArgs>
-  typename T::Response executeCommand(TArgs... args);
-
  private:
   template <typename T>
   T udpBlockingReceiveUnsafe();
@@ -126,16 +120,13 @@ template <typename T, typename... TArgs>
 uint32_t Network::tcpSendRequest(TArgs&&... args) try {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
-  struct {
-    typename T::Header header;
-    typename T::Request payload;
-  } request{
-      .header = typename T::Header(T::kCommand, command_id_++),
-      .payload = typename T::Request(std::forward<TArgs>(args)...),
-  };
-  tcp_socket_.sendBytes(&request, sizeof(request));
+  typename T::template Message<typename T::Request> message;
+  message.header = typename T::Header(T::kCommand, command_id_++);
+  message.set(typename T::Request(std::forward<TArgs>(args)...));
 
-  return request.header.command_id;
+  tcp_socket_.sendBytes(&message, sizeof(message));
+
+  return message.header.command_id;
 } catch (const Poco::Exception& e) {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
   throw NetworkException("libfranka: TCP send bytes: "s + e.what());
@@ -162,42 +153,36 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
                                  std::function<void(const typename T::Response&)> handler) {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
-  struct {
-    typename T::Header header;
-    std::array<uint8_t, sizeof(typename T::Response)> payload;
-  } response;
+  typename T::template Message<typename T::Response> message;
 
-  if (!tcpPeekHeaderUnsafe(&response.header) || response.header.command != T::kCommand ||
-      response.header.command_id != command_id) {
+  if (!tcpPeekHeaderUnsafe(&message.header) || message.header.command != T::kCommand ||
+      message.header.command_id != command_id) {
     return false;
   }
 
   // We peeked the correct header, so now we have to block and wait for the rest of the message.
-  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&response), sizeof(response));
-  handler(*reinterpret_cast<typename T::Response*>(response.payload.data()));
+  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
+  handler(message.get());
   return true;
 }
 
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
-  struct {
-    typename T::Header header;
-    std::array<uint8_t, sizeof(typename T::Response)> payload;
-  } response;
+  typename T::template Message<typename T::Response> message;
 
   // Wait until we receive a packet with the right header.
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   while (true) {
     lock.lock();
     tcp_socket_.poll(Poco::Timespan(0, 1e4), Poco::Net::Socket::SELECT_READ);
-    if (tcpPeekHeaderUnsafe(&response.header) && response.header.command == T::kCommand &&
-        response.header.command_id == command_id) {
+    if (tcpPeekHeaderUnsafe(&message.header) && message.header.command == T::kCommand &&
+        message.header.command_id == command_id) {
       break;
     }
     lock.unlock();
   }
-  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&response), sizeof(response));
-  return *reinterpret_cast<typename T::Response*>(response.payload.data());
+  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
+  return message.get();
 }
 
 template <typename T, uint16_t kLibraryVersion>
