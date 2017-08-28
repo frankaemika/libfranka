@@ -182,6 +182,9 @@ struct Errors {
    * True if commanded values would result in exceeding the power limit.
    */
   bool power_limit_violation{};
+
+ private:
+  std::array<bool, 33> errors_{};
 };
 
 /**

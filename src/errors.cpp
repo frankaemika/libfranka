@@ -6,7 +6,6 @@
 
 #include <research_interface/robot/error.h>
 
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 using Error = research_interface::robot::Error;
 
 namespace franka {
@@ -72,114 +71,23 @@ Errors::Errors(std::array<bool, 33> errors)
           errors[static_cast<size_t>(Error::kStartElbowSignInconsistent)]),
       communication_constraints_violation(
           errors[static_cast<size_t>(Error::kCommunicationConstraintsViolation)]),
-      power_limit_violation(errors[static_cast<size_t>(Error::kPowerLimitViolation)]) {}
+      power_limit_violation(errors[static_cast<size_t>(Error::kPowerLimitViolation)]),
+      errors_(errors) {}
 
 Errors::operator bool() const noexcept {
-  return joint_position_limits_violation || cartesian_position_limits_violation ||
-         self_collision_avoidance_violation || joint_velocity_violation ||
-         cartesian_velocity_violation || force_control_safety_violation || joint_reflex ||
-         cartesian_reflex || max_goal_pose_deviation_violation ||
-         max_path_pose_deviation_violation || cartesian_velocity_profile_safety_violation ||
-         joint_position_motion_generator_start_pose_invalid ||
-         joint_motion_generator_position_limits_violation ||
-         joint_motion_generator_velocity_limits_violation ||
-         joint_motion_generator_velocity_discontinuity ||
-         joint_motion_generator_acceleration_discontinuity ||
-         cartesian_position_motion_generator_start_pose_invalid ||
-         cartesian_motion_generator_elbow_limit_violation ||
-         cartesian_motion_generator_velocity_limits_violation ||
-         cartesian_motion_generator_velocity_discontinuity ||
-         cartesian_motion_generator_acceleration_discontinuity ||
-         cartesian_motion_generator_elbow_sign_inconsistent ||
-         cartesian_motion_generator_start_elbow_invalid ||
-         force_controller_desired_force_tolerance_violation || start_elbow_sign_inconsistent ||
-         communication_constraints_violation || power_limit_violation ||
-         cartesian_motion_generator_joint_position_limits_violation ||
-         cartesian_motion_generator_joint_velocity_limits_violation ||
-         cartesian_motion_generator_joint_velocity_discontinuity ||
-         cartesian_motion_generator_joint_acceleration_discontinuity ||
-         cartesian_position_motion_generator_invalid_frame || controller_torque_discontinuity;
+  return std::any_of(errors_.cbegin(), errors_.cend(), [](bool x) { return x; });
 }
 
 Errors::operator std::string() const {
   std::string error_string = "[";
 
-  error_string += joint_position_limits_violation ? "\"joint_position_limits_violation\", " : "";
-  error_string +=
-      cartesian_position_limits_violation ? "\"cartesian_position_limits_violation\", " : "";
-  error_string +=
-      self_collision_avoidance_violation ? "\"self_collision_avoidance_violation\", " : "";
-  error_string += joint_velocity_violation ? "\"joint_velocity_violation\", " : "";
-  error_string += cartesian_velocity_violation ? "\"cartesian_velocity_violation\", " : "";
-  error_string += force_control_safety_violation ? "\"force_control_safety_violation\", " : "";
-  error_string += joint_reflex ? "\"joint_reflex\", " : "";
-  error_string += cartesian_reflex ? "\"cartesian_reflex\", " : "";
-  error_string +=
-      max_goal_pose_deviation_violation ? "\"max_goal_pose_deviation_violation\", " : "";
-  error_string +=
-      max_path_pose_deviation_violation ? "\"max_path_pose_deviation_violation\", " : "";
-  error_string += cartesian_velocity_profile_safety_violation
-                      ? "\"cartesian_velocity_profile_safety_violation\", "
-                      : "";
-  error_string += joint_position_motion_generator_start_pose_invalid
-                      ? "\"joint_position_motion_generator_start_pose_invalid\", "
-                      : "";
-  error_string += joint_motion_generator_position_limits_violation
-                      ? "\"joint_motion_generator_position_limits_violation\", "
-                      : "";
-  error_string += joint_motion_generator_velocity_limits_violation
-                      ? "\"joint_motion_generator_velocity_limits_violation\", "
-                      : "";
-  error_string += joint_motion_generator_velocity_discontinuity
-                      ? "\"joint_motion_generator_velocity_discontinuity\", "
-                      : "";
-  error_string += joint_motion_generator_acceleration_discontinuity
-                      ? "\"joint_motion_generator_acceleration_discontinuity\", "
-                      : "";
-  error_string += cartesian_position_motion_generator_start_pose_invalid
-                      ? "\"cartesian_position_motion_generator_start_pose_invalid\", "
-                      : "";
-  error_string += cartesian_motion_generator_elbow_limit_violation
-                      ? "\"cartesian_motion_generator_elbow_limit_violation\", "
-                      : "";
-  error_string += cartesian_motion_generator_velocity_limits_violation
-                      ? "\"cartesian_motion_generator_velocity_limits_violation\", "
-                      : "";
-  error_string += cartesian_motion_generator_velocity_discontinuity
-                      ? "\"cartesian_motion_generator_velocity_discontinuity\", "
-                      : "";
-  error_string += cartesian_motion_generator_acceleration_discontinuity
-                      ? "\"cartesian_motion_generator_acceleration_discontinuity\", "
-                      : "";
-  error_string += cartesian_motion_generator_elbow_sign_inconsistent
-                      ? "\"cartesian_motion_generator_elbow_sign_inconsistent\", "
-                      : "";
-  error_string += cartesian_motion_generator_start_elbow_invalid
-                      ? "\"cartesian_motion_generator_start_elbow_invalid\", "
-                      : "";
-  error_string += cartesian_motion_generator_joint_position_limits_violation
-                      ? "\"cartesian_motion_generator_joint_position_limits_violation\", "
-                      : "";
-  error_string += cartesian_motion_generator_joint_velocity_limits_violation
-                      ? "\"cartesian_motion_generator_joint_velocity_limits_violation\", "
-                      : "";
-  error_string += cartesian_motion_generator_joint_velocity_discontinuity
-                      ? "\"cartesian_motion_generator_joint_velocity_discontinuity\", "
-                      : "";
-  error_string += cartesian_motion_generator_joint_acceleration_discontinuity
-                      ? "\"cartesian_motion_generator_joint_acceleration_discontinuity\", "
-                      : "";
-  error_string += cartesian_position_motion_generator_invalid_frame
-                      ? "\"cartesian_position_motion_generator_invalid_frame_flag\", "
-                      : "";
-  error_string += controller_torque_discontinuity ? "\"controller_torque_discontinuity\", " : "";
-  error_string += force_controller_desired_force_tolerance_violation
-                      ? "\"force_controller_desired_force_tolerance_violation\", "
-                      : "";
-  error_string += start_elbow_sign_inconsistent ? "\"start_elbow_sign_inconsistent\", " : "";
-  error_string +=
-      communication_constraints_violation ? "\"communication_constraints_violation\", " : "";
-  error_string += power_limit_violation ? "\"power_limit_violation\", " : "";
+  for (size_t i = 0; i < errors_.size(); i++) {
+    if (errors_[i]) {
+      error_string += "\"";
+      error_string += getErrorName(static_cast<Error>(i));
+      error_string += "\", ";
+    }
+  }
 
   if (error_string.size() > 1) {
     error_string.erase(error_string.end() - 2, error_string.end());
