@@ -1,17 +1,20 @@
 #pragma once
 
 #include <chrono>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <functional>
 #include <mutex>
 #include <sstream>
-
-#include <franka/exception.h>
+#include <thread>
+#include <unordered_map>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
+
+#include <franka/exception.h>
 
 namespace franka {
 
@@ -37,10 +40,9 @@ class Network {
 
   void tcpThrowIfConnectionClosed();
 
-  void tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size);
-
   template <typename T>
-  typename T::Response tcpBlockingReceiveResponse(uint32_t command_id);
+  typename T::Response tcpBlockingReceiveResponse(uint32_t command_id,
+                                                  std::vector<uint8_t>* buffer = nullptr);
 
   template <typename T>
   bool tcpReceiveResponse(uint32_t command_id,
@@ -53,10 +55,8 @@ class Network {
   template <typename T>
   T udpBlockingReceiveUnsafe();
 
-  void tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size);
-
   template <typename T>
-  bool tcpPeekHeaderUnsafe(T* header);
+  void tcpReadFromBuffer(int32_t timeout);
 
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
@@ -67,6 +67,10 @@ class Network {
   std::mutex udp_mutex_;
 
   uint32_t command_id_{0};
+
+  uint8_t* pending_response_ = nullptr;
+  size_t pending_response_offset_ = 0;
+  std::unordered_map<uint32_t, uint8_t*> received_responses_{};
 };
 
 template <typename T>
@@ -116,12 +120,43 @@ void Network::udpSend(const T& data) try {
   throw NetworkException("libfranka: UDP send: "s + e.what());
 }
 
+template <typename T>
+void Network::tcpReadFromBuffer(int32_t timeout) try {
+  if (!tcp_socket_.poll(timeout, Poco::Net::Socket::SELECT_READ)) {
+    return;
+  }
+
+  if (pending_response_ == nullptr &&
+      tcp_socket_.available() >= static_cast<int>(sizeof(typename T::Header))) {
+    typename T::Header header;
+    tcp_socket_.receiveBytes(&header, sizeof(header));
+    pending_response_ = new uint8_t[header.size];
+    std::memcpy(pending_response_, &header, sizeof(header));
+    pending_response_offset_ = sizeof(header);
+  }
+  if (pending_response_ != nullptr && tcp_socket_.available() > 0) {
+    typename T::Header* header = reinterpret_cast<typename T::Header*>(pending_response_);
+    pending_response_offset_ += tcp_socket_.receiveBytes(
+        &pending_response_[pending_response_offset_],
+        std::min(tcp_socket_.available(),
+                 static_cast<int>(header->size - pending_response_offset_)));
+    if (pending_response_offset_ == header->size) {
+      received_responses_.emplace(header->command_id, pending_response_);
+      pending_response_ = nullptr;
+      pending_response_offset_ = 0;
+    }
+  }
+} catch (const Poco::Exception& e) {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  throw NetworkException("libfranka: TCP receive: "s + e.what());
+}
+
 template <typename T, typename... TArgs>
 uint32_t Network::tcpSendRequest(TArgs&&... args) try {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::template Message<typename T::Request> message(
-      typename T::Header(T::kCommand, command_id_++),
+      typename T::Header(T::kCommand, command_id_++, sizeof(message)),
       typename T::Request(std::forward<TArgs>(args)...));
 
   tcp_socket_.sendBytes(&message, sizeof(message));
@@ -133,55 +168,50 @@ uint32_t Network::tcpSendRequest(TArgs&&... args) try {
 }
 
 template <typename T>
-bool Network::tcpPeekHeaderUnsafe(T* header) try {
-  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_READ) &&
-      tcp_socket_.available() >= static_cast<int>(sizeof(T))) {
-    int rv = tcp_socket_.receiveBytes(header, sizeof(T), MSG_PEEK);
-    if (rv != sizeof(T)) {
-      throw NetworkException("libfranka: Could not read data.");
-    }
-    return true;
-  }
-  return false;
-} catch (const Poco::Exception& e) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
-  throw NetworkException("libfranka: "s + e.what());
-}
-
-template <typename T>
 bool Network::tcpReceiveResponse(uint32_t command_id,
                                  std::function<void(const typename T::Response&)> handler) {
-  std::lock_guard<std::mutex> _(tcp_mutex_);
-
-  typename T::template Message<typename T::Response> message;
-
-  if (!tcpPeekHeaderUnsafe(&message.header) || message.header.command != T::kCommand ||
-      message.header.command_id != command_id) {
+  std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
+  if (!lock.owns_lock()) {
     return false;
   }
 
-  // We peeked the correct header, so now we have to block and wait for the rest of the message.
-  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
-  handler(message.getInstance());
-  return true;
+  tcpReadFromBuffer<T>(0);
+  decltype(received_responses_)::const_iterator it = received_responses_.find(command_id);
+  if (it != received_responses_.end()) {
+    auto message =
+        reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second);
+    handler(message->getInstance());
+    delete[] it->second;
+    received_responses_.erase(it);
+    return true;
+  }
+  return false;
 }
 
 template <typename T>
-typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
-  typename T::template Message<typename T::Response> message;
-
-  // Wait until we receive a packet with the right header.
+typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
+                                                         std::vector<uint8_t>* buffer) {
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
-  while (true) {
+  decltype(received_responses_)::const_iterator it;
+  do {
     lock.lock();
-    tcp_socket_.poll(Poco::Timespan(0, 1e4), Poco::Net::Socket::SELECT_READ);
-    if (tcpPeekHeaderUnsafe(&message.header) && message.header.command == T::kCommand &&
-        message.header.command_id == command_id) {
-      break;
-    }
+    tcpReadFromBuffer<T>(1e4);
+    it = received_responses_.find(command_id);
     lock.unlock();
+    std::this_thread::yield();
+  } while (it == received_responses_.end());
+
+  auto message = *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second);
+
+  if (buffer != nullptr && message.header.size != sizeof(message)) {
+    size_t data_size = message.header.size - sizeof(message);
+    std::vector<uint8_t> data_buffer(data_size);
+    std::memcpy(data_buffer.data(), &it->second[sizeof(message)], data_size);
+    *buffer = data_buffer;
   }
-  tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
+
+  delete[] it->second;
+  received_responses_.erase(it);
   return message.getInstance();
 }
 

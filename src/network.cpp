@@ -42,6 +42,14 @@ Network::Network(const std::string& franka_address,
 }
 
 Network::~Network() {
+  if (pending_response_ != nullptr) {
+    delete[] pending_response_;
+  }
+
+  for (auto it : received_responses_) {
+    delete[] it.second;
+  }
+
   try {
     tcp_socket_.shutdown();
   } catch (...) {
@@ -67,33 +75,6 @@ void Network::tcpThrowIfConnectionClosed() try {
   }
 } catch (const Poco::Exception& e) {
   throw NetworkException("libfranka: "s + e.what());
-}
-
-void Network::tcpReceiveIntoBuffer(uint8_t* buffer, size_t read_size) {
-  std::lock_guard<std::mutex> _(tcp_mutex_);
-  return tcpReceiveIntoBufferUnsafe(buffer, read_size);
-}
-
-void Network::tcpReceiveIntoBufferUnsafe(uint8_t* buffer, size_t read_size) {
-  size_t bytes_read = 0;
-  try {
-    while (bytes_read < read_size) {
-      size_t bytes_left = read_size - bytes_read;
-      int rv = tcp_socket_.receiveBytes(&buffer[bytes_read], static_cast<int>(bytes_left));
-      if (rv < 0) {
-        throw NetworkException("libfranka: server closed connection");
-      }
-      bytes_read += rv;
-    }
-  } catch (const Poco::TimeoutException& e) {
-    if (bytes_read != 0) {
-      throw ProtocolException("libfranka: incorrect object size");
-    } else {
-      throw NetworkException("libfranka: FRANKA connection timeout");
-    }
-  } catch (const Poco::Exception& e) {
-    throw NetworkException("libfranka: FRANKA connection closed");
-  }
 }
 
 }  // namespace franka
