@@ -55,9 +55,6 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    // Set the cartesian impedance:
-    robot.setCartesianImpedance({{1500, 1500, 1500, 150, 150, 150}});
-
     // Set the joint impedance:
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 

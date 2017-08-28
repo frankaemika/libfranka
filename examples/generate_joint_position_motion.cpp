@@ -5,15 +5,15 @@
 #include <franka/robot.h>
 
 /**
- * @example generate_joint_pose_motion.cpp
- * An example showing how to generate a joint pose motion.
+ * @example generate_joint_position_motion.cpp
+ * An example showing how to generate a joint position motion.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_joint_pose_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: ./generate_joint_position_motion <robot-hostname>" << std::endl;
     return -1;
   }
 
@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    auto initial_pose = robot.readOnce().q_d;
+    auto initial_position = robot.readOnce().q_d;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&,
                              franka::Duration time_step) -> franka::JointPositions {
@@ -42,8 +42,9 @@ int main(int argc, char** argv) {
 
       double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
 
-      return {{initial_pose[0], initial_pose[1], initial_pose[2], initial_pose[3] + delta_angle,
-               initial_pose[4] + delta_angle, initial_pose[5], initial_pose[6] + delta_angle}};
+      return {{initial_position[0], initial_position[1], initial_position[2],
+               initial_position[3] + delta_angle, initial_position[4] + delta_angle,
+               initial_position[5], initial_position[6] + delta_angle}};
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
