@@ -17,6 +17,11 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
+template class ControlLoop<JointPositions>;
+template class ControlLoop<JointVelocities>;
+template class ControlLoop<CartesianPose>;
+template class ControlLoop<CartesianVelocities>;
+
 template <typename T>
 constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDeviation;
 
@@ -76,11 +81,12 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 
 template <typename T>
 ControlLoop<T>::~ControlLoop() noexcept {
-  try {
-    if (motion_id_ != 0) {
-      robot_.stopMotion(motion_id_);
+  if (std::uncaught_exception() && motion_id_ != 0) {
+    // Send stop command if an exception occured in a control loop.
+    try {
+      robot_.cancelMotion(motion_id_);
+    } catch (...) {
     }
-  } catch (...) {
   }
 }
 
@@ -114,7 +120,12 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  if (control_output.stop()) {
+  if (control_output.motionFinished()) {
+    robot_.finishMotion(motion_id_);
+    return false;
+  }
+  if (control_output.motionCancelled()) {
+    robot_.cancelMotion(motion_id_);
     return false;
   }
   command->tau_J_d = control_output.tau_J;
@@ -126,7 +137,12 @@ bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
                                 franka::Duration time_step,
                                 research_interface::robot::MotionGeneratorCommand* command) {
   T motion_output = motion_callback_(robot_state, time_step);
-  if (motion_output.stop()) {
+  if (motion_output.motionFinished()) {
+    robot_.finishMotion(motion_id_);
+    return false;
+  }
+  if (motion_output.motionCancelled()) {
+    robot_.cancelMotion(motion_id_);
     return false;
   }
   convertMotion(motion_output, command);

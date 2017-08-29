@@ -62,12 +62,10 @@ int main(int argc, char** argv) {
                       franka::Duration time_step) -> franka::JointPositions {
       index += time_step.toMSec();
 
-      if (index >= samples.size()) {
-        return franka::Stop;
-      }
-
       states.push_back(robot_state);
-      return samples[index];
+
+      franka::JointPositions output = samples[index];
+      return (index == samples.size() - 1) ? franka::MotionFinished(output) : output;
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;

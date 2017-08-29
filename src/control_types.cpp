@@ -5,15 +5,53 @@
 
 namespace franka {
 
-IsStop::IsStop() noexcept : IsStop(false) {}
+Stoppable::Stoppable() noexcept : Stoppable(false) {}
 
-IsStop::IsStop(bool is_stop) noexcept : is_stop_(is_stop) {}
+Stoppable::Stoppable(bool is_stop) noexcept : is_stop_(is_stop), motion_finished_(false) {}
 
-bool IsStop::stop() const noexcept {
+bool Stoppable::motionCancelled() const noexcept {
   return is_stop_;
 }
 
-Torques::Torques() noexcept : IsStop(true) {}
+bool Stoppable::motionFinished() const noexcept {
+  return motion_finished_;
+}
+
+void Stoppable::setMotionFinished(bool value) noexcept {
+  motion_finished_ = value;
+}
+
+Torques MotionFinished(const Torques& command) {
+  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
+  new_command.setMotionFinished(true);
+  return new_command;
+}
+
+JointPositions MotionFinished(const JointPositions& command) {
+  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
+  new_command.setMotionFinished(true);
+  return new_command;
+}
+
+JointVelocities MotionFinished(const JointVelocities& command) {
+  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
+  new_command.setMotionFinished(true);
+  return new_command;
+}
+
+CartesianPose MotionFinished(const CartesianPose& command) {
+  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
+  new_command.setMotionFinished(true);
+  return new_command;
+}
+
+CartesianVelocities MotionFinished(const CartesianVelocities& command) {
+  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
+  new_command.setMotionFinished(true);
+  return new_command;
+}
+
+Torques::Torques() noexcept : Stoppable(true) {}
 
 Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                  torques) noexcept : tau_J(torques) {}
@@ -25,7 +63,7 @@ Torques::Torques(std::initializer_list<double> torques) {
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
 
-JointPositions::JointPositions() noexcept : IsStop(true) {}
+JointPositions::JointPositions() noexcept : Stoppable(true) {}
 
 JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                                joint_positions) noexcept : q(joint_positions) {}
@@ -37,7 +75,7 @@ JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
 }
 
-JointVelocities::JointVelocities() noexcept : IsStop(true) {}
+JointVelocities::JointVelocities() noexcept : Stoppable(true) {}
 
 JointVelocities::JointVelocities(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                                  joint_velocities) noexcept : dq(joint_velocities) {}
@@ -49,7 +87,7 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
 }
 
-CartesianPose::CartesianPose() noexcept : IsStop(true) {}
+CartesianPose::CartesianPose() noexcept : Stoppable(true) {}
 
 CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
                              cartesian_pose)
@@ -96,7 +134,7 @@ bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& tr
   return true;
 }
 
-CartesianVelocities::CartesianVelocities() noexcept : IsStop(true) {}
+CartesianVelocities::CartesianVelocities() noexcept : Stoppable(true) {}
 
 CartesianVelocities::CartesianVelocities(
     const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)

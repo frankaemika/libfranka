@@ -506,7 +506,7 @@ TEST(RobotImpl, CanStopMotion) {
       })
       .spinOnce();
 
-  robot.stopMotion(id);
+  robot.finishMotion(id);
   EXPECT_FALSE(robot.motionGeneratorRunning());
 }
 
@@ -562,7 +562,7 @@ TEST(RobotImpl, CanStopMotionWithController) {
       .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kSuccess); })
       .spinOnce();
 
-  robot.stopMotion(id);
+  robot.finishMotion(id);
   EXPECT_FALSE(robot.motionGeneratorRunning());
   EXPECT_FALSE(robot.controllerRunning());
 
@@ -731,7 +731,7 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
         })
         .spinOnce();
 
-    robot.stopMotion(id);
+    robot.finishMotion(id);
     EXPECT_FALSE(robot.motionGeneratorRunning());
   }
 }

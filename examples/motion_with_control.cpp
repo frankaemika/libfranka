@@ -144,14 +144,10 @@ int main(int argc, char** argv) {
         [&](const franka::RobotState&, franka::Duration time_step) -> franka::JointVelocities {
           index += time_step.toMSec();
 
-          if (index >= trajectory.size()) {
-            return franka::Stop;
-          }
+          franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
+          velocities.dq[joint_number] = trajectory[index];
 
-          std::array<double, 7> velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities[joint_number] = trajectory[index];
-
-          return velocities;
+          return (index == trajectory.size() - 1) ? MotionFinished(velocities) : velocities;
         });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

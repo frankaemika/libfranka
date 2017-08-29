@@ -29,33 +29,39 @@ enum class RealtimeConfig { kEnforce, kIgnore };
  * Used to determine whether to terminate a loop after the control callback has returned.
  * @see @em franka::Stop variable in control_types.h
  */
-class IsStop {
+class Stoppable {
  public:
   /**
-   * Determines whether to stop the control and motion generation loops.
+   * Determines whether to cancel a currently running motion.
    *
-   * @return True if the control loop should be stopped.
+   * @return True if the currently running motion should be cancelled, false otherwise.
    */
-  bool stop() const noexcept;
+  bool motionCancelled() const noexcept;
+
+  bool motionFinished() const noexcept;
+
+  void setMotionFinished(bool value) noexcept;
 
  protected:
   /**
-   * Creates a new instance with stop() = false;
+   * Creates a new Stoppable instance with stop() = false.
    */
-  IsStop() noexcept;
+  Stoppable() noexcept;
+
   /**
-   * Creates a new instance with stop() = is_stop;
+   * Creates a new Stoppable instance with stop() = stop.
    */
-  IsStop(bool is_stop) noexcept;
+  Stoppable(bool stop) noexcept;
 
  private:
   bool is_stop_;
+  bool motion_finished_;
 };
 
 /**
  * Stores values for torque control.
  */
-class Torques : public IsStop {
+class Torques : public Stoppable {
  public:
   /**
    * Creates a new Torques instance.
@@ -85,7 +91,7 @@ class Torques : public IsStop {
 /**
  * Stores values for joint position motion generation.
  */
-class JointPositions : public IsStop {
+class JointPositions : public Stoppable {
  public:
   /**
    * Creates a new JointPositions instance.
@@ -115,7 +121,7 @@ class JointPositions : public IsStop {
 /**
  * Stores values for joint velocity motion generation.
  */
-class JointVelocities : public IsStop {
+class JointVelocities : public Stoppable {
  public:
   /**
    * Creates a new JointVelocities instance.
@@ -145,7 +151,7 @@ class JointVelocities : public IsStop {
 /**
  * Stores values for Cartesian pose motion generation.
  */
-class CartesianPose : public IsStop {
+class CartesianPose : public Stoppable {
  public:
   /**
    * Creates a new CartesianPose instance.
@@ -197,7 +203,7 @@ class CartesianPose : public IsStop {
 /**
  * Stores values for Cartesian velocity motion generation.
  */
-class CartesianVelocities : public IsStop {
+class CartesianVelocities : public Stoppable {
  public:
   /**
    * Creates a new CartesianVelocities instance.
@@ -228,20 +234,21 @@ class CartesianVelocities : public IsStop {
 };
 
 /**
- * A static instance of this class @em franka::Stop is used to signal the termination of motion
- * generation and control loops.
- *
- * @see Robot::control
- */
-struct StopT final : Torques, JointPositions, JointVelocities, CartesianVelocities, CartesianPose {
-  StopT() noexcept = default;
-};
-
-/**
  * Used to signal the termination of motion generation and control loops.
  *
  * @see Robot::control
  */
-static const StopT Stop{};  // NOLINT (readability-identifier-naming)
+static const struct : Torques,
+                      JointPositions,
+                      JointVelocities,
+                      CartesianVelocities,
+                      CartesianPose {
+} Cancel{};  // NOLINT (readability-identifier-naming)
+
+Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifier-naming)
+JointPositions MotionFinished(const JointPositions& command);  // NOLINT (readability-identifier-naming)
+JointVelocities MotionFinished(const JointVelocities& command);  // NOLINT (readability-identifier-naming)
+CartesianPose MotionFinished(const CartesianPose& command);  // NOLINT (readability-identifier-naming)
+CartesianVelocities MotionFinished(const CartesianVelocities& command);  // NOLINT (readability-identifier-naming)
 
 }  // namespace franka

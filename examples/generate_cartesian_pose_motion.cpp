@@ -35,11 +35,6 @@ int main(int argc, char** argv) {
         [=, &time](const franka::RobotState&, franka::Duration time_step) -> franka::CartesianPose {
           time += time_step.toSec();
 
-          if (time > 10.0) {
-            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-            return franka::Stop;
-          }
-
           double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
           double delta_x = radius * std::sin(angle);
           double delta_z = radius * (std::cos(angle) - 1);
@@ -48,6 +43,10 @@ int main(int argc, char** argv) {
           new_pose[12] += delta_x;
           new_pose[14] += delta_z;
 
+          if (time == 10.0) {
+            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+            return franka::MotionFinished(new_pose);
+          }
           return new_pose;
         });
   } catch (const franka::Exception& e) {

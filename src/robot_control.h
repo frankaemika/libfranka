@@ -18,7 +18,8 @@ class RobotControl {
       research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
       const research_interface::robot::Move::Deviation& maximum_path_deviation,
       const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) = 0;
-  virtual void stopMotion(uint32_t motion_id) = 0;
+  virtual void finishMotion(uint32_t motion_id) = 0;
+  virtual void cancelMotion(uint32_t motion_id) = 0;
 
   virtual RobotState update(
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,

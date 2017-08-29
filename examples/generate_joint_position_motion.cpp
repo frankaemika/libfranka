@@ -34,16 +34,17 @@ int main(int argc, char** argv) {
                              franka::Duration time_step) -> franka::JointPositions {
       time += time_step.toSec();
 
-      if (time > 10.0) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::Stop;
-      }
-
       double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
 
-      return {{initial_position[0], initial_position[1], initial_position[2],
+      franka::JointPositions output = {{initial_position[0], initial_position[1], initial_position[2],
                initial_position[3] + delta_angle, initial_position[4] + delta_angle,
                initial_position[5], initial_position[6] + delta_angle}};
+
+      if (time > 10.0) {
+        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+        return MotionFinished(output);
+      }
+      return output;
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

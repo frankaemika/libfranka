@@ -18,7 +18,7 @@ using franka::Duration;
 using franka::JointPositions;
 using franka::JointVelocities;
 using franka::RobotState;
-using franka::Stop;
+using franka::Cancel;
 using franka::Torques;
 
 using research_interface::robot::ControllerCommand;
@@ -132,14 +132,10 @@ TYPED_TEST(ControlLoops, CanNotConstructWithoutControlCallback) {
 
 TYPED_TEST(ControlLoops, CanConstructWithMotionAndControllerCallback) {
   MockRobotControl robot;
-  {
-    InSequence _;
-    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
-                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation))
-        .WillOnce(Return(100));
-    EXPECT_CALL(robot, stopMotion(100));
-  }
+  EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                 this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                 TestFixture::Loop::kDefaultDeviation))
+      .WillOnce(Return(100));
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot,
                                              [](const RobotState&, Duration) {
@@ -150,21 +146,22 @@ TYPED_TEST(ControlLoops, CanConstructWithMotionAndControllerCallback) {
 
 TYPED_TEST(ControlLoops, CanConstructWithMotionCallbackAndControllerMode) {
   MockRobotControl robot;
-  {
-    InSequence _;
-    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
-                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
-                                   TestFixture::Loop::kDefaultDeviation))
-        .WillOnce(Return(200));
-    EXPECT_CALL(robot, stopMotion(200));
-  }
+  EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
+                                 this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                 TestFixture::Loop::kDefaultDeviation))
+      .WillOnce(Return(200));
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot, ControllerMode::kCartesianImpedance,
                                              std::bind(&TestFixture::createMotion, this)));
 }
 
 TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
-  NiceMock<MockRobotControl> robot;
+  StrictMock<MockRobotControl> robot;
+  EXPECT_CALL(robot, startMotion(Move::ControllerMode::kJointImpedance, this->kMotionGeneratorMode,
+                                 TestFixture::Loop::kDefaultDeviation,
+                                 TestFixture::Loop::kDefaultDeviation))
+      .WillOnce(Return(200));
+
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
 
   auto motion = this->createMotion();
@@ -184,7 +181,12 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
 }
 
 TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
-  NiceMock<MockRobotControl> robot;
+  StrictMock<MockRobotControl> robot;
+  EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                 this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                 TestFixture::Loop::kDefaultDeviation))
+      .WillOnce(Return(200));
+
   MockControlCallback control_callback;
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
 
@@ -208,8 +210,16 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
   EXPECT_EQ(torques.tau_J, command.control.tau_J_d);
 }
 
-TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallback) {
+TYPED_TEST(ControlLoops, SpinOnceWithCancellingMotionCallback) {
   NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200)).Times(2);
+  }
 
   NiceMock<MockControlCallback> control_callback;
   ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(Torques({0, 1, 2, 3, 4, 5, 6})));
@@ -218,7 +228,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallback) {
   Duration duration(3);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Cancel));
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
@@ -234,24 +244,135 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallback) {
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
-      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Cancel)));
 
   loop();
 
   testRobotStateIsZero(robot_state);
 }
 
-TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallbackAndControllerMode) {
+TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
   NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+  }
+
+  NiceMock<MockControlCallback> control_callback;
+  ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(Torques({0, 1, 2, 3, 4, 5, 6})));
+
+  RobotState robot_state{};
+  Duration duration(3);
+  Duration zero_duration(0);
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(this->createMotion())));
+
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+  ControllerCommand control_command{};
+  EXPECT_TRUE(loop.spinControl(robot_state, duration, &control_command));
+
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
+  MotionGeneratorCommand motion_command{};
+
+  ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
+
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(motion_callback, invoke(_, zero_duration))
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(this->createMotion()))));
+
+  loop();
+
+  testRobotStateIsZero(robot_state);
+}
+
+TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallback) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200));
+  }
+
+  NiceMock<MockControlCallback> control_callback;
+  ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(Torques({0, 1, 2, 3, 4, 5, 6})));
+
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  EXPECT_CALL(motion_callback, invoke(_, _)).WillOnce(Throw(std::domain_error("")));
+
+  try {
+    typename TestFixture::Loop loop(
+        robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+    loop();
+  } catch (const std::domain_error&) {
+  }
+}
+
+TYPED_TEST(ControlLoops, SpinOnceWithCancellingMotionCallbackAndControllerMode) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200)).Times(2);
+  }
 
   RobotState robot_state{};
   Duration duration(4);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Cancel));
 
   typename TestFixture::Loop loop(
-      robot, ControllerMode::kJointImpedance,
+      robot, ControllerMode::kCartesianImpedance,
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
+  MotionGeneratorCommand motion_command{};
+  ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
+
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(motion_callback, invoke(_, zero_duration))
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Cancel)));
+  loop();
+
+  testRobotStateIsZero(robot_state);
+}
+
+TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kCartesianImpedance,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+  }
+
+  RobotState robot_state{};
+  Duration duration(4);
+  Duration zero_duration(0);
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(this->createMotion())));
+
+  typename TestFixture::Loop loop(
+      robot, ControllerMode::kCartesianImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
   // Use ASSERT to abort on failure because loop() in next line would block otherwise.
@@ -260,14 +381,46 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallbackAndControllerMode) {
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
-      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(this->createMotion()))));
   loop();
 
   testRobotStateIsZero(robot_state);
 }
 
-TYPED_TEST(ControlLoops, SpinOnceWithStoppingControlCallback) {
+TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallbackAndControllerMode) {
   NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kJointImpedance,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200));
+  }
+
+  MockMotionCallback<typename TestFixture::TMotion> motion_callback;
+  EXPECT_CALL(motion_callback, invoke(_, _)).WillOnce(Throw(std::domain_error("")));
+
+  try {
+    typename TestFixture::Loop loop(
+        robot, ControllerMode::kJointImpedance,
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+    loop();
+  } catch (const std::domain_error&) {
+  }
+}
+
+TYPED_TEST(ControlLoops, SpinOnceWithCancellingControlCallback) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200)).Times(2);
+  }
 
   NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;
   ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
@@ -276,7 +429,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingControlCallback) {
   RobotState robot_state{};
   Duration duration(5);
   Duration zero_duration(0);
-  EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
+  EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Cancel));
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
@@ -292,10 +445,79 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingControlCallback) {
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(control_callback, invoke(_, zero_duration))
-      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Cancel)));
   loop();
 
   testRobotStateIsZero(robot_state);
+}
+
+TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+  }
+
+  NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;
+  ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
+
+  MockControlCallback control_callback;
+  RobotState robot_state{};
+  Duration duration(5);
+  Duration zero_duration(0);
+  Torques zero_torques{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+  EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(zero_torques)));
+
+  typename TestFixture::Loop loop(
+      robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+  MotionGeneratorCommand motion_command{};
+  EXPECT_TRUE(loop.spinMotion(robot_state, duration, &motion_command));
+
+  // Use ASSERT to abort on failure because loop() in next line
+  // would block otherwise
+  ControllerCommand control_command{};
+
+  ASSERT_FALSE(loop.spinControl(robot_state, duration, &control_command));
+
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(control_callback, invoke(_, zero_duration))
+      .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(zero_torques))));
+  loop();
+
+  testRobotStateIsZero(robot_state);
+}
+
+TYPED_TEST(ControlLoops, LoopWithThrowingControlCallback) {
+  NiceMock<MockRobotControl> robot;
+  {
+    InSequence s;
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
+                                   TestFixture::Loop::kDefaultDeviation))
+        .WillOnce(Return(200));
+    EXPECT_CALL(robot, cancelMotion(200));
+  }
+
+  NiceMock<MockControlCallback> control_callback;
+  EXPECT_CALL(control_callback, invoke(_, _)).WillOnce(Throw(std::domain_error("")));
+
+  NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;
+  ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
+
+  try {
+    typename TestFixture::Loop loop(
+        robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
+    loop();
+  } catch (const std::domain_error&) {
+  }
 }
 
 TYPED_TEST(ControlLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback) {
@@ -317,7 +539,7 @@ TYPED_TEST(ControlLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback)
         EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
         if (++control_count == ticks.size()) {
-          return Stop;
+          return Cancel;
         }
         return zero_torques;
       }));
@@ -356,7 +578,7 @@ TYPED_TEST(ControlLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) 
             EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
-              return Stop;
+              return Cancel;
             }
             return this->createMotion();
           }));
@@ -391,7 +613,7 @@ TYPED_TEST(ControlLoops, GetsCorrectTimeStepWithMotionCallback) {
             EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
-              return Stop;
+              return Cancel;
             }
             return this->createMotion();
           }));

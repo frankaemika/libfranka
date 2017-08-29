@@ -56,9 +56,4 @@ class ControlLoop {
   void convertMotion(const T& motion, research_interface::robot::MotionGeneratorCommand* command);
 };
 
-template class ControlLoop<JointPositions>;
-template class ControlLoop<JointVelocities>;
-template class ControlLoop<CartesianPose>;
-template class ControlLoop<CartesianVelocities>;
-
 }  // namespace franka

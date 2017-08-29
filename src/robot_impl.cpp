@@ -209,7 +209,7 @@ uint32_t Robot::Impl::startMotion(
   return move_command_id;
 }
 
-void Robot::Impl::stopMotion(uint32_t motion_id) {
+void Robot::Impl::finishMotion(uint32_t motion_id) {
   if (!motionGeneratorRunning()) {
     return;
   }
@@ -224,6 +224,19 @@ void Robot::Impl::stopMotion(uint32_t motion_id) {
   // this loop and explicitly wait for the Move response over TCP afterwards.
   while (motionGeneratorRunning()) {
     sendRobotCommand(&motion_command, controllerRunning() ? &controller_command : nullptr);
+    receiveRobotState();
+  }
+  handleCommandResponse<research_interface::robot::Move>(
+      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+}
+
+void Robot::Impl::cancelMotion(uint32_t motion_id) {
+  if (!motionGeneratorRunning()) {
+    return;
+  }
+
+  executeCommand<research_interface::robot::StopMove>();
+  while (motionGeneratorRunning()) {
     receiveRobotState();
   }
   handleCommandResponse<research_interface::robot::Move>(
