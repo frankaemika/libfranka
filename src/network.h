@@ -120,9 +120,9 @@ template <typename T, typename... TArgs>
 uint32_t Network::tcpSendRequest(TArgs&&... args) try {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
-  typename T::template Message<typename T::Request> message;
-  message.header = typename T::Header(T::kCommand, command_id_++);
-  message.set(typename T::Request(std::forward<TArgs>(args)...));
+  typename T::template Message<typename T::Request> message(
+      typename T::Header(T::kCommand, command_id_++),
+      typename T::Request(std::forward<TArgs>(args)...));
 
   tcp_socket_.sendBytes(&message, sizeof(message));
 
@@ -162,7 +162,7 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
 
   // We peeked the correct header, so now we have to block and wait for the rest of the message.
   tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
-  handler(message.get());
+  handler(message.getInstance());
   return true;
 }
 
@@ -182,7 +182,7 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id) {
     lock.unlock();
   }
   tcpReceiveIntoBufferUnsafe(reinterpret_cast<uint8_t*>(&message), sizeof(message));
-  return message.get();
+  return message.getInstance();
 }
 
 template <typename T, uint16_t kLibraryVersion>

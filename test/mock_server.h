@@ -118,9 +118,8 @@ MockServer<C>& MockServer<C>::sendResponse(const typename T::Header& header,
   block_ = true;
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &header](Socket& tcp_socket, Socket&) {
-                           typename T::template Message<typename T::Response> message;
-                           message.header = header;
-                           message.set(create_response());
+                           typename T::template Message<typename T::Response> message(
+                               header, create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
   return *this;
@@ -135,9 +134,8 @@ MockServer<C>& MockServer<C>::queueResponse(const typename T::Header& header,
   std::lock_guard<std::mutex> _(command_mutex_);
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &header](Socket& tcp_socket, Socket&) {
-                           typename T::template Message<typename T::Response> message;
-                           message.header = header;
-                           message.set(create_response());
+                           typename T::template Message<typename T::Response> message(
+                               header, create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
   return *this;
@@ -199,10 +197,8 @@ void MockServer<C>::handleCommand(
     *header_ptr = request_message.header;
   }
 
-  typename T::template Message<typename T::Response> response_message;
-  response_message.header = request_message.header;
-  response_message.set(callback(request_message.get()));
-
+  typename T::template Message<typename T::Response> response_message(
+      request_message.header, callback(request_message.getInstance()));
   tcp_socket.sendBytes(&response_message, sizeof(response_message));
 }
 
