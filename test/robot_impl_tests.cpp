@@ -638,13 +638,15 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
         robot_state.message_id = message_id;
       })
       .spinOnce()
-      .waitForCommand<Move>([=](const Move::Request& request) {
-        EXPECT_EQ(Move::MotionGeneratorMode::kJointVelocity, request.motion_generator_mode);
-        EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
-        EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
-        EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
-        return Move::Response(Move::Status::kMotionStarted);
-      }, &move_header)
+      .waitForCommand<Move>(
+          [=](const Move::Request& request) {
+            EXPECT_EQ(Move::MotionGeneratorMode::kJointVelocity, request.motion_generator_mode);
+            EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
+            EXPECT_EQ(maximum_path_deviation, request.maximum_path_deviation);
+            EXPECT_EQ(maximum_goal_pose_deviation, request.maximum_goal_pose_deviation);
+            return Move::Response(Move::Status::kMotionStarted);
+          },
+          &move_header)
       .spinOnce();
 
   auto id = robot.startMotion(Move::ControllerMode::kExternalController,
@@ -811,10 +813,12 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
         robot_state.robot_mode = RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>([](const Move::Request& request) {
-        EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
-        return Move::Response(Move::Status::kMotionStarted);
-      }, &move_header)
+      .waitForCommand<Move>(
+          [](const Move::Request& request) {
+            EXPECT_EQ(Move::ControllerMode::kExternalController, request.controller_mode);
+            return Move::Response(Move::Status::kMotionStarted);
+          },
+          &move_header)
       .spinOnce();
 
   auto id = robot.startMotion(Move::ControllerMode::kExternalController,
