@@ -33,36 +33,33 @@ typename T::Status GripperCommand<T>::getSuccess() {
 }
 
 template <typename T>
-bool GripperCommand<T>::compare(const typename T::Request& request_one,
-                                const typename T::Request& request_two) {
-  return request_one.header.command_id == request_two.header.command_id;
+bool GripperCommand<T>::compare(const typename T::Request&, const typename T::Request&) {
+  return true;
 }
 
 template <>
 bool GripperCommand<Grasp>::compare(const Grasp::Request& request_one,
                                     const Grasp::Request& request_two) {
-  return request_one.header.command_id == request_two.header.command_id &&
-         request_one.width == request_two.width && request_one.speed == request_two.speed &&
+  return request_one.width == request_two.width && request_one.speed == request_two.speed &&
          request_one.force == request_two.force;
 }
 
 template <>
 bool GripperCommand<Move>::compare(const Move::Request& request_one,
                                    const Move::Request& request_two) {
-  return request_one.header.command_id == request_two.header.command_id &&
-         request_one.width == request_two.width && request_one.speed == request_two.speed;
+  return request_one.width == request_two.width && request_one.speed == request_two.speed;
 }
 
 template <typename T>
 typename T::Request GripperCommand<T>::getExpected() {
-  return typename T::Request(1);
+  return typename T::Request();
 }
 
 template <>
 Move::Request GripperCommand<Move>::getExpected() {
   double width = 0.05;
   double speed = 0.1;
-  return Move::Request(1, width, speed);
+  return Move::Request(width, speed);
 }
 
 template <>
@@ -70,7 +67,7 @@ Grasp::Request GripperCommand<Grasp>::getExpected() {
   double width = 0.05;
   double speed = 0.1;
   double force = 400.0;
-  return Grasp::Request(1, width, speed, force);
+  return Grasp::Request(width, speed, force);
 }
 
 template <>
@@ -99,9 +96,9 @@ bool GripperCommand<Homing>::executeCommand(Gripper& gripper) {
 }
 
 template <typename T>
-typename T::Response GripperCommand<T>::createResponse(const typename T::Request& request,
+typename T::Response GripperCommand<T>::createResponse(const typename T::Request&,
                                                        const typename T::Status status) {
-  return typename T::Response(request.header.command_id, status);
+  return typename T::Response(status);
 }
 
 using CommandTypes = ::testing::Types<Homing, Move, Grasp, Stop>;

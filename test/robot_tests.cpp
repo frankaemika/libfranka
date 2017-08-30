@@ -33,9 +33,8 @@ TEST(Robot, CanPerformHandshake) {
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {
-  RobotMockServer server([](const Connect::Request& request) {
-    return Connect::Response(request.header.command_id,
-                             Connect::Status::kIncompatibleLibraryVersion);
+  RobotMockServer server([](const Connect::Request&) {
+    return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
   });
 
   EXPECT_THROW(Robot robot("127.0.0.1"), IncompatibleVersionException);
@@ -86,7 +85,7 @@ TEST(Robot, CanControlRobot) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
-  uint32_t move_command_id;
+  Move::Header move_header;
 
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
@@ -99,30 +98,32 @@ TEST(Robot, CanControlRobot) {
         robot_state.robot_mode = robot::RobotMode::kMove;
       })
       .spinOnce()
-      .waitForCommand<Move>([&](const Move::Request& request) {
-        move_command_id = request.header.command_id;
-        server
-            .doForever([&]() {
-              bool continue_sending = send.test_and_set();
-              if (continue_sending) {
-                server.onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
-                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
+      .waitForCommand<Move>(
+          [&](const Move::Request&) {
+            server
+                .doForever([&]() {
+                  bool continue_sending = send.test_and_set();
+                  if (continue_sending) {
+                    server.onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
+                      robot_state.motion_generator_mode =
+                          robot::MotionGeneratorMode::kJointPosition;
+                      robot_state.controller_mode = robot::ControllerMode::kJointImpedance;
+                      robot_state.robot_mode = robot::RobotMode::kMove;
+                    });
+                  }
+                  return continue_sending;
+                })
+                .onSendUDP<robot::RobotState>([&](robot::RobotState& robot_state) {
+                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
                   robot_state.controller_mode = robot::ControllerMode::kJointImpedance;
-                  robot_state.robot_mode = robot::RobotMode::kMove;
-                });
-              }
-              return continue_sending;
-            })
-            .onSendUDP<robot::RobotState>([&](robot::RobotState& robot_state) {
-              robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
-              robot_state.controller_mode = robot::ControllerMode::kJointImpedance;
-              robot_state.robot_mode = robot::RobotMode::kIdle;
-              stopped_message_id = robot_state.message_id;
-            })
-            .sendResponse<Move::Response>(
-                [&]() { return Move::Response(move_command_id, Move::Status::kSuccess); });
-        return Move::Response(move_command_id, Move::Status::kMotionStarted);
-      })
+                  robot_state.robot_mode = robot::RobotMode::kIdle;
+                  stopped_message_id = robot_state.message_id;
+                })
+                .sendResponse<Move>(move_header,
+                                    []() { return Move::Response(Move::Status::kSuccess); });
+            return Move::Response(Move::Status::kMotionStarted);
+          },
+          &move_header)
       .spinOnce();
 
   JointPositions joint_positions{{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}};
