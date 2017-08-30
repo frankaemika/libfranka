@@ -138,12 +138,11 @@ void Network::tcpReadFromBuffer(int32_t timeout) try {
   if (pending_response_ && available_bytes > 0) {
     typename T::Header* header = reinterpret_cast<typename T::Header*>(pending_response_.get());
     pending_response_offset_ += tcp_socket_.receiveBytes(
-        &pending_response_.get()[pending_response_offset_],
+        &pending_response_[pending_response_offset_],
         std::min(tcp_socket_.available(),
                  static_cast<int>(header->size - pending_response_offset_)));
     if (pending_response_offset_ == header->size) {
       received_responses_.emplace(header->command_id, std::move(pending_response_));
-      pending_response_.reset();
       pending_response_offset_ = 0;
     }
   }
@@ -207,7 +206,7 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
   if (buffer != nullptr && message.header.size != sizeof(message)) {
     size_t data_size = message.header.size - sizeof(message);
     std::vector<uint8_t> data_buffer(data_size);
-    std::memcpy(data_buffer.data(), &it->second.get()[sizeof(message)], data_size);
+    std::memcpy(data_buffer.data(), &it->second[sizeof(message)], data_size);
     *buffer = data_buffer;
   }
 
