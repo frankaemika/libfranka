@@ -256,8 +256,8 @@ Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifi
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-JointPositions MotionFinished(
-    const JointPositions& command);  // NOLINT (readability-identifier-naming)
+JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointPositions& command);
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -267,8 +267,8 @@ JointPositions MotionFinished(
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-JointVelocities MotionFinished(
-    const JointVelocities& command);  // NOLINT (readability-identifier-naming)
+JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointVelocities& command);
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -278,8 +278,8 @@ JointVelocities MotionFinished(
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-CartesianPose MotionFinished(
-    const CartesianPose& command);  // NOLINT (readability-identifier-naming)
+CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianPose& command);
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -289,7 +289,7 @@ CartesianPose MotionFinished(
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-CartesianVelocities MotionFinished(
-    const CartesianVelocities& command);  // NOLINT (readability-identifier-naming)
+CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianVelocities& command);
 
 }  // namespace franka

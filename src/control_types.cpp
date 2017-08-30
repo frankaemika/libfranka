@@ -9,31 +9,35 @@ Stoppable::Stoppable() noexcept : Stoppable(false) {}
 
 Stoppable::Stoppable(bool motion_cancelled) noexcept : motion_cancelled(motion_cancelled) {}
 
-Torques MotionFinished(const Torques& command) {
+Torques MotionFinished(const Torques& command) {  // NOLINT (readability-identifier-naming)
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-JointPositions MotionFinished(const JointPositions& command) {
+JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointPositions& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-JointVelocities MotionFinished(const JointVelocities& command) {
+JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-CartesianPose MotionFinished(const CartesianPose& command) {
+CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianPose& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-CartesianVelocities MotionFinished(const CartesianVelocities& command) {
+CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
