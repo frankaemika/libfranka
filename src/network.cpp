@@ -42,14 +42,6 @@ Network::Network(const std::string& franka_address,
 }
 
 Network::~Network() {
-  if (pending_response_ != nullptr) {
-    delete[] pending_response_;
-  }
-
-  for (auto it : received_responses_) {
-    delete[] it.second;
-  }
-
   try {
     tcp_socket_.shutdown();
   } catch (...) {

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
@@ -68,9 +69,9 @@ class Network {
 
   uint32_t command_id_{0};
 
-  uint8_t* pending_response_ = nullptr;
+  std::unique_ptr<uint8_t[]> pending_response_{};
   size_t pending_response_offset_ = 0;
-  std::unordered_map<uint32_t, uint8_t*> received_responses_{};
+  std::unordered_map<uint32_t, std::unique_ptr<uint8_t[]>> received_responses_{};
 };
 
 template <typename T>
@@ -126,23 +127,23 @@ void Network::tcpReadFromBuffer(int32_t timeout) try {
     return;
   }
 
-  if (pending_response_ == nullptr &&
-      tcp_socket_.available() >= static_cast<int>(sizeof(typename T::Header))) {
+  int available_bytes = tcp_socket_.available();
+  if (!pending_response_ && available_bytes >= static_cast<int>(sizeof(typename T::Header))) {
     typename T::Header header;
     tcp_socket_.receiveBytes(&header, sizeof(header));
-    pending_response_ = new uint8_t[header.size];
-    std::memcpy(pending_response_, &header, sizeof(header));
+    pending_response_.reset(new uint8_t[header.size]);
+    std::memcpy(pending_response_.get(), &header, sizeof(header));
     pending_response_offset_ = sizeof(header);
   }
-  if (pending_response_ != nullptr && tcp_socket_.available() > 0) {
-    typename T::Header* header = reinterpret_cast<typename T::Header*>(pending_response_);
+  if (pending_response_ && available_bytes > 0) {
+    typename T::Header* header = reinterpret_cast<typename T::Header*>(pending_response_.get());
     pending_response_offset_ += tcp_socket_.receiveBytes(
-        &pending_response_[pending_response_offset_],
+        &pending_response_.get()[pending_response_offset_],
         std::min(tcp_socket_.available(),
                  static_cast<int>(header->size - pending_response_offset_)));
     if (pending_response_offset_ == header->size) {
-      received_responses_.emplace(header->command_id, pending_response_);
-      pending_response_ = nullptr;
+      received_responses_.emplace(header->command_id, std::move(pending_response_));
+      pending_response_.reset();
       pending_response_offset_ = 0;
     }
   }
@@ -179,9 +180,8 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   decltype(received_responses_)::const_iterator it = received_responses_.find(command_id);
   if (it != received_responses_.end()) {
     auto message =
-        reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second);
+        reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
     handler(message->getInstance());
-    delete[] it->second;
     received_responses_.erase(it);
     return true;
   }
@@ -201,16 +201,16 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     std::this_thread::yield();
   } while (it == received_responses_.end());
 
-  auto message = *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second);
+  auto message =
+      *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
 
   if (buffer != nullptr && message.header.size != sizeof(message)) {
     size_t data_size = message.header.size - sizeof(message);
     std::vector<uint8_t> data_buffer(data_size);
-    std::memcpy(data_buffer.data(), &it->second[sizeof(message)], data_size);
+    std::memcpy(data_buffer.data(), &it->second.get()[sizeof(message)], data_size);
     *buffer = data_buffer;
   }
 
-  delete[] it->second;
   received_responses_.erase(it);
   return message.getInstance();
 }
