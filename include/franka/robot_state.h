@@ -192,6 +192,12 @@ struct RobotState {
   Errors last_motion_errors{};
 
   /**
+   * Percentage of the last 100 robot commands that were successfully received by the robot.
+   * Range: \f$[0, 1]\f$, 0 if no robot commands are sent.
+   */
+  double packet_drop_rate{};
+
+  /**
    * Current FRANKA mode.
    */
   RobotMode robot_mode = RobotMode::kUserStopped;
