@@ -27,35 +27,31 @@ enum class RealtimeConfig { kEnforce, kIgnore };
  * Helper type for control and motion generation loops.
  *
  * Used to determine whether to terminate a loop after the control callback has returned.
- * @see @em franka::Stop variable in control_types.h
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
  */
 class Stoppable {
  public:
   /**
    * Determines whether to cancel a currently running motion.
-   *
-   * @return True if the currently running motion should be cancelled, false otherwise.
    */
-  bool motionCancelled() const noexcept;
+  bool motion_finished = false;
 
-  bool motionFinished() const noexcept;
-
-  void setMotionFinished(bool value) noexcept;
+  /**
+   * Determines whether to cancel a currently running motion.
+   */
+  const bool motion_cancelled = false;
 
  protected:
   /**
-   * Creates a new Stoppable instance with stop() = false.
+   * Creates a new Stoppable instance.
    */
   Stoppable() noexcept;
 
   /**
-   * Creates a new Stoppable instance with stop() = stop.
+   * Creates a new Stoppable instance with the given motion_cancelled value.
    */
-  Stoppable(bool stop) noexcept;
-
- private:
-  bool is_stop_;
-  bool motion_finished_;
+  Stoppable(bool motion_cancelled) noexcept;
 };
 
 /**
@@ -233,22 +229,67 @@ class CartesianVelocities : public Stoppable {
   CartesianVelocities() noexcept;
 };
 
+static const struct : Torques, JointPositions, JointVelocities, CartesianVelocities, CartesianPose {
+}
 /**
- * Used to signal the termination of motion generation and control loops.
+ * Used to signal the cancellation of motion generation and control loops.
  *
- * @see Robot::control
+ * @see @ref callback-docs "Documentation on callbacks"
  */
-static const struct : Torques,
-                      JointPositions,
-                      JointVelocities,
-                      CartesianVelocities,
-                      CartesianPose {
-} Cancel{};  // NOLINT (readability-identifier-naming)
+Cancel{};  // NOLINT (readability-identifier-naming)
 
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
 Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifier-naming)
-JointPositions MotionFinished(const JointPositions& command);  // NOLINT (readability-identifier-naming)
-JointVelocities MotionFinished(const JointVelocities& command);  // NOLINT (readability-identifier-naming)
-CartesianPose MotionFinished(const CartesianPose& command);  // NOLINT (readability-identifier-naming)
-CartesianVelocities MotionFinished(const CartesianVelocities& command);  // NOLINT (readability-identifier-naming)
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+JointPositions MotionFinished(
+    const JointPositions& command);  // NOLINT (readability-identifier-naming)
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+JointVelocities MotionFinished(
+    const JointVelocities& command);  // NOLINT (readability-identifier-naming)
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+CartesianPose MotionFinished(
+    const CartesianPose& command);  // NOLINT (readability-identifier-naming)
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+CartesianVelocities MotionFinished(
+    const CartesianVelocities& command);  // NOLINT (readability-identifier-naming)
 
 }  // namespace franka

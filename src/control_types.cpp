@@ -7,47 +7,35 @@ namespace franka {
 
 Stoppable::Stoppable() noexcept : Stoppable(false) {}
 
-Stoppable::Stoppable(bool is_stop) noexcept : is_stop_(is_stop), motion_finished_(false) {}
-
-bool Stoppable::motionCancelled() const noexcept {
-  return is_stop_;
-}
-
-bool Stoppable::motionFinished() const noexcept {
-  return motion_finished_;
-}
-
-void Stoppable::setMotionFinished(bool value) noexcept {
-  motion_finished_ = value;
-}
+Stoppable::Stoppable(bool motion_cancelled) noexcept : motion_cancelled(motion_cancelled) {}
 
 Torques MotionFinished(const Torques& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.setMotionFinished(true);
+  new_command.motion_finished = true;
   return new_command;
 }
 
 JointPositions MotionFinished(const JointPositions& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.setMotionFinished(true);
+  new_command.motion_finished = true;
   return new_command;
 }
 
 JointVelocities MotionFinished(const JointVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.setMotionFinished(true);
+  new_command.motion_finished = true;
   return new_command;
 }
 
 CartesianPose MotionFinished(const CartesianPose& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.setMotionFinished(true);
+  new_command.motion_finished = true;
   return new_command;
 }
 
 CartesianVelocities MotionFinished(const CartesianVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.setMotionFinished(true);
+  new_command.motion_finished = true;
   return new_command;
 }
 

@@ -120,11 +120,11 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  if (control_output.motionFinished()) {
+  if (control_output.motion_finished) {
     robot_.finishMotion(motion_id_);
     return false;
   }
-  if (control_output.motionCancelled()) {
+  if (control_output.motion_cancelled) {
     robot_.cancelMotion(motion_id_);
     return false;
   }
@@ -137,11 +137,11 @@ bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
                                 franka::Duration time_step,
                                 research_interface::robot::MotionGeneratorCommand* command) {
   T motion_output = motion_callback_(robot_state, time_step);
-  if (motion_output.motionFinished()) {
+  if (motion_output.motion_finished) {
     robot_.finishMotion(motion_id_);
     return false;
   }
-  if (motion_output.motionCancelled()) {
+  if (motion_output.motion_cancelled) {
     robot_.cancelMotion(motion_id_);
     return false;
   }

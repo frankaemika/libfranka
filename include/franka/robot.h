@@ -78,11 +78,43 @@ class Robot {
   /**
    * @name Motion generation and torque control
    *
-   * The callbacks given to the control functions are called with a fixed frequency of 1 \f$[KHz]\f$
-   * and therefore need to be able to compute outputs within this time frame.
+   * The following methods allow to perform torque control and/or motion generation by providing
+   * callback functions.
    *
-   * Only one of these methods can be active at the same time.
-   * @{
+   * Only one of these methods can be active at the same time; a franka::ControlException is thrown
+   * otherwise.
+   *
+   * @anchor callback-docs
+   * The callback functions are called with a fixed frequency of 1 KHz and therefore need to be
+   * able to compute outputs within this time frame. Callback functions take two parameters:
+   *
+   * * A franka::RobotState showing the current robot state.
+   * * A franka::Duration to indicate the time since the last callback invocation. Note that
+   *   this implies that the duration is zero when invoking the callback function for the first
+   * time!
+   *
+   * The following incomplete example shows the general structure of a callback function:
+   *
+   * @code{.cpp}
+   * franka::JointPositions control_callback(const franka::RobotState& robot_state,
+   *                                         franka::Duration time_step) {
+   *   time += time_step.toSec();  // Update time at the beginning of the callback.
+   *
+   *   if (cancel) {
+   *     // Return Cancel if the motion should be aborted before the end of the trajectory.
+   *     return franka::Cancel;
+   *   }
+   *
+   *   franka::JointPositions output = getJointPositions(time);
+   *
+   *   if (time == max_time) {
+   *     // Return MotionFinished at the end of the trajectory.
+   *     return franka::MotionFinished(output);
+   *   }
+   *
+   *   return output;
+   * }
+   * @endcode
    */
 
   /**
@@ -91,7 +123,8 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control.
+   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
+   * for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -108,8 +141,10 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control.
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
+   * for more details.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -128,8 +163,10 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control.
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
+   * for more details.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -148,8 +185,10 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control.
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
+   * for more details.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -168,8 +207,10 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control.
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
+   * for more details.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -188,7 +229,8 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -208,7 +250,8 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -228,7 +271,9 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here"
+   * for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -248,7 +293,8 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] motion_generator_callback Callback function for motion generation. See @ref
+   * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.

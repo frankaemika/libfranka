@@ -269,7 +269,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
   Duration duration(3);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(this->createMotion())));
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration))
+      .WillOnce(Return(MotionFinished(this->createMotion())));
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
@@ -369,7 +370,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
   Duration duration(4);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(this->createMotion())));
+  EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration))
+      .WillOnce(Return(MotionFinished(this->createMotion())));
 
   typename TestFixture::Loop loop(
       robot, ControllerMode::kCartesianImpedance,
@@ -470,7 +472,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
   Duration duration(5);
   Duration zero_duration(0);
   Torques zero_torques{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(MotionFinished(zero_torques)));
+  EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration))
+      .WillOnce(Return(MotionFinished(zero_torques)));
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
