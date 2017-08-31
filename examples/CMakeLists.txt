@@ -18,6 +18,7 @@ set(EXAMPLES
   joint_impedance_control
   motion_with_control
   print_joint_poses
+  joint_point_to_point_motion
 )
 
 foreach(example ${EXAMPLES})
