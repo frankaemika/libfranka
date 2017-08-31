@@ -5,7 +5,7 @@
 #include <franka/model.h>
 
 /**
- * @example print_joint_poses.cpp
+ * @example print_joint_positions.cpp
  * An example showing how to use the FRANKA model library.
  */
 
@@ -20,7 +20,7 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./print_joint_poses <robot-hostname>" << std::endl;
+    std::cerr << "Usage: ./print_joint_positions <robot-hostname>" << std::endl;
     return -1;
   }
 

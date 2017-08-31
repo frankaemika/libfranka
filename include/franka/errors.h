@@ -14,16 +14,22 @@ namespace franka {
  * Enumerates FRANKA's error flags.
  */
 struct Errors {
-  Errors() = default;
   /**
-   * Sets the error according to values from the array
-   * @param errors array of error flags
+   * Creates an empty Errors instance.
+   */
+  Errors() = default;
+
+  /**
+   * Creates a new Errors instance from the given array.
+   *
+   * @param errors Array of error flags.
    */
   Errors(std::array<bool, 33> errors);
 
   /**
-   * Check if any error flag is set to true
-   * @return true if any errors are set
+   * Check if any error flag is set to true.
+   *
+   * @return True if any errors are set.
    */
   explicit operator bool() const noexcept;
 
@@ -31,6 +37,7 @@ struct Errors {
    * Creates a string with names of active errors:
    * "[active_error_name2, active_error_name_2, ... active_error_name_n]"
    * If no errors are active, the string contains empty brackets: "[]"
+   *
    * @return string with names of active errors
    */
   explicit operator std::string() const;
@@ -175,6 +182,9 @@ struct Errors {
    * True if commanded values would result in exceeding the power limit.
    */
   bool power_limit_violation{};
+
+ private:
+  std::array<bool, 33> errors_{};
 };
 
 /**

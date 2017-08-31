@@ -34,7 +34,7 @@ TEST(Gripper, CanPerformHandshake) {
 
 TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {
   GripperMockServer server([](const Connect::Request&) {
-    return Connect::Response(0, Connect::Status::kIncompatibleLibraryVersion);
+    return Connect::Response(Connect::Status::kIncompatibleLibraryVersion);
   });
 
   EXPECT_THROW(Gripper("127.0.0.1"), IncompatibleVersionException);

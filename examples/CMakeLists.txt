@@ -12,13 +12,13 @@ set(EXAMPLES
   generate_cartesian_pose_motion
   generate_cartesian_velocity_motion
   generate_consecutive_motions
-  generate_joint_pose_motion
+  generate_joint_position_motion
   generate_joint_velocity_motion
   grasp_object
   joint_impedance_control
   motion_with_control
-  print_joint_poses
   joint_point_to_point_motion
+  print_joint_positions
 )
 
 foreach(example ${EXAMPLES})
