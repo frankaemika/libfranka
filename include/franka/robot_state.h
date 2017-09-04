@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstdint>
 #include <ostream>
 
 #include <franka/duration.h>
@@ -192,10 +193,10 @@ struct RobotState {
   Errors last_motion_errors{};
 
   /**
-   * Percentage of the last 100 robot commands that were successfully received by the robot.
-   * Range: \f$[0, 1]\f$, 0 if no robot commands are sent.
+   * Amount of the last 100 robot commands that were not successfully received by the robot.
+   * Range: \f$[0, 100]\f$, 0 if no robot commands are sent.
    */
-  double packet_drop_rate{};
+  uint8_t lost_command_percentage{};
 
   /**
    * Current FRANKA mode.
