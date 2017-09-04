@@ -36,9 +36,9 @@ void sub(const std::array<double, 7>& a,
 }
 void maxVector(const std::array<double, 7>& a, double* out) {
   (*out) = a[0];
-  for (uint i = 0; i < a.size(); i++) {
-    if (a[i] > (*out)) {
-      (*out) = a[i];
+  for (const int& element : a) {
+    if (element > (*out)) {
+      (*out) = element;
     }
   }
 }
@@ -56,7 +56,7 @@ void calculationOfDesiredValues(double t,
   std::array<int, 7> sign_delta_q;
   std::array<double, 7> t_d;
   std::array<double, 7> delta_t_2;
-  std::array<bool, 7> joint_motion_finished = {false, false, false, false, false, false, false};
+  std::array<bool, 7> joint_motion_finished{{false, false, false, false, false, false, false}};
   sub(t_2, t_1, &t_d);
   sub(t_f, t_2, &delta_t_2);
 
@@ -131,9 +131,9 @@ int main(int argc, char** argv) {
     }
     // Initialization
 
-    std::array<double, 7> dq_max = {2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5};
-    std::array<double, 7> ddq_max_start = {5, 5, 5, 5, 5, 5, 5};
-    std::array<double, 7> ddq_max_goal = {5, 5, 5, 5, 5, 5, 5};
+    std::array<double, 7> dq_max{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
+    std::array<double, 7> ddq_max_start{{5, 5, 5, 5, 5, 5, 5}};
+    std::array<double, 7> ddq_max_goal{{5, 5, 5, 5, 5, 5, 5}};
     for (int joint_index = 0; joint_index < 7; joint_index++) {
       dq_max[joint_index] = speed_factor * dq_max[joint_index];
       ddq_max_start[joint_index] = speed_factor * ddq_max_start[joint_index];
@@ -143,14 +143,14 @@ int main(int argc, char** argv) {
     double time = 0.0;
     std::array<double, 7> dq_max_reach = dq_max;
     std::array<double, 7> dq_max_sync;
-    std::array<double, 7> t_1 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> delta_t_2 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> t_f = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> t_1_sync = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> t_2_sync = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> delta_t_2_sync = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> t_f_sync = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-    std::array<double, 7> q_1 = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    std::array<double, 7> t_1{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> delta_t_2{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> t_f{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> t_1_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> t_2_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> delta_t_2_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> t_f_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    std::array<double, 7> q_1{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<double, 7> delta_q;
     std::array<double, 7> delta_q_d;
 
@@ -202,7 +202,7 @@ int main(int argc, char** argv) {
           calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync, q_1,
                                      delta_q_motion_finished, &delta_q_d, &motion_finished_flag);
 
-          if (motion_finished_flag == true) {
+          if (motion_finished_flag) {
             std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
             return franka::Stop;
           }
