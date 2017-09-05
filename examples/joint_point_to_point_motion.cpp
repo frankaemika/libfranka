@@ -13,13 +13,10 @@
  */
 
 inline int sgn(double x) {
-  int sign = 0;
   if (x == 0) {
-    sign = 0;
-  } else {
-    sign = (x > 0) ? 1 : -1;
+    return 0;
   }
-  return sign;
+  return (x > 0) ? 1 : -1;
 }
 
 std::array<double, 7> sub(const std::array<double, 7>& a, const std::array<double, 7>& b) {
@@ -30,7 +27,7 @@ std::array<double, 7> sub(const std::array<double, 7>& a, const std::array<doubl
   return result;
 }
 
-void calculationOfDesiredValues(double t,
+bool calculationOfDesiredValues(double t,
                                 const std::array<double, 7>& delta_q,
                                 const std::array<double, 7>& dq_max,
                                 const std::array<double, 7>& t_1,
@@ -38,20 +35,18 @@ void calculationOfDesiredValues(double t,
                                 const std::array<double, 7>& t_f,
                                 const std::array<double, 7>& q_1,
                                 double delta_q_motion_finished,
-                                std::array<double, 7>& delta_q_d,
-                                bool& motion_finished_flag);
+                                std::array<double, 7>* delta_q_d);
 
 void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
                                      const double delta_q_motion_finished,
                                      const std::array<double, 7>& dq_max,
                                      const std::array<double, 7>& ddq_max_start,
                                      const std::array<double, 7>& ddq_max_goal,
-                                     std::array<double, 7>& dq_max_sync,
-                                     std::array<double, 7>& t_1_sync,
-                                     std::array<double, 7>& t_2_sync,
-                                     std::array<double, 7>& t_f_sync,
-                                     std::array<double, 7>& q_1);
-
+                                     std::array<double, 7>* dq_max_sync,
+                                     std::array<double, 7>* t_1_sync,
+                                     std::array<double, 7>* t_2_sync,
+                                     std::array<double, 7>* t_f_sync,
+                                     std::array<double, 7>* q_1);
 int main(int argc, char** argv) {
   if (argc != 10) {
     std::cerr << "Usage: ./generate_joint_pose_motion <robot-hostname> <goal_position> <speed "
@@ -104,15 +99,17 @@ int main(int argc, char** argv) {
     delta_q = sub(q_goal, q_start);
 
     calculationOfSynchronizedValues(delta_q, delta_q_motion_finished, dq_max, ddq_max_start,
-                                    ddq_max_goal, dq_max_sync, t_1_sync, t_2_sync, t_f_sync, q_1);
+                                    ddq_max_goal, &dq_max_sync, &t_1_sync, &t_2_sync, &t_f_sync,
+                                    &q_1);
     robot.control(
         [=, &time, &delta_q_d, &motion_finished_flag](
             const franka::RobotState&, franka::Duration time_step) -> franka::JointPositions {
 
           time += time_step.s();
 
-          calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync, q_1,
-                                     delta_q_motion_finished, delta_q_d, motion_finished_flag);
+          motion_finished_flag =
+              calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync,
+                                         q_1, delta_q_motion_finished, &delta_q_d);
 
           if (motion_finished_flag) {
             std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
@@ -131,7 +128,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-void calculationOfDesiredValues(double t,
+bool calculationOfDesiredValues(double t,
                                 const std::array<double, 7>& delta_q,
                                 const std::array<double, 7>& dq_max,
                                 const std::array<double, 7>& t_1,
@@ -139,36 +136,33 @@ void calculationOfDesiredValues(double t,
                                 const std::array<double, 7>& t_f,
                                 const std::array<double, 7>& q_1,
                                 double delta_q_motion_finished,
-                                std::array<double, 7>& delta_q_d,
-                                bool& motion_finished_flag) {
+                                std::array<double, 7>* delta_q_d) {
   std::array<int, 7> sign_delta_q;
   std::array<double, 7> t_d;
   std::array<double, 7> delta_t_2;
   std::array<bool, 7> joint_motion_finished{{false, false, false, false, false, false, false}};
   t_d = sub(t_2, t_1);
   delta_t_2 = sub(t_f, t_2);
-
   for (uint joint_index = 0; joint_index < 7; joint_index++) {
     sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
     if (std::abs(delta_q[joint_index]) < delta_q_motion_finished) {  // not moving joint
-      delta_q_d[joint_index] = 0;
+      (*delta_q_d)[joint_index] = 0;
       joint_motion_finished[joint_index] = true;
     } else {  // Moving joints
 
-      if (t < t_1[joint_index])  // Acceleration phase
-      {
-        delta_q_d[joint_index] = -1.0 / std::pow(t_1[joint_index], 3) * dq_max[joint_index] *
-                                 sign_delta_q[joint_index] * (0.5 * t - t_1[joint_index]) *
-                                 std::pow(t, 3);
+      if (t < t_1[joint_index]) {  // Acceleration phase
+        (*delta_q_d)[joint_index] = -1.0 / std::pow(t_1[joint_index], 3) * dq_max[joint_index] *
+                                    sign_delta_q[joint_index] * (0.5 * t - t_1[joint_index]) *
+                                    std::pow(t, 3);
 
       } else if (t >= t_1[joint_index] && t < t_2[joint_index]) {  // Constant velocity phase
-        delta_q_d[joint_index] =
+        (*delta_q_d)[joint_index] =
             q_1[joint_index] +
             (t - t_1[joint_index]) * dq_max[joint_index] * sign_delta_q[joint_index];
 
       } else if (t >= t_2[joint_index] && t < t_f[joint_index]) {  // Deceleration phase
 
-        delta_q_d[joint_index] =
+        (*delta_q_d)[joint_index] =
             delta_q[joint_index] +
             0.5 * (1 / std::pow(delta_t_2[joint_index], 3) *
                        (t - t_1[joint_index] - 2 * delta_t_2[joint_index] - t_d[joint_index]) *
@@ -176,16 +170,14 @@ void calculationOfDesiredValues(double t,
                    (2 * t - 2 * t_1[joint_index] - delta_t_2[joint_index] - 2 * t_d[joint_index])) *
                 dq_max[joint_index] * sign_delta_q[joint_index];
       } else {  // End of Trajectory
-
-        delta_q_d[joint_index] = delta_q[joint_index];
+        (*delta_q_d)[joint_index] = delta_q[joint_index];
         joint_motion_finished[joint_index] = true;
       }
     }
   }
-  motion_finished_flag =
-      (joint_motion_finished[0] && joint_motion_finished[1] && joint_motion_finished[2] &&
-       joint_motion_finished[3] && joint_motion_finished[4] && joint_motion_finished[5] &&
-       joint_motion_finished[6]);
+  return (joint_motion_finished[0] && joint_motion_finished[1] && joint_motion_finished[2] &&
+          joint_motion_finished[3] && joint_motion_finished[4] && joint_motion_finished[5] &&
+          joint_motion_finished[6]);
 }
 
 void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
@@ -193,11 +185,11 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
                                      const std::array<double, 7>& dq_max,
                                      const std::array<double, 7>& ddq_max_start,
                                      const std::array<double, 7>& ddq_max_goal,
-                                     std::array<double, 7>& dq_max_sync,
-                                     std::array<double, 7>& t_1_sync,
-                                     std::array<double, 7>& t_2_sync,
-                                     std::array<double, 7>& t_f_sync,
-                                     std::array<double, 7>& q_1) {
+                                     std::array<double, 7>* dq_max_sync,
+                                     std::array<double, 7>* t_1_sync,
+                                     std::array<double, 7>* t_2_sync,
+                                     std::array<double, 7>* t_f_sync,
+                                     std::array<double, 7>* q_1) {
   std::array<double, 7> dq_max_reach = dq_max;
   std::array<double, 7> t_f{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   std::array<double, 7> delta_t_2{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
@@ -229,14 +221,15 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
       double c =
           std::abs(delta_q[joint_index]) * ddq_max_goal[joint_index] * ddq_max_start[joint_index];
       double delta = b * b - 4.0 * a * c;
-      dq_max_sync[joint_index] = (-1 * b - std::sqrt(delta)) / (2.0 * a);
-      t_1_sync[joint_index] = 1.5 * dq_max_sync[joint_index] / ddq_max_start[joint_index];
-      delta_t_2_sync[joint_index] = 1.5 * dq_max_sync[joint_index] / ddq_max_goal[joint_index];
-      t_f_sync[joint_index] = t_1_sync[joint_index] / 2 + delta_t_2_sync[joint_index] / 2 +
-                              std::abs(delta_q[joint_index] / dq_max_sync[joint_index]);
-      t_2_sync[joint_index] = t_f_sync[joint_index] - delta_t_2_sync[joint_index];
-      q_1[joint_index] =
-          dq_max_sync[joint_index] * sign_delta_q[joint_index] * (0.5 * t_1_sync[joint_index]);
+      (*dq_max_sync)[joint_index] = (-1 * b - std::sqrt(delta)) / (2.0 * a);
+      (*t_1_sync)[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_start[joint_index];
+      delta_t_2_sync[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_goal[joint_index];
+      (*t_f_sync)[joint_index] = (*t_1_sync)[joint_index] / 2 +
+                                 delta_t_2_sync[joint_index] /
+                                     std::abs(delta_q[joint_index] / (*dq_max_sync)[joint_index]);
+      (*t_2_sync)[joint_index] = (*t_f_sync)[joint_index] - delta_t_2_sync[joint_index];
+      (*q_1)[joint_index] = (*dq_max_sync)[joint_index] * sign_delta_q[joint_index] *
+                            (0.5 * (*t_1_sync)[joint_index]);
     }
   }
 }
