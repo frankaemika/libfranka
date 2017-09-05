@@ -96,32 +96,30 @@ int main(int argc, char** argv) {
     std::array<double, 7> t_f_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<double, 7> q_1{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<double, 7> delta_q;
-    std::array<double, 7> delta_q_d;
 
-    bool motion_finished_flag;
     delta_q = sub(q_goal, q_start);
 
     calculationOfSynchronizedValues(delta_q, delta_q_motion_finished, dq_max, ddq_max_start,
                                     ddq_max_goal, &dq_max_sync, &t_1_sync, &t_2_sync, &t_f_sync,
                                     &q_1);
-    robot.control(
-        [=, &time, &delta_q_d, &motion_finished_flag](
-            const franka::RobotState&, franka::Duration time_step) -> franka::JointPositions {
-          time += time_step.s();
+    robot.control([=, &time](const franka::RobotState&,
+                             franka::Duration time_step) -> franka::JointPositions {
+      time += time_step.s();
 
-          motion_finished_flag =
-              calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync,
-                                         q_1, delta_q_motion_finished, &delta_q_d);
+      std::array<double, 7> delta_q_d;
+      bool motion_finished_flag =
+          calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync, q_1,
+                                     delta_q_motion_finished, &delta_q_d);
 
-          if (motion_finished_flag) {
-            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-            return franka::Stop;
-          }
+      if (motion_finished_flag) {
+        return franka::Stop;
+      }
 
-          return {{q_start[0] + delta_q_d[0], q_start[1] + delta_q_d[1], q_start[2] + delta_q_d[2],
-                   q_start[3] + delta_q_d[3], q_start[4] + delta_q_d[4], q_start[5] + delta_q_d[5],
-                   q_start[6] + delta_q_d[6]}};
-        });
+      return {{q_start[0] + delta_q_d[0], q_start[1] + delta_q_d[1], q_start[2] + delta_q_d[2],
+               q_start[3] + delta_q_d[3], q_start[4] + delta_q_d[4], q_start[5] + delta_q_d[5],
+               q_start[6] + delta_q_d[6]}};
+    });
+    std::cout << std::endl << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
@@ -150,7 +148,7 @@ bool calculationOfDesiredValues(double t,
     if (std::abs(delta_q[joint_index]) < delta_q_motion_finished) {  // Joint not moving
       (*delta_q_d)[joint_index] = 0;
       joint_motion_finished[joint_index] = true;
-    } else {  // Moving joints
+    } else {                       // Moving joints
       if (t < t_1[joint_index]) {  // Acceleration phase
         (*delta_q_d)[joint_index] = -1.0 / std::pow(t_1[joint_index], 3) * dq_max[joint_index] *
                                     sign_delta_q[joint_index] * (0.5 * t - t_1[joint_index]) *
