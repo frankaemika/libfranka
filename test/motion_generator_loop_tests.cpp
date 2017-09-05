@@ -314,7 +314,7 @@ TYPED_TEST(MotionGeneratorLoops, GetsCorrectControlTimeStepWithMotionAndControlC
   EXPECT_CALL(control_callback, invoke(_, _))
       .Times(ticks.size())
       .WillRepeatedly(Invoke([&](const RobotState&, Duration duration) -> Torques {
-        EXPECT_EQ(ticks.at(control_count), duration.ms());
+        EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
         if (++control_count == ticks.size()) {
           return Stop;
@@ -353,7 +353,7 @@ TYPED_TEST(MotionGeneratorLoops, GetsCorrectMotionTimeStepWithMotionAndControlCa
       .Times(ticks.size())
       .WillRepeatedly(
           Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
-            EXPECT_EQ(ticks.at(control_count), duration.ms());
+            EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
               return Stop;
@@ -388,7 +388,7 @@ TYPED_TEST(MotionGeneratorLoops, GetsCorrectTimeStepWithMotionCallback) {
       .Times(ticks.size())
       .WillRepeatedly(
           Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
-            EXPECT_EQ(ticks.at(control_count), duration.ms());
+            EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
               return Stop;

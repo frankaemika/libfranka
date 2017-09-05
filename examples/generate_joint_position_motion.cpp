@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&,
                              franka::Duration time_step) -> franka::JointPositions {
-      time += time_step.s();
+      time += time_step.toSec();
 
       if (time > 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;

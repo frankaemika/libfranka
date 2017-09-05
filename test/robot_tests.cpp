@@ -131,9 +131,9 @@ TEST(Robot, CanControlRobot) {
   robot.control(
       [&](const RobotState&, Duration time_step) -> JointPositions {
         if (count == 0) {
-          EXPECT_EQ(0u, time_step.ms());
+          EXPECT_EQ(0u, time_step.toMSec());
         } else {
-          EXPECT_GE(time_step.ms(), 1u);
+          EXPECT_GE(time_step.toMSec(), 1u);
         }
         if (++count < 5) {
           return joint_positions;

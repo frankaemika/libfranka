@@ -43,7 +43,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   auto received_robot_state = robot.update();
-  EXPECT_EQ(2u, received_robot_state.time.ms());
+  EXPECT_EQ(2u, received_robot_state.time.toMSec());
 
   server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 4; })
@@ -52,7 +52,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .spinOnce();
 
   received_robot_state = robot.update();
-  EXPECT_EQ(4u, received_robot_state.time.ms());
+  EXPECT_EQ(4u, received_robot_state.time.toMSec());
 }
 
 TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {

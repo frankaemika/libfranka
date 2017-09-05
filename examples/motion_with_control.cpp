@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
 
     robot.control(
         [&](const franka::RobotState&, franka::Duration time_step) -> franka::JointVelocities {
-          index += time_step.ms();
+          index += time_step.toMSec();
 
           if (index >= trajectory.size()) {
             return franka::Stop;

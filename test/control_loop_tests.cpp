@@ -103,7 +103,7 @@ TEST(ControlLoop, GetsCorrectTimeStep) {
   EXPECT_CALL(control_callback, invoke(_, _))
       .Times(ticks.size())
       .WillRepeatedly(Invoke([&](const RobotState&, Duration duration) -> Torques {
-        EXPECT_EQ(ticks.at(control_count), duration.ms());
+        EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
         if (++control_count == ticks.size()) {
           return Stop;

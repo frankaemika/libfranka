@@ -75,7 +75,7 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   }
   EXPECT_FALSE(actual.current_errors);
   EXPECT_FALSE(actual.last_motion_errors);
-  EXPECT_EQ(0u, actual.time.ms());
+  EXPECT_EQ(0u, actual.time.toMSec());
 }
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
@@ -133,7 +133,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
   EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
-  EXPECT_EQ(expected.message_id, actual.time.ms());
+  EXPECT_EQ(expected.message_id, actual.time.toMSec());
 
   franka::RobotMode expected_robot_mode;
   switch (expected.robot_mode) {
@@ -404,7 +404,7 @@ void testGripperStatesAreEqual(const franka::GripperState& expected,
 
 void testGripperStatesAreEqual(const research_interface::gripper::GripperState& expected,
                                const franka::GripperState& actual) {
-  EXPECT_EQ(expected.message_id, actual.time.ms());
+  EXPECT_EQ(expected.message_id, actual.time.toMSec());
   EXPECT_EQ(expected.width, actual.width);
   EXPECT_EQ(expected.max_width, actual.max_width);
   EXPECT_EQ(expected.is_grasped, actual.is_grasped);
