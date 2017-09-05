@@ -131,6 +131,9 @@ void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
   if (!pending_response_ && available_bytes >= static_cast<int>(sizeof(typename T::Header))) {
     typename T::Header header;
     tcp_socket_.receiveBytes(&header, sizeof(header));
+    if (header.size < sizeof(header)) {
+      throw ProtocolException("libfranka: Incorrect TCP message size.");
+    }
     pending_response_.reset(new uint8_t[header.size]);
     std::memcpy(pending_response_.get(), &header, sizeof(header));
     pending_response_offset_ = sizeof(header);
@@ -181,6 +184,9 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   if (it != received_responses_.end()) {
     auto message =
         reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
+    if (message->header.size < sizeof(message)) {
+      throw ProtocolException("libfranka: Incorrect TCP message size.");
+    }
     handler(message->getInstance());
     received_responses_.erase(it);
     return true;
@@ -201,8 +207,10 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     lock.unlock();
   } while (it == received_responses_.end());
 
-  auto message =
-      *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
+  auto message = *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
+  if (message.header.size < sizeof(message)) {
+    throw ProtocolException("libfranka: Incorrect TCP message size.");
+  }
 
   if (buffer != nullptr && message.header.size != sizeof(message)) {
     size_t data_size = message.header.size - sizeof(message);
