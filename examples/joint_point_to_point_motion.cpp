@@ -50,6 +50,7 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
                                      std::array<double, 7>* t_2_sync,
                                      std::array<double, 7>* t_f_sync,
                                      std::array<double, 7>* q_1);
+
 int main(int argc, char** argv) {
   if (argc != 10) {
     std::cerr << "Usage: ./generate_joint_pose_motion <robot-hostname> <goal_position> <speed "
@@ -65,6 +66,7 @@ int main(int argc, char** argv) {
       q_goal[i] = std::stod(argv[i + 2]);
     }
     double speed_factor = std::stod(argv[9]);
+
     // Set additional parameters always before the control loop, NEVER in the
     // control loop
     // Set collision behavior:
@@ -73,10 +75,11 @@ int main(int argc, char** argv) {
         {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}},
         {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
         {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
+
     // Reads the start position
     std::array<double, 7> q_start = robot.readOnce().q_d;
-    // Initialization
 
+    // Initialization
     std::array<double, 7> dq_max{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
     std::array<double, 7> ddq_max_start{{5, 5, 5, 5, 5, 5, 5}};
     std::array<double, 7> ddq_max_goal{{5, 5, 5, 5, 5, 5, 5}};
@@ -96,33 +99,30 @@ int main(int argc, char** argv) {
     std::array<double, 7> t_f_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<double, 7> q_1{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
     std::array<double, 7> delta_q;
-    std::array<double, 7> delta_q_d;
 
-    bool motion_finished_flag;
     delta_q = sub(q_goal, q_start);
 
     calculationOfSynchronizedValues(delta_q, delta_q_motion_finished, dq_max, ddq_max_start,
                                     ddq_max_goal, &dq_max_sync, &t_1_sync, &t_2_sync, &t_f_sync,
                                     &q_1);
-    robot.control(
-        [=, &time, &delta_q_d, &motion_finished_flag](
-            const franka::RobotState&, franka::Duration time_step) -> franka::JointPositions {
+    robot.control([=, &time](const franka::RobotState&,
+                             franka::Duration time_step) -> franka::JointPositions {
+      time += time_step.s();
 
-          time += time_step.s();
+      std::array<double, 7> delta_q_d;
+      bool motion_finished_flag =
+          calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync, q_1,
+                                     delta_q_motion_finished, &delta_q_d);
 
-          motion_finished_flag =
-              calculationOfDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync, t_f_sync,
-                                         q_1, delta_q_motion_finished, &delta_q_d);
+      if (motion_finished_flag) {
+        return franka::Stop;
+      }
 
-          if (motion_finished_flag) {
-            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-            return franka::Stop;
-          }
-
-          return {{q_start[0] + delta_q_d[0], q_start[1] + delta_q_d[1], q_start[2] + delta_q_d[2],
-                   q_start[3] + delta_q_d[3], q_start[4] + delta_q_d[4], q_start[5] + delta_q_d[5],
-                   q_start[6] + delta_q_d[6]}};
-        });
+      return {{q_start[0] + delta_q_d[0], q_start[1] + delta_q_d[1], q_start[2] + delta_q_d[2],
+               q_start[3] + delta_q_d[3], q_start[4] + delta_q_d[4], q_start[5] + delta_q_d[5],
+               q_start[6] + delta_q_d[6]}};
+    });
+    std::cout << std::endl << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
@@ -148,23 +148,19 @@ bool calculationOfDesiredValues(double t,
   delta_t_2 = sub(t_f, t_2);
   for (uint joint_index = 0; joint_index < 7; joint_index++) {
     sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
-    if (std::abs(delta_q[joint_index]) < delta_q_motion_finished) {  // not moving joint
+    if (std::abs(delta_q[joint_index]) < delta_q_motion_finished) {  // Joint not moving
       (*delta_q_d)[joint_index] = 0;
       joint_motion_finished[joint_index] = true;
-    } else {  // Moving joints
-
+    } else {                       // Moving joints
       if (t < t_1[joint_index]) {  // Acceleration phase
         (*delta_q_d)[joint_index] = -1.0 / std::pow(t_1[joint_index], 3) * dq_max[joint_index] *
                                     sign_delta_q[joint_index] * (0.5 * t - t_1[joint_index]) *
                                     std::pow(t, 3);
-
       } else if (t >= t_1[joint_index] && t < t_2[joint_index]) {  // Constant velocity phase
         (*delta_q_d)[joint_index] =
             q_1[joint_index] +
             (t - t_1[joint_index]) * dq_max[joint_index] * sign_delta_q[joint_index];
-
       } else if (t >= t_2[joint_index] && t < t_f[joint_index]) {  // Deceleration phase
-
         (*delta_q_d)[joint_index] =
             delta_q[joint_index] +
             0.5 * (1 / std::pow(delta_t_2[joint_index], 3) *
@@ -201,7 +197,7 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
   int sign_delta_q[7];
   for (int joint_index = 0; joint_index < 7; joint_index++) {
     sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
-    if (std::abs(delta_q[joint_index]) > delta_q_motion_finished) {  // moving joints
+    if (std::abs(delta_q[joint_index]) > delta_q_motion_finished) {  // Moving joints
       if (std::abs(delta_q[joint_index]) <
           (3 / 4 * (std::pow(dq_max[joint_index], 2) / ddq_max_start[joint_index]) +
            3 / 4 * (std::pow(dq_max[joint_index], 2) / ddq_max_goal[joint_index]))) {
@@ -216,9 +212,10 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
                          std::abs(delta_q[joint_index]) / dq_max_reach[joint_index];
     }
   }
+
   double max_t_f = *std::max_element(t_f.begin(), t_f.end());
   for (int joint_index = 0; joint_index < 7; joint_index++) {
-    if (std::abs(delta_q[joint_index]) > delta_q_motion_finished) {  // moving joints
+    if (std::abs(delta_q[joint_index]) > delta_q_motion_finished) {  // Moving joints
       double a = 1.5 / 2.0 * (ddq_max_goal[joint_index] + ddq_max_start[joint_index]);
       double b = -1.0 * max_t_f * ddq_max_goal[joint_index] * ddq_max_start[joint_index];
       double c =
