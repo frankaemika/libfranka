@@ -19,7 +19,7 @@ Errors& Errors::operator=(Errors other) {
   return *this;
 }
 
-Errors::Errors(std::array<bool, 33> errors)
+Errors::Errors(const std::array<bool, 33>& errors)  // NOLINT (modernize-pass-by-value)
     : errors_(errors),
       joint_position_limits_violation(
           errors_[static_cast<size_t>(Error::kJointPositionLimitsViolation)]),

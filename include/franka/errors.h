@@ -44,7 +44,7 @@ struct Errors {
    *
    * @param errors Array of error flags.
    */
-  Errors(std::array<bool, 33> errors);
+  Errors(const std::array<bool, 33>& errors);
 
   /**
    * Check if any error flag is set to true.
