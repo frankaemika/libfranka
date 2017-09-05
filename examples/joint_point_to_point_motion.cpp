@@ -8,6 +8,9 @@
 /**
  * @example joint_point_to_point_motion.cpp
  * An example showing how to generate a joint pose motion to a goal position.
+ * Adopted from:
+ *  Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots (Kogan
+ * Page Science Paper edition).
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
