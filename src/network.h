@@ -5,11 +5,10 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
-#include <memory>
 #include <mutex>
 #include <sstream>
 #include <unordered_map>
-#include <utility>
+#include <vector>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
@@ -69,9 +68,10 @@ class Network {
 
   uint32_t command_id_{0};
 
-  std::unique_ptr<uint8_t[]> pending_response_{};
+  std::vector<uint8_t> pending_response_{};
   size_t pending_response_offset_ = 0;
-  std::unordered_map<uint32_t, std::unique_ptr<uint8_t[]>> received_responses_{};
+  uint32_t pending_command_id_ = 0;
+  std::unordered_map<uint32_t, std::vector<uint8_t>> received_responses_{};
 };
 
 template <typename T>
@@ -128,25 +128,28 @@ void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
   }
 
   int available_bytes = tcp_socket_.available();
-  if (!pending_response_ && available_bytes >= static_cast<int>(sizeof(typename T::Header))) {
+  if (pending_response_.empty() &&
+      available_bytes >= static_cast<int>(sizeof(typename T::Header))) {
     typename T::Header header;
     tcp_socket_.receiveBytes(&header, sizeof(header));
     if (header.size < sizeof(header)) {
       throw ProtocolException("libfranka: Incorrect TCP message size.");
     }
-    pending_response_.reset(new uint8_t[header.size]);
-    std::memcpy(pending_response_.get(), &header, sizeof(header));
+    pending_response_.resize(header.size);
+    std::memcpy(pending_response_.data(), &header, sizeof(header));
     pending_response_offset_ = sizeof(header);
+    pending_command_id_ = header.command_id;
   }
-  if (pending_response_ && available_bytes > 0) {
-    typename T::Header* header = reinterpret_cast<typename T::Header*>(pending_response_.get());
+  if (!pending_response_.empty() && available_bytes > 0) {
     pending_response_offset_ += tcp_socket_.receiveBytes(
         &pending_response_[pending_response_offset_],
         std::min(tcp_socket_.available(),
-                 static_cast<int>(header->size - pending_response_offset_)));
-    if (pending_response_offset_ == header->size) {
-      received_responses_.emplace(header->command_id, std::move(pending_response_));
+                 static_cast<int>(pending_response_.size() - pending_response_offset_)));
+    if (pending_response_offset_ == pending_response_.size()) {
+      received_responses_.emplace(pending_command_id_, pending_response_);
+      pending_response_.clear();
       pending_response_offset_ = 0;
+      pending_command_id_ = 0;
     }
   }
 } catch (const Poco::Exception& e) {
@@ -182,8 +185,8 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   tcpReadFromBuffer<T>(0us);
   decltype(received_responses_)::const_iterator it = received_responses_.find(command_id);
   if (it != received_responses_.end()) {
-    auto message =
-        reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
+    auto message = reinterpret_cast<const typename T::template Message<typename T::Response>*>(
+        it->second.data());
     if (message->header.size < sizeof(message)) {
       throw ProtocolException("libfranka: Incorrect TCP message size.");
     }
@@ -207,7 +210,8 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     lock.unlock();
   } while (it == received_responses_.end());
 
-  auto message = *reinterpret_cast<typename T::template Message<typename T::Response>*>(it->second.get());
+  auto message = *reinterpret_cast<const typename T::template Message<typename T::Response>*>(
+      it->second.data());
   if (message.header.size < sizeof(message)) {
     throw ProtocolException("libfranka: Incorrect TCP message size.");
   }
