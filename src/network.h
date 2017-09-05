@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <sstream>
-#include <thread>
 #include <unordered_map>
 #include <utility>
 
@@ -57,7 +57,7 @@ class Network {
   T udpBlockingReceiveUnsafe();
 
   template <typename T>
-  void tcpReadFromBuffer(int32_t timeout);
+  void tcpReadFromBuffer(std::chrono::microseconds timeout);
 
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
@@ -122,8 +122,8 @@ void Network::udpSend(const T& data) try {
 }
 
 template <typename T>
-void Network::tcpReadFromBuffer(int32_t timeout) try {
-  if (!tcp_socket_.poll(timeout, Poco::Net::Socket::SELECT_READ)) {
+void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
+  if (!tcp_socket_.poll(timeout.count(), Poco::Net::Socket::SELECT_READ)) {
     return;
   }
 
@@ -170,12 +170,13 @@ uint32_t Network::tcpSendRequest(TArgs&&... args) try {
 template <typename T>
 bool Network::tcpReceiveResponse(uint32_t command_id,
                                  std::function<void(const typename T::Response&)> handler) {
+  using namespace std::literals::chrono_literals;  // NOLINT (google-build-using-namespace)
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {
     return false;
   }
 
-  tcpReadFromBuffer<T>(0);
+  tcpReadFromBuffer<T>(0us);
   decltype(received_responses_)::const_iterator it = received_responses_.find(command_id);
   if (it != received_responses_.end()) {
     auto message =
@@ -190,14 +191,14 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
                                                          std::vector<uint8_t>* buffer) {
+  using namespace std::literals::chrono_literals;  // NOLINT (google-build-using-namespace)
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   decltype(received_responses_)::const_iterator it;
   do {
     lock.lock();
-    tcpReadFromBuffer<T>(1e4);
+    tcpReadFromBuffer<T>(10'000us);
     it = received_responses_.find(command_id);
     lock.unlock();
-    std::this_thread::yield();
   } while (it == received_responses_.end());
 
   auto message =
