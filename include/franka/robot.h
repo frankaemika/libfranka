@@ -493,17 +493,6 @@ class Robot {
                const std::array<double, 9>& load_inertia);
 
   /**
-   * Sets a time scaling factor for all motion generators.
-   *
-   * Slows down or speeds up a trajectory.
-   *
-   * @param[in] factor Time scaling factor \f$\in [0, 1]\f$.
-   *
-   * @throw CommandException if an error occurred.
-   */
-  void setTimeScalingFactor(double factor);
-
-  /**
    * Runs automatic error recovery on FRANKA.
    *
    * Automatic error recovery e.g. resets FRANKA after a collision occurred.

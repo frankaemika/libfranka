@@ -269,10 +269,6 @@ void Robot::setLoad(double load_mass,
   impl_->executeCommand<research_interface::robot::SetLoad>(load_mass, F_x_Cload, load_inertia);
 }
 
-void Robot::setTimeScalingFactor(double factor) {
-  impl_->executeCommand<research_interface::robot::SetTimeScalingFactor>(factor);
-}
-
 void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }

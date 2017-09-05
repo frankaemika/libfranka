@@ -26,7 +26,6 @@ using research_interface::robot::SetFToEE;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
-using research_interface::robot::SetTimeScalingFactor;
 using research_interface::robot::StopMove;
 
 template <typename T>
@@ -128,12 +127,6 @@ bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
 }
 
 template <>
-bool Command<SetTimeScalingFactor>::compare(const SetTimeScalingFactor::Request& request_one,
-                                            const SetTimeScalingFactor::Request& request_two) {
-  return request_one.time_scaling_factor == request_two.time_scaling_factor;
-}
-
-template <>
 bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Request&,
                                               const AutomaticErrorRecovery::Request&) {
   return true;
@@ -214,12 +207,6 @@ SetLoad::Request Command<SetLoad>::getExpected() {
 }
 
 template <>
-SetTimeScalingFactor::Request Command<SetTimeScalingFactor>::getExpected() {
-  double factor = 0.5;
-  return SetTimeScalingFactor::Request(factor);
-}
-
-template <>
 AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
   return AutomaticErrorRecovery::Request();
 }
@@ -254,7 +241,6 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetFToEE,
                                       SetLoad,
                                       Move,
-                                      SetTimeScalingFactor,
                                       AutomaticErrorRecovery>;
 
 TYPED_TEST_CASE(Command, CommandTypes);
