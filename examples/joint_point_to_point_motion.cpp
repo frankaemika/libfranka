@@ -224,9 +224,8 @@ void calculationOfSynchronizedValues(const std::array<double, 7>& delta_q,
       (*dq_max_sync)[joint_index] = (-1 * b - std::sqrt(delta)) / (2.0 * a);
       (*t_1_sync)[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_start[joint_index];
       delta_t_2_sync[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_goal[joint_index];
-      (*t_f_sync)[joint_index] = (*t_1_sync)[joint_index] / 2 +
-                                 delta_t_2_sync[joint_index] /
-                                     std::abs(delta_q[joint_index] / (*dq_max_sync)[joint_index]);
+      (*t_f_sync)[joint_index] = (*t_1_sync)[joint_index] / 2 + delta_t_2_sync[joint_index] / 2 +
+                                 std::abs(delta_q[joint_index] / (*dq_max_sync)[joint_index]);
       (*t_2_sync)[joint_index] = (*t_f_sync)[joint_index] - delta_t_2_sync[joint_index];
       (*q_1)[joint_index] = (*dq_max_sync)[joint_index] * sign_delta_q[joint_index] *
                             (0.5 * (*t_1_sync)[joint_index]);
