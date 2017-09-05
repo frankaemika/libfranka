@@ -1,7 +1,7 @@
-#include <algorithm>
-#include <cmath>
 #include <franka/exception.h>
 #include <franka/robot.h>
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <vector>
 
