@@ -39,12 +39,6 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
     case ControllerMode::kJointImpedance:
       mode = decltype(mode)::kJointImpedance;
       break;
-    case ControllerMode::kMotorPD:
-      mode = decltype(mode)::kMotorPD;
-      break;
-    case ControllerMode::kJointPosition:
-      mode = decltype(mode)::kJointPosition;
-      break;
     case ControllerMode::kCartesianImpedance:
       mode = decltype(mode)::kCartesianImpedance;
       break;

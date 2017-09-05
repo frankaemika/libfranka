@@ -250,7 +250,7 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallbackAndController
   EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
 
   typename TestFixture::Loop loop(
-      robot, ControllerMode::kMotorPD,
+      robot, ControllerMode::kCartesianImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
   // Use ASSERT to abort on failure because loop() in next line

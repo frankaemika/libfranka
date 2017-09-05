@@ -204,12 +204,6 @@ VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
 void Robot::setIdleControllerMode(ControllerMode controller_mode) {
   research_interface::robot::SetControllerMode::ControllerMode mode;
   switch (controller_mode) {
-    case ControllerMode::kMotorPD:
-      mode = decltype(mode)::kMotorPD;
-      break;
-    case ControllerMode::kJointPosition:
-      mode = decltype(mode)::kJointPosition;
-      break;
     case ControllerMode::kJointImpedance:
       mode = decltype(mode)::kJointImpedance;
       break;

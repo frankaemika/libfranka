@@ -141,7 +141,7 @@ bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Requ
 
 template <>
 Move::Request Command<Move>::getExpected() {
-  return Move::Request(Move::ControllerMode::kCartesianImpedance,
+  return Move::Request(Move::ControllerMode::kJointImpedance,
                        Move::MotionGeneratorMode::kJointVelocity, Move::Deviation(1, 2, 3),
                        Move::Deviation(4, 5, 6));
 }
@@ -154,7 +154,7 @@ GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
 
 template <>
 SetControllerMode::Request Command<SetControllerMode>::getExpected() {
-  return SetControllerMode::Request(SetControllerMode::ControllerMode::kJointPosition);
+  return SetControllerMode::Request(SetControllerMode::ControllerMode::kJointImpedance);
 }
 
 template <>

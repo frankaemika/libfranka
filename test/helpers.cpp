@@ -325,7 +325,7 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   robot_state.message_id = static_cast<uint32_t>(std::rand());
 
   robot_state.motion_generator_mode = research_interface::robot::MotionGeneratorMode::kIdle;
-  robot_state.controller_mode = research_interface::robot::ControllerMode::kMotorPD;
+  robot_state.controller_mode = research_interface::robot::ControllerMode::kJointImpedance;
 }
 
 void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
