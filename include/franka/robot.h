@@ -90,6 +90,28 @@ class Robot {
    */
 
   /**
+   * Changes the type of controller used for idle mode and starts a loop for reading the current
+   * robot state afterwards.
+   *
+   * FRANKA is in idle mode when holding the current position, i.e. when no motion
+   * is being performed and guiding mode is not active.
+   *
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] controller_mode Controller mode.
+   * @param[in] read_callback Callback function for robot state reading.
+   *
+   * @throw CommandException if an error during setting the controller mode occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(ControllerMode controller_mode,
+               std::function<bool(const RobotState&)> read_callback);
+
+  /**
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.
@@ -325,23 +347,6 @@ class Robot {
    * @throw CommandException if an error occurred.
    */
   VirtualWallCuboid getVirtualWall(int32_t id);
-
-  /**
-   * Changes the type of controller used for idle mode.
-   *
-   * FRANKA is in idle mode when holding the current position, i.e. when no motion
-   * is being performed and guiding mode is not active.
-   *
-   * The controller mode is reset when a motion is started or guiding mode is activated.
-   *
-   * @param[in] controller_mode Controller mode.
-   *
-   * @throw CommandException if an error occurred.
-   *
-   * @see setGuidingMode for an explanation of guiding mode.
-   * @see control to start a motion.
-   */
-  void setIdleControllerMode(ControllerMode controller_mode);
 
   /**
    * Changes the collision behavior.

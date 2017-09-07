@@ -36,6 +36,36 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
+void Robot::control(ControllerMode controller_mode,
+                    std::function<bool(const RobotState&)> read_callback) {
+  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
+  if (!l.owns_lock()) {
+    throw InvalidOperationException(
+        "libfranka robot: Cannot perform this operation while another control or read operation "
+        "is running.");
+  }
+
+  research_interface::robot::SetControllerMode::ControllerMode mode;
+  switch (controller_mode) {
+    case ControllerMode::kJointImpedance:
+      mode = decltype(mode)::kJointImpedance;
+      break;
+    case ControllerMode::kCartesianImpedance:
+      mode = decltype(mode)::kCartesianImpedance;
+      break;
+    default:
+      throw std::invalid_argument("Invalid controller mode given.");
+  }
+  impl_->executeCommand<research_interface::robot::SetControllerMode>(mode);
+
+  while (true) {
+    RobotState robot_state = impl_->update();
+    if (!read_callback(robot_state)) {
+      break;
+    }
+  }
+}
+
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
@@ -199,21 +229,6 @@ VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
   VirtualWallCuboid virtual_wall;
   impl_->executeCommand<research_interface::robot::GetCartesianLimit>(id, &virtual_wall);
   return virtual_wall;
-}
-
-void Robot::setIdleControllerMode(ControllerMode controller_mode) {
-  research_interface::robot::SetControllerMode::ControllerMode mode;
-  switch (controller_mode) {
-    case ControllerMode::kJointImpedance:
-      mode = decltype(mode)::kJointImpedance;
-      break;
-    case ControllerMode::kCartesianImpedance:
-      mode = decltype(mode)::kCartesianImpedance;
-      break;
-    default:
-      throw std::invalid_argument("Invalid controller mode given.");
-  }
-  impl_->executeCommand<research_interface::robot::SetControllerMode>(mode);
 }
 
 void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
