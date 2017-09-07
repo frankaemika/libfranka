@@ -31,8 +31,8 @@ int main(int argc, char** argv) {
 
     auto initial_position = robot.readOnce().q_d;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration time_step) -> franka::JointPositions {
+    robot.move([=, &time](const franka::RobotState&,
+                          franka::Duration time_step) -> franka::JointPositions {
       time += time_step.toSec();
 
       if (time > 10.0) {

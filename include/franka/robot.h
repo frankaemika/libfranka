@@ -151,27 +151,6 @@ class Robot {
       std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
   /**
-   * Starts a control loop for a joint position motion generator with a given controller mode.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] controller_mode Controller to use to execute the motion.
-   *
-   * @throw ControlException if an error related to motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(
-      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
-
-  /**
    * Starts a control loop for a joint velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
@@ -191,27 +170,6 @@ class Robot {
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
       std::function<Torques(const RobotState&, franka::Duration)> control_callback);
-
-  /**
-   * Starts a control loop for a joint velocity motion generator with a given controller mode.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] controller_mode Controller to use to execute the motion.
-   *
-   * @throw ControlException if an error related to motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(
-      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with torque control.
@@ -235,27 +193,6 @@ class Robot {
       std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
   /**
-   * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] controller_mode Controller to use to execute the motion.
-   *
-   * @throw ControlException if an error related to motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(
-      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
-
-  /**
    * Starts a control loop for a Cartesian velocity motion generator with torque control.
    *
    * Sets realtime priority for the current thread.
@@ -277,6 +214,69 @@ class Robot {
                std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
   /**
+   * Starts a control loop for a joint position motion generator with a given controller mode.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
+   *
+   * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void move(
+      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
+      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
+   * Starts a control loop for a joint velocity motion generator with a given controller mode.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
+   *
+   * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void move(
+      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
+      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
+   * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   * @param[in] controller_mode Controller to use to execute the motion.
+   *
+   * @throw ControlException if an error related to motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void move(
+      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
+      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+
+  /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
@@ -293,9 +293,9 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback,
-               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+  void move(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+                motion_generator_callback,
+            ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
   /**
    * @}
