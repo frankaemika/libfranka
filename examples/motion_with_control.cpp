@@ -139,6 +139,9 @@ int main(int argc, char** argv) {
     std::vector<double> trajectory = generateTrajectory(std::stod(argv[6]));
 
     robot.control(
+        [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
+          return controller.step(robot_state);
+        },
         [&](const franka::RobotState&, franka::Duration time_step) -> franka::JointVelocities {
           index += time_step.toMSec();
 
@@ -150,9 +153,6 @@ int main(int argc, char** argv) {
           velocities[joint_number] = trajectory[index];
 
           return velocities;
-        },
-        [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
-          return controller.step(robot_state);
         });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

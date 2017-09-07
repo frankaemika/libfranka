@@ -147,8 +147,8 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(
-      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback);
 
   /**
    * Starts a control loop for a joint velocity motion generator with torque control.
@@ -167,9 +167,9 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(
-      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               std::function<JointVelocities(const RobotState&, franka::Duration)>
+                   motion_generator_callback);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with torque control.
@@ -189,8 +189,8 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(
-      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with torque control.
@@ -209,9 +209,9 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback,
-               std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+                   motion_generator_callback);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.

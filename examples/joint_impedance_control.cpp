@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
     };
 
     // Start real-time control loop
-    robot.control(cartesian_pose_callback, impedance_control_callback);
+    robot.control(impedance_control_callback, cartesian_pose_callback);
 
   } catch (const franka::Exception& ex) {
     running = false;

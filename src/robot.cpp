@@ -79,8 +79,8 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
 }
 
 void Robot::control(
-    std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-    std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
+    std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+    std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -94,8 +94,8 @@ void Robot::control(
 }
 
 void Robot::control(
-    std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-    std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
+    std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+    std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -109,8 +109,8 @@ void Robot::control(
 }
 
 void Robot::control(
-    std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-    std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
+    std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+    std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -123,9 +123,9 @@ void Robot::control(
   loop();
 }
 
-void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                        motion_generator_callback,
-                    std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
+void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+                    std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+                        motion_generator_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
