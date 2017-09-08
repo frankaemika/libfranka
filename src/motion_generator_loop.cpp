@@ -7,9 +7,6 @@
 namespace franka {
 
 template <typename T>
-constexpr research_interface::robot::Move::Deviation MotionGeneratorLoop<T>::kDefaultDeviation;
-
-template <typename T>
 MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
                                             ControlCallback control_callback,
                                             MotionGeneratorCallback motion_callback)
@@ -56,23 +53,9 @@ MotionGeneratorLoop<T>::MotionGeneratorLoop(RobotControl& robot,
 }
 
 template <typename T>
-MotionGeneratorLoop<T>::~MotionGeneratorLoop() noexcept {
-  try {
-    robot_.stopMotion(motion_id_);
-  } catch (...) {
-  }
-  if (control_callback_) {
-    try {
-      robot_.stopController();
-    } catch (...) {
-    }
-  }
-}
-
-template <typename T>
 void MotionGeneratorLoop<T>::operator()() {
   RobotState robot_state = robot_.update();
-  robot_.throwOnMotionError(robot_state, &motion_id_);
+  robot_.throwOnMotionError(robot_state, motion_id_);
 
   Duration previous_time = robot_state.time;
 
@@ -83,13 +66,13 @@ void MotionGeneratorLoop<T>::operator()() {
            spinOnce(robot_state, robot_state.time - previous_time, &control_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command, &control_command);
-      robot_.throwOnMotionError(robot_state, &motion_id_);
+      robot_.throwOnMotionError(robot_state, motion_id_);
     }
   } else {
     while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command);
-      robot_.throwOnMotionError(robot_state, &motion_id_);
+      robot_.throwOnMotionError(robot_state, motion_id_);
     }
   }
 }

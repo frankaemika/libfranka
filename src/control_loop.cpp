@@ -10,26 +10,23 @@ ControlLoop::ControlLoop(RobotControl& robot, ControlCallback control_callback)
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
 
-  robot_.startController();
-}
-
-ControlLoop::~ControlLoop() noexcept {
-  try {
-    robot_.stopController();
-  } catch (...) {
-  }
+  motion_id_ =
+      robot.startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
+                        research_interface::robot::Move::MotionGeneratorMode::kJointVelocity,
+                        kDefaultDeviation, kDefaultDeviation);
 }
 
 void ControlLoop::operator()() {
   RobotState robot_state = robot_.update();
-  robot_.throwOnMotionError(robot_state, nullptr);
+  robot_.throwOnMotionError(robot_state, motion_id_);
 
   Duration previous_time = robot_state.time;
-  research_interface::robot::ControllerCommand command{};
-  while (spinOnce(robot_state, robot_state.time - previous_time, &command)) {
+  research_interface::robot::ControllerCommand controller_command{};
+  research_interface::robot::MotionGeneratorCommand zero_velocity{};
+  while (spinOnce(robot_state, robot_state.time - previous_time, &controller_command)) {
     previous_time = robot_state.time;
-    robot_state = robot_.update(nullptr, &command);
-    robot_.throwOnMotionError(robot_state, nullptr);
+    robot_state = robot_.update(&zero_velocity, &controller_command);
+    robot_.throwOnMotionError(robot_state, motion_id_);
   }
 }
 

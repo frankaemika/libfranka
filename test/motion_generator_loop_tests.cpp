@@ -116,6 +116,7 @@ TYPED_TEST(MotionGeneratorLoops, CanNotConstructWithoutMotionCallback) {
                                                },
                                                typename TestFixture::MotionGeneratorCallback()),
                std::invalid_argument);
+
   EXPECT_THROW(typename TestFixture::Loop loop(robot, ControllerMode::kCartesianImpedance,
                                                typename TestFixture::MotionGeneratorCallback()),
                std::invalid_argument);
@@ -138,7 +139,6 @@ TYPED_TEST(MotionGeneratorLoops, CanConstructWithMotionAndControllerCallback) {
                                    TestFixture::Loop::kDefaultDeviation))
         .WillOnce(Return(100));
     EXPECT_CALL(robot, stopMotion(100));
-    EXPECT_CALL(robot, stopController());
   }
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot,
@@ -230,11 +230,13 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingMotionCallback) {
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
   MotionGeneratorCommand motion_command{};
+
   ASSERT_FALSE(loop.spinOnce(robot_state, duration, &motion_command));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
       .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(Stop)));
+
   loop();
 
   testRobotStateIsZero(robot_state);
@@ -288,6 +290,7 @@ TYPED_TEST(MotionGeneratorLoops, SpinOnceWithStoppingControlCallback) {
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
   ControllerCommand control_command{};
+
   ASSERT_FALSE(loop.spinOnce(robot_state, duration, &control_command));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
@@ -407,5 +410,6 @@ TYPED_TEST(MotionGeneratorLoops, GetsCorrectTimeStepWithMotionCallback) {
   typename TestFixture::Loop loop(
       robot, ControllerMode::kJointImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+
   loop();
 }

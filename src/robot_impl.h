@@ -25,15 +25,12 @@ class Robot::Impl : public RobotControl {
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) override;
 
-  void throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) override;
+  void throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) override;
 
   RobotState readOnce();
 
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
-
-  void startController() override;
-  void stopController() override;
 
   uint32_t startMotion(
       research_interface::robot::Move::ControllerMode controller_mode,
@@ -45,7 +42,7 @@ class Robot::Impl : public RobotControl {
   template <typename T, typename... TArgs>
   uint32_t executeCommand(TArgs... /* args */);
 
-  Model loadModel();
+  Model loadModel() const;
 
  protected:
   bool motionGeneratorRunning() const noexcept;

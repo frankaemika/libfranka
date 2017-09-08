@@ -4,7 +4,6 @@
 #include <gmock/gmock.h>
 
 #include "control_loop.h"
-
 #include "helpers.h"
 #include "mock_robot_control.h"
 
@@ -16,6 +15,7 @@ using franka::Stop;
 using franka::Torques;
 
 using research_interface::robot::ControllerCommand;
+using research_interface::robot::Move;
 using research_interface::robot::MotionGeneratorCommand;
 
 using std::placeholders::_1;
@@ -24,7 +24,7 @@ using std::placeholders::_2;
 class ControlLoop : public franka::ControlLoop {
  public:
   using franka::ControlLoop::ControlLoop;
-  using franka::ControlLoopBase::spinOnce;
+  using franka::ControlLoop::spinOnce;
 };
 
 struct MockControlCallback {
@@ -32,7 +32,7 @@ struct MockControlCallback {
 };
 
 TEST(ControlLoop, CanNotConstructWithoutCallback) {
-  MockRobotControl robot;
+  StrictMock<MockRobotControl> robot;
   EXPECT_THROW(ControlLoop(robot, ControlLoop::ControlCallback()), std::invalid_argument);
 }
 
@@ -40,8 +40,9 @@ TEST(ControlLoop, CanConstructWithCallback) {
   MockRobotControl robot;
   {
     InSequence _;
-    EXPECT_CALL(robot, startController());
-    EXPECT_CALL(robot, stopController());
+    EXPECT_CALL(robot, startMotion(Move::ControllerMode::kExternalController,
+                                   Move::MotionGeneratorMode::kJointVelocity,
+                                   ControlLoop::kDefaultDeviation, ControlLoop::kDefaultDeviation));
   }
 
   StrictMock<MockControlCallback> control_callback;

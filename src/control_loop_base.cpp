@@ -14,6 +14,8 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
+constexpr research_interface::robot::Move::Deviation ControlLoopBase::kDefaultDeviation;
+
 ControlLoopBase::ControlLoopBase(RobotControl& robot, ControlCallback control_callback)
     : robot_(robot), control_callback_(std::move(control_callback)) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
@@ -32,6 +34,15 @@ bool ControlLoopBase::spinOnce(const RobotState& robot_state,
   }
   command->tau_J_d = control_output.tau_J;
   return true;
+}
+
+ControlLoopBase::~ControlLoopBase() noexcept {
+  try {
+    if (motion_id_ != 0) {
+      robot_.stopMotion(motion_id_);
+    }
+  } catch (...) {
+  }
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {
