@@ -229,7 +229,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void move(
+  void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
@@ -250,7 +250,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void move(
+  void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
@@ -271,7 +271,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void move(
+  void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
@@ -292,7 +292,7 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
-  void move(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+  void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                 motion_generator_callback,
             ControllerMode controller_mode = ControllerMode::kJointImpedance);
 

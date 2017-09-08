@@ -144,7 +144,7 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   loop();
 }
 
-void Robot::move(
+void Robot::control(
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
@@ -159,7 +159,7 @@ void Robot::move(
   loop();
 }
 
-void Robot::move(
+void Robot::control(
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
@@ -174,7 +174,7 @@ void Robot::move(
   loop();
 }
 
-void Robot::move(
+void Robot::control(
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
@@ -189,7 +189,7 @@ void Robot::move(
   loop();
 }
 
-void Robot::move(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                      motion_generator_callback,
                  ControllerMode controller_mode) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);

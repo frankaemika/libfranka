@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     double v_max = 0.1;
     double angle = M_PI / 4.0;
     double time = 0.0;
-    robot.move([=, &time](const franka::RobotState&,
+    robot.control([=, &time](const franka::RobotState&,
                           franka::Duration time_step) -> franka::CartesianVelocities {
       time += time_step.toSec();
 

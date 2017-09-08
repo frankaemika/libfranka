@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
-    robot.move([&](const franka::RobotState& robot_state,
+    robot.control([&](const franka::RobotState& robot_state,
                    franka::Duration time_step) -> franka::JointPositions {
       index += time_step.toMSec();
 

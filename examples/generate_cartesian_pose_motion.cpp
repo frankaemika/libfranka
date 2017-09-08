@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     auto initial_pose = robot.readOnce().O_T_EE_d;
     double radius = 0.3;
     double time = 0.0;
-    robot.move(
+    robot.control(
         [=, &time](const franka::RobotState&, franka::Duration time_step) -> franka::CartesianPose {
           time += time_step.toSec();
 
