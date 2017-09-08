@@ -1,16 +1,16 @@
-#include <franka/exception.h>
-#include <franka/robot.h>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
 
+#include <franka/exception.h>
+#include <franka/robot.h>
+
 /**
  * @example joint_point_to_point_motion.cpp
- * An example showing how to generate a joint pose motion to a goal position.
- * Adapted from:
- *  Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots (Kogan
- * Page Science Paper edition).
+ * An example showing how to generate a joint pose motion to a goal position. Adapted from:
+ * Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots
+ * (Kogan Page Science Paper edition).
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
@@ -22,6 +22,14 @@ inline int sgn(double x) {
     return 0;
   }
   return (x > 0) ? 1 : -1;
+}
+
+std::array<double, 7> add(const std::array<double, 7>& a, const std::array<double, 7>& b) {
+  std::array<double, 7> result;
+  for (size_t i = 0; i < a.size(); i++) {
+    result[i] = a[i] + b[i];
+  }
+  return result;
 }
 
 std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<double, 7>& b) {
@@ -104,16 +112,14 @@ int main(int argc, char** argv) {
       time += time_step.s();
 
       std::array<double, 7> delta_q_d;
-      bool motion_finished_flag = calculateDesiredValues(time, delta_q, dq_max_sync, t_1_sync,
-                                                         t_2_sync, t_f_sync, q_1, &delta_q_d);
+      bool motion_finished = calculateDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync,
+                                                    t_f_sync, q_1, &delta_q_d);
 
-      if (motion_finished_flag) {
+      if (motion_finished) {
         return franka::Stop;
       }
 
-      return {{q_start[0] + delta_q_d[0], q_start[1] + delta_q_d[1], q_start[2] + delta_q_d[2],
-               q_start[3] + delta_q_d[3], q_start[4] + delta_q_d[4], q_start[5] + delta_q_d[5],
-               q_start[6] + delta_q_d[6]}};
+      return add(q_start, delta_q_d);
     });
     std::cout << std::endl << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
@@ -135,7 +141,7 @@ bool calculateDesiredValues(double t,
   std::array<int, 7> sign_delta_q;
   std::array<double, 7> t_d = subtract(t_2, t_1);
   std::array<double, 7> delta_t_2 = subtract(t_f, t_2);
-  std::array<bool, 7> joint_motion_finished{{}};
+  std::array<bool, 7> joint_motion_finished{};
 
   for (size_t joint_index = 0; joint_index < 7; joint_index++) {
     sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
@@ -154,10 +160,11 @@ bool calculateDesiredValues(double t,
       } else if (t >= t_2[joint_index] && t < t_f[joint_index]) {
         (*delta_q_d)[joint_index] =
             delta_q[joint_index] +
-            0.5 * (1 / std::pow(delta_t_2[joint_index], 3) *
+            0.5 * (1.0 / std::pow(delta_t_2[joint_index], 3) *
                        (t - t_1[joint_index] - 2 * delta_t_2[joint_index] - t_d[joint_index]) *
                        std::pow((t - t_1[joint_index] - t_d[joint_index]), 3) +
-                   (2 * t - 2 * t_1[joint_index] - delta_t_2[joint_index] - 2 * t_d[joint_index])) *
+                   (2.0 * t - 2.0 * t_1[joint_index] - delta_t_2[joint_index] -
+                    2.0 * t_d[joint_index])) *
                 dq_max[joint_index] * sign_delta_q[joint_index];
       } else {
         (*delta_q_d)[joint_index] = delta_q[joint_index];
@@ -179,10 +186,10 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
                                  std::array<double, 7>* t_f_sync,
                                  std::array<double, 7>* q_1) {
   std::array<double, 7> dq_max_reach = dq_max;
-  std::array<double, 7> t_f{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 7> delta_t_2{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 7> t_1{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  std::array<double, 7> delta_t_2_sync{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+  std::array<double, 7> t_f{};
+  std::array<double, 7> delta_t_2{};
+  std::array<double, 7> t_1{};
+  std::array<double, 7> delta_t_2_sync{};
   int sign_delta_q[7];
   for (int joint_index = 0; joint_index < 7; joint_index++) {
     sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
@@ -191,13 +198,13 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
           (3.0 / 4.0 * (std::pow(dq_max[joint_index], 2) / ddq_max_start[joint_index]) +
            3.0 / 4.0 * (std::pow(dq_max[joint_index], 2) / ddq_max_goal[joint_index]))) {
         dq_max_reach[joint_index] =
-            std::sqrt(4 / 3 * delta_q[joint_index] * sign_delta_q[joint_index] *
+            std::sqrt(4.0 / 3.0 * delta_q[joint_index] * sign_delta_q[joint_index] *
                       (ddq_max_start[joint_index] * ddq_max_goal[joint_index]) /
                       (ddq_max_start[joint_index] + ddq_max_goal[joint_index]));
       }
       t_1[joint_index] = 1.5 * dq_max_reach[joint_index] / ddq_max_start[joint_index];
       delta_t_2[joint_index] = 1.5 * dq_max_reach[joint_index] / ddq_max_goal[joint_index];
-      t_f[joint_index] = t_1[joint_index] / 2 + delta_t_2[joint_index] / 2 +
+      t_f[joint_index] = t_1[joint_index] / 2.0 + delta_t_2[joint_index] / 2.0 +
                          std::abs(delta_q[joint_index]) / dq_max_reach[joint_index];
     }
   }
@@ -210,7 +217,7 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
       double c =
           std::abs(delta_q[joint_index]) * ddq_max_goal[joint_index] * ddq_max_start[joint_index];
       double delta = b * b - 4.0 * a * c;
-      (*dq_max_sync)[joint_index] = (-1 * b - std::sqrt(delta)) / (2.0 * a);
+      (*dq_max_sync)[joint_index] = (-1.0 * b - std::sqrt(delta)) / (2.0 * a);
       (*t_1_sync)[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_start[joint_index];
       delta_t_2_sync[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_goal[joint_index];
       (*t_f_sync)[joint_index] = (*t_1_sync)[joint_index] / 2 + delta_t_2_sync[joint_index] / 2 +
