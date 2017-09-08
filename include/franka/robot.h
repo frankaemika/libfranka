@@ -106,8 +106,6 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw ProtocolException if received data has invalid format.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(ControllerMode controller_mode,
                std::function<bool(const RobotState&)> read_callback);
