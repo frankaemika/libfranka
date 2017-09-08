@@ -172,77 +172,77 @@ bool randomBool() {
 }
 
 void randomRobotState(franka::RobotState& robot_state) {
-  for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
-    robot_state.O_T_EE[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
-    robot_state.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
-    robot_state.EE_T_K[i] = randomDouble();
+  for (double& element : robot_state.EE_T_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
-    robot_state.F_T_EE[i] = randomDouble();
+  for (double& element : robot_state.F_T_EE) {
+    element = randomDouble();
   }
   robot_state.m_load = randomDouble();
-  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
-    robot_state.F_x_Cload[i] = randomDouble();
+  for (double& element : robot_state.F_x_Cload) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
-    robot_state.I_load[i] = randomDouble();
+  for (double& element : robot_state.I_load) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow.size(); i++) {
-    robot_state.elbow[i] = randomDouble();
+  for (double& element : robot_state.elbow) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
-    robot_state.elbow_d[i] = randomDouble();
+  for (double& element : robot_state.elbow_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
-    robot_state.tau_J[i] = randomDouble();
+  for (double& element : robot_state.tau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dtau_J.size(); i++) {
-    robot_state.dtau_J[i] = randomDouble();
+  for (double& element : robot_state.dtau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q.size(); i++) {
-    robot_state.q[i] = randomDouble();
+  for (double& element : robot_state.q) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq.size(); i++) {
-    robot_state.dq[i] = randomDouble();
+  for (double& element : robot_state.dq) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q_d.size(); i++) {
-    robot_state.q_d[i] = randomDouble();
+  for (double& element : robot_state.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
-    robot_state.dq_d[i] = randomDouble();
+  for (double& element : robot_state.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
-    robot_state.joint_contact[i] = randomDouble();
+  for (double& element : robot_state.joint_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_contact.size(); i++) {
-    robot_state.cartesian_contact[i] = randomDouble();
+  for (double& element : robot_state.cartesian_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_collision.size(); i++) {
-    robot_state.joint_collision[i] = randomDouble();
+  for (double& element : robot_state.joint_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_collision.size(); i++) {
-    robot_state.cartesian_collision[i] = randomDouble();
+  for (double& element : robot_state.cartesian_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
-    robot_state.tau_ext_hat_filtered[i] = randomDouble();
+  for (double& element : robot_state.tau_ext_hat_filtered) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_F_ext_hat_K.size(); i++) {
-    robot_state.O_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.O_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
-    robot_state.K_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
   }
-  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors;
-  for (size_t i = 0; i < errors.size(); i++) {
-    errors[i] = randomBool();
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors{};
+  for (bool& error : errors) {
+    error = randomBool();
   }
   robot_state.current_errors = franka::Errors(errors);
-  for (size_t i = 0; i < errors.size(); i++) {
-    errors[i] = randomBool();
+  for (bool& error : errors) {
+    error = randomBool();
   }
   robot_state.last_motion_errors = franka::Errors(errors);
 
@@ -252,75 +252,75 @@ void randomRobotState(franka::RobotState& robot_state) {
 void randomRobotState(research_interface::robot::RobotState& robot_state) {
   // Reset to all-zeros first
   robot_state = research_interface::robot::RobotState();
-  for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
-    robot_state.O_T_EE[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
-    robot_state.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
-    robot_state.EE_T_K[i] = randomDouble();
+  for (double& element : robot_state.EE_T_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
-    robot_state.F_T_EE[i] = randomDouble();
+  for (double& element : robot_state.F_T_EE) {
+    element = randomDouble();
   }
   robot_state.m_load = randomDouble();
-  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
-    robot_state.F_x_Cload[i] = randomDouble();
+  for (double& element : robot_state.F_x_Cload) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
-    robot_state.I_load[i] = randomDouble();
+  for (double& element : robot_state.I_load) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow.size(); i++) {
-    robot_state.elbow[i] = randomDouble();
+  for (double& element : robot_state.elbow) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
-    robot_state.elbow_d[i] = randomDouble();
+  for (double& element : robot_state.elbow_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
-    robot_state.tau_J[i] = randomDouble();
+  for (double& element : robot_state.tau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dtau_J.size(); i++) {
-    robot_state.dtau_J[i] = randomDouble();
+  for (double& element : robot_state.dtau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q.size(); i++) {
-    robot_state.q[i] = randomDouble();
+  for (double& element : robot_state.q) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq.size(); i++) {
-    robot_state.dq[i] = randomDouble();
+  for (double& element : robot_state.dq) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q_d.size(); i++) {
-    robot_state.q_d[i] = randomDouble();
+  for (double& element : robot_state.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
-    robot_state.dq_d[i] = randomDouble();
+  for (double& element : robot_state.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
-    robot_state.joint_contact[i] = randomDouble();
+  for (double& element : robot_state.joint_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_contact.size(); i++) {
-    robot_state.cartesian_contact[i] = randomDouble();
+  for (double& element : robot_state.cartesian_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_collision.size(); i++) {
-    robot_state.joint_collision[i] = randomDouble();
+  for (double& element : robot_state.joint_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_collision.size(); i++) {
-    robot_state.cartesian_collision[i] = randomDouble();
+  for (double& element : robot_state.cartesian_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
-    robot_state.tau_ext_hat_filtered[i] = randomDouble();
+  for (double& element : robot_state.tau_ext_hat_filtered) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_F_ext_hat_K.size(); i++) {
-    robot_state.O_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.O_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
-    robot_state.K_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.errors.size(); i++) {
-    robot_state.errors[i] = randomBool();
+  for (bool& error : robot_state.errors) {
+    error = randomBool();
   }
-  for (size_t i = 0; i < robot_state.reflex_reason.size(); i++) {
-    robot_state.reflex_reason[i] = randomBool();
+  for (bool& element : robot_state.reflex_reason) {
+    element = randomBool();
   }
   robot_state.message_id = static_cast<uint32_t>(std::rand());
 
@@ -331,28 +331,28 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
 void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
   // Reset to all-zeros first
   robot_command = research_interface::robot::RobotCommand();
-  for (size_t i = 0; i < robot_command.motion.q_d.size(); i++) {
-    robot_command.motion.q_d[i] = randomDouble();
+  for (double& element : robot_command.motion.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.dq_d.size(); i++) {
-    robot_command.motion.dq_d[i] = randomDouble();
+  for (double& element : robot_command.motion.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.ddq_d.size(); i++) {
-    robot_command.motion.ddq_d[i] = randomDouble();
+  for (double& element : robot_command.motion.ddq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.O_T_EE_d.size(); i++) {
-    robot_command.motion.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_command.motion.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.O_dP_EE_d.size(); i++) {
-    robot_command.motion.O_dP_EE_d[i] = randomDouble();
+  for (double& element : robot_command.motion.O_dP_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.elbow_d.size(); i++) {
-    robot_command.motion.elbow_d[i] = randomDouble();
+  for (double& element : robot_command.motion.elbow_d) {
+    element = randomDouble();
   }
   robot_command.motion.valid_elbow = true;
   robot_command.motion.motion_generation_finished = true;
-  for (size_t i = 0; i < robot_command.control.tau_J_d.size(); i++) {
-    robot_command.control.tau_J_d[i] = randomDouble();
+  for (double& element : robot_command.control.tau_J_d) {
+    element = randomDouble();
   }
   robot_command.message_id = static_cast<uint32_t>(std::rand());
 }
