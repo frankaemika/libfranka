@@ -249,7 +249,6 @@ void Robot::Impl::stopMotion(uint32_t motion_id) {
 void Robot::Impl::startController() {
   if (controllerRunning()) {
     throw ControlException("libfranka robot: attempted to start multiple controllers!");
-    return;
   }
 
   executeCommand<research_interface::robot::SetControllerMode>(

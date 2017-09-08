@@ -15,15 +15,14 @@ LibraryDownloader::LibraryDownloader(Network& network) {
 
   uint32_t command_id = network.tcpSendRequest<LoadModelLibrary>(
       LoadModelLibrary::Architecture::kX64, LoadModelLibrary::System::kLinux);
+  std::vector<uint8_t> buffer;
   LoadModelLibrary::Response response =
-      network.tcpBlockingReceiveResponse<LoadModelLibrary>(command_id);
+      network.tcpBlockingReceiveResponse<LoadModelLibrary>(command_id, &buffer);
   if (response.status != LoadModelLibrary::Status::kSuccess) {
     throw ModelException("libfranka: Server reports error when loading model library.");
   }
 
   try {
-    std::vector<uint8_t> buffer(response.size);
-    network.tcpReceiveIntoBuffer(buffer.data(), static_cast<int>(buffer.size()));
     std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
     model_library_stream.write(reinterpret_cast<char*>(buffer.data()), buffer.size());
   } catch (const std::exception& ex) {
