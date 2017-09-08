@@ -38,7 +38,8 @@ template <typename T>
 class ControlLoop : public franka::ControlLoop<T> {
  public:
   using franka::ControlLoop<T>::ControlLoop;
-  using franka::ControlLoop<T>::spinOnce;
+  using franka::ControlLoop<T>::spinMotion;
+  using franka::ControlLoop<T>::spinControl;
 };
 
 template <typename T>
@@ -178,7 +179,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
 
   RobotCommand command;
   randomRobotCommand(command);
-  EXPECT_TRUE(loop.spinOnce(robot_state, duration, &command.motion));
+  EXPECT_TRUE(loop.spinMotion(robot_state, duration, &command.motion));
   EXPECT_THAT(command.motion, this->getField(motion));
 }
 
@@ -201,8 +202,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
 
   RobotCommand command;
   randomRobotCommand(command);
-  EXPECT_TRUE(loop.spinOnce(robot_state, duration, &command.motion));
-  EXPECT_TRUE(loop.spinOnce(robot_state, duration, &command.control));
+  EXPECT_TRUE(loop.spinMotion(robot_state, duration, &command.motion));
+  EXPECT_TRUE(loop.spinControl(robot_state, duration, &command.control));
   EXPECT_THAT(command.motion, this->getField(motion));
   EXPECT_EQ(torques.tau_J, command.control.tau_J_d);
 }
@@ -224,13 +225,13 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallback) {
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
   ControllerCommand control_command{};
-  EXPECT_TRUE(loop.spinOnce(robot_state, duration, &control_command));
+  EXPECT_TRUE(loop.spinControl(robot_state, duration, &control_command));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
   MotionGeneratorCommand motion_command{};
 
-  ASSERT_FALSE(loop.spinOnce(robot_state, duration, &motion_command));
+  ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
@@ -257,7 +258,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallbackAndControllerMode) {
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
   MotionGeneratorCommand motion_command{};
-  ASSERT_FALSE(loop.spinOnce(robot_state, duration, &motion_command));
+  ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
@@ -284,13 +285,13 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingControlCallback) {
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
   MotionGeneratorCommand motion_command{};
-  EXPECT_TRUE(loop.spinOnce(robot_state, duration, &motion_command));
+  EXPECT_TRUE(loop.spinMotion(robot_state, duration, &motion_command));
 
   // Use ASSERT to abort on failure because loop() in next line
   // would block otherwise
   ControllerCommand control_command{};
 
-  ASSERT_FALSE(loop.spinOnce(robot_state, duration, &control_command));
+  ASSERT_FALSE(loop.spinControl(robot_state, duration, &control_command));
 
   EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
   EXPECT_CALL(control_callback, invoke(_, zero_duration))

@@ -100,14 +100,14 @@ void ControlLoop<T>::operator()() {
   research_interface::robot::MotionGeneratorCommand motion_command{};
   if (control_callback_) {
     research_interface::robot::ControllerCommand control_command{};
-    while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command) &&
-           spinOnce(robot_state, robot_state.time - previous_time, &control_command)) {
+    while (spinMotion(robot_state, robot_state.time - previous_time, &motion_command) &&
+           spinControl(robot_state, robot_state.time - previous_time, &control_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command, &control_command);
       robot_.throwOnMotionError(robot_state, motion_id_);
     }
   } else {
-    while (spinOnce(robot_state, robot_state.time - previous_time, &motion_command)) {
+    while (spinMotion(robot_state, robot_state.time - previous_time, &motion_command)) {
       previous_time = robot_state.time;
       robot_state = robot_.update(&motion_command, nullptr);
       robot_.throwOnMotionError(robot_state, motion_id_);
@@ -116,9 +116,9 @@ void ControlLoop<T>::operator()() {
 }
 
 template <typename T>
-bool ControlLoop<T>::spinOnce(const RobotState& robot_state,
-                              franka::Duration time_step,
-                              research_interface::robot::ControllerCommand* command) {
+bool ControlLoop<T>::spinControl(const RobotState& robot_state,
+                                 franka::Duration time_step,
+                                 research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
   if (control_output.stop()) {
     return false;
@@ -128,9 +128,9 @@ bool ControlLoop<T>::spinOnce(const RobotState& robot_state,
 }
 
 template <typename T>
-bool ControlLoop<T>::spinOnce(const RobotState& robot_state,
-                              franka::Duration time_step,
-                              research_interface::robot::MotionGeneratorCommand* command) {
+bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
+                                franka::Duration time_step,
+                                research_interface::robot::MotionGeneratorCommand* command) {
   T motion_output = motion_callback_(robot_state, time_step);
   if (motion_output.stop()) {
     return false;

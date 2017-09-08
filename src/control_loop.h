@@ -40,12 +40,12 @@ class ControlLoop {
               MotionGeneratorCallback motion_callback,
               ControlCallback control_callback);
 
-  bool spinOnce(const RobotState& robot_state,
-                franka::Duration time_step,
-                research_interface::robot::ControllerCommand* command);
-  bool spinOnce(const RobotState& robot_state,
-                franka::Duration time_step,
-                research_interface::robot::MotionGeneratorCommand* command);
+  bool spinControl(const RobotState& robot_state,
+                   franka::Duration time_step,
+                   research_interface::robot::ControllerCommand* command);
+  bool spinMotion(const RobotState& robot_state,
+                  franka::Duration time_step,
+                  research_interface::robot::MotionGeneratorCommand* command);
 
  private:
   RobotControl& robot_;
