@@ -40,10 +40,33 @@ class Network {
 
   void tcpThrowIfConnectionClosed();
 
+  /**
+   * Blocks until a T::Response message with the given command ID has been received.
+   *
+   * Additional variable-length data for the expected response (if any) is written into the given
+   * vl_buffer. If vl_buffer is not given, this data is discarded.
+   *
+   * @param[in] command_id Expected command ID of the T::Response.
+   * @param[out] vl_buffer If given, variable-length data for the expected T::Response
+   * message (if any has been received) is copied into it.
+   *
+   * @return Received T::Response instance.
+   */
   template <typename T>
   typename T::Response tcpBlockingReceiveResponse(uint32_t command_id,
-                                                  std::vector<uint8_t>* buffer = nullptr);
+                                                  std::vector<uint8_t>* vl_buffer = nullptr);
 
+  /**
+   * Tries to receive a T::Response message with the given command ID (non-blocking).
+   *
+   * Additional variable-length data for the expected response (if any) is discarded.
+   *
+   * @param[in] command_id Expected command ID of the T::Response.
+   * @param[in] handler Callback to be invoked if the expected response has been received.
+   *
+   * @return True if a T::Response message with the given command_id has been received,
+   * false otherwise.
+   */
   template <typename T>
   bool tcpReceiveResponse(uint32_t command_id,
                           std::function<void(const typename T::Response&)> handler);
@@ -199,13 +222,13 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
 
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
-                                                         std::vector<uint8_t>* buffer) {
+                                                         std::vector<uint8_t>* vl_buffer) {
   using namespace std::literals::chrono_literals;  // NOLINT (google-build-using-namespace)
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   decltype(received_responses_)::const_iterator it;
   do {
     lock.lock();
-    tcpReadFromBuffer<T>(10'000us);
+    tcpReadFromBuffer<T>(10ms);
     it = received_responses_.find(command_id);
     lock.unlock();
   } while (it == received_responses_.end());
@@ -216,11 +239,11 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     throw ProtocolException("libfranka: Incorrect TCP message size.");
   }
 
-  if (buffer != nullptr && message.header.size != sizeof(message)) {
+  if (vl_buffer != nullptr && message.header.size != sizeof(message)) {
     size_t data_size = message.header.size - sizeof(message);
     std::vector<uint8_t> data_buffer(data_size);
     std::memcpy(data_buffer.data(), &it->second[sizeof(message)], data_size);
-    *buffer = data_buffer;
+    *vl_buffer = data_buffer;
   }
 
   received_responses_.erase(it);
