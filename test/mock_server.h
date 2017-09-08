@@ -43,11 +43,11 @@ class MockServer {
   MockServer& sendEmptyState();
 
   template <typename T>
-  MockServer& sendResponse(const typename T::Header& header,
+  MockServer& sendResponse(const uint32_t& command_id,
                            std::function<typename T::Response()> create_response);
 
   template <typename T>
-  MockServer& queueResponse(const typename T::Header& header,
+  MockServer& queueResponse(const uint32_t& command_id,
                             std::function<typename T::Response()> create_response);
 
   template <typename T>
@@ -64,14 +64,22 @@ class MockServer {
   MockServer& generic(std::function<void(Socket&, Socket&)> generic_command);
 
   template <typename T>
+  typename T::Request receiveRequest(Socket& tcp_socket, typename T::Header* header = nullptr);
+
+  template <typename T>
+  void sendResponse(Socket& tcp_socket,
+                    const typename T::Header& header,
+                    const typename T::Response& response);
+
+  template <typename T>
   void handleCommand(Socket& tcp_socket,
                      std::function<typename T::Response(const typename T::Request&)> callback,
-                     typename T::Header* header = nullptr);
+                     uint32_t* command_id = nullptr);
 
   template <typename T>
   MockServer& waitForCommand(
       std::function<typename T::Response(const typename T::Request&)> callback,
-      typename T::Header* header = nullptr);
+      uint32_t* command_id = nullptr);
 
   MockServer& spinOnce();
 
@@ -110,16 +118,17 @@ class MockServer {
 
 template <typename C>
 template <typename T>
-MockServer<C>& MockServer<C>::sendResponse(const typename T::Header& header,
+MockServer<C>& MockServer<C>::sendResponse(const uint32_t& command_id,
                                            std::function<typename T::Response()> create_response) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(command_mutex_);
   block_ = true;
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
-                         [=, &header](Socket& tcp_socket, Socket&) {
+                         [=, &command_id](Socket& tcp_socket, Socket&) {
                            typename T::template Message<typename T::Response> message(
-                               header, create_response());
+                               typename T::Header(T::kCommand, command_id, sizeof(message)),
+                               create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
   return *this;
@@ -127,15 +136,16 @@ MockServer<C>& MockServer<C>::sendResponse(const typename T::Header& header,
 
 template <typename C>
 template <typename T>
-MockServer<C>& MockServer<C>::queueResponse(const typename T::Header& header,
+MockServer<C>& MockServer<C>::queueResponse(const uint32_t& command_id,
                                             std::function<typename T::Response()> create_response) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(command_mutex_);
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
-                         [=, &header](Socket& tcp_socket, Socket&) {
+                         [=, &command_id](Socket& tcp_socket, Socket&) {
                            typename T::template Message<typename T::Response> message(
-                               header, create_response());
+                               typename T::Header(T::kCommand, command_id, sizeof(message)),
+                               create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
   return *this;
@@ -187,33 +197,54 @@ MockServer<C>& MockServer<C>::onSendUDP(std::function<void(T&)> on_send_udp) {
 
 template <typename C>
 template <typename T>
-void MockServer<C>::handleCommand(
-    Socket& tcp_socket,
-    std::function<typename T::Response(const typename T::Request&)> callback,
-    typename T::Header* header_ptr) {
+typename T::Request MockServer<C>::receiveRequest(Socket& tcp_socket,
+                                                  typename T::Header* header_ptr) {
   typename T::template Message<typename T::Request> request_message;
   tcp_socket.receiveBytes(&request_message, sizeof(request_message));
   if (header_ptr != nullptr) {
     *header_ptr = request_message.header;
   }
+  return request_message.getInstance();
+}
 
-  typename T::template Message<typename T::Response> response_message(
-      request_message.header, callback(request_message.getInstance()));
+template <typename C>
+template <typename T>
+void MockServer<C>::sendResponse(Socket& tcp_socket,
+                                 const typename T::Header& header,
+                                 const typename T::Response& response) {
+  typename T::template Message<typename T::Response> response_message(header, response);
   tcp_socket.sendBytes(&response_message, sizeof(response_message));
+}
+
+template <typename C>
+template <typename T>
+void MockServer<C>::handleCommand(
+    Socket& tcp_socket,
+    std::function<typename T::Response(const typename T::Request&)> callback,
+    uint32_t* command_id) {
+  typename T::Header header;
+  typename T::Request request = receiveRequest<T>(tcp_socket, &header);
+  if (command_id != nullptr) {
+    *command_id = header.command_id;
+  }
+  sendResponse<T>(tcp_socket,
+                  typename T::Header(T::kCommand, header.command_id,
+                                     sizeof(typename T::template Message<typename T::Response>)),
+                  callback(request));
 }
 
 template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::waitForCommand(
     std::function<typename T::Response(const typename T::Request&)> callback,
-    typename T::Header* header) {
+    uint32_t* command_id) {
   using namespace std::string_literals;
 
   std::lock_guard<std::mutex> _(command_mutex_);
   std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " +
                      typeid(typename T::Response).name();
-  commands_.emplace_back(name, [this, callback, header](Socket& tcp_socket, Socket&) {
-    handleCommand<T>(tcp_socket, callback, header);
+  commands_.emplace_back(name, [this, callback, command_id](Socket& tcp_socket, Socket&) {
+    handleCommand<T>(tcp_socket, callback, command_id);
   });
   return *this;
 }
