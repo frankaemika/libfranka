@@ -46,12 +46,15 @@ void Robot::control(ControllerMode controller_mode,
   }
 
   research_interface::robot::SetControllerMode::ControllerMode mode;
+  research_interface::robot::ControllerMode state_controller_mode;
   switch (controller_mode) {
     case ControllerMode::kJointImpedance:
       mode = decltype(mode)::kJointImpedance;
+      state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
       break;
     case ControllerMode::kCartesianImpedance:
       mode = decltype(mode)::kCartesianImpedance;
+      state_controller_mode = decltype(state_controller_mode)::kCartesianImpedance;
       break;
     default:
       throw std::invalid_argument("Invalid controller mode given.");
@@ -59,8 +62,11 @@ void Robot::control(ControllerMode controller_mode,
   impl_->executeCommand<research_interface::robot::SetControllerMode>(mode);
 
   while (true) {
-    RobotState robot_state = impl_->update();
-    if (!read_callback(robot_state)) {
+    research_interface::robot::RobotState robot_state = impl_->updateWithoutConversion();
+    if (robot_state.controller_mode != state_controller_mode) {
+      throw ControlException("Controller mode changed.");
+    }
+    if (!read_callback(convertRobotState(robot_state))) {
       break;
     }
   }

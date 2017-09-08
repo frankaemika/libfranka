@@ -25,6 +25,10 @@ class Robot::Impl : public RobotControl {
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) override;
 
+  research_interface::robot::RobotState updateWithoutConversion(
+      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
+      const research_interface::robot::ControllerCommand* control_command = nullptr);
+
   void throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) override;
 
   RobotState readOnce();

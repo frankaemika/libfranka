@@ -24,11 +24,17 @@ Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_conf
 RobotState Robot::Impl::update(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
+  return convertRobotState(updateWithoutConversion(motion_command, control_command));
+}
+
+research_interface::robot::RobotState Robot::Impl::updateWithoutConversion(
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
   network_->tcpThrowIfConnectionClosed();
 
   sendRobotCommand(motion_command, control_command);
 
-  return convertRobotState(receiveRobotState());
+  return receiveRobotState();
 }
 
 void Robot::Impl::throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) {
