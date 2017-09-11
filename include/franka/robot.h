@@ -113,8 +113,8 @@ class Robot {
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] motion_generator_callback Callback function for motion generation.
    * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -125,8 +125,71 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(
-      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback);
+
+  /**
+   * Starts a control loop for a joint velocity motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               std::function<JointVelocities(const RobotState&, franka::Duration)>
+                   motion_generator_callback);
+
+  /**
+   * Starts a control loop for a Cartesian pose motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback);
+
+  /**
+   * Starts a control loop for a Cartesian velocity motion generator with torque control.
+   *
+   * Sets realtime priority for the current thread.
+   * Cannot be executed while another control or motion generator loop is active.
+   *
+   * @param[in] control_callback Callback function for torque control.
+   * @param[in] motion_generator_callback Callback function for motion generation.
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw ProtocolException if received data has invalid format.
+   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   *
+   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   */
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               std::function<CartesianVelocities(const RobotState&, franka::Duration)>
+                   motion_generator_callback);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
@@ -150,27 +213,6 @@ class Robot {
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
   /**
-   * Starts a control loop for a joint velocity motion generator with torque control.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] control_callback Callback function for torque control.
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(
-      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
-
-  /**
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
@@ -192,27 +234,6 @@ class Robot {
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
   /**
-   * Starts a control loop for a Cartesian pose motion generator with torque control.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] control_callback Callback function for torque control.
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(
-      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      std::function<Torques(const RobotState&, franka::Duration)> control_callback);
-
-  /**
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
    *
    * Sets realtime priority for the current thread.
@@ -232,27 +253,6 @@ class Robot {
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance);
-
-  /**
-   * Starts a control loop for a Cartesian velocity motion generator with torque control.
-   *
-   * Sets realtime priority for the current thread.
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] motion_generator_callback Callback function for motion generation.
-   * @param[in] control_callback Callback function for torque control.
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
-   *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
-   */
-  void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback,
-               std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
@@ -325,23 +325,6 @@ class Robot {
    * @throw CommandException if an error occurred.
    */
   VirtualWallCuboid getVirtualWall(int32_t id);
-
-  /**
-   * Changes the type of controller used for idle mode.
-   *
-   * FRANKA is in idle mode when holding the current position, i.e. when no motion
-   * is being performed and guiding mode is not active.
-   *
-   * The controller mode is reset when a motion is started or guiding mode is activated.
-   *
-   * @param[in] controller_mode Controller mode.
-   *
-   * @throw CommandException if an error occurred.
-   *
-   * @see setGuidingMode for an explanation of guiding mode.
-   * @see control to start a motion.
-   */
-  void setIdleControllerMode(ControllerMode controller_mode);
 
   /**
    * Changes the collision behavior.
@@ -491,17 +474,6 @@ class Robot {
   void setLoad(double load_mass,
                const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
                const std::array<double, 9>& load_inertia);
-
-  /**
-   * Sets a time scaling factor for all motion generators.
-   *
-   * Slows down or speeds up a trajectory.
-   *
-   * @param[in] factor Time scaling factor \f$\in [0, 1]\f$.
-   *
-   * @throw CommandException if an error occurred.
-   */
-  void setTimeScalingFactor(double factor);
 
   /**
    * Runs automatic error recovery on FRANKA.

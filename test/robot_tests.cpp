@@ -131,9 +131,9 @@ TEST(Robot, CanControlRobot) {
   robot.control(
       [&](const RobotState&, Duration time_step) -> JointPositions {
         if (count == 0) {
-          EXPECT_EQ(0u, time_step.ms());
+          EXPECT_EQ(0u, time_step.toMSec());
         } else {
-          EXPECT_GE(time_step.ms(), 1u);
+          EXPECT_GE(time_step.toMSec(), 1u);
         }
         if (++count < 5) {
           return joint_positions;
@@ -195,20 +195,19 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   while (!read_started) {
     std::this_thread::yield();
   }
-
   EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>()),
                InvalidOperationException);
-  EXPECT_THROW(robot.control(std::function<JointPositions(const RobotState&, Duration)>(),
-                             std::function<Torques(const RobotState&, Duration)>()),
+  EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>(),
+                             std::function<JointPositions(const RobotState&, Duration)>()),
                InvalidOperationException);
-  EXPECT_THROW(robot.control(std::function<JointVelocities(const RobotState&, Duration)>(),
-                             std::function<Torques(const RobotState&, Duration)>()),
+  EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>(),
+                             std::function<JointVelocities(const RobotState&, Duration)>()),
                InvalidOperationException);
-  EXPECT_THROW(robot.control(std::function<CartesianPose(const RobotState&, Duration)>(),
-                             std::function<Torques(const RobotState&, Duration)>()),
+  EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>(),
+                             std::function<CartesianPose(const RobotState&, Duration)>()),
                InvalidOperationException);
-  EXPECT_THROW(robot.control(std::function<CartesianVelocities(const RobotState&, Duration)>(),
-                             std::function<Torques(const RobotState&, Duration)>()),
+  EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>(),
+                             std::function<CartesianVelocities(const RobotState&, Duration)>()),
                InvalidOperationException);
   EXPECT_THROW(robot.control(std::function<JointPositions(const RobotState&, Duration)>()),
                InvalidOperationException);

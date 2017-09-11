@@ -13,11 +13,11 @@ Duration::operator std::chrono::duration<uint64_t, std::milli>() const noexcept 
   return duration_;
 }
 
-double Duration::s() const noexcept {
+double Duration::toSec() const noexcept {
   return std::chrono::duration_cast<std::chrono::duration<double>>(duration_).count();
 }
 
-uint64_t Duration::ms() const noexcept {
+uint64_t Duration::toMSec() const noexcept {
   return duration_.count();
 }
 

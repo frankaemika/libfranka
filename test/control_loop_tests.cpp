@@ -252,7 +252,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallbackAndControllerMode) {
   EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(Stop));
 
   typename TestFixture::Loop loop(
-      robot, ControllerMode::kMotorPD,
+      robot, ControllerMode::kJointImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
   // Use ASSERT to abort on failure because loop() in next line
@@ -317,7 +317,7 @@ TYPED_TEST(ControlLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback)
   EXPECT_CALL(control_callback, invoke(_, _))
       .Times(ticks.size())
       .WillRepeatedly(Invoke([&](const RobotState&, Duration duration) -> Torques {
-        EXPECT_EQ(ticks.at(control_count), duration.ms());
+        EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
         if (++control_count == ticks.size()) {
           return Stop;
@@ -356,7 +356,7 @@ TYPED_TEST(ControlLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) 
       .Times(ticks.size())
       .WillRepeatedly(
           Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
-            EXPECT_EQ(ticks.at(control_count), duration.ms());
+            EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
               return Stop;
@@ -391,7 +391,7 @@ TYPED_TEST(ControlLoops, GetsCorrectTimeStepWithMotionCallback) {
       .Times(ticks.size())
       .WillRepeatedly(
           Invoke([&](const RobotState&, Duration duration) -> typename TestFixture::TMotion {
-            EXPECT_EQ(ticks.at(control_count), duration.ms());
+            EXPECT_EQ(ticks.at(control_count), duration.toMSec());
 
             if (++control_count == ticks.size()) {
               return Stop;
