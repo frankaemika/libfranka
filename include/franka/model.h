@@ -121,8 +121,8 @@ class Model {
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] load_inertia Inertia of the load, relative to center of mass,
-   * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
    * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load.
    * Unit: \f$[m]\f$.
@@ -140,10 +140,9 @@ class Model {
    * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
    * dq\f$, in \f$[Nm]\f$.
    *
-   * @param[in] robot_state State from which the Coriolis force vector should be
-   * calculated.
-   * @param[in] load_inertia Inertia of the load, relative to center of mass,
-   * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] robot_state State from which the Coriolis force vector should be calculated.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
+   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
    * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load.
    * Unit: \f$[m]\f$.
@@ -160,8 +159,7 @@ class Model {
   /**
    * Calculates the gravity vector. Unit: \f$[Nm]\f$.
    *
-   * @param[in] robot_state State from which the gravity vector should be
-   * calculated.
+   * @param[in] robot_state State from which the gravity vector should be calculated.
    * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load.
    * Unit: \f$[m]\f$.

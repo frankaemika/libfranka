@@ -2,8 +2,8 @@
 
 #include <sstream>
 
-// `using std::string_literals::operator""s` produces a GCC warning that cannot
-// be disabled, so we have to use `using namespace ...`.
+// `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
+// have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
@@ -38,8 +38,8 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
       receiveRobotState();
     }
 
-    // If a motion generator was running and the robot state shows an error,
-    // we will receive a TCP response to the Move command.
+    // If a motion generator was running and the robot state shows an error, we will receive a TCP
+    // response to the Move command.
     try {
       handleCommandResponse<research_interface::robot::Move>(
           network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
@@ -219,9 +219,9 @@ void Robot::Impl::stopMotion(uint32_t motion_id) {
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
   motion_command.motion_generation_finished = true;
-  // The TCP response for the finished Move might arrive while the robot state still shows
-  // that the motion is running, or afterwards. To handle both situations, we do not process
-  // TCP packages in this loop and explicitly wait for the Move response over TCP afterwards.
+  // The TCP response for the finished Move might arrive while the robot state still shows that the
+  // motion is running, or afterwards. To handle both situations, we do not process TCP packages in
+  // this loop and explicitly wait for the Move response over TCP afterwards.
   while (motionGeneratorRunning()) {
     sendRobotCommand(&motion_command, controllerRunning() ? &controller_command : nullptr);
     receiveRobotState();
