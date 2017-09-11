@@ -13,7 +13,7 @@
 namespace franka {
 
 /**
- * Describes FRANKA's gripper state.
+ * Describes the gripper state.
  */
 struct GripperState {
   /**

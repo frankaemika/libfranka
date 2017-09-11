@@ -12,7 +12,7 @@
 namespace franka {
 
 /**
- * Controller mode for FRANKA.
+ * Available controller modes for a franka::Robot.
  */
 enum class ControllerMode { kMotorPD, kJointPosition, kJointImpedance, kCartesianImpedance };
 

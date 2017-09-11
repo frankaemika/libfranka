@@ -14,7 +14,7 @@
 namespace franka {
 
 /**
- * Describes FRANKA's current mode.
+ * Describes the robot's current mode.
  */
 
 enum class RobotMode {
@@ -28,7 +28,7 @@ enum class RobotMode {
 };
 
 /**
- * Describes FRANKA's robot state.
+ * Describes the robot state.
  */
 struct RobotState {
   /**
@@ -192,7 +192,7 @@ struct RobotState {
   Errors last_motion_errors{};
 
   /**
-   * Current FRANKA mode.
+   * Current robot mode.
    */
   RobotMode robot_mode = RobotMode::kUserStopped;
 

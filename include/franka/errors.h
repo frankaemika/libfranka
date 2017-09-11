@@ -11,7 +11,7 @@
 namespace franka {
 
 /**
- * Enumerates FRANKA's error flags.
+ * Enumerates errors than can occur while controlling a franka::Robot.
  */
 struct Errors {
  private:
@@ -63,35 +63,37 @@ struct Errors {
   explicit operator std::string() const;
 
   /**
-   * True if FRANKA moved past the joint limits.
+   * True if the robot moved past the joint limits.
    */
   const bool& joint_position_limits_violation;
   /**
-   * True if FRANKA moved past any of the virtual walls.
+   * True if the robot moved past any of the virtual walls.
    */
   const bool& cartesian_position_limits_violation;
   /**
-   * True if FRANKA would have collided with itself.
+   * True if the robot would have collided with itself.
    */
   const bool& self_collision_avoidance_violation;
   /**
-   * True if FRANKA exceeded joint velocity limits.
+   * True if the robot exceeded joint velocity limits.
    */
   const bool& joint_velocity_violation;
   /**
-   * True if FRANKA exceeded cartesian velocity limits.
+   * True if the robot exceeded cartesian velocity limits.
    */
   const bool& cartesian_velocity_violation;
   /**
-   * True if FRANKA exceeded safety threshold during force control.
+   * True if the robot exceeded safety threshold during force control.
    */
   const bool& force_control_safety_violation;
   /**
-   * True if a collision was detected: i.e. FRANKA exceeded torque threshold in a joint motion.
+   * True if a collision was detected, i.e.\ the robot exceeded a torque threshold in a joint
+   * motion.
    */
   const bool& joint_reflex;
   /**
-   * True if a collision was detected: i.e. FRANKA exceeded torque threshold in a Cartesian motion.
+   * True if a collision was detected, i.e.\ the robot exceeded a torque threshold in a Cartesian
+   * motion.
    */
   const bool& cartesian_reflex;
   /**

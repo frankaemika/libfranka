@@ -14,7 +14,7 @@
 namespace franka {
 
 /**
- * Enumerates FRANKA's seven joints, the flange and the end effector.
+ * Enumerates the seven joints, the flange, and the end effector of a robot.
  */
 enum class Frame {
   kJoint1,
@@ -137,19 +137,19 @@ class Model {
       const noexcept;
 
   /**
- * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
- * dq\f$, in \f$[Nm]\f$.
- *
- * @param[in] robot_state State from which the Coriolis force vector should be
- * calculated.
- * @param[in] load_inertia Inertia of the load, relative to center of mass,
- * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
- * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
- * @param[in] F_x_Cload Translation from flange to center of mass of load.
- * Unit: \f$[m]\f$.
- *
- * @return Coriolis force vector.
- */
+   * Calculates the Coriolis force vector (state-space equation): \f$ c= C \times
+   * dq\f$, in \f$[Nm]\f$.
+   *
+   * @param[in] robot_state State from which the Coriolis force vector should be
+   * calculated.
+   * @param[in] load_inertia Inertia of the load, relative to center of mass,
+   * given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   *
+   * @return Coriolis force vector.
+   */
   std::array<double, 7> coriolis(
       const franka::RobotState& robot_state,
       const std::array<double, 9>& load_inertia,
@@ -158,18 +158,18 @@ class Model {
       const noexcept;
 
   /**
-  * Calculates the gravity vector. Unit: \f$[Nm]\f$.
-  *
-  * @param[in] robot_state State from which the gravity vector should be
-  * calculated.
-  * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
-  * @param[in] F_x_Cload Translation from flange to center of mass of load.
-  * Unit: \f$[m]\f$.
-  * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
-  * Default to {0.0, 0.0, -9.81}.
-  *
-  * @return Gravity vector.
-  */
+   * Calculates the gravity vector. Unit: \f$[Nm]\f$.
+   *
+   * @param[in] robot_state State from which the gravity vector should be
+   * calculated.
+   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
+   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * Unit: \f$[m]\f$.
+   * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
+   * Default to {0.0, 0.0, -9.81}.
+   *
+   * @return Gravity vector.
+   */
   std::array<double, 7> gravity(
       const franka::RobotState& robot_state,
       double load_mass,

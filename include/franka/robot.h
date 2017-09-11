@@ -20,9 +20,9 @@ namespace franka {
 class Model;
 
 /**
- * Maintains a connection to FRANKA CONTROL, provides the current robot state,
- * gives access to the model library and allows to execute commands,
- * motions, and torque control.
+ * Maintains a network connection to the robot, provides the current robot state,
+ * gives access to the model library and allows to execute commands, motions,
+ * and torque control.
  *
  * @note
  * The members of this class are threadsafe.
@@ -38,21 +38,20 @@ class Model;
 class Robot {
  public:
   /**
-   * Version of the server running on FRANKA CONTROL.
+   * Version of the robot server.
    */
   using ServerVersion = uint16_t;
 
   /**
-   * Establishes a connection with FRANKA CONTROL.
+   * Establishes a connection with the robot.
    *
-   * @param[in] franka_address IP/hostname of FRANKA CONTROL
+   * @param[in] franka_address IP/hostname of the robot.
    * @param[in] realtime_config if set to Enforce, an exception will be thrown
    * if realtime priority cannot be set when required. Setting realtime_config
    * to Ignore disables this behavior.
    *
    * @throw NetworkException if the connection is unsuccessful.
-   * @throw IncompatibleVersionException if this library is not supported by FRANKA CONTROL.
-   * @throw ProtocolException if data received from the host is invalid.
+   * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
@@ -100,7 +99,6 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -119,7 +117,6 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -140,7 +137,6 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -161,7 +157,6 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -182,7 +177,6 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -203,7 +197,6 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -224,7 +217,6 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -245,7 +237,6 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -266,7 +257,6 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    * @throw RealtimeException if realtime priority can not be set for the current thread.
    *
    * @see Robot::Robot to change behavior if realtime priority can not be set.
@@ -288,7 +278,6 @@ class Robot {
    *
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    */
   void read(std::function<bool(const RobotState&)> read_callback);
 
@@ -301,7 +290,6 @@ class Robot {
    *
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
    *
    * @see Robot::read for a way to repeatedly receive the robot state.
    */
@@ -310,7 +298,7 @@ class Robot {
   /**
    * @name Commands
    *
-   * Commands are executed by communicating with FRANKA CONTROL over the network.
+   * Commands are executed by communicating with the robot over the network.
    * These functions should therefore not be called from within control or motion generator loops.
    * @{
    */
@@ -329,7 +317,7 @@ class Robot {
   /**
    * Changes the type of controller used for idle mode.
    *
-   * FRANKA is in idle mode when holding the current position, i.e. when no motion
+   * The robot is in idle mode when holding the current position, i.e. when no motion
    * is being performed and guiding mode is not active.
    *
    * The controller mode is reset when a motion is started or guiding mode is activated.
@@ -352,7 +340,7 @@ class Robot {
    * Forces or torques between lower and upper threshold are shown as
    * contacts in the RobotState.
    * Forces or torques above the upper threshold are registered as collision
-   * and cause FRANKA to stop moving.
+   * and cause the robot to stop moving.
    *
    * @param[in] lower_torque_thresholds_acceleration Contact torque thresholds during
    * acceleration/deceleration in \f$[Nm]\f$.
@@ -391,7 +379,7 @@ class Robot {
    * constant velocity movement phases.
    *
    * Forces or torques between lower and upper threshold are shown as contacts in the RobotState.
-   * Forces or torques above the upper threshold are registered as collision and cause FRANKA to
+   * Forces or torques above the upper threshold are registered as collision and cause the robot to
    * stop moving.
    *
    * @param[in] lower_torque_thresholds Contact torque thresholds in \f$[Nm]\f$.
@@ -438,7 +426,7 @@ class Robot {
    * If a flag is set to true, movement is unlocked.
    *
    * @note
-   * Guiding mode can be enabled by pressing the two opposing buttons near FRANKA's flange.
+   * Guiding mode can be enabled by pressing the two opposing buttons near the robot's flange.
    *
    * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding mode.
    * @param[in] elbow True if the elbow is free in guiding mode, false otherwise.
@@ -504,9 +492,9 @@ class Robot {
   void setTimeScalingFactor(double factor);
 
   /**
-   * Runs automatic error recovery on FRANKA.
+   * Runs automatic error recovery on the robot.
    *
-   * Automatic error recovery e.g. resets FRANKA after a collision occurred.
+   * Automatic error recovery e.g. resets the robot after a collision occurred.
    *
    * @throw CommandException if an error occurred.
    */
@@ -517,7 +505,7 @@ class Robot {
    */
 
   /**
-   * Loads the Model Library from FRANKA CONTROL.
+   * Loads the model library from the robot.
    *
    * @return Model instance.
    *
