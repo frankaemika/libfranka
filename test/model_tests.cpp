@@ -62,18 +62,22 @@ struct Model : public ::testing::Test {
     std::ifstream model_library_stream(
         FRANKA_TEST_BINARY_DIR + "/libfcimodels.so"s,
         std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
-    buffer.resize(model_library_stream.tellg());
+    buffer_.resize(model_library_stream.tellg());
     model_library_stream.seekg(0, std::ios::beg);
-    if (!model_library_stream.read(buffer.data(), buffer.size())) {
+    if (!model_library_stream.read(buffer_.data(), buffer_.size())) {
       throw std::runtime_error("Model test: Cannot load mock libfcimodels.so");
     }
 
     server
         .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
-          server.handleCommand<LoadModelLibrary>(tcp_socket, [&](const LoadModelLibrary::Request&) {
-            return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
-          });
-          tcp_socket.sendBytes(buffer.data(), buffer.size());
+          CommandHeader header;
+          server.receiveRequest<LoadModelLibrary>(tcp_socket, &header);
+          server.sendResponse<LoadModelLibrary>(
+              tcp_socket,
+              CommandHeader(Command::kLoadModelLibrary, header.command_id,
+                            sizeof(CommandMessage<LoadModelLibrary::Response>) + buffer_.size()),
+              LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess));
+          tcp_socket.sendBytes(buffer_.data(), buffer_.size());
         })
         .spinOnce();
 
@@ -84,7 +88,7 @@ struct Model : public ::testing::Test {
   franka::Robot robot{"127.0.0.1"};
 
  private:
-  std::vector<char> buffer;
+  std::vector<char> buffer_;
 };
 
 TEST(InvalidModel, ThrowsIfNoModelReceived) {
@@ -93,7 +97,7 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
 
   server
       .waitForCommand<LoadModelLibrary>([&](const LoadModelLibrary::Request&) {
-        return LoadModelLibrary::Response(LoadModelLibrary::Status::kError, 0);
+        return LoadModelLibrary::Response(LoadModelLibrary::Status::kError);
       })
       .spinOnce();
 
@@ -107,9 +111,13 @@ TEST(InvalidModel, ThrowsIfInvalidModelReceived) {
   std::array<char, 10> buffer{};
   server
       .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
-        server.handleCommand<LoadModelLibrary>(tcp_socket, [&](const LoadModelLibrary::Request&) {
-          return LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess, buffer.size());
-        });
+        CommandHeader header;
+        server.receiveRequest<LoadModelLibrary>(tcp_socket, &header);
+        server.sendResponse<LoadModelLibrary>(
+            tcp_socket,
+            CommandHeader(Command::kLoadModelLibrary, header.command_id,
+                          sizeof(CommandMessage<LoadModelLibrary::Response>) + buffer.size()),
+            LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess));
         tcp_socket.sendBytes(buffer.data(), buffer.size());
       })
       .spinOnce();
