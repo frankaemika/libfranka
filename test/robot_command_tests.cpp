@@ -20,7 +20,6 @@ using research_interface::robot::LoadModelLibrary;
 using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
-using research_interface::robot::SetControllerMode;
 using research_interface::robot::SetEEToK;
 using research_interface::robot::SetFToEE;
 using research_interface::robot::SetGuidingMode;
@@ -63,12 +62,6 @@ template <>
 bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
                                          const GetCartesianLimit::Request& request_two) {
   return request_one.id == request_two.id;
-}
-
-template <>
-bool Command<SetControllerMode>::compare(const SetControllerMode::Request& request_one,
-                                         const SetControllerMode::Request& request_two) {
-  return request_one.mode == request_two.mode;
 }
 
 template <>
@@ -143,11 +136,6 @@ template <>
 GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
   int32_t limit_id = 3;
   return GetCartesianLimit::Request(limit_id);
-}
-
-template <>
-SetControllerMode::Request Command<SetControllerMode>::getExpected() {
-  return SetControllerMode::Request(SetControllerMode::ControllerMode::kJointImpedance);
 }
 
 template <>
@@ -232,7 +220,6 @@ GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
 }
 
 using CommandTypes = ::testing::Types<GetCartesianLimit,
-                                      SetControllerMode,
                                       SetCollisionBehavior,
                                       SetJointImpedance,
                                       SetCartesianImpedance,

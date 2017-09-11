@@ -81,36 +81,6 @@ TEST(Robot, CanReadRobotStateAfterInstanceMove) {
   robot.read([&](const RobotState& robot_state) { return callback.invoke(robot_state); });
 }
 
-TEST(Robot, CanSetIdleControllerAndReadRobotState) {
-  struct MockCallback {
-    MOCK_METHOD1(invoke, bool(const RobotState&));
-  };
-
-  RobotMockServer server;
-  Robot robot("127.0.0.1");
-
-  server.sendEmptyState<research_interface::robot::RobotState>()
-      .spinOnce()
-      .waitForCommand<research_interface::robot::SetControllerMode>(
-          [this](const research_interface::robot::SetControllerMode::Request& request)
-              -> research_interface::robot::SetControllerMode::Response {
-                EXPECT_EQ(
-                    request.mode,
-                    research_interface::robot::SetControllerMode::ControllerMode::kJointImpedance);
-                return research_interface::robot::SetControllerMode::Response(
-                    research_interface::robot::SetControllerMode::Status::kSuccess);
-              })
-      .spinOnce();
-
-  MockCallback callback;
-  EXPECT_CALL(callback, invoke(_));
-
-  robot.control(ControllerMode::kJointImpedance, [&](const RobotState& robot_state) -> bool {
-    callback.invoke(robot_state);
-    return false;
-  });
-}
-
 TEST(Robot, CanControlRobot) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
