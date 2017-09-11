@@ -7,7 +7,7 @@
 
 /**
  * @file gripper_state.h
- * Contains the GripperState struct.
+ * Contains the franka::GripperState type.
  */
 
 namespace franka {

@@ -5,7 +5,7 @@
 
 /**
  * @file errors.h
- * Contains the Error struct.
+ * Contains the franka::Errors type.
  */
 
 namespace franka {

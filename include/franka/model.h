@@ -8,7 +8,7 @@
 
 /**
  * @file model.h
- * Contains the Model class and the Joint enum.
+ * Contains model library types.
  */
 
 namespace franka {

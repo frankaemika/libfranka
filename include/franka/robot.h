@@ -12,7 +12,7 @@
 
 /**
  * @file robot.h
- * Contains the Robot class.
+ * Contains the franka::Robot type.
  */
 
 namespace franka {

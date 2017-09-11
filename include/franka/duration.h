@@ -4,6 +4,11 @@
 #include <cstdint>
 #include <ratio>
 
+/**
+ * @file gripper.h
+ * Contains the franka::Duration type.
+ */
+
 namespace franka {
 
 /**

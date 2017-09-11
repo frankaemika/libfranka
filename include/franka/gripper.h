@@ -8,7 +8,7 @@
 
 /**
  * @file gripper.h
- * Contains the Gripper class.
+ * Contains the franka::Gripper type.
  */
 
 namespace franka {

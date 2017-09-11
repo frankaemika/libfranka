@@ -8,7 +8,7 @@
 
 /**
  * @file robot_state.h
- * Contains the RobotState struct.
+ * Contains the franka::RobotState types.
  */
 
 namespace franka {
