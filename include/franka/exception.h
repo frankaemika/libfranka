@@ -25,7 +25,7 @@ struct ModelException : public Exception {
 };
 
 /**
- * NetworkException is thrown if no connection to the robot can be established,
+ * NetworkException is thrown if a connection to the robot cannot be established,
  * or when a timeout occurs.
  */
 struct NetworkException : public Exception {

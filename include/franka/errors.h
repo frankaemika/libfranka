@@ -11,7 +11,7 @@
 namespace franka {
 
 /**
- * Enumerates errors than can occur while controlling a franka::Robot.
+ * Enumerates errors that can occur while controlling a franka::Robot.
  */
 struct Errors {
  private:

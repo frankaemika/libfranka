@@ -17,7 +17,7 @@ class Network;
 
 /**
  * Maintains a network connection to the gripper, provides the current gripper state,
- * and allows to execute commands.
+ * and allows the execution of commands.
  *
  * @note
  * The members of this class are threadsafe.
