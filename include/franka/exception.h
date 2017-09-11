@@ -25,8 +25,8 @@ struct ModelException : public Exception {
 };
 
 /**
- * NetworkException is thrown if a connection to the robot cannot be established,
- * or when a timeout occurs.
+ * NetworkException is thrown if a connection to the robot cannot be established, or when a timeout
+ * occurs.
  */
 struct NetworkException : public Exception {
   using Exception::Exception;
@@ -40,16 +40,14 @@ struct ProtocolException : public Exception {
 };
 
 /**
- * IncompatibleVersionException is thrown if the robot does not support this
- * version of libfranka.
+ * IncompatibleVersionException is thrown if the robot does not support this version of libfranka.
  */
 struct IncompatibleVersionException : public Exception {
   using Exception::Exception;
 };
 
 /**
- * ControlException is thrown if an error occurs during motion generation
- * or torque control.
+ * ControlException is thrown if an error occurs during motion generation or torque control.
  */
 struct ControlException : public Exception {
   using Exception::Exception;

@@ -158,8 +158,8 @@ TEST(Robot, CanControlRobot) {
   }
 
   // Receive the robot commands sent after Stop has been returned from the motion loop.
-  // These will be sent at least once and until Robot received the robot state showing the
-  // stopped motion.
+  // These will be sent at least once and until Robot received the robot state showing the stopped
+  // motion.
   server
       .onReceiveRobotCommand([&](const robot::RobotCommand& robot_command) {
         EXPECT_TRUE(robot_command.motion.motion_generation_finished);

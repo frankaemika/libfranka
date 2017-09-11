@@ -19,12 +19,11 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    // Set additional parameters always before the control loop, NEVER in the
-    // control loop
-    // Set the joint impedance:
+    // Set additional parameters always before the control loop, NEVER in the control loop!
+    // Set the joint impedance.
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
-    // Set the collision behavior:
+    // Set the collision behavior.
     std::array<double, 7> lower_torque_thresholds_nominal{
         {25.0, 25.0, 22.0, 20.0, 19.0, 17.0, 14.}};
     std::array<double, 7> upper_torque_thresholds_nominal{

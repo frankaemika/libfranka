@@ -227,8 +227,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallback) {
   ControllerCommand control_command{};
   EXPECT_TRUE(loop.spinControl(robot_state, duration, &control_command));
 
-  // Use ASSERT to abort on failure because loop() in next line
-  // would block otherwise
+  // Use ASSERT to abort on failure because loop() in next line would block otherwise.
   MotionGeneratorCommand motion_command{};
 
   ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
@@ -255,8 +254,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingMotionCallbackAndControllerMode) {
       robot, ControllerMode::kJointImpedance,
       std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
 
-  // Use ASSERT to abort on failure because loop() in next line
-  // would block otherwise
+  // Use ASSERT to abort on failure because loop() in next line would block otherwise.
   MotionGeneratorCommand motion_command{};
   ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
 
@@ -287,8 +285,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithStoppingControlCallback) {
   MotionGeneratorCommand motion_command{};
   EXPECT_TRUE(loop.spinMotion(robot_state, duration, &motion_command));
 
-  // Use ASSERT to abort on failure because loop() in next line
-  // would block otherwise
+  // Use ASSERT to abort on failure because loop() in next line would block otherwise.
   ControllerCommand control_command{};
 
   ASSERT_FALSE(loop.spinControl(robot_state, duration, &control_command));

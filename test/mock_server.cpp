@@ -20,7 +20,7 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
 
   cv_.wait(lock, [this] { return initialized_; });
   lock.unlock();
-  spinOnce();  // spin to accept connections immediately
+  spinOnce();  // Spin to accept connections immediately.
 }
 
 template <typename C>

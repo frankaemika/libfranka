@@ -46,16 +46,15 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    // Set additional parameters always before the control loop, NEVER in the
-    // control loop
-    // Set collision behavior:
+    // Set additional parameters always before the control loop, NEVER in the control loop!
+    // Set collision behavior.
     robot.setCollisionBehavior(
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    // Set the joint impedance:
+    // Set the joint impedance.
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;

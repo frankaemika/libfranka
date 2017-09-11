@@ -26,8 +26,7 @@ enum class RealtimeConfig { kEnforce, kIgnore };
 /**
  * Helper type for control and motion generation loops.
  *
- * Used to determine whether to terminate a loop after the control callback
- * has returned.
+ * Used to determine whether to terminate a loop after the control callback has returned.
  * @see @em franka::Stop variable in control_types.h
  */
 class IsStop {
@@ -154,18 +153,18 @@ class CartesianPose : public IsStop {
    * @throw ControlException if cartesian_pose is not a valid vectorized
    *                         homogeneous transformation matrix (column-major).
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation
-   * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
-   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to
+   * base frame \f$O\f$.
    */
   CartesianPose(const std::array<double, 16>& cartesian_pose);
 
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation
-   * matrix \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
-   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to
+   * base frame \f$O\f$.
    *
    * @throw ControlException if cartesian_pose is not a valid vectorized
    *                         homogeneous transformation matrix (column-major).
@@ -173,8 +172,8 @@ class CartesianPose : public IsStop {
   CartesianPose(std::initializer_list<double> cartesian_pose);
 
   /**
-   * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that
-   * transforms from the end-effector frame \f$EE\f$ to base frame \f$O\f$
+   * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
+   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -187,11 +186,10 @@ class CartesianPose : public IsStop {
   /**
    * Checks a a homogeneous transformation for validity.
    *
-   * @param[in] transform Homogeneous transformation to be checked,
-   * passed as column major array.
+   * @param[in] transform Homogeneous transformation to be checked, passed as column major array.
    *
-   * @return True if transformation has ortho-normal rotation matrix,
-   * the last row is [0 0 0 1] and the array defines a column major matrix.
+   * @return True if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
+   * the array defines a column major matrix.
    */
   static bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept;
 };
@@ -204,26 +202,24 @@ class CartesianVelocities : public IsStop {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame
-   * {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in
-   * [rad/s], omegaz in [rad/s]}.
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   CartesianVelocities(const std::array<double, 6>& cartesian_velocities);
 
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame
-   * {dx in [m/s], dx in [m/s], dz in [m/s], omegax in [rad/s], omegay in
-   * [rad/s], omegaz in [rad/s]}.
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    *
    * @throw ControlException Invalid number of elements in cartesian_pose.
    */
   CartesianVelocities(std::initializer_list<double> cartesian_velocities);
 
   /**
-   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in
-   * [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}
+   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in
+   * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -232,8 +228,8 @@ class CartesianVelocities : public IsStop {
 };
 
 /**
- * A static instance of this class @em franka::Stop is used to signal the
- * termination of motion generation and control loops.
+ * A static instance of this class @em franka::Stop is used to signal the termination of motion
+ * generation and control loops.
  *
  * @see Robot::control
  */
