@@ -13,9 +13,6 @@ class RobotControl {
  public:
   virtual ~RobotControl() = default;
 
-  virtual void startController() = 0;
-  virtual void stopController() = 0;
-
   virtual uint32_t startMotion(
       research_interface::robot::Move::ControllerMode controller_mode,
       research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
@@ -27,7 +24,7 @@ class RobotControl {
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
       const research_interface::robot::ControllerCommand* control_command = nullptr) = 0;
 
-  virtual void throwOnMotionError(const RobotState& robot_state, const uint32_t* motion_id) = 0;
+  virtual void throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) = 0;
 
   virtual RealtimeConfig realtimeConfig() const noexcept = 0;
 };

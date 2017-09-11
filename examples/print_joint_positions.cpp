@@ -30,9 +30,9 @@ int main(int argc, char** argv) {
     franka::RobotState state = robot.readOnce();
 
     franka::Model model(robot.loadModel());
-    for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-         joint++) {
-      std::cout << model.jointPose(joint, state) << std::endl;
+    for (franka::Frame frame = franka::Frame::kJoint1; frame <= franka::Frame::kEndEffector;
+         frame++) {
+      std::cout << model.pose(frame, state) << std::endl;
     }
   } catch (franka::Exception const& e) {
     std::cout << e.what() << std::endl;

@@ -23,8 +23,11 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
     case (RobotMode::kUserStopped):
       ostream << "User stopped";
       break;
-    case (RobotMode::kReady):
-      ostream << "Ready";
+    case (RobotMode::kIdle):
+      ostream << "Idle";
+      break;
+    case (RobotMode::kMove):
+      ostream << "Move";
       break;
     case (RobotMode::kGuiding):
       ostream << "Guiding";

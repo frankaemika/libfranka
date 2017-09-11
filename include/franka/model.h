@@ -82,16 +82,40 @@ class Model {
   ~Model() noexcept;
 
   /**
-   * Gets the 4x4 pose matrix for the given joint in world coordinates.
+   * Gets the 4x4 pose matrix for the given frame in base frame.
    *
    * The pose is represented as a 4x4 matrix in column-major format.
    *
-   * @param[in] joint Number of the desired joint.
+   * @param[in] frame The desired frame.
    * @param[in] robot_state State from which the pose should be calculated.
    *
    * @return Vectorized 4x4 pose matrix, column-major.
    */
-  std::array<double, 16> jointPose(Frame joint, const franka::RobotState& robot_state) const;
+  std::array<double, 16> pose(Frame frame, const franka::RobotState& robot_state) const;
+
+  /**
+   * Gets the 6x7 Jacobian for the given frame, relative to that frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format.
+   *
+   * @param[in] frame The desired frame.
+   * @param[in] robot_state State from which the pose should be calculated.
+   *
+   * @return Vectorized 6x7 Jacobian, column-major.
+   */
+  std::array<double, 42> bodyJacobian(Frame frame, const franka::RobotState& robot_state) const;
+
+  /**
+   * Gets the 6x7 Jacobian for the given joint relative to the base frame.
+   *
+   * The Jacobian is represented as a 6x7 matrix in column-major format.
+   *
+   * @param[in] frame The desired frame.
+   * @param[in] robot_state State from which the pose should be calculated.
+   *
+   * @return Vectorized 6x7 Jacobian, column-major.
+   */
+  std::array<double, 42> zeroJacobian(Frame frame, const franka::RobotState& robot_state) const;
 
   /**
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.

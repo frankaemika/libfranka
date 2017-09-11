@@ -80,7 +80,7 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
         "is running.");
   }
 
-  ControlLoop loop(*impl_, control_callback);
+  ControlLoop loop(*impl_, std::move(control_callback));
   loop();
 }
 

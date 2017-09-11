@@ -137,12 +137,14 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
 
   franka::RobotMode expected_robot_mode;
   switch (expected.robot_mode) {
-    case research_interface::robot::RobotMode::kEmergency:
-      expected_robot_mode = franka::RobotMode::kUserStopped;
+    case research_interface::robot::RobotMode::kOther:
+      expected_robot_mode = franka::RobotMode::kOther;
       break;
     case research_interface::robot::RobotMode::kIdle:
+      expected_robot_mode = franka::RobotMode::kIdle;
+      break;
     case research_interface::robot::RobotMode::kMove:
-      expected_robot_mode = franka::RobotMode::kReady;
+      expected_robot_mode = franka::RobotMode::kMove;
       break;
     case research_interface::robot::RobotMode::kGuiding:
       expected_robot_mode = franka::RobotMode::kGuiding;
@@ -150,14 +152,11 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
     case research_interface::robot::RobotMode::kReflex:
       expected_robot_mode = franka::RobotMode::kReflex;
       break;
+    case research_interface::robot::RobotMode::kUserStopped:
+      expected_robot_mode = franka::RobotMode::kUserStopped;
+      break;
     case research_interface::robot::RobotMode::kAutomaticErrorRecovery:
       expected_robot_mode = franka::RobotMode::kAutomaticErrorRecovery;
-      break;
-    case research_interface::robot::RobotMode::kEmergency2:
-    case research_interface::robot::RobotMode::kForce:
-    case research_interface::robot::RobotMode::kMoveForce:
-    case research_interface::robot::RobotMode::kRcuInputError:
-      expected_robot_mode = franka::RobotMode::kOther;
       break;
   }
   EXPECT_EQ(expected_robot_mode, actual.robot_mode);
@@ -337,9 +336,6 @@ void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) 
   for (double& element : robot_command.motion.dq_d) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.ddq_d) {
-    element = randomDouble();
-  }
   for (double& element : robot_command.motion.O_T_EE_d) {
     element = randomDouble();
   }
@@ -362,7 +358,6 @@ void testMotionGeneratorCommandsAreEqual(
     const research_interface::robot::MotionGeneratorCommand& actual) {
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
-  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
@@ -460,7 +455,20 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
              rhs.cartesian_motion_generator_elbow_sign_inconsistent &&
          lhs.cartesian_motion_generator_start_elbow_invalid ==
              rhs.cartesian_motion_generator_start_elbow_invalid &&
+         lhs.cartesian_motion_generator_joint_position_limits_violation ==
+             rhs.cartesian_motion_generator_joint_position_limits_violation &&
+         lhs.cartesian_motion_generator_joint_velocity_limits_violation ==
+             rhs.cartesian_motion_generator_joint_velocity_limits_violation &&
+         lhs.cartesian_motion_generator_joint_velocity_discontinuity ==
+             rhs.cartesian_motion_generator_joint_velocity_discontinuity &&
+         lhs.cartesian_motion_generator_joint_acceleration_discontinuity ==
+             rhs.cartesian_motion_generator_joint_acceleration_discontinuity &&
+         lhs.cartesian_position_motion_generator_invalid_frame ==
+             rhs.cartesian_position_motion_generator_invalid_frame &&
          lhs.force_controller_desired_force_tolerance_violation ==
-             rhs.force_controller_desired_force_tolerance_violation;
+             rhs.force_controller_desired_force_tolerance_violation &&
+         lhs.start_elbow_sign_inconsistent == rhs.start_elbow_sign_inconsistent &&
+         lhs.communication_constraints_violation == rhs.communication_constraints_violation &&
+         lhs.power_limit_violation == rhs.power_limit_violation;
 }
 }

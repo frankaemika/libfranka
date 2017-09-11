@@ -85,7 +85,7 @@ TEST(Robot, CanControlRobot) {
   RobotMockServer server;
   Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
 
-  Move::Header move_header;
+  uint32_t move_id;
 
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
@@ -119,11 +119,11 @@ TEST(Robot, CanControlRobot) {
                   robot_state.robot_mode = robot::RobotMode::kIdle;
                   stopped_message_id = robot_state.message_id;
                 })
-                .sendResponse<Move>(move_header,
+                .sendResponse<Move>(move_id,
                                     []() { return Move::Response(Move::Status::kSuccess); });
             return Move::Response(Move::Status::kMotionStarted);
           },
-          &move_header)
+          &move_id)
       .spinOnce();
 
   JointPositions joint_positions{{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}};

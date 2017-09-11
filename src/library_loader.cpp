@@ -11,11 +11,11 @@ namespace franka {
 LibraryLoader::LibraryLoader(const std::string& filepath) try {
   library_.load(filepath);
 } catch (const Poco::LibraryAlreadyLoadedException& e) {
-  throw ModelException("libfranka: model library already loaded"s);
+  throw ModelException("libfranka: Model library already loaded"s);
 } catch (const Poco::LibraryLoadException& e) {
-  throw ModelException("libfranka: cannot load model library: "s + e.what());
+  throw ModelException("libfranka: Cannot load model library: "s + e.what());
 } catch (const Poco::Exception& e) {
-  throw ModelException("libfranka: error while loading library: "s + e.what());
+  throw ModelException("libfranka: Error while loading library: "s + e.what());
 }
 
 LibraryLoader::~LibraryLoader() {
@@ -28,9 +28,9 @@ LibraryLoader::~LibraryLoader() {
 void* LibraryLoader::getSymbol(const std::string& symbol_name) try {
   return library_.getSymbol(symbol_name);
 } catch (const Poco::NotFoundException& e) {
-  throw ModelException("libfranka: symbol cannot be found: "s + e.what());
+  throw ModelException("libfranka: Symbol cannot be found: "s + e.what());
 } catch (const Poco::Exception& e) {
-  throw ModelException("libfranka: error while fetching symbols: "s + e.what());
+  throw ModelException("libfranka: Error while fetching symbols: "s + e.what());
 }
 
 }  // namespace franka
