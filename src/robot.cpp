@@ -76,7 +76,7 @@ void Robot::control(
   }
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                            std::move(motion_generator_callback));
+                                    std::move(motion_generator_callback));
   loop();
 }
 
@@ -91,7 +91,7 @@ void Robot::control(
   }
 
   ControlLoop<CartesianPose> loop(*impl_, std::move(control_callback),
-                                          std::move(motion_generator_callback));
+                                  std::move(motion_generator_callback));
   loop();
 }
 
@@ -106,7 +106,7 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   }
 
   ControlLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
-                                                std::move(motion_generator_callback));
+                                        std::move(motion_generator_callback));
   loop();
 }
 
@@ -120,8 +120,7 @@ void Robot::control(
         "is running.");
   }
 
-  ControlLoop<JointPositions> loop(*impl_, controller_mode,
-                                           std::move(motion_generator_callback));
+  ControlLoop<JointPositions> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
@@ -135,8 +134,7 @@ void Robot::control(
         "is running.");
   }
 
-  ControlLoop<JointVelocities> loop(*impl_, controller_mode,
-                                            std::move(motion_generator_callback));
+  ControlLoop<JointVelocities> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
@@ -150,14 +148,13 @@ void Robot::control(
         "is running.");
   }
 
-  ControlLoop<CartesianPose> loop(*impl_, controller_mode,
-                                          std::move(motion_generator_callback));
+  ControlLoop<CartesianPose> loop(*impl_, controller_mode, std::move(motion_generator_callback));
   loop();
 }
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                     motion_generator_callback,
-                 ControllerMode controller_mode) {
+                        motion_generator_callback,
+                    ControllerMode controller_mode) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(

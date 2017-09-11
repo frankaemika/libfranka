@@ -272,8 +272,8 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority can not be set.
    */
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                motion_generator_callback,
-            ControllerMode controller_mode = ControllerMode::kJointImpedance);
+                   motion_generator_callback,
+               ControllerMode controller_mode = ControllerMode::kJointImpedance);
 
   /**
    * @}

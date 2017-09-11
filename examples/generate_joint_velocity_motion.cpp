@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     double omega_max = 0.2;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&,
-                          franka::Duration time_step) -> franka::JointVelocities {
+                             franka::Duration time_step) -> franka::JointVelocities {
       time += time_step.toSec();
 
       if (time > 2 * time_max) {
