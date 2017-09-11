@@ -195,9 +195,6 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   while (!read_started) {
     std::this_thread::yield();
   }
-  EXPECT_THROW(
-      robot.control(ControllerMode::kJointImpedance, std::function<bool(const RobotState&)>()),
-      InvalidOperationException);
   EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>()),
                InvalidOperationException);
   EXPECT_THROW(robot.control(std::function<Torques(const RobotState&, Duration)>(),

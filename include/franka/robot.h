@@ -90,27 +90,6 @@ class Robot {
    */
 
   /**
-   * Changes the type of controller used for idle mode and starts a loop for reading the current
-   * robot state afterwards.
-   *
-   * The robot is in idle mode when holding the current position, i.e. when no motion
-   * is being performed and guiding mode is not active.
-   *
-   * Cannot be executed while another control or motion generator loop is active.
-   *
-   * @param[in] controller_mode Controller mode.
-   * @param[in] read_callback Callback function for robot state reading.
-   *
-   * @throw ControlException if controller changes, e.g. user stop closed.
-   * @throw CommandException if an error during setting the controller mode occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw ProtocolException if received data has invalid format.
-   */
-  void control(ControllerMode controller_mode,
-               std::function<bool(const RobotState&)> read_callback);
-
-  /**
    * Starts a control loop for torque control.
    *
    * Sets realtime priority for the current thread.

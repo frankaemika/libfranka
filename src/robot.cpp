@@ -36,42 +36,6 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
   return impl_->serverVersion();
 }
 
-void Robot::control(ControllerMode controller_mode,
-                    std::function<bool(const RobotState&)> read_callback) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
-
-  research_interface::robot::SetControllerMode::ControllerMode mode;
-  research_interface::robot::ControllerMode state_controller_mode;
-  switch (controller_mode) {
-    case ControllerMode::kJointImpedance:
-      mode = decltype(mode)::kJointImpedance;
-      state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
-      break;
-    case ControllerMode::kCartesianImpedance:
-      mode = decltype(mode)::kCartesianImpedance;
-      state_controller_mode = decltype(state_controller_mode)::kCartesianImpedance;
-      break;
-    default:
-      throw std::invalid_argument("Invalid controller mode given.");
-  }
-  impl_->executeCommand<research_interface::robot::SetControllerMode>(mode);
-
-  while (true) {
-    research_interface::robot::RobotState robot_state = impl_->updateWithoutConversion();
-    if (robot_state.controller_mode != state_controller_mode) {
-      throw ControlException("Controller mode changed.");
-    }
-    if (!read_callback(convertRobotState(robot_state))) {
-      break;
-    }
-  }
-}
-
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
