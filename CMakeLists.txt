@@ -39,7 +39,7 @@ if(BUILD_COVERAGE)
 endif()
 
 ## Submodules
-add_subdirectory(lib/research-interface-common)
+add_subdirectory(common)
 
 ## Library
 add_library(franka SHARED
@@ -72,7 +72,7 @@ target_include_directories(franka PUBLIC
 )
 
 target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation Threads::Threads)
-target_link_libraries(franka PRIVATE research-interface-common)
+target_link_libraries(franka PRIVATE libfranka-common)
 
 ## Installation
 include(GNUInstallDirs)
@@ -166,13 +166,13 @@ include(CPack)
 file(GLOB_RECURSE SOURCES
   src/*.cpp
   examples/*.cpp
-  lib/research-interface-common/*.cpp
+  common/*.cpp
 )
 file(GLOB_RECURSE HEADERS
   include/*.h
   src/*.h
   examples/*.h
-  lib/research-interface-common/*.h
+  common/*.h
 )
 file(GLOB_RECURSE TEST_FILES
   test/*.h
