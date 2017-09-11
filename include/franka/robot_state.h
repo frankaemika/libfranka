@@ -192,6 +192,15 @@ struct RobotState {
   Errors last_motion_errors{};
 
   /**
+   * Percentage of the last 100 control commands that were successfully received by the robot.
+   *
+   * Shows a value of zero if no control or motion generator loop is currently running.
+   *
+   * Range: \f$[0, 1]\f$.
+   */
+  double control_command_success_rate{};
+
+  /**
    * Current robot mode.
    */
   RobotMode robot_mode = RobotMode::kUserStopped;
