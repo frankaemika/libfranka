@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     size_t index = 0;
     robot.control([&](const franka::RobotState& robot_state,
                       franka::Duration time_step) -> franka::JointPositions {
-      index += time_step.ms();
+      index += time_step.toMSec();
 
       if (index >= samples.size()) {
         return franka::Stop;

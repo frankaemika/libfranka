@@ -169,12 +169,6 @@ uint32_t Robot::Impl::startMotion(
 
   research_interface::robot::ControllerMode state_controller_mode;
   switch (controller_mode) {
-    case decltype(controller_mode)::kMotorPD:
-      state_controller_mode = decltype(state_controller_mode)::kMotorPD;
-      break;
-    case decltype(controller_mode)::kJointPosition:
-      state_controller_mode = decltype(state_controller_mode)::kJointPosition;
-      break;
     case decltype(controller_mode)::kJointImpedance:
       state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
       break;

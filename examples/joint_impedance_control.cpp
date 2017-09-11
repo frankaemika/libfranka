@@ -121,23 +121,23 @@ int main(int argc, char** argv) {
         cartesian_pose_callback = [=, &time, &vel_current, &running, &angle](
             const franka::RobotState& /*state*/, franka::Duration period) -> franka::CartesianPose {
       // Update time
-      time += period.s();
+      time += period.toSec();
       if (time > run_time + acceleration_time) {
         running = false;
         return franka::Stop;
       }
       // Compute Cartesian velocity
       if (vel_current < vel_max && time < run_time) {
-        vel_current += period.s() * std::fabs(vel_max / acceleration_time);
+        vel_current += period.toSec() * std::fabs(vel_max / acceleration_time);
       }
       if (vel_current > 0.0 && time > run_time) {
-        vel_current -= period.s() * std::fabs(vel_max / acceleration_time);
+        vel_current -= period.toSec() * std::fabs(vel_max / acceleration_time);
       }
       vel_current = std::fmax(vel_current, 0.0);
       vel_current = std::fmin(vel_current, vel_max);
 
       // Compute new angle for our circular trajectory
-      angle += period.s() * vel_current / std::fabs(radius);
+      angle += period.toSec() * vel_current / std::fabs(radius);
       if (angle > 2 * M_PI) {
         angle -= 2 * M_PI;
       }
@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
     };
 
     // Start real-time control loop
-    robot.control(cartesian_pose_callback, impedance_control_callback);
+    robot.control(impedance_control_callback, cartesian_pose_callback);
 
   } catch (const franka::Exception& ex) {
     running = false;
