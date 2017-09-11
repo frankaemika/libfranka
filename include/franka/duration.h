@@ -4,6 +4,11 @@
 #include <cstdint>
 #include <ratio>
 
+/**
+ * @file duration.h
+ * Contains the franka::Duration type.
+ */
+
 namespace franka {
 
 /**
@@ -52,14 +57,14 @@ class Duration {
    *
    * @return Duration in \f$[s]\f$.
    */
-  double s() const noexcept;
+  double toSec() const noexcept;
 
   /**
    * Returns the stored duration in \f$[ms]\f$.
    *
    * @return Duration in \f$[ms]\f$.
    */
-  uint64_t ms() const noexcept;
+  uint64_t toMSec() const noexcept;
 
   /**
    * @name Arithmetic operators

@@ -75,7 +75,8 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   }
   EXPECT_FALSE(actual.current_errors);
   EXPECT_FALSE(actual.last_motion_errors);
-  EXPECT_EQ(0u, actual.time.ms());
+  EXPECT_EQ(0u, actual.time.toMSec());
+  EXPECT_EQ(0.0, actual.control_command_success_rate);
 }
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
@@ -103,6 +104,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
   EXPECT_EQ(expected.last_motion_errors, actual.last_motion_errors);
+  EXPECT_EQ(expected.control_command_success_rate, actual.control_command_success_rate);
   EXPECT_EQ(expected.robot_mode, actual.robot_mode);
   EXPECT_EQ(expected.time, actual.time);
 }
@@ -133,7 +135,8 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
   EXPECT_EQ(franka::Errors(expected.reflex_reason), actual.last_motion_errors);
-  EXPECT_EQ(expected.message_id, actual.time.ms());
+  EXPECT_EQ(expected.message_id, actual.time.toMSec());
+  EXPECT_EQ(expected.control_command_success_rate, actual.control_command_success_rate);
 
   franka::RobotMode expected_robot_mode;
   switch (expected.robot_mode) {
@@ -171,184 +174,184 @@ bool randomBool() {
 }
 
 void randomRobotState(franka::RobotState& robot_state) {
-  for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
-    robot_state.O_T_EE[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
-    robot_state.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
-    robot_state.EE_T_K[i] = randomDouble();
+  for (double& element : robot_state.EE_T_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
-    robot_state.F_T_EE[i] = randomDouble();
+  for (double& element : robot_state.F_T_EE) {
+    element = randomDouble();
   }
   robot_state.m_load = randomDouble();
-  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
-    robot_state.F_x_Cload[i] = randomDouble();
+  for (double& element : robot_state.F_x_Cload) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
-    robot_state.I_load[i] = randomDouble();
+  for (double& element : robot_state.I_load) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow.size(); i++) {
-    robot_state.elbow[i] = randomDouble();
+  for (double& element : robot_state.elbow) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
-    robot_state.elbow_d[i] = randomDouble();
+  for (double& element : robot_state.elbow_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
-    robot_state.tau_J[i] = randomDouble();
+  for (double& element : robot_state.tau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dtau_J.size(); i++) {
-    robot_state.dtau_J[i] = randomDouble();
+  for (double& element : robot_state.dtau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q.size(); i++) {
-    robot_state.q[i] = randomDouble();
+  for (double& element : robot_state.q) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq.size(); i++) {
-    robot_state.dq[i] = randomDouble();
+  for (double& element : robot_state.dq) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q_d.size(); i++) {
-    robot_state.q_d[i] = randomDouble();
+  for (double& element : robot_state.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
-    robot_state.dq_d[i] = randomDouble();
+  for (double& element : robot_state.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
-    robot_state.joint_contact[i] = randomDouble();
+  for (double& element : robot_state.joint_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_contact.size(); i++) {
-    robot_state.cartesian_contact[i] = randomDouble();
+  for (double& element : robot_state.cartesian_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_collision.size(); i++) {
-    robot_state.joint_collision[i] = randomDouble();
+  for (double& element : robot_state.joint_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_collision.size(); i++) {
-    robot_state.cartesian_collision[i] = randomDouble();
+  for (double& element : robot_state.cartesian_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
-    robot_state.tau_ext_hat_filtered[i] = randomDouble();
+  for (double& element : robot_state.tau_ext_hat_filtered) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_F_ext_hat_K.size(); i++) {
-    robot_state.O_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.O_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
-    robot_state.K_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
   }
-  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors;
-  for (size_t i = 0; i < errors.size(); i++) {
-    errors[i] = randomBool();
+  std::array<bool, sizeof(research_interface::robot::RobotState::errors)> errors{};
+  for (bool& error : errors) {
+    error = randomBool();
   }
   robot_state.current_errors = franka::Errors(errors);
-  for (size_t i = 0; i < errors.size(); i++) {
-    errors[i] = randomBool();
+  for (bool& error : errors) {
+    error = randomBool();
   }
   robot_state.last_motion_errors = franka::Errors(errors);
-
+  robot_state.control_command_success_rate = randomDouble();
   robot_state.time = franka::Duration(static_cast<uint64_t>(std::rand()));
 }
 
 void randomRobotState(research_interface::robot::RobotState& robot_state) {
   // Reset to all-zeros first
   robot_state = research_interface::robot::RobotState();
-  for (size_t i = 0; i < robot_state.O_T_EE.size(); i++) {
-    robot_state.O_T_EE[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_T_EE_d.size(); i++) {
-    robot_state.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_state.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.EE_T_K.size(); i++) {
-    robot_state.EE_T_K[i] = randomDouble();
+  for (double& element : robot_state.EE_T_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.F_T_EE.size(); i++) {
-    robot_state.F_T_EE[i] = randomDouble();
+  for (double& element : robot_state.F_T_EE) {
+    element = randomDouble();
   }
   robot_state.m_load = randomDouble();
-  for (size_t i = 0; i < robot_state.F_x_Cload.size(); i++) {
-    robot_state.F_x_Cload[i] = randomDouble();
+  for (double& element : robot_state.F_x_Cload) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.I_load.size(); i++) {
-    robot_state.I_load[i] = randomDouble();
+  for (double& element : robot_state.I_load) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow.size(); i++) {
-    robot_state.elbow[i] = randomDouble();
+  for (double& element : robot_state.elbow) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.elbow_d.size(); i++) {
-    robot_state.elbow_d[i] = randomDouble();
+  for (double& element : robot_state.elbow_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_J.size(); i++) {
-    robot_state.tau_J[i] = randomDouble();
+  for (double& element : robot_state.tau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dtau_J.size(); i++) {
-    robot_state.dtau_J[i] = randomDouble();
+  for (double& element : robot_state.dtau_J) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q.size(); i++) {
-    robot_state.q[i] = randomDouble();
+  for (double& element : robot_state.q) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq.size(); i++) {
-    robot_state.dq[i] = randomDouble();
+  for (double& element : robot_state.dq) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.q_d.size(); i++) {
-    robot_state.q_d[i] = randomDouble();
+  for (double& element : robot_state.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.dq_d.size(); i++) {
-    robot_state.dq_d[i] = randomDouble();
+  for (double& element : robot_state.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_contact.size(); i++) {
-    robot_state.joint_contact[i] = randomDouble();
+  for (double& element : robot_state.joint_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_contact.size(); i++) {
-    robot_state.cartesian_contact[i] = randomDouble();
+  for (double& element : robot_state.cartesian_contact) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.joint_collision.size(); i++) {
-    robot_state.joint_collision[i] = randomDouble();
+  for (double& element : robot_state.joint_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.cartesian_collision.size(); i++) {
-    robot_state.cartesian_collision[i] = randomDouble();
+  for (double& element : robot_state.cartesian_collision) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.tau_ext_hat_filtered.size(); i++) {
-    robot_state.tau_ext_hat_filtered[i] = randomDouble();
+  for (double& element : robot_state.tau_ext_hat_filtered) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.O_F_ext_hat_K.size(); i++) {
-    robot_state.O_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.O_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.K_F_ext_hat_K.size(); i++) {
-    robot_state.K_F_ext_hat_K[i] = randomDouble();
+  for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_state.errors.size(); i++) {
-    robot_state.errors[i] = randomBool();
+  for (bool& error : robot_state.errors) {
+    error = randomBool();
   }
-  for (size_t i = 0; i < robot_state.reflex_reason.size(); i++) {
-    robot_state.reflex_reason[i] = randomBool();
+  for (bool& element : robot_state.reflex_reason) {
+    element = randomBool();
   }
   robot_state.message_id = static_cast<uint32_t>(std::rand());
-
+  robot_state.control_command_success_rate = randomDouble();
   robot_state.motion_generator_mode = research_interface::robot::MotionGeneratorMode::kIdle;
-  robot_state.controller_mode = research_interface::robot::ControllerMode::kMotorPD;
+  robot_state.controller_mode = research_interface::robot::ControllerMode::kJointImpedance;
 }
 
 void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
   // Reset to all-zeros first
   robot_command = research_interface::robot::RobotCommand();
-  for (size_t i = 0; i < robot_command.motion.q_d.size(); i++) {
-    robot_command.motion.q_d[i] = randomDouble();
+  for (double& element : robot_command.motion.q_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.dq_d.size(); i++) {
-    robot_command.motion.dq_d[i] = randomDouble();
+  for (double& element : robot_command.motion.dq_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.O_T_EE_d.size(); i++) {
-    robot_command.motion.O_T_EE_d[i] = randomDouble();
+  for (double& element : robot_command.motion.O_T_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.O_dP_EE_d.size(); i++) {
-    robot_command.motion.O_dP_EE_d[i] = randomDouble();
+  for (double& element : robot_command.motion.O_dP_EE_d) {
+    element = randomDouble();
   }
-  for (size_t i = 0; i < robot_command.motion.elbow_d.size(); i++) {
-    robot_command.motion.elbow_d[i] = randomDouble();
+  for (double& element : robot_command.motion.elbow_d) {
+    element = randomDouble();
   }
   robot_command.motion.valid_elbow = true;
   robot_command.motion.motion_generation_finished = true;
-  for (size_t i = 0; i < robot_command.control.tau_J_d.size(); i++) {
-    robot_command.control.tau_J_d[i] = randomDouble();
+  for (double& element : robot_command.control.tau_J_d) {
+    element = randomDouble();
   }
   robot_command.message_id = static_cast<uint32_t>(std::rand());
 }
@@ -368,6 +371,42 @@ void testMotionGeneratorCommandsAreEqual(
 void testControllerCommandsAreEqual(const research_interface::robot::ControllerCommand& expected,
                                     const research_interface::robot::ControllerCommand& actual) {
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
+}
+
+void randomGripperState(franka::GripperState& gripper_state) {
+  gripper_state.time = franka::Duration(static_cast<uint64_t>(std::rand()));
+  gripper_state.temperature = static_cast<uint16_t>(std::rand());
+  gripper_state.is_grasped = randomBool();
+  gripper_state.max_width = randomDouble();
+  gripper_state.width = randomDouble();
+}
+
+void randomGripperState(research_interface::gripper::GripperState& gripper_state) {
+  // Reset to all-zeros first
+  gripper_state = research_interface::gripper::GripperState();
+  gripper_state.message_id = static_cast<uint32_t>(std::rand());
+  gripper_state.temperature = static_cast<uint16_t>(std::rand());
+  gripper_state.is_grasped = randomBool();
+  gripper_state.max_width = randomDouble();
+  gripper_state.width = randomDouble();
+}
+
+void testGripperStatesAreEqual(const franka::GripperState& expected,
+                               const franka::GripperState& actual) {
+  EXPECT_EQ(expected.time, actual.time);
+  EXPECT_EQ(expected.width, actual.width);
+  EXPECT_EQ(expected.max_width, actual.max_width);
+  EXPECT_EQ(expected.is_grasped, actual.is_grasped);
+  EXPECT_EQ(expected.temperature, actual.temperature);
+}
+
+void testGripperStatesAreEqual(const research_interface::gripper::GripperState& expected,
+                               const franka::GripperState& actual) {
+  EXPECT_EQ(expected.message_id, actual.time.toMSec());
+  EXPECT_EQ(expected.width, actual.width);
+  EXPECT_EQ(expected.max_width, actual.max_width);
+  EXPECT_EQ(expected.is_grasped, actual.is_grasped);
+  EXPECT_EQ(expected.temperature, actual.temperature);
 }
 
 namespace research_interface {

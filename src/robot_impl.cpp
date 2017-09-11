@@ -169,12 +169,6 @@ uint32_t Robot::Impl::startMotion(
 
   research_interface::robot::ControllerMode state_controller_mode;
   switch (controller_mode) {
-    case decltype(controller_mode)::kMotorPD:
-      state_controller_mode = decltype(state_controller_mode)::kMotorPD;
-      break;
-    case decltype(controller_mode)::kJointPosition:
-      state_controller_mode = decltype(state_controller_mode)::kJointPosition;
-      break;
     case decltype(controller_mode)::kJointImpedance:
       state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
       break;
@@ -266,6 +260,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
+  converted.control_command_success_rate = robot_state.control_command_success_rate;
   converted.time = Duration(robot_state.message_id);
 
   converted.robot_mode = RobotMode::kOther;

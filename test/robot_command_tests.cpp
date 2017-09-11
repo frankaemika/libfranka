@@ -20,13 +20,11 @@ using research_interface::robot::LoadModelLibrary;
 using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
-using research_interface::robot::SetControllerMode;
 using research_interface::robot::SetEEToK;
 using research_interface::robot::SetFToEE;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
-using research_interface::robot::SetTimeScalingFactor;
 using research_interface::robot::StopMove;
 
 template <typename T>
@@ -64,12 +62,6 @@ template <>
 bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
                                          const GetCartesianLimit::Request& request_two) {
   return request_one.id == request_two.id;
-}
-
-template <>
-bool Command<SetControllerMode>::compare(const SetControllerMode::Request& request_one,
-                                         const SetControllerMode::Request& request_two) {
-  return request_one.mode == request_two.mode;
 }
 
 template <>
@@ -128,12 +120,6 @@ bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
 }
 
 template <>
-bool Command<SetTimeScalingFactor>::compare(const SetTimeScalingFactor::Request& request_one,
-                                            const SetTimeScalingFactor::Request& request_two) {
-  return request_one.time_scaling_factor == request_two.time_scaling_factor;
-}
-
-template <>
 bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Request&,
                                               const AutomaticErrorRecovery::Request&) {
   return true;
@@ -141,7 +127,7 @@ bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Requ
 
 template <>
 Move::Request Command<Move>::getExpected() {
-  return Move::Request(Move::ControllerMode::kCartesianImpedance,
+  return Move::Request(Move::ControllerMode::kJointImpedance,
                        Move::MotionGeneratorMode::kJointVelocity, Move::Deviation(1, 2, 3),
                        Move::Deviation(4, 5, 6));
 }
@@ -150,11 +136,6 @@ template <>
 GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
   int32_t limit_id = 3;
   return GetCartesianLimit::Request(limit_id);
-}
-
-template <>
-SetControllerMode::Request Command<SetControllerMode>::getExpected() {
-  return SetControllerMode::Request(SetControllerMode::ControllerMode::kJointPosition);
 }
 
 template <>
@@ -214,12 +195,6 @@ SetLoad::Request Command<SetLoad>::getExpected() {
 }
 
 template <>
-SetTimeScalingFactor::Request Command<SetTimeScalingFactor>::getExpected() {
-  double factor = 0.5;
-  return SetTimeScalingFactor::Request(factor);
-}
-
-template <>
 AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
   return AutomaticErrorRecovery::Request();
 }
@@ -245,7 +220,6 @@ GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
 }
 
 using CommandTypes = ::testing::Types<GetCartesianLimit,
-                                      SetControllerMode,
                                       SetCollisionBehavior,
                                       SetJointImpedance,
                                       SetCartesianImpedance,
@@ -254,7 +228,6 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetFToEE,
                                       SetLoad,
                                       Move,
-                                      SetTimeScalingFactor,
                                       AutomaticErrorRecovery>;
 
 TYPED_TEST_CASE(Command, CommandTypes);

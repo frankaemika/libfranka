@@ -66,8 +66,9 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"K_F_ext_hat_K\": " << robot_state.K_F_ext_hat_K
           << ", \"current_errors\": " << robot_state.current_errors
           << ", \"last_motion_errors\": " << robot_state.last_motion_errors
+          << ", \"control_command_success_rate\": " << robot_state.control_command_success_rate
           << ", \"robot_mode\": " << robot_state.robot_mode
-          << ", \"time\": " << robot_state.time.ms() << "}";
+          << ", \"time\": " << robot_state.time.toMSec() << "}";
   return ostream;
 }
 
