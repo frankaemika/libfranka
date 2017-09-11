@@ -90,10 +90,10 @@ int main(int argc, char** argv) {
     std::array<double, 7> dq_max{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
     std::array<double, 7> ddq_max_start{{5, 5, 5, 5, 5, 5, 5}};
     std::array<double, 7> ddq_max_goal{{5, 5, 5, 5, 5, 5, 5}};
-    for (size_t joint_index = 0; joint_index < 7; joint_index++) {
-      dq_max[joint_index] = speed_factor * dq_max[joint_index];
-      ddq_max_start[joint_index] = speed_factor * ddq_max_start[joint_index];
-      ddq_max_goal[joint_index] = speed_factor * ddq_max_goal[joint_index];
+    for (size_t i = 0; i < 7; i++) {
+      dq_max[i] = speed_factor * dq_max[i];
+      ddq_max_start[i] = speed_factor * ddq_max_start[i];
+      ddq_max_goal[i] = speed_factor * ddq_max_goal[i];
     }
 
     double time = 0.0;
@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
                                 &t_1_sync, &t_2_sync, &t_f_sync, &q_1);
     robot.control([=, &time](const franka::RobotState&,
                              franka::Duration time_step) -> franka::JointPositions {
-      time += time_step.s();
+      time += time_step.toSec();
 
       std::array<double, 7> delta_q_d;
       bool motion_finished = calculateDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync,
@@ -143,32 +143,27 @@ bool calculateDesiredValues(double t,
   std::array<double, 7> delta_t_2 = subtract(t_f, t_2);
   std::array<bool, 7> joint_motion_finished{};
 
-  for (size_t joint_index = 0; joint_index < 7; joint_index++) {
-    sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
-    if (std::abs(delta_q[joint_index]) < kDeltaQMotionFinished) {
-      (*delta_q_d)[joint_index] = 0;
-      joint_motion_finished[joint_index] = true;
+  for (size_t i = 0; i < 7; i++) {
+    sign_delta_q[i] = sgn(delta_q[i]);
+    if (std::abs(delta_q[i]) < kDeltaQMotionFinished) {
+      (*delta_q_d)[i] = 0;
+      joint_motion_finished[i] = true;
     } else {
-      if (t < t_1[joint_index]) {
-        (*delta_q_d)[joint_index] = -1.0 / std::pow(t_1[joint_index], 3) * dq_max[joint_index] *
-                                    sign_delta_q[joint_index] * (0.5 * t - t_1[joint_index]) *
-                                    std::pow(t, 3);
-      } else if (t >= t_1[joint_index] && t < t_2[joint_index]) {
-        (*delta_q_d)[joint_index] =
-            q_1[joint_index] +
-            (t - t_1[joint_index]) * dq_max[joint_index] * sign_delta_q[joint_index];
-      } else if (t >= t_2[joint_index] && t < t_f[joint_index]) {
-        (*delta_q_d)[joint_index] =
-            delta_q[joint_index] +
-            0.5 * (1.0 / std::pow(delta_t_2[joint_index], 3) *
-                       (t - t_1[joint_index] - 2 * delta_t_2[joint_index] - t_d[joint_index]) *
-                       std::pow((t - t_1[joint_index] - t_d[joint_index]), 3) +
-                   (2.0 * t - 2.0 * t_1[joint_index] - delta_t_2[joint_index] -
-                    2.0 * t_d[joint_index])) *
-                dq_max[joint_index] * sign_delta_q[joint_index];
+      if (t < t_1[i]) {
+        (*delta_q_d)[i] = -1.0 / std::pow(t_1[i], 3) * dq_max[i] * sign_delta_q[i] *
+                          (0.5 * t - t_1[i]) * std::pow(t, 3);
+      } else if (t >= t_1[i] && t < t_2[i]) {
+        (*delta_q_d)[i] = q_1[i] + (t - t_1[i]) * dq_max[i] * sign_delta_q[i];
+      } else if (t >= t_2[i] && t < t_f[i]) {
+        (*delta_q_d)[i] =
+            delta_q[i] +
+            0.5 * (1.0 / std::pow(delta_t_2[i], 3) * (t - t_1[i] - 2 * delta_t_2[i] - t_d[i]) *
+                       std::pow((t - t_1[i] - t_d[i]), 3) +
+                   (2.0 * t - 2.0 * t_1[i] - delta_t_2[i] - 2.0 * t_d[i])) *
+                dq_max[i] * sign_delta_q[i];
       } else {
-        (*delta_q_d)[joint_index] = delta_q[joint_index];
-        joint_motion_finished[joint_index] = true;
+        (*delta_q_d)[i] = delta_q[i];
+        joint_motion_finished[i] = true;
       }
     }
   }
@@ -191,40 +186,35 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
   std::array<double, 7> t_1{};
   std::array<double, 7> delta_t_2_sync{};
   int sign_delta_q[7];
-  for (int joint_index = 0; joint_index < 7; joint_index++) {
-    sign_delta_q[joint_index] = sgn(delta_q[joint_index]);
-    if (std::abs(delta_q[joint_index]) > kDeltaQMotionFinished) {
-      if (std::abs(delta_q[joint_index]) <
-          (3.0 / 4.0 * (std::pow(dq_max[joint_index], 2) / ddq_max_start[joint_index]) +
-           3.0 / 4.0 * (std::pow(dq_max[joint_index], 2) / ddq_max_goal[joint_index]))) {
-        dq_max_reach[joint_index] =
-            std::sqrt(4.0 / 3.0 * delta_q[joint_index] * sign_delta_q[joint_index] *
-                      (ddq_max_start[joint_index] * ddq_max_goal[joint_index]) /
-                      (ddq_max_start[joint_index] + ddq_max_goal[joint_index]));
+  for (size_t i = 0; i < 7; i++) {
+    sign_delta_q[i] = sgn(delta_q[i]);
+    if (std::abs(delta_q[i]) > kDeltaQMotionFinished) {
+      if (std::abs(delta_q[i]) < (3.0 / 4.0 * (std::pow(dq_max[i], 2) / ddq_max_start[i]) +
+                                  3.0 / 4.0 * (std::pow(dq_max[i], 2) / ddq_max_goal[i]))) {
+        dq_max_reach[i] =
+            std::sqrt(4.0 / 3.0 * delta_q[i] * sign_delta_q[i] *
+                      (ddq_max_start[i] * ddq_max_goal[i]) / (ddq_max_start[i] + ddq_max_goal[i]));
       }
-      t_1[joint_index] = 1.5 * dq_max_reach[joint_index] / ddq_max_start[joint_index];
-      delta_t_2[joint_index] = 1.5 * dq_max_reach[joint_index] / ddq_max_goal[joint_index];
-      t_f[joint_index] = t_1[joint_index] / 2.0 + delta_t_2[joint_index] / 2.0 +
-                         std::abs(delta_q[joint_index]) / dq_max_reach[joint_index];
+      t_1[i] = 1.5 * dq_max_reach[i] / ddq_max_start[i];
+      delta_t_2[i] = 1.5 * dq_max_reach[i] / ddq_max_goal[i];
+      t_f[i] = t_1[i] / 2.0 + delta_t_2[i] / 2.0 + std::abs(delta_q[i]) / dq_max_reach[i];
     }
   }
 
   double max_t_f = *std::max_element(t_f.begin(), t_f.end());
-  for (int joint_index = 0; joint_index < 7; joint_index++) {
-    if (std::abs(delta_q[joint_index]) > kDeltaQMotionFinished) {
-      double a = 1.5 / 2.0 * (ddq_max_goal[joint_index] + ddq_max_start[joint_index]);
-      double b = -1.0 * max_t_f * ddq_max_goal[joint_index] * ddq_max_start[joint_index];
-      double c =
-          std::abs(delta_q[joint_index]) * ddq_max_goal[joint_index] * ddq_max_start[joint_index];
+  for (size_t i = 0; i < 7; i++) {
+    if (std::abs(delta_q[i]) > kDeltaQMotionFinished) {
+      double a = 1.5 / 2.0 * (ddq_max_goal[i] + ddq_max_start[i]);
+      double b = -1.0 * max_t_f * ddq_max_goal[i] * ddq_max_start[i];
+      double c = std::abs(delta_q[i]) * ddq_max_goal[i] * ddq_max_start[i];
       double delta = b * b - 4.0 * a * c;
-      (*dq_max_sync)[joint_index] = (-1.0 * b - std::sqrt(delta)) / (2.0 * a);
-      (*t_1_sync)[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_start[joint_index];
-      delta_t_2_sync[joint_index] = 1.5 * (*dq_max_sync)[joint_index] / ddq_max_goal[joint_index];
-      (*t_f_sync)[joint_index] = (*t_1_sync)[joint_index] / 2 + delta_t_2_sync[joint_index] / 2 +
-                                 std::abs(delta_q[joint_index] / (*dq_max_sync)[joint_index]);
-      (*t_2_sync)[joint_index] = (*t_f_sync)[joint_index] - delta_t_2_sync[joint_index];
-      (*q_1)[joint_index] = (*dq_max_sync)[joint_index] * sign_delta_q[joint_index] *
-                            (0.5 * (*t_1_sync)[joint_index]);
+      (*dq_max_sync)[i] = (-1.0 * b - std::sqrt(delta)) / (2.0 * a);
+      (*t_1_sync)[i] = 1.5 * (*dq_max_sync)[i] / ddq_max_start[i];
+      delta_t_2_sync[i] = 1.5 * (*dq_max_sync)[i] / ddq_max_goal[i];
+      (*t_f_sync)[i] =
+          (*t_1_sync)[i] / 2 + delta_t_2_sync[i] / 2 + std::abs(delta_q[i] / (*dq_max_sync)[i]);
+      (*t_2_sync)[i] = (*t_f_sync)[i] - delta_t_2_sync[i];
+      (*q_1)[i] = (*dq_max_sync)[i] * sign_delta_q[i] * (0.5 * (*t_1_sync)[i]);
     }
   }
 }
