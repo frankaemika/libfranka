@@ -32,7 +32,6 @@ add_executable(run_all_tests
   helpers.cpp
   mock_server.cpp
   model_tests.cpp
-  motion_generator_loop_tests.cpp
   robot_command_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
