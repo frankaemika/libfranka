@@ -5,7 +5,7 @@
 #include <ratio>
 
 /**
- * @file gripper.h
+ * @file duration.h
  * Contains the franka::Duration type.
  */
 
