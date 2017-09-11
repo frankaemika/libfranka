@@ -18,14 +18,14 @@ struct Exception : public std::runtime_error {
 };
 
 /**
- * ModelException is thrown when unsupported robot model is used.
+ * ModelException is thrown if an error occurs when loading the model library.
  */
 struct ModelException : public Exception {
   using Exception::Exception;
 };
 
 /**
- * NetworkException is thrown when a connection to FRANKA cannot be established,
+ * NetworkException is thrown if a connection to the robot cannot be established,
  * or when a timeout occurs.
  */
 struct NetworkException : public Exception {
@@ -33,14 +33,14 @@ struct NetworkException : public Exception {
 };
 
 /**
- * ProtocolException is thrown when the server returns an incorrect message.
+ * ProtocolException is thrown if the robot returns an incorrect message.
  */
 struct ProtocolException : public Exception {
   using Exception::Exception;
 };
 
 /**
- * IncompatibleVersionException is thrown if the server does not support this
+ * IncompatibleVersionException is thrown if the robot does not support this
  * version of libfranka.
  */
 struct IncompatibleVersionException : public Exception {

@@ -33,9 +33,9 @@ Network::Network(const std::string& franka_address,
     udp_socket_.bind({"0.0.0.0", 0});
     udp_port_ = udp_socket_.address().port();
   } catch (const Poco::Net::NetException& e) {
-    throw NetworkException("libfranka: FRANKA connection error: "s + e.what());
+    throw NetworkException("libfranka: Connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
-    throw NetworkException("libfranka: FRANKA connection timeout"s);
+    throw NetworkException("libfranka: Connection timeout"s);
   } catch (const Poco::Exception& e) {
     throw NetworkException("libfranka: "s + e.what());
   }

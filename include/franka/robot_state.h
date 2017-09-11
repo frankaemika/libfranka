@@ -8,13 +8,13 @@
 
 /**
  * @file robot_state.h
- * Contains the RobotState struct.
+ * Contains the franka::RobotState types.
  */
 
 namespace franka {
 
 /**
- * Describes FRANKA's current mode.
+ * Describes the robot's current mode.
  */
 
 enum class RobotMode {
@@ -28,7 +28,7 @@ enum class RobotMode {
 };
 
 /**
- * Describes FRANKA's robot state.
+ * Describes the robot state.
  */
 struct RobotState {
   /**
@@ -193,12 +193,15 @@ struct RobotState {
 
   /**
    * Percentage of the last 100 control commands that were successfully received by the robot.
-   * Range: \f$[0, 1]\f$, 0 if no control commands are sent.
+   *
+   * Shows a value of zero if no control or motion generator loop is currently running.
+   *
+   * Range: \f$[0, 1]\f$.
    */
   double control_command_success_rate{};
 
   /**
-   * Current FRANKA mode.
+   * Current robot mode.
    */
   RobotMode robot_mode = RobotMode::kUserStopped;
 

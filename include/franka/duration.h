@@ -4,6 +4,11 @@
 #include <cstdint>
 #include <ratio>
 
+/**
+ * @file duration.h
+ * Contains the franka::Duration type.
+ */
+
 namespace franka {
 
 /**

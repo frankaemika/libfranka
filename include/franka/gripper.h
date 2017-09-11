@@ -8,7 +8,7 @@
 
 /**
  * @file gripper.h
- * Contains the Gripper class.
+ * Contains the franka::Gripper type.
  */
 
 namespace franka {
@@ -16,8 +16,8 @@ namespace franka {
 class Network;
 
 /**
- * Maintains a connection to FRANKA CONTROL, provides the current gripper state,
- * and allows to execute gripper commands.
+ * Maintains a network connection to the gripper, provides the current gripper state,
+ * and allows the execution of commands.
  *
  * @note
  * The members of this class are threadsafe.
@@ -25,18 +25,17 @@ class Network;
 class Gripper {
  public:
   /**
-   * Version of the gripper server running on FRANKA CONTROL.
+   * Version of the gripper server.
    */
   using ServerVersion = uint16_t;
 
   /**
-   * Establishes a connection with the gripper service on FRANKA CONTROL.
+   * Establishes a connection with a gripper connected to a robot.
    *
-   * @param[in] franka_address IP/hostname of FRANKA CONTROL
+   * @param[in] franka_address IP/hostname of the robot the gripper is connected to.
    *
    * @throw NetworkException if the connection is unsuccessful.
-   * @throw IncompatibleVersionException if this library is not supported by FRANKA CONTROL.
-   * @throw ProtocolException if data received from the host is invalid.
+   * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
    */
   explicit Gripper(const std::string& franka_address);
 
@@ -116,7 +115,6 @@ class Gripper {
    *
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw InvalidOperationException if another readOnce is already running.
-   * @throw ProtocolException if received data has invalid format.
    */
   GripperState readOnce() const;
 
