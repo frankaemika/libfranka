@@ -515,6 +515,15 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
+   * Stops all currently running motions.
+   *
+   * If a control or motion generator loop is running, it will be preempted.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void stop();
+
+  /**
    * @}
    */
 

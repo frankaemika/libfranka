@@ -257,6 +257,10 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
 
+void Robot::stop() {
+  impl_->executeCommand<research_interface::robot::StopMove>();
+}
+
 Model Robot::loadModel() {
   return impl_->loadModel();
 }
