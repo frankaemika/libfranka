@@ -34,7 +34,7 @@ class IsStop {
   /**
    * Determines whether to stop the control and motion generation loops.
    *
-   * @return True if the control loop should be stopped.
+   * @return true if the control loop should be stopped.
    */
   bool stop() const noexcept;
 
@@ -154,7 +154,7 @@ class CartesianPose : public IsStop {
    *                         homogeneous transformation matrix (column-major).
    *
    * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
    * base frame \f$O\f$.
    */
   CartesianPose(const std::array<double, 16>& cartesian_pose);
@@ -163,7 +163,7 @@ class CartesianPose : public IsStop {
    * Creates a new CartesianPose instance.
    *
    * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end-effector frame \f$EE\f$ to
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
    * base frame \f$O\f$.
    *
    * @throw ControlException if cartesian_pose is not a valid vectorized
@@ -173,7 +173,7 @@ class CartesianPose : public IsStop {
 
   /**
    * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
-   * end-effector frame \f$EE\f$ to base frame \f$O\f$.
+   * end effector frame \f$EE\f$ to base frame \f$O\f$.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -188,7 +188,7 @@ class CartesianPose : public IsStop {
    *
    * @param[in] transform Homogeneous transformation to be checked, passed as column major array.
    *
-   * @return True if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
+   * @return true if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
    * the array defines a column major matrix.
    */
   static bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept;

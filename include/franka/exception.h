@@ -61,7 +61,7 @@ struct CommandException : public Exception {
 };
 
 /**
- * RealtimeException is thrown if realtime priority can not be set.
+ * RealtimeException is thrown if realtime priority cannot be set.
  */
 struct RealtimeException : public Exception {
   using Exception::Exception;
