@@ -15,6 +15,9 @@ node {
       stage('Build (Release)') {
         sh '.ci/release.sh'
         dir('build-release') {
+          dir('doc') {
+            sh 'tar cfz ../libfranka-docs.tar.gz html'
+          }
           archive '*.deb, *.tar.gz'
           publishHTML([allowMissing: false,
                        alwaysLinkToLastBuild: false,
