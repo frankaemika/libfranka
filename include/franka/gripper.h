@@ -79,7 +79,7 @@ class Gripper {
    *
    * @param[in] width Size of the object to grasp. [m]
    * @param[in] speed Closing speed. [m/s]
-   * @param[in] force Grasping force. [mA]
+   * @param[in] force Grasping force. [N]
    *
    * @return True if an object has been grasped, false otherwise.
    *
