@@ -14,10 +14,9 @@ node {
 
       stage('Build (Release)') {
         sh '.ci/release.sh'
+        // Can't use dir() for this shell script due to JENKINS-33510
+        sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs.tar.gz html"
         dir('build-release') {
-          dir('doc') {
-            sh 'tar cfz ../libfranka-docs.tar.gz html'
-          }
           archive '*.deb, *.tar.gz'
           publishHTML([allowMissing: false,
                        alwaysLinkToLastBuild: false,
