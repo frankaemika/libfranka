@@ -66,8 +66,8 @@ class Controller {
 };
 
 std::vector<double> generateTrajectory(double a_max) {
-  // Generating a motion with smooth velocity and acceleration
-  // Squared sine is used for the acceleration/deceleration phase
+  // Generating a motion with smooth velocity and acceleration.
+  // Squared sine is used for the acceleration/deceleration phase.
   std::vector<double> trajectory;
   constexpr double kTimeStep = 0.001;          // [s]
   constexpr double kAccelerationTime = 1;      // time spend accelerating and decelerating [s]
@@ -125,9 +125,8 @@ int main(int argc, char** argv) {
   try {
     franka::Robot robot(argv[1]);
 
-    // Set additional parameters always before the control loop, NEVER in the
-    // control loop
-    // Set collision behavior:
+    // Set additional parameters always before the control loop, NEVER in the control loop!
+    // Set collision behavior.
     robot.setCollisionBehavior(
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},

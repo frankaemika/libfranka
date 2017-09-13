@@ -76,15 +76,15 @@ struct RobotState {
 
   /**
    * Elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th
-   * joint. Unit: \f$[rad]\f$
+   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
+   * \f$[rad]\f$
    */
   std::array<double, 2> elbow{};
 
   /**
    * Desired elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th
-   * joint. Unit: \f$[rad]\f$
+   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
+   * \f$[rad]\f$
    */
   std::array<double, 2> elbow_d{};
 
@@ -125,39 +125,36 @@ struct RobotState {
   std::array<double, 7> dq_d{};
 
   /**
-   * Indicates which contact level is activated in which joint. After contact
-   * disappears, value turns to zero.
+   * Indicates which contact level is activated in which joint. After contact disappears, value
+   * turns to zero.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
    */
   std::array<double, 7> joint_contact{};
 
   /**
-   * Indicates which contact level is activated in which cartesian dimension (x,
-   * y, z, roll, pitch, yaw). After contact disappears, value turns to zero.
+   * Indicates which contact level is activated in which cartesian dimension (x, y, z, roll, pitch,
+   * yaw). After contact disappears, value turns to zero.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
    */
   std::array<double, 6> cartesian_contact{};
 
   /**
-   * Indicates which contact level is activated in which joint. After contact
-   * disappears, the value stays the same until a reset command is sent.
+   * Indicates which contact level is activated in which joint. After contact disappears, the value
+   * stays the same until a reset command is sent.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
-   * @see Robot::automaticErrorRecovery for performing a reset after a
-   * collision.
+   * @see Robot::automaticErrorRecovery for performing a reset after a collision.
    */
   std::array<double, 7> joint_collision{};
 
   /**
-   * Indicates which contact level is activated in which cartesian dimension (x,
-   * y, z, roll, pitch, yaw). After contact disappears, the value stays the same
-   * until a reset command is sent.
+   * Indicates which contact level is activated in which cartesian dimension (x, y, z, roll, pitch,
+   * yaw). After contact disappears, the value stays the same until a reset command is sent.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
-   * @see Robot::automaticErrorRecovery for performing a reset after a
-   * collision.
+   * @see Robot::automaticErrorRecovery for performing a reset after a collision.
    */
   std::array<double, 6> cartesian_collision{};
 
@@ -169,15 +166,15 @@ struct RobotState {
 
   /**
    * \f$^OF_{K,\text{ext}}\f$
-   * External wrench (force, torque) scaled by a factor acting on K frame,
-   * expressed relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) scaled by a factor acting on K frame, expressed relative to the
+   * base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
-   * External wrench (force, torque) acting on K frame, expressed relative to
-   * the end effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) acting on K frame, expressed relative to the end effector
+   * frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
@@ -212,8 +209,8 @@ struct RobotState {
 };
 
 /**
- * Streams the robot state as JSON object: {"field_name_1": [0,0,0,0,0,0,0],
- * "field_name_2": [0,0,0,0,0,0], ...}
+ * Streams the robot state as JSON object: {"field_name_1": [0,0,0,0,0,0,0], "field_name_2":
+ * [0,0,0,0,0,0], ...}
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
 

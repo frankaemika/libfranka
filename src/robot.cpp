@@ -13,7 +13,7 @@ Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config)
           std::make_unique<Network>(franka_address, research_interface::robot::kCommandPort),
           realtime_config)} {}
 
-// Has to be declared here, as the Impl type is incomplete in the header
+// Has to be declared here, as the Impl type is incomplete in the header.
 Robot::~Robot() noexcept = default;
 
 Robot::Robot(Robot&& other) noexcept {

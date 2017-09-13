@@ -47,8 +47,8 @@ class Network {
    * vl_buffer. If vl_buffer is not given, this data is discarded.
    *
    * @param[in] command_id Expected command ID of the T::Response.
-   * @param[out] vl_buffer If given, variable-length data for the expected T::Response
-   * message (if any has been received) is copied into it.
+   * @param[out] vl_buffer If given, variable-length data for the expected T::Response message (if
+   * any has been received) is copied into it.
    *
    * @return Received T::Response instance.
    */
@@ -64,8 +64,8 @@ class Network {
    * @param[in] command_id Expected command ID of the T::Response.
    * @param[in] handler Callback to be invoked if the expected response has been received.
    *
-   * @return True if a T::Response message with the given command_id has been received,
-   * false otherwise.
+   * @return True if a T::Response message with the given command_id has been received, false
+   * otherwise.
    */
   template <typename T>
   bool tcpReceiveResponse(uint32_t command_id,

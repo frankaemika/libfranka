@@ -20,20 +20,19 @@ namespace franka {
 class Model;
 
 /**
- * Maintains a network connection to the robot, provides the current robot state,
- * gives access to the model library and allows to execute commands, motions,
- * and torque control.
+ * Maintains a network connection to the robot, provides the current robot state, gives access to
+ * the model library and allows to execute commands, motions, and torque control.
  *
  * @note
  * The members of this class are threadsafe.
  *
  * @par End effector frame
- * While the end effector parameters are set in a configuration file, it is
- * possible to change the end effector frame with Robot::setEE.
+ * While the end effector parameters are set in a configuration file, it is possible to change the
+ * end effector frame with Robot::setEE.
  *
  * @par K frame
- * The K frame is used for Cartesian impedance control and measuring forces
- * and torques. It can be set with Robot::setK.
+ * The K frame is used for Cartesian impedance control and measuring forces and torques. It can be
+ * set with Robot::setK.
  */
 class Robot {
  public:
@@ -46,9 +45,8 @@ class Robot {
    * Establishes a connection with the robot.
    *
    * @param[in] franka_address IP/hostname of the robot.
-   * @param[in] realtime_config if set to Enforce, an exception will be thrown
-   * if realtime priority cannot be set when required. Setting realtime_config
-   * to Ignore disables this behavior.
+   * @param[in] realtime_config if set to Enforce, an exception will be thrown if realtime priority
+   * cannot be set when required. Setting realtime_config to Ignore disables this behavior.
    *
    * @throw NetworkException if the connection is unsuccessful.
    * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
@@ -80,9 +78,8 @@ class Robot {
   /**
    * @name Motion generation and torque control
    *
-   * The callbacks given to the control functions are called with a fixed
-   * frequency of 1 \f$[KHz]\f$ and therefore need to be able to compute
-   * outputs within this time frame.
+   * The callbacks given to the control functions are called with a fixed frequency of 1 \f$[KHz]\f$
+   * and therefore need to be able to compute outputs within this time frame.
    *
    * Only one of these methods can be active at the same time.
    * @{
@@ -317,13 +314,12 @@ class Robot {
   /**
    * Changes the collision behavior.
    *
-   * Set separate torque and force boundaries for acceleration/deceleration
-   * and constant velocity movement phases.
+   * Set separate torque and force boundaries for acceleration/deceleration and constant velocity
+   * movement phases.
    *
-   * Forces or torques between lower and upper threshold are shown as
-   * contacts in the RobotState.
-   * Forces or torques above the upper threshold are registered as collision
-   * and cause the robot to stop moving.
+   * Forces or torques between lower and upper threshold are shown as contacts in the RobotState.
+   * Forces or torques above the upper threshold are registered as collision and cause the robot to
+   * stop moving.
    *
    * @param[in] lower_torque_thresholds_acceleration Contact torque thresholds during
    * acceleration/deceleration in \f$[Nm]\f$.
@@ -358,8 +354,8 @@ class Robot {
   /**
    * Changes the collision behavior.
    *
-   * Set common torque and force boundaries for acceleration/deceleration and
-   * constant velocity movement phases.
+   * Set common torque and force boundaries for acceleration/deceleration and constant velocity
+   * movement phases.
    *
    * Forces or torques between lower and upper threshold are shown as contacts in the RobotState.
    * Forces or torques above the upper threshold are registered as collision and cause the robot to

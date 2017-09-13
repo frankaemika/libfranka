@@ -47,8 +47,7 @@ struct GripperState {
 };
 
 /**
- * Streams the gripper state as JSON object: {"field_name_1":
- * value, "field_name_2": value, ...}
+ * Streams the gripper state as JSON object: {"field_name_1": value, "field_name_2": value, ...}
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::GripperState& gripper_state);
 
