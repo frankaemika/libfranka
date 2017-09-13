@@ -91,7 +91,7 @@ class Robot {
    * * A franka::RobotState showing the current robot state.
    * * A franka::Duration to indicate the time since the last callback invocation. Note that
    *   this implies that the duration is zero when invoking the callback function for the first
-   * time!
+   *   time!
    *
    * The following incomplete example shows the general structure of a callback function:
    *
@@ -267,8 +267,7 @@ class Robot {
    * Cannot be executed while another control or motion generator loop is active.
    *
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
-   * callback-docs "here"
-   * for more details.
+   * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
    *
    * @throw ControlException if an error related to motion generation occurred.
