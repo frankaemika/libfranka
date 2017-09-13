@@ -100,11 +100,6 @@ class Robot {
    *                                         franka::Duration time_step) {
    *   time += time_step.toSec();  // Update time at the beginning of the callback.
    *
-   *   if (cancel) {
-   *     // Return Cancel if the motion should be aborted before the end of the trajectory.
-   *     return franka::Cancel;
-   *   }
-   *
    *   franka::JointPositions output = getJointPositions(time);
    *
    *   if (time == max_time) {
