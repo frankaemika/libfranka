@@ -6,7 +6,7 @@ node {
   try {
     checkout scm
 
-    docker.build('worker', '.ci').inside {
+    docker.build('libfranka-ci-worker', '.ci').inside {
       stage('Build (Debug)') {
         sh '.ci/debug.sh'
         junit 'build-debug/test_results/*.xml'
