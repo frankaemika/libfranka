@@ -229,15 +229,6 @@ class CartesianVelocities : public Stoppable {
   CartesianVelocities() noexcept;
 };
 
-static const struct : Torques, JointPositions, JointVelocities, CartesianVelocities, CartesianPose {
-}
-/**
- * Used to signal the cancellation of motion generation and control loops.
- *
- * @see @ref callback-docs "Documentation on callbacks"
- */
-Cancel{};  // NOLINT (readability-identifier-naming)
-
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
  *
