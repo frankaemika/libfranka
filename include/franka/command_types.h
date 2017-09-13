@@ -37,7 +37,7 @@ struct VirtualWallCuboid {
   std::array<double, 16> p_frame;
 
   /**
-  * True if this Cartesian limit is active, false otherwise.
+   * True if this Cartesian limit is active, false otherwise.
    */
   bool active;
 };
