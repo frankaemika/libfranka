@@ -33,25 +33,9 @@ enum class RealtimeConfig { kEnforce, kIgnore };
 class Stoppable {
  public:
   /**
-   * Determines whether to cancel a currently running motion.
+   * Determines whether to finish a currently running motion.
    */
   bool motion_finished = false;
-
-  /**
-   * Determines whether to cancel a currently running motion.
-   */
-  const bool motion_cancelled = false;
-
- protected:
-  /**
-   * Creates a new Stoppable instance.
-   */
-  Stoppable() noexcept;
-
-  /**
-   * Creates a new Stoppable instance with the given motion_cancelled value.
-   */
-  Stoppable(bool motion_cancelled) noexcept;
 };
 
 /**
@@ -79,9 +63,6 @@ class Torques : public Stoppable {
    * Desired torques in [Nm].
    */
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
-
- protected:
-  Torques() noexcept;
 };
 
 /**
@@ -109,9 +90,6 @@ class JointPositions : public Stoppable {
    * Desired joint angles in [rad].
    */
   std::array<double, 7> q{};
-
- protected:
-  JointPositions() noexcept;
 };
 
 /**
@@ -139,9 +117,6 @@ class JointVelocities : public Stoppable {
    * Desired joint velocities in [rad/s].
    */
   std::array<double, 7> dq{};
-
- protected:
-  JointVelocities() noexcept;
 };
 
 /**
@@ -178,9 +153,6 @@ class CartesianPose : public Stoppable {
    * end-effector frame \f$EE\f$ to base frame \f$O\f$.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
-
- protected:
-  CartesianPose() noexcept;
 
  private:
   void checkHomogeneousTransformation();
@@ -224,9 +196,6 @@ class CartesianVelocities : public Stoppable {
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
-
- protected:
-  CartesianVelocities() noexcept;
 };
 
 /**

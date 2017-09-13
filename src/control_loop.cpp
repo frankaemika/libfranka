@@ -124,10 +124,6 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
     robot_.finishMotion(motion_id_);
     return false;
   }
-  if (control_output.motion_cancelled) {
-    robot_.cancelMotion(motion_id_);
-    return false;
-  }
   command->tau_J_d = control_output.tau_J;
   return true;
 }
@@ -139,10 +135,6 @@ bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
   T motion_output = motion_callback_(robot_state, time_step);
   if (motion_output.motion_finished) {
     robot_.finishMotion(motion_id_);
-    return false;
-  }
-  if (motion_output.motion_cancelled) {
-    robot_.cancelMotion(motion_id_);
     return false;
   }
   convertMotion(motion_output, command);

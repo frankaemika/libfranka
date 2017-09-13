@@ -5,10 +5,6 @@
 
 namespace franka {
 
-Stoppable::Stoppable() noexcept : Stoppable(false) {}
-
-Stoppable::Stoppable(bool motion_cancelled) noexcept : motion_cancelled(motion_cancelled) {}
-
 Torques MotionFinished(const Torques& command) {  // NOLINT (readability-identifier-naming)
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
@@ -43,8 +39,6 @@ CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
   return new_command;
 }
 
-Torques::Torques() noexcept : Stoppable(true) {}
-
 Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                  torques) noexcept : tau_J(torques) {}
 
@@ -54,8 +48,6 @@ Torques::Torques(std::initializer_list<double> torques) {
   }
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
-
-JointPositions::JointPositions() noexcept : Stoppable(true) {}
 
 JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                                joint_positions) noexcept : q(joint_positions) {}
@@ -67,8 +59,6 @@ JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
 }
 
-JointVelocities::JointVelocities() noexcept : Stoppable(true) {}
-
 JointVelocities::JointVelocities(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
                                  joint_velocities) noexcept : dq(joint_velocities) {}
 
@@ -78,8 +68,6 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
   }
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
 }
-
-CartesianPose::CartesianPose() noexcept : Stoppable(true) {}
 
 CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
                              cartesian_pose)
@@ -125,8 +113,6 @@ bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& tr
   }
   return true;
 }
-
-CartesianVelocities::CartesianVelocities() noexcept : Stoppable(true) {}
 
 CartesianVelocities::CartesianVelocities(
     const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
