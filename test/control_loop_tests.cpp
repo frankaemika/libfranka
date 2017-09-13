@@ -217,7 +217,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
                                    TestFixture::Loop::kDefaultDeviation))
         .WillOnce(Return(200));
-    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+    EXPECT_CALL(robot, finishMotion(200, _, _));
   }
 
   NiceMock<MockControlCallback> control_callback;
@@ -287,7 +287,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
                                    TestFixture::Loop::kDefaultDeviation))
         .WillOnce(Return(200));
-    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+    EXPECT_CALL(robot, finishMotion(200, _, nullptr));
   }
 
   RobotState robot_state{};
@@ -345,7 +345,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
                                    this->kMotionGeneratorMode, TestFixture::Loop::kDefaultDeviation,
                                    TestFixture::Loop::kDefaultDeviation))
         .WillOnce(Return(200));
-    EXPECT_CALL(robot, finishMotion(200)).Times(2);
+    EXPECT_CALL(robot, finishMotion(200, _, _));
   }
 
   NiceMock<MockMotionCallback<typename TestFixture::TMotion>> motion_callback;

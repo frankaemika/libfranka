@@ -30,8 +30,7 @@ enum class RealtimeConfig { kEnforce, kIgnore };
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-class Stoppable {
- public:
+struct Stoppable {
   /**
    * Determines whether to finish a currently running motion.
    */

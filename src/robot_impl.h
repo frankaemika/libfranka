@@ -38,7 +38,9 @@ class Robot::Impl : public RobotControl {
       const research_interface::robot::Move::Deviation& maximum_path_deviation,
       const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) override;
   void cancelMotion(uint32_t motion_id) override;
-  void finishMotion(uint32_t motion_id) override;
+  void finishMotion(uint32_t motion_id,
+                    const research_interface::robot::MotionGeneratorCommand* motion_command,
+                    const research_interface::robot::ControllerCommand* control_command) override;
 
   template <typename T, typename... TArgs>
   uint32_t executeCommand(TArgs... /* args */);
