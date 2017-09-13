@@ -14,7 +14,9 @@ node {
 
       stage('Build (Release)') {
         sh '.ci/release.sh'
-        archive 'build-release/*.deb, build-release/*.tar.gz'
+        dir('build-release') {
+          archive '*.deb, *.tar.gz'
+        }
       }
 
       stage('Build (Coverage)') {
