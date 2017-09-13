@@ -16,6 +16,12 @@ node {
         sh '.ci/release.sh'
         dir('build-release') {
           archive '*.deb, *.tar.gz'
+          publishHTML([allowMissing: false,
+                       alwaysLinkToLastBuild: false,
+                       keepAll: true,
+                       reportDir: 'doc/html',
+                       reportFiles: 'index.html',
+                       reportName: 'API Documentation'])
         }
       }
 
@@ -31,16 +37,6 @@ node {
 
       stage('Lint') {
         sh '.ci/lint.sh'
-      }
-
-      stage('Documentation') {
-        sh '.ci/doc.sh'
-        publishHTML([allowMissing: false,
-                     alwaysLinkToLastBuild: false,
-                     keepAll: true,
-                     reportDir: 'build-doc/doc/html',
-                     reportFiles: 'index.html',
-                     reportName: 'API Documentation'])
       }
     }
 

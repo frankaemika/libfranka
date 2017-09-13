@@ -5,7 +5,7 @@ set -e
 rm -rf build-release
 mkdir build-release
 cd build-release
-cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT=ON -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF \
+cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT=ON -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=ON \
       -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
 cmake --build .
 ctest -V
