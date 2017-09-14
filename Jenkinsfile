@@ -4,51 +4,49 @@ node {
   step([$class: 'StashNotifier'])
 
   try {
-    stage('Checkout') {
-      checkout scm
-    }
+    checkout scm
 
-    stage('Build in debug mode') {
-      sh 'scripts/ci/debug-build.sh'
-    }
+    docker.build('libfranka-ci-worker', '.ci').inside {
+      stage('Build (Debug)') {
+        sh '.ci/debug.sh'
+        junit 'build-debug/test_results/*.xml'
+      }
 
-    stage('Build with code coverage') {
-      sh 'scripts/ci/coverage-build.sh'
-    }
+      stage('Build (Release)') {
+        sh '.ci/release.sh'
+        // Can't use dir() for this shell script due to JENKINS-33510
+        sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs.tar.gz html"
+        dir('build-release') {
+          archive '*.deb, *.tar.gz'
+          publishHTML([allowMissing: false,
+                       alwaysLinkToLastBuild: false,
+                       keepAll: true,
+                       reportDir: 'doc/html',
+                       reportFiles: 'index.html',
+                       reportName: 'API Documentation'])
+        }
+      }
 
-    stage('Build in release mode') {
-      sh 'scripts/ci/release-build.sh'
-      dir('build-release/doc') {
-        sh 'tar cfz ../libfranka-docs.tar.gz html'
+      stage('Build (Coverage)') {
+        sh '.ci/coverage.sh'
+        publishHTML([allowMissing: false,
+                     alwaysLinkToLastBuild: false,
+                     keepAll: true,
+                     reportDir: 'build-coverage/coverage',
+                     reportFiles: 'index.html',
+                     reportName: 'Code Coverage'])
+      }
+
+      stage('Lint') {
+        sh '.ci/lint.sh'
       }
     }
 
-    stage('Build examples') {
-      sh 'scripts/ci/examples-build.sh'
-    }
-
-    stage('Archive results') {
-      junit 'build/test_results/*.xml'
-      archive 'build-release/*.deb, build-release/*.tar.gz'
-      publishHTML([allowMissing: false,
-                   alwaysLinkToLastBuild: false,
-                   keepAll: true,
-                   reportDir: 'build-coverage/coverage',
-                   reportFiles: 'index.html',
-                   reportName: 'Code Coverage'])
-      publishHTML([allowMissing: false,
-                   alwaysLinkToLastBuild: false,
-                   keepAll: true,
-                   reportDir: 'build-release/doc/html',
-                   reportFiles: 'index.html',
-                   reportName: 'API Documentation'])
-    }
     currentBuild.result = 'SUCCESS'
   } catch (e) {
     currentBuild.result = 'FAILED'
     throw e;
   } finally {
     step([$class: 'StashNotifier'])
-    step([$class: 'Mailer', notifyEveryUnstableBuild: true, sendToIndividuals: true])
   }
 }
