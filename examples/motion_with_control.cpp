@@ -148,8 +148,8 @@ int main(int argc, char** argv) {
             index = trajectory.size() - 1;
           }
 
-          franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities.dq[joint_number] = trajectory[index];
+          std::array<double, 7> velocities{{0, 0, 0, 0, 0, 0, 0}};
+          velocities[joint_number] = trajectory[index];
 
           if (index >= trajectory.size() - 1) {
             return franka::MotionFinished(velocities);
