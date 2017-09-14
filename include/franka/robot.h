@@ -89,15 +89,15 @@ class Robot {
    * able to compute outputs within this time frame. Callback functions take two parameters:
    *
    * * A franka::RobotState showing the current robot state.
-   * * A franka::Duration to indicate the time since the last callback invocation. Note that
-   *   this implies that the duration is zero when invoking the callback function for the first
-   *   time!
+   * * A franka::Duration to indicate the time since the last callback invocation. Thus, the
+   *   duration is zero on the first invocation of the callback function!
    *
    * The following incomplete example shows the general structure of a callback function:
    *
    * @code{.cpp}
-   * franka::JointPositions control_callback(const franka::RobotState& robot_state,
-   *                                         franka::Duration time_step) {
+   * double time = 0.0;
+   * auto control_callback = [&time](const franka::RobotState& robot_state,
+   *                                 franka::Duration time_step) -> franka::JointPositions {
    *   time += time_step.toSec();  // Update time at the beginning of the callback.
    *
    *   franka::JointPositions output = getJointPositions(time);
