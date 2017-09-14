@@ -408,7 +408,7 @@ class Robot {
    * Guiding mode can be enabled by pressing the two opposing buttons near the robot's flange.
    *
    * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding mode.
-   * @param[in] elbow true if the elbow is free in guiding mode, false otherwise.
+   * @param[in] elbow True if the elbow is free in guiding mode, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
