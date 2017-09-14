@@ -80,18 +80,7 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 }
 
 template <typename T>
-ControlLoop<T>::~ControlLoop() noexcept {
-  if (std::uncaught_exception() && motion_id_ != 0) {
-    // Send stop command if an exception occured in a control loop.
-    try {
-      robot_.cancelMotion(motion_id_);
-    } catch (...) {
-    }
-  }
-}
-
-template <typename T>
-void ControlLoop<T>::operator()() {
+void ControlLoop<T>::operator()() try {
   RobotState robot_state = robot_.update();
   robot_.throwOnMotionError(robot_state, motion_id_);
 
@@ -115,6 +104,12 @@ void ControlLoop<T>::operator()() {
     }
     robot_.finishMotion(motion_id_, &motion_command, nullptr);
   }
+} catch (...) {
+  try {
+    robot_.cancelMotion(motion_id_);
+  } catch (...) {
+  }
+  throw;
 }
 
 template <typename T>

@@ -244,8 +244,9 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
   while (motionGeneratorRunning()) {
     receiveRobotState();
   }
-  handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+
+  // Ignore Move response.
+  network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
 }
 
 Model Robot::Impl::loadModel() const {
