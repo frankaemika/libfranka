@@ -79,7 +79,7 @@ struct Errors {
    */
   const bool& joint_velocity_violation;
   /**
-   * True if the robot exceeded cartesian velocity limits.
+   * True if the robot exceeded Cartesian velocity limits.
    */
   const bool& cartesian_velocity_violation;
   /**
@@ -105,7 +105,7 @@ struct Errors {
    */
   const bool& max_path_pose_deviation_violation;
   /**
-   * True if cartesian velocity profile for internal motions was exceeded.
+   * True if Cartesian velocity profile for internal motions was exceeded.
    */
   const bool& cartesian_velocity_profile_safety_violation;
   /**
@@ -181,7 +181,7 @@ struct Errors {
    */
   const bool& cartesian_motion_generator_joint_acceleration_discontinuity;
   /**
-   * True if the cartesian pose is not a valid transformation matrix.
+   * True if the Cartesian pose is not a valid transformation matrix.
    */
   const bool& cartesian_position_motion_generator_invalid_frame;
   /**
@@ -193,7 +193,7 @@ struct Errors {
    */
   const bool& controller_torque_discontinuity;
   /**
-   * True if the start elbow sign was inconsistent. Applies only to motions started from DESK.
+   * True if the start elbow sign was inconsistent. Applies only to motions started from Desk.
    */
   const bool& start_elbow_sign_inconsistent;
   /**

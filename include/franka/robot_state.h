@@ -133,7 +133,7 @@ struct RobotState {
   std::array<double, 7> joint_contact{};
 
   /**
-   * Indicates which contact level is activated in which cartesian dimension (x, y, z, roll, pitch,
+   * Indicates which contact level is activated in which Cartesian dimension (x, y, z, roll, pitch,
    * yaw). After contact disappears, value turns to zero.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
@@ -150,7 +150,7 @@ struct RobotState {
   std::array<double, 7> joint_collision{};
 
   /**
-   * Indicates which contact level is activated in which cartesian dimension (x, y, z, roll, pitch,
+   * Indicates which contact level is activated in which Cartesian dimension (x, y, z, roll, pitch,
    * yaw). After contact disappears, the value stays the same until a reset command is sent.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
