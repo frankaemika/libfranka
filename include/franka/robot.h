@@ -96,9 +96,9 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
@@ -114,9 +114,9 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
@@ -134,9 +134,9 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<JointVelocities(const RobotState&, franka::Duration)>
@@ -154,9 +154,9 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
@@ -174,9 +174,9 @@ class Robot {
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
@@ -194,9 +194,9 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
@@ -214,9 +214,9 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
@@ -234,9 +234,9 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
@@ -254,9 +254,9 @@ class Robot {
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw RealtimeException if realtime priority can not be set for the current thread.
+   * @throw RealtimeException if realtime priority cannot be set for the current thread.
    *
-   * @see Robot::Robot to change behavior if realtime priority can not be set.
+   * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
@@ -436,7 +436,7 @@ class Robot {
    *
    * @throw CommandException if an error occurred.
    *
-   * @see RobotState::O_T_EE for end-effector pose in world base frame.
+   * @see RobotState::O_T_EE for end effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
    */
   void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT (readability-identifier-naming)
