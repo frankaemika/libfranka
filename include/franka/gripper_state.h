@@ -36,7 +36,7 @@ struct GripperState {
   bool is_grasped{};
 
   /**
-   * Current gripper temperature.
+   * Current gripper temperature in °C.
    */
   uint16_t temperature{};
 
