@@ -1,6 +1,7 @@
 #!/bin/sh
 
 set -e
+set -x
 
 rm -rf build-coverage
 mkdir build-coverage
