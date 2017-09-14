@@ -43,9 +43,9 @@ int main(int argc, char** argv) {
           double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
 
           franka::JointVelocities velocities = {{0.0, 0.0, omega, 0.0, 0.0, 0.0, 0.0}};
-          if (time == 2 * time_max) {
+          if (time >= 2 * time_max) {
             std::cout << std::endl << "Finished motion." << std::endl;
-            return MotionFinished(velocities);
+            return franka::MotionFinished(velocities);
           }
           return velocities;
         });

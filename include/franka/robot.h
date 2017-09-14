@@ -102,7 +102,7 @@ class Robot {
    *
    *   franka::JointPositions output = getJointPositions(time);
    *
-   *   if (time == max_time) {
+   *   if (time >= max_time) {
    *     // Return MotionFinished at the end of the trajectory.
    *     return franka::MotionFinished(output);
    *   }

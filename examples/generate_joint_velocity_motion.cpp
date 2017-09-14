@@ -39,9 +39,9 @@ int main(int argc, char** argv) {
 
       franka::JointVelocities velocities = {{0.0, 0.0, 0.0, omega, omega, omega, omega}};
 
-      if (time == 2 * time_max) {
+      if (time >= 2 * time_max) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return MotionFinished(velocities);
+        return franka::MotionFinished(velocities);
       }
       return velocities;
     });

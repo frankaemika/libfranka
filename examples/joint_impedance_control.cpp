@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
       pose_desired.O_T_EE[14] += delta_z;
 
       // Send desired pose.
-      if (time == run_time + acceleration_time) {
+      if (time >= run_time + acceleration_time) {
         running = false;
         return franka::MotionFinished(pose_desired);
       }

@@ -41,9 +41,9 @@ int main(int argc, char** argv) {
                                         initial_position[4] + delta_angle, initial_position[5],
                                         initial_position[6] + delta_angle}};
 
-      if (time > 10.0) {
+      if (time >= 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return MotionFinished(output);
+        return franka::MotionFinished(output);
       }
       return output;
     });

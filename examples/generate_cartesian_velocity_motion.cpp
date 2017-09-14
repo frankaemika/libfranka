@@ -56,9 +56,9 @@ int main(int argc, char** argv) {
       double v_z = -std::sin(angle) * v;
 
       franka::CartesianVelocities output = {{v_x, 0.0, v_z, 0.0, 0.0, 0.0}};
-      if (time == 2 * time_max) {
+      if (time >= 2 * time_max) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return MotionFinished(output);
+        return franka::MotionFinished(output);
       }
       return output;
     });

@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
           new_pose[12] += delta_x;
           new_pose[14] += delta_z;
 
-          if (time == 10.0) {
+          if (time >= 10.0) {
             std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
             return franka::MotionFinished(new_pose);
           }

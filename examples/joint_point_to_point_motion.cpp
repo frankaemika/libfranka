@@ -113,11 +113,9 @@ int main(int argc, char** argv) {
       bool motion_finished = calculateDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync,
                                                     t_f_sync, q_1, &delta_q_d);
 
-      if (motion_finished) {
-        return franka::Stop;
-      }
-
-      return add(q_start, delta_q_d);
+      franka::JointPositions output = add(q_start, delta_q_d);
+      output.motion_finished = motion_finished;
+      return output;
     });
     std::cout << std::endl << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
