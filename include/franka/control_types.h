@@ -34,7 +34,7 @@ class IsStop {
   /**
    * Determines whether to stop the control and motion generation loops.
    *
-   * @return true if the control loop should be stopped.
+   * @return True if the control loop should be stopped.
    */
   bool stop() const noexcept;
 
@@ -188,7 +188,7 @@ class CartesianPose : public IsStop {
    *
    * @param[in] transform Homogeneous transformation to be checked, passed as column major array.
    *
-   * @return true if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
+   * @return True if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
    * the array defines a column major matrix.
    */
   static bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept;

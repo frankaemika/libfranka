@@ -66,7 +66,7 @@ class Gripper {
    * After changing the gripper fingers, a homing needs to be done.
    * This is needed to estimate the maximum grasping width.
    *
-   * @return true if command was successful, false otherwise.
+   * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
    *
@@ -81,7 +81,7 @@ class Gripper {
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [mA]
    *
-   * @return true if an object has been grasped, false otherwise.
+   * @return True if an object has been grasped, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
@@ -93,7 +93,7 @@ class Gripper {
    * @param[in] width Intended opening width. [m]
    * @param[in] speed Closing speed. [m/s]
    *
-   * @return true if command was successful, false otherwise.
+   * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
@@ -102,7 +102,7 @@ class Gripper {
   /**
    * Stops a currently running gripper move or grasp.
    *
-   * @return true if command was successful, false otherwise.
+   * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
    */

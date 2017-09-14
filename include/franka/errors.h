@@ -49,7 +49,7 @@ struct Errors {
   /**
    * Check if any error flag is set to true.
    *
-   * @return true if any errors are set.
+   * @return True if any errors are set.
    */
   explicit operator bool() const noexcept;
 
