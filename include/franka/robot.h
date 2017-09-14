@@ -511,7 +511,8 @@ class Robot {
   /**
    * Stops all currently running motions.
    *
-   * If a control or motion generator loop is running, it will be preempted.
+   * If a control or motion generator loop is running in another thread, it will be preempted
+   * with a franka::ControlException.
    *
    * @throw CommandException if an error occurred.
    */

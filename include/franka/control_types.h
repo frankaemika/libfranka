@@ -30,7 +30,7 @@ enum class RealtimeConfig { kEnforce, kIgnore };
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-struct Stoppable {
+struct Finishable {
   /**
    * Determines whether to finish a currently running motion.
    */
@@ -40,7 +40,7 @@ struct Stoppable {
 /**
  * Stores values for torque control.
  */
-class Torques : public Stoppable {
+class Torques : public Finishable {
  public:
   /**
    * Creates a new Torques instance.
@@ -67,7 +67,7 @@ class Torques : public Stoppable {
 /**
  * Stores values for joint position motion generation.
  */
-class JointPositions : public Stoppable {
+class JointPositions : public Finishable {
  public:
   /**
    * Creates a new JointPositions instance.
@@ -94,7 +94,7 @@ class JointPositions : public Stoppable {
 /**
  * Stores values for joint velocity motion generation.
  */
-class JointVelocities : public Stoppable {
+class JointVelocities : public Finishable {
  public:
   /**
    * Creates a new JointVelocities instance.
@@ -121,7 +121,7 @@ class JointVelocities : public Stoppable {
 /**
  * Stores values for Cartesian pose motion generation.
  */
-class CartesianPose : public Stoppable {
+class CartesianPose : public Finishable {
  public:
   /**
    * Creates a new CartesianPose instance.
@@ -170,7 +170,7 @@ class CartesianPose : public Stoppable {
 /**
  * Stores values for Cartesian velocity motion generation.
  */
-class CartesianVelocities : public Stoppable {
+class CartesianVelocities : public Finishable {
  public:
   /**
    * Creates a new CartesianVelocities instance.
