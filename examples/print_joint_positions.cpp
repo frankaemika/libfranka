@@ -6,7 +6,7 @@
 
 /**
  * @example print_joint_positions.cpp
- * An example showing how to use the FRANKA model library.
+ * An example showing how to use the model library.
  */
 
 template <class T, size_t N>

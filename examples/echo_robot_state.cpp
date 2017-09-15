@@ -5,7 +5,7 @@
 
 /**
  * @example echo_robot_state.cpp
- * An example showing how to continuously read FRANKA's current state.
+ * An example showing how to continuously read the robot state.
  */
 
 int main(int argc, char** argv) {
