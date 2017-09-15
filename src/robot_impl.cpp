@@ -209,25 +209,44 @@ uint32_t Robot::Impl::startMotion(
   return move_command_id;
 }
 
-void Robot::Impl::stopMotion(uint32_t motion_id) {
+void Robot::Impl::finishMotion(
+    uint32_t motion_id,
+    const research_interface::robot::MotionGeneratorCommand* motion_command,
+    const research_interface::robot::ControllerCommand* control_command) {
+  // As a motion generator is always running, even if just controlling torques,
+  // checking motionGeneratorRunning() is sufficient.
   if (!motionGeneratorRunning()) {
     return;
   }
 
-  // If a controller is currently running, send zero torques while stopping motion.
-  research_interface::robot::ControllerCommand controller_command{};
+  if (motion_command == nullptr) {
+    throw ControlException("libfranka robot: No motion generator command given!");
+  }
+  research_interface::robot::MotionGeneratorCommand motion_finished_command = *motion_command;
+  motion_finished_command.motion_generation_finished = true;
 
-  research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.motion_generation_finished = true;
   // The TCP response for the finished Move might arrive while the robot state still shows that the
   // motion is running, or afterwards. To handle both situations, we do not process TCP packages in
   // this loop and explicitly wait for the Move response over TCP afterwards.
   while (motionGeneratorRunning()) {
-    sendRobotCommand(&motion_command, controllerRunning() ? &controller_command : nullptr);
-    receiveRobotState();
+    update(&motion_finished_command, control_command);
   }
   handleCommandResponse<research_interface::robot::Move>(
       network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+}
+
+void Robot::Impl::cancelMotion(uint32_t motion_id) {
+  if (!motionGeneratorRunning()) {
+    return;
+  }
+
+  executeCommand<research_interface::robot::StopMove>();
+  while (motionGeneratorRunning()) {
+    receiveRobotState();
+  }
+
+  // Ignore Move response.
+  network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
 }
 
 Model Robot::Impl::loadModel() const {

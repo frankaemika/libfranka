@@ -27,35 +27,20 @@ enum class RealtimeConfig { kEnforce, kIgnore };
  * Helper type for control and motion generation loops.
  *
  * Used to determine whether to terminate a loop after the control callback has returned.
- * @see @em franka::Stop variable in control_types.h
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
  */
-class IsStop {
- public:
+struct Finishable {
   /**
-   * Determines whether to stop the control and motion generation loops.
-   *
-   * @return True if the control loop should be stopped.
+   * Determines whether to finish a currently running motion.
    */
-  bool stop() const noexcept;
-
- protected:
-  /**
-   * Creates a new instance with stop() = false;
-   */
-  IsStop() noexcept;
-  /**
-   * Creates a new instance with stop() = is_stop;
-   */
-  IsStop(bool is_stop) noexcept;
-
- private:
-  bool is_stop_;
+  bool motion_finished = false;
 };
 
 /**
  * Stores values for torque control.
  */
-class Torques : public IsStop {
+class Torques : public Finishable {
  public:
   /**
    * Creates a new Torques instance.
@@ -77,15 +62,12 @@ class Torques : public IsStop {
    * Desired torques in [Nm].
    */
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
-
- protected:
-  Torques() noexcept;
 };
 
 /**
  * Stores values for joint position motion generation.
  */
-class JointPositions : public IsStop {
+class JointPositions : public Finishable {
  public:
   /**
    * Creates a new JointPositions instance.
@@ -107,15 +89,12 @@ class JointPositions : public IsStop {
    * Desired joint angles in [rad].
    */
   std::array<double, 7> q{};
-
- protected:
-  JointPositions() noexcept;
 };
 
 /**
  * Stores values for joint velocity motion generation.
  */
-class JointVelocities : public IsStop {
+class JointVelocities : public Finishable {
  public:
   /**
    * Creates a new JointVelocities instance.
@@ -137,15 +116,12 @@ class JointVelocities : public IsStop {
    * Desired joint velocities in [rad/s].
    */
   std::array<double, 7> dq{};
-
- protected:
-  JointVelocities() noexcept;
 };
 
 /**
  * Stores values for Cartesian pose motion generation.
  */
-class CartesianPose : public IsStop {
+class CartesianPose : public Finishable {
  public:
   /**
    * Creates a new CartesianPose instance.
@@ -177,9 +153,6 @@ class CartesianPose : public IsStop {
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
- protected:
-  CartesianPose() noexcept;
-
  private:
   void checkHomogeneousTransformation();
 
@@ -197,7 +170,7 @@ class CartesianPose : public IsStop {
 /**
  * Stores values for Cartesian velocity motion generation.
  */
-class CartesianVelocities : public IsStop {
+class CartesianVelocities : public Finishable {
  public:
   /**
    * Creates a new CartesianVelocities instance.
@@ -222,26 +195,73 @@ class CartesianVelocities : public IsStop {
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
-
- protected:
-  CartesianVelocities() noexcept;
 };
 
 /**
- * A static instance of this class @em franka::Stop is used to signal the termination of motion
- * generation and control loops.
+ * Helper method to indicate that a motion should stop after processing the given command.
  *
- * @see Robot::control
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
  */
-struct StopT final : Torques, JointPositions, JointVelocities, CartesianVelocities, CartesianPose {
-  StopT() noexcept = default;
-};
+Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifier-naming)
 
 /**
- * Used to signal the termination of motion generation and control loops.
+ * Helper method to indicate that a motion should stop after processing the given command.
  *
- * @see Robot::control
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
  */
-static const StopT Stop{};  // NOLINT (readability-identifier-naming)
+JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointPositions& command);
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const JointVelocities& command);
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianPose& command);
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+    const CartesianVelocities& command);
+
+/**
+ * Helper method to indicate that a motion should stop after processing the given command.
+ *
+ * @param[in] command Last command to be executed before the motion terminates.
+ * @return Command with motion_finished set to true.
+ *
+ * @see @ref callback-docs "Documentation on callbacks"
+ */
+template <typename T>
+T MotionFinished(const T& command) {  // NOLINT (readability-identifier-naming)
+  return MotionFinished(command);
+}
 
 }  // namespace franka

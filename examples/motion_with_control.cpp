@@ -145,12 +145,15 @@ int main(int argc, char** argv) {
           index += time_step.toMSec();
 
           if (index >= trajectory.size()) {
-            return franka::Stop;
+            index = trajectory.size() - 1;
           }
 
           std::array<double, 7> velocities{{0, 0, 0, 0, 0, 0, 0}};
           velocities[joint_number] = trajectory[index];
 
+          if (index >= trajectory.size() - 1) {
+            return franka::MotionFinished(velocities);
+          }
           return velocities;
         });
   } catch (const franka::Exception& e) {

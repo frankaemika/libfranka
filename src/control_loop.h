@@ -31,8 +31,6 @@ class ControlLoop {
               ControllerMode controller_mode,
               MotionGeneratorCallback motion_callback);
 
-  virtual ~ControlLoop() noexcept;
-
   void operator()();
 
  protected:
@@ -55,10 +53,5 @@ class ControlLoop {
 
   void convertMotion(const T& motion, research_interface::robot::MotionGeneratorCommand* command);
 };
-
-template class ControlLoop<JointPositions>;
-template class ControlLoop<JointVelocities>;
-template class ControlLoop<CartesianPose>;
-template class ControlLoop<CartesianVelocities>;
 
 }  // namespace franka

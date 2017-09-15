@@ -16,6 +16,7 @@ using ::testing::Return;
 
 using research_interface::robot::Connect;
 using research_interface::robot::Move;
+using research_interface::robot::StopMove;
 using namespace research_interface;
 
 using namespace franka;
@@ -139,7 +140,7 @@ TEST(Robot, CanControlRobot) {
           return joint_positions;
         }
         send.clear();
-        return Stop;
+        return MotionFinished(joint_positions);
       },
       ControllerMode::kJointImpedance);
 

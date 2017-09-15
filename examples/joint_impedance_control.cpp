@@ -120,12 +120,9 @@ int main(int argc, char** argv) {
     std::function<franka::CartesianPose(const franka::RobotState&, franka::Duration)>
         cartesian_pose_callback = [=, &time, &vel_current, &running, &angle](
             const franka::RobotState& /*state*/, franka::Duration period) -> franka::CartesianPose {
-      // Update time
+      // Update time.
       time += period.toSec();
-      if (time > run_time + acceleration_time) {
-        running = false;
-        return franka::Stop;
-      }
+
       // Compute Cartesian velocity.
       if (vel_current < vel_max && time < run_time) {
         vel_current += period.toSec() * std::fabs(vel_max / acceleration_time);
@@ -145,11 +142,16 @@ int main(int argc, char** argv) {
       // Compute relative y and z positions of desired pose.
       double delta_y = radius * (1 - std::cos(angle));
       double delta_z = radius * std::sin(angle);
-      std::array<double, 16> pose_desired = initial_pose;
-      pose_desired[13] += delta_y;
-      pose_desired[14] += delta_z;
+      franka::CartesianPose pose_desired = initial_pose;
+      pose_desired.O_T_EE[13] += delta_y;
+      pose_desired.O_T_EE[14] += delta_z;
 
       // Send desired pose.
+      if (time >= run_time + acceleration_time) {
+        running = false;
+        return franka::MotionFinished(pose_desired);
+      }
+
       return pose_desired;
     };
 
@@ -161,13 +163,8 @@ int main(int argc, char** argv) {
 
     // Define callback for the joint torque control loop.
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        impedance_control_callback = [&print_data, &model, &running, k_gains, d_gains](
+        impedance_control_callback = [&print_data, &model, k_gains, d_gains](
             const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
-      // Stop moving when not running anymore
-      if (!running) {
-        return franka::Stop;
-      }
-
       // Read current coriolis terms from model.
       std::array<double, 7> coriolis = model.coriolis(
           state, {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});

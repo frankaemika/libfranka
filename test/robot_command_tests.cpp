@@ -126,6 +126,11 @@ bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Requ
 }
 
 template <>
+bool Command<StopMove>::compare(const StopMove::Request&, const StopMove::Request&) {
+  return true;
+}
+
+template <>
 Move::Request Command<Move>::getExpected() {
   return Move::Request(Move::ControllerMode::kJointImpedance,
                        Move::MotionGeneratorMode::kJointVelocity, Move::Deviation(1, 2, 3),
@@ -199,6 +204,11 @@ AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
   return AutomaticErrorRecovery::Request();
 }
 
+template <>
+StopMove::Request Command<StopMove>::getExpected() {
+  return StopMove::Request();
+}
+
 template <typename T>
 void Command<T>::executeCommand(Robot::Impl& robot) {
   robot.executeCommand<T>(getExpected());
@@ -228,6 +238,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetFToEE,
                                       SetLoad,
                                       Move,
+                                      StopMove,
                                       AutomaticErrorRecovery>;
 
 TYPED_TEST_CASE(Command, CommandTypes);
