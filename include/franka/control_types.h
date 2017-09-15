@@ -251,17 +251,4 @@ CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
 CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
     const CartesianVelocities& command);
 
-/**
- * Helper method to indicate that a motion should stop after processing the given command.
- *
- * @param[in] command Last command to be executed before the motion terminates.
- * @return Command with motion_finished set to true.
- *
- * @see @ref callback-docs "Documentation on callbacks"
- */
-template <typename T>
-T MotionFinished(const T& command) {  // NOLINT (readability-identifier-naming)
-  return MotionFinished(command);
-}
-
 }  // namespace franka

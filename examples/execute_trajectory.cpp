@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
       index += time_step.toMSec();
 
       if (index >= samples.size() - 1) {
-        return franka::MotionFinished(samples.back());
+        return franka::MotionFinished(franka::JointPositions(samples.back()));
       }
       return samples[index];
     });
