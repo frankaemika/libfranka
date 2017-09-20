@@ -97,6 +97,12 @@ struct RobotState {
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$\tau_{J}_d\f$
+   * Desired link side torque signal. Unit: \f$[Nm]\f$
+   */
+  std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * \f$\dot{\tau_{J}}\f$
    * Derivative of measured joint torque. Unit: \f$[\frac{Nm}{s}]\f$
    */
