@@ -23,6 +23,14 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "]";
   return ostream;
 }
+
+std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<double, 7>& b) {
+  std::array<double, 7> result;
+  for (size_t i = 0; i < a.size(); i++) {
+    result[i] = a[i] - b[i];
+  }
+  return result;
+}
 }  // anonymous namespace
 
 /**
@@ -163,9 +171,9 @@ int main(int argc, char** argv) {
 
     // Set gains for the joint impedance control.
     // Stiffness
-    const std::array<double, 7> k_gains = {{1000.0, 1000.0, 1000.0, 1000.0, 500.0, 300.0, 100.0}};
+    const std::array<double, 7> k_gains = {{600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 50.0}};
     // Damping
-    const std::array<double, 7> d_gains = {{100.0, 100.0, 100.0, 100.0, 50.0, 30.0, 10.0}};
+    const std::array<double, 7> d_gains = {{50.0, 50.0, 50.0, 50.0, 30.0, 25.0, 15.0}};
 
     // Maximum torque difference.
     const double delta_tau_max = 1.0;
@@ -188,7 +196,8 @@ int main(int argc, char** argv) {
       }
 
       std::array<double, 7> tau_d_saturated =
-          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d);
+          saturateTorqueRate(delta_tau_max, tau_d_calculated,
+                             subtract(state.tau_J_d, model.gravity(state, 0.0, {{0.0, 0.0, 0.0}})));
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
