@@ -35,6 +35,10 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
  * to avoid blocking print functions in the real-time loop.
  */
 
+std::array<double, 7> saturateTorqueRate(const double delta_tau_max,
+                                         const std::array<double, 7>& tau_d_calculated,
+                                         const std::array<double, 7>& tau_J_d);
+
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
   if (argc != 5) {
@@ -163,9 +167,12 @@ int main(int argc, char** argv) {
     // Damping
     const std::array<double, 7> d_gains = {{100.0, 100.0, 100.0, 100.0, 50.0, 30.0, 10.0}};
 
+    // Maximum torque difference.
+    const double delta_tau_max = 1.0;
+
     // Define callback for the joint torque control loop.
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        impedance_control_callback = [&print_data, &model, k_gains, d_gains](
+        impedance_control_callback = [&print_data, &model, k_gains, d_gains, delta_tau_max](
             const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
       // Read current coriolis terms from model.
       std::array<double, 7> coriolis = model.coriolis(
@@ -174,23 +181,26 @@ int main(int argc, char** argv) {
       // Compute torque command from joint impedance control law.
       // Note: The answer to our Cartesian pose inverse kinematics is always in state.q_d with one
       // time step delay.
-      std::array<double, 7> tau_d;
+      std::array<double, 7> tau_d_calculated;
       for (size_t i = 0; i < 7; i++) {
-        tau_d[i] =
+        tau_d_calculated[i] =
             k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
       }
+
+      std::array<double, 7> tau_d_saturated =
+          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
         print_data.has_data = true;
         print_data.robot_state = state;
-        print_data.tau_d_last = tau_d;
+        print_data.tau_d_last = tau_d_saturated;
         print_data.gravity = model.gravity(state, 0.0, {{0.0, 0.0, 0.0}});
         print_data.mutex.unlock();
       }
 
       // Send torque command.
-      return tau_d;
+      return tau_d_saturated;
     };
 
     // Start real-time control loop.
@@ -205,4 +215,15 @@ int main(int argc, char** argv) {
     print_thread.join();
   }
   return 0;
+}
+
+std::array<double, 7> saturateTorqueRate(const double delta_tau_max,
+                                         const std::array<double, 7>& tau_d_calculated,
+                                         const std::array<double, 7>& tau_J_d) {
+  std::array<double, 7> tau_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    double difference = tau_d_calculated[i] - tau_J_d[i];
+    tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
+  }
+  return tau_d_saturated;
 }
