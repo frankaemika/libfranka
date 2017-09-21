@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    const std::array<double, 7>  max_joint_acc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
+    const std::array<double, 7> max_joint_acc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
 
     double time_max = 1.0;
     double omega_max = 1.0;
@@ -70,9 +70,10 @@ std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 
                                                        const std::array<double, 7>& dq_d,
                                                        const std::array<double, 7>& last_dq_d) {
   std::array<double, 7> dq_d_saturated{};
-  for (size_t i = 0 ; i < 7 ; i ++) {
-    double accel = (dq_d[i] - last_dq_d[i])/1e-3;
-    dq_d_saturated[i] = last_dq_d[i] + std::max(std::min(accel, max_joint_acc[i]), -max_joint_acc[i])*1e-3;
+  for (size_t i = 0; i < 7; i++) {
+    double accel = (dq_d[i] - last_dq_d[i]) / 1e-3;
+    dq_d_saturated[i] =
+        last_dq_d[i] + std::max(std::min(accel, max_joint_acc[i]), -max_joint_acc[i]) * 1e-3;
   }
   return dq_d_saturated;
 };

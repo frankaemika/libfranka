@@ -14,9 +14,8 @@
  */
 
 std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                       const std::array<double, 7>& q_d,
-                                                       const std::array<double, 7>& last_q_d);
-
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d);
 
 int main(int argc, char** argv) {
   if (argc != 2) {
@@ -35,7 +34,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    const std::array<double, 7>  max_joint_vel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
+    const std::array<double, 7> max_joint_vel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
 
     auto initial_position = robot.readOnce().q_d;
     double time = 0.0;
@@ -70,12 +69,13 @@ int main(int argc, char** argv) {
 }
 
 std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                       const std::array<double, 7>& q_d,
-                                                       const std::array<double, 7>& last_q_d) {
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d) {
   std::array<double, 7> q_d_saturated{};
-  for (size_t i = 0 ; i < 7 ; i ++) {
-    double vel = (q_d[i] - last_q_d[i])/1e-3;
-    q_d_saturated[i] = last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i])*1e-3;
+  for (size_t i = 0; i < 7; i++) {
+    double vel = (q_d[i] - last_q_d[i]) / 1e-3;
+    q_d_saturated[i] =
+        last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i]) * 1e-3;
   }
   return q_d_saturated;
 };
