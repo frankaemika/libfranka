@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.0)
-project(libfranka-examples CXX)
 
+project(libfranka-examples CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Franka REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(EXAMPLES
   echo_robot_state
@@ -16,6 +17,7 @@ set(EXAMPLES
   generate_joint_velocity_motion
   grasp_object
   joint_impedance_control
+  cartesian_impedance_control
   joint_point_to_point_motion
   motion_with_control
   print_joint_positions
