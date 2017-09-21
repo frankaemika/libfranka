@@ -18,14 +18,14 @@
  * where the equilibrium is the initial configuration.
  * After starting the controller try to push the robot around and try different stiffness levels.
  * Usage:
- * ./cartesian_impedance_control <robot-hostname> <translational_stiffness> <rotational_stiffness>
+ * ./cartesian_impedance_control <robot-hostname> <translational-stiffness> <rotational-stiffness>
  */
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 4) {
     std::cerr << "Usage: ./" << argv[0]
-              << " <robot-hostname> <translational_stiffness> <rotational_stiffness>" << std::endl;
+              << " <robot-hostname> <translational-stiffness> <rotational-stiffness>" << std::endl;
     return -1;
   }
 
