@@ -75,10 +75,13 @@ int main(int argc, char** argv) {
         return franka::MotionFinished(franka::JointPositions(samples.back()));
       }
       // state.q_d contains the last joint position command received by the robot.
-      // In case of packet loss due to bad connection, even if your desired trajectory
-      // is smooth discontinuities might occur.
+      // In case of packet loss due to bad connection or due to a slow control loop
+      // not reaching the 1Khz rate, even if your desired trajectory
+      // is smooth, discontinuities might occur.
       // Saturating the velocity computed with respect to the last command received
       // by the robot will prevent from getting discontinuity errors.
+      // Note that if the robot does not receive a command it will try to extrapolate
+      // the desired behavior assuming a constant acceleration model
       return saturateDesiredJointVelocity(max_joint_vel, samples[index], robot_state.q_d);
     });
   } catch (const franka::ControlException& e) {
