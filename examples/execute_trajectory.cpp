@@ -14,6 +14,10 @@
  * An example showing how to execute a joint trajectory loaded from a CSV file.
  */
 
+std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d);
+
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "[";
@@ -56,6 +60,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
+    const std::array<double, 7>  max_joint_vel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
     // Set the joint impedance.
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
@@ -69,7 +74,12 @@ int main(int argc, char** argv) {
       if (index >= samples.size() - 1) {
         return franka::MotionFinished(franka::JointPositions(samples.back()));
       }
-      return samples[index];
+      // state.q_d contains the last joint position command received by the robot.
+      // In case of packet loss due to bad connection, even if your desired trajectory
+      // is smooth discontinuities might occur.
+      // Saturating the velocity computed with respect to the last command received
+      // by the robot will prevent from getting discontinuity errors.
+      return saturateDesiredJointVelocity(max_joint_vel,samples[index], robot_state.q_d);
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
@@ -93,3 +103,15 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
+std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d) {
+  std::array<double, 7> q_d_saturated{};
+  for (size_t i = 1 ; i < 7 ; i ++) {
+    double vel = (q_d[i] - last_q_d[i])/1e-3;
+    q_d_saturated[i] = last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i])*1e-3;
+  }
+  return q_d_saturated;
+};
+
