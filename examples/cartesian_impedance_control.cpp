@@ -13,12 +13,12 @@
 #include <eigen3/Eigen/Dense>
 
 /**
- * @example cartesian_impedance_example.cpp
+ * @example cartesian_impedance_control.cpp
  * An example showing a simple cartesian impedance controller that renders a spring damper system
  * where the equilibrium is the initial configuration.
  * After starting the controller try to push the robot around and try different stiffness levels.
  * Usage:
- * ./cartesian_impedance_example <robot-hostname> <translational_stiffness> <rotational_stiffness>
+ * ./cartesian_impedance_control <robot-hostname> <translational_stiffness> <rotational_stiffness>
  */
 
 int main(int argc, char** argv) {
