@@ -18,6 +18,7 @@ set(EXAMPLES
   grasp_object
   joint_impedance_control
   cartesian_impedance_control
+  force_control
   joint_point_to_point_motion
   motion_with_control
   print_joint_positions
