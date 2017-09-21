@@ -108,7 +108,7 @@ std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& 
                                                    const std::array<double, 7>& q_d,
                                                    const std::array<double, 7>& last_q_d) {
   std::array<double, 7> q_d_saturated{};
-  for (size_t i = 1 ; i < 7 ; i ++) {
+  for (size_t i = 0 ; i < 7 ; i ++) {
     double vel = (q_d[i] - last_q_d[i])/1e-3;
     q_d_saturated[i] = last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i])*1e-3;
   }

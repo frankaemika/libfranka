@@ -70,7 +70,7 @@ std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 
                                                        const std::array<double, 7>& dq_d,
                                                        const std::array<double, 7>& last_dq_d) {
   std::array<double, 7> dq_d_saturated{};
-  for (size_t i = 1 ; i < 7 ; i ++) {
+  for (size_t i = 0 ; i < 7 ; i ++) {
     double accel = (dq_d[i] - last_dq_d[i])/1e-3;
     dq_d_saturated[i] = last_dq_d[i] + std::max(std::min(accel, max_joint_acc[i]), -max_joint_acc[i])*1e-3;
   }

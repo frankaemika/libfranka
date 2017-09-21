@@ -37,20 +37,20 @@ int main(int argc, char** argv) {
 
     const std::array<double, 7>  max_joint_vel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
 
-    auto initial_position = robot.readOnce().q;
+    auto initial_position = robot.readOnce().q_d;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState& state,
                              franka::Duration time_step) -> franka::JointPositions {
       time += time_step.toSec();
 
-      double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 5.0 * time));
+      double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
 
       franka::JointPositions output = {{initial_position[0], initial_position[1],
                                         initial_position[2], initial_position[3] + delta_angle,
                                         initial_position[4] + delta_angle, initial_position[5],
                                         initial_position[6] + delta_angle}};
 
-      if (time >= 10.0) {
+      if (time >= 5.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
         return franka::MotionFinished(output);
       }
@@ -73,7 +73,7 @@ std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& 
                                                        const std::array<double, 7>& q_d,
                                                        const std::array<double, 7>& last_q_d) {
   std::array<double, 7> q_d_saturated{};
-  for (size_t i = 1 ; i < 7 ; i ++) {
+  for (size_t i = 0 ; i < 7 ; i ++) {
     double vel = (q_d[i] - last_q_d[i])/1e-3;
     q_d_saturated[i] = last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i])*1e-3;
   }
