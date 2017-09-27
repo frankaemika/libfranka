@@ -23,14 +23,6 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   ostream << "]";
   return ostream;
 }
-
-std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<double, 7>& b) {
-  std::array<double, 7> result;
-  for (size_t i = 0; i < a.size(); i++) {
-    result[i] = a[i] - b[i];
-  }
-  return result;
-}
 }  // anonymous namespace
 
 /**
@@ -43,9 +35,11 @@ std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<
  * to avoid blocking print functions in the real-time loop.
  */
 
-std::array<double, 7> saturateTorqueRate(const double delta_tau_max,
-                                         const std::array<double, 7>& tau_d_calculated,
-                                         const std::array<double, 7>& tau_J_d);
+std::array<double, 7> saturateTorqueRate(
+    const double delta_tau_max,
+    const std::array<double, 7>& tau_d_calculated,
+    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 7>& gravity);
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
@@ -196,8 +190,8 @@ int main(int argc, char** argv) {
       }
 
       std::array<double, 7> tau_d_saturated =
-          saturateTorqueRate(delta_tau_max, tau_d_calculated,
-                             subtract(state.tau_J_d, model.gravity(state, 0.0, {{0.0, 0.0, 0.0}})));
+          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d,
+                             model.gravity(state, 0.0, {{0.0, 0.0, 0.0}}));
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
@@ -226,12 +220,14 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-std::array<double, 7> saturateTorqueRate(const double delta_tau_max,
-                                         const std::array<double, 7>& tau_d_calculated,
-                                         const std::array<double, 7>& tau_J_d) {
+std::array<double, 7> saturateTorqueRate(
+    const double delta_tau_max,
+    const std::array<double, 7>& tau_d_calculated,
+    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 7>& gravity) {
   std::array<double, 7> tau_d_saturated{};
   for (size_t i = 0; i < 7; i++) {
-    double difference = tau_d_calculated[i] - tau_J_d[i];
+    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
     tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
   }
   return tau_d_saturated;
