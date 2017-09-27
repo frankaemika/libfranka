@@ -29,16 +29,16 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example} Franka::Franka)
 endforeach()
 
-option(BUILD_EIGEN3_EXAMPLES "Build examples that require Eigen3" ON)
-if(BUILD_EIGEN3_EXAMPLES)
+option(BUILD_EXAMPLES_EIGEN3 "Build examples that require Eigen3" ON)
+if(BUILD_EXAMPLES_EIGEN3)
   find_package(Eigen3 REQUIRED)
 
-  set(EIGEN_EXAMPLES
+  set(EIGEN3_EXAMPLES
     cartesian_impedance_control
     force_control
   )
 
-  foreach(example ${EIGEN_EXAMPLES})
+  foreach(example ${EIGEN3_EXAMPLES})
     add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} Franka::Franka Eigen3::Eigen3)
   endforeach()
