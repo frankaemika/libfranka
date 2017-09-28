@@ -1,8 +1,6 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <unistd.h>
 #include <array>
-#include <atomic>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -18,8 +16,9 @@
  * @example force_control.cpp
  * A simple PI force controller that renders in the Z axis the gravitational force corresponding
  * to a desired mass.
- * The controller assumes that it is in contact with a rigid surface.
- * ./force_control <robot-hostname> <desired-mass>
+ *
+ * @warning: make sure that no endeffector is mounted and that the robot's last joint is in contact
+ * with a horizontal rigid surface before starting.
  */
 
 int main(int argc, char** argv) {
@@ -28,13 +27,18 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>  <desired-mass>" << std::endl;
     return -1;
   }
+  std::cout << "Make sure sure that no endeffector is mounted and that the robot's last joint is "
+               "in contact with a horizontal rigid surface before starting."
+            << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.get();
 
   // parameters
-  double target_mass{std::stod(argv[2])};
+  const double target_mass{std::stod(argv[2])};
   double desired_mass{0.0};
-  double k_p{5.0};
-  double k_i{10.0};
-  double filter_gain{0.001};
+  constexpr double k_p{5.0};            // NOLINT (readability-identifier-naming)
+  constexpr double k_i{10.0};           // NOLINT (readability-identifier-naming)
+  constexpr double filter_gain{0.001};  // NOLINT (readability-identifier-naming)
 
   try {
     // connect to robot
