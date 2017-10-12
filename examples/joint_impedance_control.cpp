@@ -169,7 +169,8 @@ int main(int argc, char** argv) {
     // Damping
     const std::array<double, 7> d_gains = {{50.0, 50.0, 50.0, 50.0, 30.0, 25.0, 15.0}};
 
-    // Maximum torque difference.
+    // Maximum torque difference with a sampling rate of 1 kHz. The maximum torque rate is
+    // 1000 * (1 / sampling_time).
     const double delta_tau_max = 1.0;
 
     // Define callback for the joint torque control loop.
