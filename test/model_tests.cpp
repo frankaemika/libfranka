@@ -64,22 +64,23 @@ struct Model : public ::testing::Test {
     std::ifstream model_library_stream(
         FRANKA_TEST_BINARY_DIR + "/libfcimodels.so"s,
         std::ios_base::in | std::ios_base::binary | std::ios_base::ate);
-    buffer_.resize(model_library_stream.tellg());
+    std::vector<char> buffer;
+    buffer.resize(model_library_stream.tellg());
     model_library_stream.seekg(0, std::ios::beg);
-    if (!model_library_stream.read(buffer_.data(), buffer_.size())) {
+    if (!model_library_stream.read(buffer.data(), buffer.size())) {
       throw std::runtime_error("Model test: Cannot load mock libfcimodels.so");
     }
 
     server
-        .generic([&](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
+        .generic([=](decltype(server)::Socket& tcp_socket, decltype(server)::Socket&) {
           CommandHeader header;
           server.receiveRequest<LoadModelLibrary>(tcp_socket, &header);
           server.sendResponse<LoadModelLibrary>(
               tcp_socket,
               CommandHeader(Command::kLoadModelLibrary, header.command_id,
-                            sizeof(CommandMessage<LoadModelLibrary::Response>) + buffer_.size()),
+                            sizeof(CommandMessage<LoadModelLibrary::Response>) + buffer.size()),
               LoadModelLibrary::Response(LoadModelLibrary::Status::kSuccess));
-          tcp_socket.sendBytes(buffer_.data(), buffer_.size());
+          tcp_socket.sendBytes(buffer.data(), buffer.size());
         })
         .spinOnce();
 
@@ -88,9 +89,6 @@ struct Model : public ::testing::Test {
 
   RobotMockServer server{};
   franka::Robot robot{"127.0.0.1"};
-
- private:
-  std::vector<char> buffer_;
 };
 
 TEST(InvalidModel, ThrowsIfNoModelReceived) {
