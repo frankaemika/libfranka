@@ -1,6 +1,6 @@
-#include <unistd.h>
+// Copyright (c) 2017 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <array>
-#include <atomic>
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -13,21 +13,26 @@
 #include <eigen3/Eigen/Dense>
 
 /**
- * @example cartesian_impedance_example.cpp
+ * @example cartesian_impedance_control.cpp
  * An example showing a simple cartesian impedance controller that renders a spring damper system
  * where the equilibrium is the initial configuration.
  * After starting the controller try to push the robot around and try different stiffness levels.
- * Usage:
- * ./cartesian_impedance_example <robot-hostname> <translational_stiffness> <rotational_stiffness>
+ *
+ * @warning collision thresholds are set to high values. Make sure you have the user stop at hand!
  */
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 4) {
     std::cerr << "Usage: ./" << argv[0]
-              << " <robot-hostname> <translational_stiffness> <rotational_stiffness>" << std::endl;
+              << " <robot-hostname> <translational-stiffness> <rotational-stiffness>" << std::endl;
     return -1;
   }
+  std::cout
+      << "Collision thresholds are set to high values. Make sure you have the user stop at hand!"
+      << std::endl
+      << "Press Enter to continue..." << std::endl;
+  std::cin.get();
 
   // Compliance parameters
   Eigen::MatrixXd stiffness(6, 6), damping(6, 6);
