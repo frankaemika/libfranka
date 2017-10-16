@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
       }
       // state.q_d contains the last joint velocity command received by the robot.
       // In case of packet loss due to bad connection or due to a slow control loop
-      // not reaching the 1Khz rate, even if your desired velocity trajectory
+      // not reaching the 1kHz rate, even if your desired velocity trajectory
       // is smooth, discontinuities might occur.
       // Saturating the acceleration computed with respect to the last command received
       // by the robot will prevent from getting discontinuity errors.
