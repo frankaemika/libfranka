@@ -24,11 +24,12 @@
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 3) {
-    std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>  <desired-mass>" << std::endl;
+    std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>  <desired-mass [kg]>" << std::endl;
     return -1;
   }
   std::cout << "Make sure sure that no endeffector is mounted and that the robot's last joint is "
-               "in contact with a horizontal rigid surface before starting."
+               "in contact with a horizontal rigid surface before starting. Keep in mind that "
+               "collision thresholds are set to high values."
             << std::endl
             << "Press Enter to continue..." << std::endl;
   std::cin.get();
@@ -81,7 +82,7 @@ int main(int argc, char** argv) {
       desired_force_torque(2) = desired_mass * -9.81;
       tau_ext << tau_measured - gravity - initial_tau_ext;
       tau_d << jacobian.transpose() * desired_force_torque;
-      tau_error_integral << tau_error_integral + period.toSec() * (tau_d - tau_ext);
+      tau_error_integral += period.toSec() * (tau_d - tau_ext);
       // FF + PI control
       tau_cmd << tau_d + k_p * (tau_d - tau_ext) + k_i * tau_error_integral;
 
