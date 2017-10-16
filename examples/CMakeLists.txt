@@ -29,6 +29,12 @@ foreach(example ${EXAMPLES})
   target_link_libraries(${example} Franka::Franka)
 endforeach()
 
+include(GNUInstallDirs)
+install(TARGETS ${EXAMPLES}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
 option(BUILD_EXAMPLES_EIGEN3 "Build examples that require Eigen3" ON)
 if(BUILD_EXAMPLES_EIGEN3)
   find_package(Eigen3 REQUIRED)
@@ -42,10 +48,9 @@ if(BUILD_EXAMPLES_EIGEN3)
     add_executable(${example} ${example}.cpp)
     target_link_libraries(${example} Franka::Franka Eigen3::Eigen3)
   endforeach()
-endif()
 
-include(GNUInstallDirs)
-install(TARGETS ${EXAMPLES}
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+  install(TARGETS ${EIGEN3_EXAMPLES}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  )
+endif()
