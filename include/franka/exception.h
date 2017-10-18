@@ -50,9 +50,26 @@ struct IncompatibleVersionException : public Exception {
 
 /**
  * ControlException is thrown if an error occurs during motion generation or torque control.
+ * The exception holds a path to a temporary log file if one was created.
  */
 struct ControlException : public Exception {
-  using Exception::Exception;
+  /**
+   * Creates the exception with an explanatory string and a path to the log file.
+   * @param[in] what Explanatory string.
+   * @param[in] log_file_path Path to the temporary log file or an empty string.
+   */
+  explicit ControlException(const std::string& what, const std::string& log_file_path = "")
+      : Exception(what), log_file_path_(log_file_path){};
+
+  /**
+  * Returns the path to a temporary file containing the log or an empty string if a log was not
+  * written.
+  * @return Full file path or an empty string.
+  */
+  std::string logFilePath() const { return log_file_path_; }
+
+ private:
+  std::string log_file_path_;
 };
 
 /**

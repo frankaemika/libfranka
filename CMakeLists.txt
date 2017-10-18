@@ -51,6 +51,7 @@ add_library(franka SHARED
   src/gripper_state.cpp
   src/library_downloader.cpp
   src/library_loader.cpp
+  src/logger.cpp
   src/model.cpp
   src/model_library.cpp
   src/network.cpp
