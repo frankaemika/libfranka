@@ -32,7 +32,7 @@ TEST(Robot, CanPerformHandshake) {
   RobotMockServer server;
 
   Robot robot("127.0.0.1");
-  EXPECT_EQ(1, robot.serverVersion());
+  EXPECT_EQ(research_interface::robot::kVersion, robot.serverVersion());
 }
 
 TEST(Robot, ThrowsOnIncompatibleLibraryVersion) {

@@ -56,9 +56,9 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"m_load\": " << robot_state.m_load << ", \"F_x_Cload\": " << robot_state.F_x_Cload
           << ", \"I_load\": " << robot_state.I_load << ", \"elbow\": " << robot_state.elbow
           << ", \"elbow_d\": " << robot_state.elbow_d << ", \"tau_J\": " << robot_state.tau_J
-          << ", \"dtau_J\": " << robot_state.dtau_J << ", \"q\": " << robot_state.q
-          << ", \"dq\": " << robot_state.dq << ", \"q_d\": " << robot_state.q_d
-          << ", \"dq_d\": " << robot_state.dq_d
+          << ", \"tau_J_d\": " << robot_state.tau_J_d << ", \"dtau_J\": " << robot_state.dtau_J
+          << ", \"q\": " << robot_state.q << ", \"dq\": " << robot_state.dq
+          << ", \"q_d\": " << robot_state.q_d << ", \"dq_d\": " << robot_state.dq_d
           << ", \"joint_contact\": " << robot_state.joint_contact
           << ", \"cartesian_contact\": " << robot_state.cartesian_contact
           << ", \"joint_collision\": " << robot_state.joint_collision
