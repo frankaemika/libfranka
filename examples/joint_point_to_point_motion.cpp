@@ -83,7 +83,7 @@ class MotionGenerator {
   std::array<double, 7> t_f_sync_;
   std::array<double, 7> q_1_;
 
-  double time_ = 0;
+  double time_ = 0.0;
 
   std::array<double, 7> dq_max_{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
   std::array<double, 7> ddq_max_start_{{5, 5, 5, 5, 5, 5, 5}};
@@ -230,7 +230,7 @@ MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7
 
 franka::JointPositions MotionGenerator::operator()(const franka::RobotState& robot_state,
                                                    franka::Duration time_step) {
-  if (time_step.toMSec() == 0) {
+  if (time_ == 0.0) {
     q_start_ = robot_state.q_d;
     delta_q_ = subtract(q_goal_, q_start_);
     calculateSynchronizedValues(delta_q_, dq_max_, ddq_max_start_, ddq_max_goal_, &dq_max_sync_,

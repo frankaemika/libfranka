@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     double time = 0.0;
     robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
                                          franka::Duration time_step) -> franka::CartesianPose {
-      if (time_step.toMSec() == 0) {
+      if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_d;
       }
 

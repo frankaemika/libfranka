@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     double time = 0.0;
     robot.control([&initial_position, &time](const franka::RobotState& robot_state,
                                              franka::Duration time_step) -> franka::JointPositions {
-      if (time_step.toMSec() == 0) {
+      if (time == 0.0) {
         initial_position = robot_state.q_d;
       }
 

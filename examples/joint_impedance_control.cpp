@@ -122,7 +122,7 @@ int main(int argc, char** argv) {
     // Define callback function to send Cartesian pose goals to get inverse kinematics solved.
     auto cartesian_pose_callback = [=, &time, &vel_current, &running, &angle, &initial_pose](
         const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose {
-      if (period.toMSec() == 0) {
+      if (time == 0.0) {
         // Read the initial pose to start the motion from in the first time step.
         initial_pose = robot_state.O_T_EE;
       }
