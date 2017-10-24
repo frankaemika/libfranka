@@ -117,13 +117,16 @@ int main(int argc, char** argv) {
     // Load the kinematics and dynamics model.
     franka::Model model = robot.loadModel();
 
-    // Read the initial pose to start the motion from there.
-    std::array<double, 16> initial_pose = robot.readOnce().O_T_EE;
+    std::array<double, 16> initial_pose;
 
     // Define callback function to send Cartesian pose goals to get inverse kinematics solved.
-    std::function<franka::CartesianPose(const franka::RobotState&, franka::Duration)>
-        cartesian_pose_callback = [=, &time, &vel_current, &running, &angle](
-            const franka::RobotState& /*state*/, franka::Duration period) -> franka::CartesianPose {
+    auto cartesian_pose_callback = [=, &time, &vel_current, &running, &angle, &initial_pose](
+        const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose {
+      if (period.toMSec() == 0) {
+        // Read the initial pose to start the motion from in the first time step.
+        initial_pose = robot_state.O_T_EE;
+      }
+
       // Update time.
       time += period.toSec();
 
