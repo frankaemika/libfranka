@@ -50,26 +50,31 @@ struct IncompatibleVersionException : public Exception {
 
 /**
  * ControlException is thrown if an error occurs during motion generation or torque control.
- * The exception holds a path to a temporary log file if one was created.
+ * The exception holds a string log with the last received robot states. The number of recorded
+ * states can be configured in the Robot constructor.
+ *
  */
 struct ControlException : public Exception {
   /**
-   * Creates the exception with an explanatory string and a path to the log file.
+   * Creates the exception with an explanatory string and a Log object.
    * @param[in] what Explanatory string.
-   * @param[in] log_file_path Path to the temporary log file or an empty string.
+   * @param[in] log string with the last received robot states and commands.
    */
-  explicit ControlException(const std::string& what, const std::string& log_file_path = "")
-      : Exception(what), log_file_path_(log_file_path){};
+  explicit ControlException(std::string what, std::string log = "")
+      : Exception(std::move(what)), log_(std::move(log)){};
 
   /**
-  * Returns the path to a temporary file containing the log or an empty string if a log was not
-  * written.
-  * @return Full file path or an empty string.
+  * Returns a reference to a log string containing the last received robot states and commands
+  * in CSV format. If the string is not empty, the first row contains the header with row names.
+  * The following lines contain rows of values separated by commas.
+  *
+  * The log can be empty if no states were received yet.
+  * @return a const reference to the log string
   */
-  std::string logFilePath() const { return log_file_path_; }
+  const std::string& log() const { return log_; }
 
  private:
-  std::string log_file_path_;
+  std::string log_;
 };
 
 /**

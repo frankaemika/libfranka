@@ -49,24 +49,6 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
   return ostream;
 }
 
-template <typename T, size_t N>
-std::string csvName(const std::array<T, N>&, const std::string& name) {
-  std::ostringstream os;
-  for (size_t i = 0; i < N - 1; i++) {
-    os << name << "[" << i << "], ";
-  }
-  os << name << "[" << N - 1 << "]";
-  return os.str();
-}
-
-template <class T, size_t N>
-std::string commaSeparated(const std::array<T, N>& array) {
-  std::ostringstream os;
-  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(os, ","));
-  std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(os));
-  return os.str();
-}
-
 }  // anonymous namespace
 
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {

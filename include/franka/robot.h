@@ -49,12 +49,15 @@ class Robot {
    * @param[in] franka_address IP/hostname of the robot.
    * @param[in] realtime_config if set to Enforce, an exception will be thrown if realtime priority
    * cannot be set when required. Setting realtime_config to Ignore disables this behavior.
+   * @param[in] log_size sets how many last states should be kept for logging purposes.
+   * The log is provided as string in CSV format when a ControlException is thrown.
    *
    * @throw NetworkException if the connection is unsuccessful.
    * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
    */
   explicit Robot(const std::string& franka_address,
-                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
+                 size_t log_size = 20);
 
   /**
    * Move-constructs a new Robot instance.

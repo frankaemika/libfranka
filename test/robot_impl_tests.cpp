@@ -6,6 +6,7 @@
 #include <cstring>
 #include <limits>
 
+#include <logger.h>
 #include <robot_impl.h>
 
 #include "helpers.h"
@@ -616,6 +617,248 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
   auto robot_state = robot.update(&motion_command, nullptr);
   EXPECT_THROW(robot.throwOnMotionError(robot_state, id), ControlException);
   EXPECT_FALSE(robot.motionGeneratorRunning());
+}
+
+TEST(RobotImpl, LogMadeIfErrorReceived) {
+  RobotMockServer server;
+  Move::Deviation maximum_path_deviation{0, 1, 2};
+  Move::Deviation maximum_goal_pose_deviation{3, 4, 5};
+  uint32_t message_id = 682;
+
+  constexpr size_t log_size = 5;
+  constexpr size_t commands_sent_in_loop = log_size * 2;
+  std::vector<RobotCommand> commands;
+  std::vector<RobotState> states;
+
+  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort),
+                    franka::RealtimeConfig::kIgnore, log_size);
+
+  uint32_t move_id;
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        randomRobotState(robot_state);
+        robot_state.controller_mode = ControllerMode::kExternalController;
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.robot_mode = RobotMode::kMove;
+        robot_state.message_id = message_id;
+        states.push_back(robot_state);
+      })
+      .spinOnce()
+      .waitForCommand<Move>(
+          [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
+          &move_id)
+      .spinOnce();
+
+  auto id = robot.startMotion(Move::ControllerMode::kExternalController,
+                              Move::MotionGeneratorMode::kJointPosition, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
+  ASSERT_TRUE(robot.motionGeneratorRunning());
+
+  for (size_t i = 0; i < commands_sent_in_loop; i++) {
+    server
+        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+          randomRobotState(robot_state);
+          robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+          robot_state.controller_mode = ControllerMode::kExternalController;
+          robot_state.robot_mode = RobotMode::kMove;
+          robot_state.message_id = ++message_id;
+          states.push_back(robot_state);
+        })
+        .spinOnce()
+        .onReceiveRobotCommand([](const RobotCommand&) {})
+        .spinOnce();
+
+    RobotCommand sent_command;
+    randomRobotCommand(sent_command);
+    sent_command.motion.motion_generation_finished = false;
+    sent_command.message_id = message_id - 1;
+    robot.update(&sent_command.motion, &sent_command.control);
+    commands.push_back(sent_command);
+  }
+
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        randomRobotState(robot_state);
+        robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = ControllerMode::kJointImpedance;
+        robot_state.errors[0] = true;
+        robot_state.robot_mode = RobotMode::kReflex;
+        robot_state.message_id = ++message_id;
+        states.push_back(robot_state);
+      })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .spinOnce()
+      .onReceiveRobotCommand([](const RobotCommand&) {})
+      .spinOnce();
+
+  RobotCommand last_command;
+  randomRobotCommand(last_command);
+  last_command.message_id = message_id - 1;
+  auto robot_state = robot.update(&last_command.motion, &last_command.control);
+  commands.push_back(last_command);
+
+  try {
+    robot.throwOnMotionError(robot_state, id);
+    FAIL() << "Expected ControlException";
+  } catch (const ControlException& exception) {
+    franka::Logger logger(log_size);
+    for (size_t i = 0; i < log_size - 1; i++) {
+      // robot.startMotion calls update(), so there's one state more than there are commands
+      size_t start_index = commands_sent_in_loop - log_size + 1;
+      logger.log(franka::convertRobotState(states[start_index + 1 + i]), commands[start_index + i]);
+    }
+    logger.log(franka::convertRobotState(states.back()), last_command);
+    EXPECT_STREQ(logger.makeLog().c_str(), exception.log().c_str());
+  } catch (...) {
+    FAIL() << "Expected ControlException";
+  }
+}
+
+TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
+  RobotMockServer server;
+  Move::Deviation maximum_path_deviation{0, 1, 2};
+  Move::Deviation maximum_goal_pose_deviation{3, 4, 5};
+  uint32_t message_id = 682;
+
+  constexpr size_t log_size = 5;
+  constexpr size_t commands_sent_first_loop = log_size * 2;
+  constexpr size_t commands_sent_second_loop = log_size - 2;
+  std::vector<RobotCommand> commands;
+  std::vector<RobotState> states;
+
+  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort),
+                    franka::RealtimeConfig::kIgnore, log_size);
+
+  uint32_t move_id;
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        robot_state.controller_mode = ControllerMode::kExternalController;
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.robot_mode = RobotMode::kMove;
+        robot_state.message_id = message_id;
+      })
+      .spinOnce()
+      .waitForCommand<Move>(
+          [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
+          &move_id)
+      .spinOnce();
+
+  auto id = robot.startMotion(Move::ControllerMode::kExternalController,
+                              Move::MotionGeneratorMode::kJointPosition, maximum_path_deviation,
+                              maximum_goal_pose_deviation);
+  ASSERT_TRUE(robot.motionGeneratorRunning());
+  for (size_t i = 0; i < commands_sent_first_loop; i++) {
+    server
+        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+          robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+          robot_state.controller_mode = ControllerMode::kExternalController;
+          robot_state.robot_mode = RobotMode::kMove;
+          robot_state.message_id = ++message_id;
+        })
+        .spinOnce()
+        .onReceiveRobotCommand([](const RobotCommand&) {})
+        .spinOnce();
+    RobotCommand sent_command;
+    sent_command.motion.motion_generation_finished = false;
+    sent_command.message_id = message_id - 1;
+    robot.update(&sent_command.motion, &sent_command.control);
+  }
+
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = ControllerMode::kJointImpedance;
+        robot_state.errors[8] = true;
+        robot_state.robot_mode = RobotMode::kReflex;
+        robot_state.message_id = ++message_id;
+      })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .spinOnce()
+      .onReceiveRobotCommand([](const RobotCommand&) {})
+      .spinOnce();
+
+  RobotCommand last_command;
+  last_command.message_id = message_id - 1;
+  auto robot_state = robot.update(&last_command.motion, &last_command.control);
+
+  EXPECT_THROW(robot.throwOnMotionError(robot_state, id), ControlException);
+
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        randomRobotState(robot_state);
+        robot_state.controller_mode = ControllerMode::kExternalController;
+        robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+        robot_state.robot_mode = RobotMode::kMove;
+        robot_state.message_id = ++message_id;
+        states.push_back(robot_state);
+      })
+      .spinOnce()
+      .waitForCommand<Move>(
+          [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
+          &move_id)
+      .spinOnce();
+
+  id = robot.startMotion(Move::ControllerMode::kExternalController,
+                         Move::MotionGeneratorMode::kJointPosition, maximum_path_deviation,
+                         maximum_goal_pose_deviation);
+  ASSERT_TRUE(robot.motionGeneratorRunning());
+
+  for (size_t i = 0; i < commands_sent_second_loop; i++) {
+    server
+        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+          randomRobotState(robot_state);
+          robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
+          robot_state.controller_mode = ControllerMode::kExternalController;
+          robot_state.robot_mode = RobotMode::kMove;
+          robot_state.message_id = ++message_id;
+          states.push_back(robot_state);
+        })
+        .spinOnce()
+        .onReceiveRobotCommand([](const RobotCommand&) {})
+        .spinOnce();
+
+    RobotCommand sent_command;
+    randomRobotCommand(sent_command);
+    sent_command.motion.motion_generation_finished = false;
+    sent_command.message_id = message_id - 1;
+    robot.update(&sent_command.motion, &sent_command.control);
+    commands.push_back(sent_command);
+  }
+
+  server
+      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        randomRobotState(robot_state);
+        robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = ControllerMode::kJointImpedance;
+        robot_state.errors[0] = true;
+        robot_state.robot_mode = RobotMode::kReflex;
+        robot_state.message_id = ++message_id;
+        states.push_back(robot_state);
+      })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .spinOnce()
+      .onReceiveRobotCommand([](const RobotCommand&) {})
+      .spinOnce();
+
+  randomRobotCommand(last_command);
+  last_command.message_id = message_id - 1;
+  robot.update(&last_command.motion, &last_command.control);
+  commands.push_back(last_command);
+
+  try {
+    robot.throwOnMotionError(robot_state, id);
+    FAIL() << "Expected ControlException";
+  } catch (const ControlException& exception) {
+    franka::Logger logger(log_size);
+    for (size_t i = 0; i < commands_sent_second_loop; i++) {
+      // robot.startMotion calls update(), so there's one state more than there are commands
+      logger.log(franka::convertRobotState(states[i + 1]), commands[i]);
+    }
+    logger.log(franka::convertRobotState(states.back()), last_command);
+    EXPECT_STREQ(logger.makeLog().c_str(), exception.log().c_str());
+  } catch (...) {
+    FAIL() << "Expected ControlException";
+  }
 }
 
 TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {

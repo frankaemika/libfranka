@@ -52,13 +52,13 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
       handleCommandResponse<research_interface::robot::Move>(
           network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
     } catch (const CommandException& e) {
-      std::string log_path = logger_.writeToFile();
       // Rethrow as control exception to be consistent with starting/stopping of motions.
       if (robot_state.robot_mode == RobotMode::kReflex) {
         throw ControlException(
-            e.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors), log_path);
+            e.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
+            logger_.makeLog());
       }
-      throw ControlException(e.what(), log_path);
+      throw ControlException(e.what(), logger_.makeLog());
     }
   }
 }
@@ -156,7 +156,7 @@ uint32_t Robot::Impl::startMotion(
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) {
   if (motionGeneratorRunning()) {
-    throw ControlException("libfranka robot: attempted to start multiple motion generators!", "");
+    throw ControlException("libfranka robot: attempted to start multiple motion generators!");
   }
 
   research_interface::robot::MotionGeneratorMode state_motion_generator_mode;
@@ -207,14 +207,17 @@ uint32_t Robot::Impl::startMotion(
       }
     } catch (const CommandException& e) {
       if (robot_state.robot_mode == RobotMode::kReflex) {
-        throw ControlException(e.what() + " "s +
-                               static_cast<std::string>(robot_state.last_motion_errors));
+        throw ControlException(
+            e.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
+            logger_.makeLog());
       }
-      throw ControlException(e.what());
+      throw ControlException(e.what(), logger_.makeLog());
     }
 
     robot_state = update();
   }
+
+  logger_.clear();
 
   return move_command_id;
 }

@@ -67,10 +67,10 @@ class Robot::Impl : public RobotControl {
 
   std::unique_ptr<Network> network_;
 
+  Logger logger_;
+
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;
-
-  Logger logger_;
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::ControllerMode controller_mode_;

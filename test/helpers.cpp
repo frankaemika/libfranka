@@ -383,6 +383,13 @@ void testControllerCommandsAreEqual(const research_interface::robot::ControllerC
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
 }
 
+void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
+                               const research_interface::robot::RobotCommand& actual) {
+  testMotionGeneratorCommandsAreEqual(expected.motion, actual.motion);
+  testControllerCommandsAreEqual(expected.control, actual.control);
+  EXPECT_EQ(expected.message_id, actual.message_id);
+}
+
 void randomGripperState(franka::GripperState& gripper_state) {
   gripper_state.time = franka::Duration(static_cast<uint64_t>(std::rand()));
   gripper_state.temperature = static_cast<uint16_t>(std::rand());

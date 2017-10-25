@@ -23,6 +23,8 @@ void testMotionGeneratorCommandsAreEqual(
     const research_interface::robot::MotionGeneratorCommand& actual);
 void testControllerCommandsAreEqual(const research_interface::robot::ControllerCommand& expected,
                                     const research_interface::robot::ControllerCommand& actual);
+void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
+                               const research_interface::robot::RobotCommand& actual);
 
 namespace research_interface {
 namespace robot {

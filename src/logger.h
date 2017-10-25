@@ -1,6 +1,9 @@
+// Copyright (c) 2017 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
-#include <queue>
+#include <deque>
+#include <string>
 
 #include <franka/robot_state.h>
 #include <research_interface/robot/rbk_types.h>
@@ -12,13 +15,16 @@ class Logger {
   explicit Logger(size_t log_size);
 
   void log(RobotState state, research_interface::robot::RobotCommand command);
+  void clear();
 
-  std::string writeToFile();
+  std::string makeLog();
+
+ protected:
+  std::deque<RobotState> states_;
+  std::deque<research_interface::robot::RobotCommand> commands_;
 
  private:
   const size_t log_size_;
-  std::queue<RobotState> state_log_;
-  std::queue<research_interface::robot::RobotCommand> command_log_;
 };
 
 }  // namespace franka

@@ -1,19 +1,18 @@
+// Copyright (c) 2017 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "logger.h"
 
 #include <iterator>
 #include <sstream>
 
-#include <Poco/DateTimeFormatter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <fstream>
-
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+namespace franka {
 
 namespace {
 
 template <typename T, size_t N>
-std::string csvName(const std::array<T, N>&, const std::string& name) {
+std::string csvName(const std::array<T, N>& /*unused*/, const std::string& name) {
   std::ostringstream os;
   for (size_t i = 0; i < N - 1; i++) {
     os << name << "[" << i << "], ";
@@ -23,102 +22,83 @@ std::string csvName(const std::array<T, N>&, const std::string& name) {
 }
 
 template <class T, size_t N>
-std::string commaSeparated(const std::array<T, N>& array) {
-  std::ostringstream os;
-  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(os, ","));
-  std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(os));
-  return os.str();
+std::ostream& operator<<(std::ostream& ostream /*unused*/, const std::array<T, N>& array) {
+  std::copy(array.cbegin(), array.cend() - 1, std::ostream_iterator<T>(ostream, ","));
+  std::copy(array.cend() - 1, array.cend(), std::ostream_iterator<T>(ostream));
+  return ostream;
 }
 
-std::string csvHeader(const franka::RobotState& robot_state) {
+std::string csvRobotStateHeader() {
+  RobotState robot_state;
   std::ostringstream os;
   os << "duration, success rate, " << csvName(robot_state.q, "q") << ","
      << csvName(robot_state.q_d, "q_d") << "," << csvName(robot_state.dq, "dq") << ","
-     << csvName(robot_state.dq_d, "dq_d") << ","
+     << csvName(robot_state.dq_d, "dq_d") << "," << csvName(robot_state.tau_J, "tau_J") << ","
      << csvName(robot_state.tau_ext_hat_filtered, "tau_ext_hat_filtered");
+  return os.str();
+}
+
+std::string csvRobotCommandHeader() {
+  research_interface::robot::RobotCommand command;
+  std::ostringstream os;
+  os << "sent commands,id," << csvName(command.motion.q_d, "q_d") << ","
+     << csvName(command.motion.dq_d, "dq_d") << "," << csvName(command.motion.O_T_EE_d, "O_T_EE_d")
+     << "," << csvName(command.motion.O_dP_EE_d, "O_dP_EE_d") << ","
+     << csvName(command.control.tau_J_d, "tau_J_d");
   return os.str();
 }
 
 std::string csvLine(const franka::RobotState& robot_state) {
   std::ostringstream os;
   os << robot_state.time.toMSec() << "," << robot_state.control_command_success_rate << ","
-     << commaSeparated(robot_state.q) << "," << commaSeparated(robot_state.q_d) << ","
-     << commaSeparated(robot_state.dq) << "," << commaSeparated(robot_state.dq_d) << ","
-     << commaSeparated(robot_state.tau_ext_hat_filtered);
-  return os.str();
-}
-
-std::string csvHeader(const research_interface::robot::RobotCommand& command) {
-  std::ostringstream os;
-  os << "sent commands,id," << csvName(command.motion.q_d, "q_d") << ","
-     << csvName(command.motion.dq_d, "dq_d") << ","
-     << csvName(command.motion.O_T_EE_d, "O_T_EE_d") << ","
-     << csvName(command.motion.O_dP_EE_d, "O_dP_EE_d") << ","
-     << csvName(command.control.tau_J_d, "tau_J_d");
+     << robot_state.q << "," << robot_state.q_d << "," << robot_state.dq << "," << robot_state.dq_d
+     << "," << robot_state.tau_J << "," << robot_state.tau_ext_hat_filtered;
   return os.str();
 }
 
 std::string csvLine(const research_interface::robot::RobotCommand& command) {
   std::ostringstream os;
-  os << command.message_id << "," << commaSeparated(command.motion.q_d) << ","
-     << commaSeparated(command.motion.dq_d) << "," << commaSeparated(command.motion.O_T_EE_d) << ","
-     << commaSeparated(command.motion.O_dP_EE_d) << "," << commaSeparated(command.control.tau_J_d);
+  os << command.message_id << "," << command.motion.q_d << "," << command.motion.dq_d << ","
+     << command.motion.O_T_EE_d << "," << command.motion.O_dP_EE_d << ","
+     << command.control.tau_J_d;
   return os.str();
 }
 
 }  // anonymous namespace
 
-namespace franka {
-
-Logger::Logger(size_t log_size) : log_size_(log_size) {
-}
+Logger::Logger(size_t log_size) : log_size_(log_size) {}
 
 void Logger::log(RobotState state, research_interface::robot::RobotCommand command) {
-  if (command_log_.size() >= log_size_) {
-    command_log_.pop();
+  if (commands_.size() >= log_size_) {
+    commands_.pop_front();
   }
-  command_log_.push(command);
+  commands_.push_back(command);
 
-  if (state_log_.size() >= log_size_) {
-    state_log_.pop();
+  if (states_.size() >= log_size_) {
+    states_.pop_front();
   }
-  state_log_.push(state);
+  states_.push_back(state);
 }
 
-std::string Logger::writeToFile() try {
-  if (state_log_.empty()) {
-    return "";
-  }
+std::string Logger::makeLog() {
+  std::ostringstream os;
 
-  Poco::Path temp_dir_path(Poco::Path::temp());
-  temp_dir_path.pushDirectory("libfranka-logs");
-
-  Poco::File temp_dir(temp_dir_path);
-  temp_dir.createDirectories();
-
-  std::string now_string =
-      Poco::DateTimeFormatter::format(Poco::Timestamp{}, "%Y-%m-%d-%h-%m-%S-%i");
-  Poco::File log_file(Poco::Path(temp_dir_path, "log-"s + now_string + ".csv"));
-  if (!log_file.createFile()) {
-    return "";
-  }
-
-  std::ofstream log_stream(log_file.path().c_str());
-
-  log_stream << csvHeader(state_log_.front()) << ",";
-  log_stream << csvHeader(research_interface::robot::RobotCommand{}) << std::endl;
-  while (!state_log_.empty()) {
-    log_stream << csvLine(state_log_.front());
-    if (!command_log_.empty()) {
-      log_stream << ",," << csvLine(command_log_.front());
-      command_log_.pop();
+  os << csvRobotStateHeader() << "," << csvRobotCommandHeader() << std::endl;
+  for (size_t i = 0; i < states_.size(); i++) {
+    os << csvLine(states_[i]) << ",,";
+    if (i < commands_.size()) {
+      os << csvLine(commands_[i]);
     }
-    log_stream << std::endl;
-    state_log_.pop();
+    os << std::endl;
   }
-  return log_file.path();
-} catch (...) {
-  return "";
+
+  clear();
+  return os.str();
+}
+
+void Logger::clear() {
+  states_.clear();
+  commands_.clear();
 }
 
 }  // namespace franka
