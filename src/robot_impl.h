@@ -23,7 +23,7 @@ class Robot::Impl : public RobotControl {
  public:
   explicit Impl(std::unique_ptr<Network> network,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
-                size_t log_size = 10);
+                size_t log_size = 20);
 
   RobotState update(
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,

@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cstring>
 #include <iterator>
-#include <sstream>
 
 namespace franka {
 
