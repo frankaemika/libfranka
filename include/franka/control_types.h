@@ -7,8 +7,7 @@
 
 /**
  * @file control_types.h
- * Contains helper types for returning values for motion generation
- * and torque control.
+ * Contains helper types for returning motion generation and joint-level torque commands.
  */
 
 namespace franka {
@@ -40,21 +39,21 @@ struct Finishable {
 };
 
 /**
- * Stores values for torque control.
+ * Stores gravity- and friction-compensated joint-level torque commands.
  */
 class Torques : public Finishable {
  public:
   /**
    * Creates a new Torques instance.
    *
-   * @param[in] torques Desired torques in [Nm].
+   * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
    */
   Torques(const std::array<double, 7>& torques) noexcept;
 
   /**
    * Creates a new Torques instance.
    *
-   * @param[in] torques Desired torques in [Nm].
+   * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
    *
    * @throw ControlException Invalid number of elements in torques.
    */

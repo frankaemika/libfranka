@@ -30,9 +30,11 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
  * An example showing a joint impedance type control that executes a Cartesian motion in the shape
  * of a circle. The example illustrates how to use the internal inverse kinematics to map a
  * Cartesian trajectory to joint space. The joint space target is tracked by an impedance control
- * that additionally compensates coriolis terms using the libfranka model library. This example also
- * serves to compare commanded vs. measured torques. The results are printed from a separate thread
- * to avoid blocking print functions in the real-time loop.
+ * that additionally compensates coriolis terms using the libfranka model library. This example
+ * also serves to compare commanded vs. measured torques. The results are printed from a separate
+ * thread to avoid blocking print functions in the real-time loop.
+ *
+ * @warning This example assumes that no endeffector is mounted.
  */
 
 std::array<double, 7> saturateTorqueRate(
