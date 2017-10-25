@@ -77,16 +77,20 @@ struct RobotState {
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow{};
 
   /**
-   * Desired elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Desired elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow_d{};
 

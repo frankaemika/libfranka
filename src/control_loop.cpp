@@ -151,6 +151,14 @@ void ControlLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_d = motion.O_T_EE;
+
+  if (motion.hasValidElbow()) {
+    command->valid_elbow = true;
+    command->elbow_d = motion.elbow;
+  } else {
+    command->valid_elbow = false;
+    command->elbow_d = {};
+  }
 }
 
 template <>
@@ -158,6 +166,14 @@ void ControlLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_dP_EE_d = motion.O_dP_EE;
+
+  if (motion.hasValidElbow()) {
+    command->valid_elbow = true;
+    command->elbow_d = motion.elbow;
+  } else {
+    command->valid_elbow = false;
+    command->elbow_d = {};
+  }
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {

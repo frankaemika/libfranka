@@ -12,6 +12,7 @@ set(EXAMPLES
   generate_cartesian_pose_motion
   generate_cartesian_velocity_motion
   generate_consecutive_motions
+  generate_elbow_motion
   generate_joint_position_motion
   generate_joint_velocity_motion
   grasp_object
