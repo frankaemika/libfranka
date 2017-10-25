@@ -17,6 +17,9 @@
  * @example motion_with_control.cpp
  * An example showing how to use a joint velocity motion generator and torque control.
  *
+ * Additionally, this example shows how to capture and write logs in case an exception is thrown
+ * during a motion.
+ *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
