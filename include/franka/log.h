@@ -40,7 +40,13 @@ struct RobotCommand {
  * and the corresponding robot command. Provided by the ControlException.
  */
 struct Record {
+  /**
+   * Received robot state.
+   */
   RobotState state;
+  /**
+   * Command sent after receiving that state.
+   */
   RobotCommand command;
 };
 

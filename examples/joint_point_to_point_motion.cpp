@@ -17,6 +17,8 @@
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
+namespace {
+
 constexpr double kDeltaQMotionFinished = 1e-6;
 
 inline int sgn(double x) {
@@ -26,7 +28,7 @@ inline int sgn(double x) {
   return (x > 0) ? 1 : -1;
 }
 
-std::array<double, 7> add(const std::array<double, 7>& a, const std::array<double, 7>& b) {
+inline std::array<double, 7> add(const std::array<double, 7>& a, const std::array<double, 7>& b) {
   std::array<double, 7> result;
   for (size_t i = 0; i < a.size(); i++) {
     result[i] = a[i] + b[i];
@@ -34,7 +36,8 @@ std::array<double, 7> add(const std::array<double, 7>& a, const std::array<doubl
   return result;
 }
 
-std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<double, 7>& b) {
+inline std::array<double, 7> subtract(const std::array<double, 7>& a,
+                                      const std::array<double, 7>& b) {
   std::array<double, 7> result;
   for (size_t i = 0; i < a.size(); i++) {
     result[i] = a[i] - b[i];
@@ -61,6 +64,34 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
                                  std::array<double, 7>* t_f_sync,
                                  std::array<double, 7>* q_1);
 
+class MotionGenerator {
+ public:
+  MotionGenerator(double speed_factor, const std::array<double, 7>& q_goal);
+
+  franka::JointPositions operator()(const franka::RobotState& robot_state,
+                                    franka::Duration time_step);
+
+ private:
+  const std::array<double, 7> q_goal_;
+
+  std::array<double, 7> q_start_;
+  std::array<double, 7> delta_q_;
+
+  std::array<double, 7> dq_max_sync_;
+  std::array<double, 7> t_1_sync_;
+  std::array<double, 7> t_2_sync_;
+  std::array<double, 7> t_f_sync_;
+  std::array<double, 7> q_1_;
+
+  double time_ = 0.0;
+
+  std::array<double, 7> dq_max_{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
+  std::array<double, 7> ddq_max_start_{{5, 5, 5, 5, 5, 5, 5}};
+  std::array<double, 7> ddq_max_goal_{{5, 5, 5, 5, 5, 5, 5}};
+};
+
+}  // anonymous namespace
+
 int main(int argc, char** argv) {
   if (argc != 10) {
     std::cerr << "Usage: ./generate_joint_pose_motion "
@@ -85,41 +116,10 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
         {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
 
-    std::array<double, 7> q_start = robot.readOnce().q_d;
+    MotionGenerator motion_generator(speed_factor, q_goal);
+    robot.control(motion_generator);
 
-    std::array<double, 7> dq_max{{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
-    std::array<double, 7> ddq_max_start{{5, 5, 5, 5, 5, 5, 5}};
-    std::array<double, 7> ddq_max_goal{{5, 5, 5, 5, 5, 5, 5}};
-    for (size_t i = 0; i < 7; i++) {
-      dq_max[i] = speed_factor * dq_max[i];
-      ddq_max_start[i] = speed_factor * ddq_max_start[i];
-      ddq_max_goal[i] = speed_factor * ddq_max_goal[i];
-    }
-
-    double time = 0.0;
-
-    std::array<double, 7> dq_max_sync{};
-    std::array<double, 7> t_1_sync{};
-    std::array<double, 7> t_2_sync{};
-    std::array<double, 7> t_f_sync{};
-    std::array<double, 7> q_1{};
-    std::array<double, 7> delta_q = subtract(q_goal, q_start);
-
-    calculateSynchronizedValues(delta_q, dq_max, ddq_max_start, ddq_max_goal, &dq_max_sync,
-                                &t_1_sync, &t_2_sync, &t_f_sync, &q_1);
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration time_step) -> franka::JointPositions {
-      time += time_step.toSec();
-
-      std::array<double, 7> delta_q_d;
-      bool motion_finished = calculateDesiredValues(time, delta_q, dq_max_sync, t_1_sync, t_2_sync,
-                                                    t_f_sync, q_1, &delta_q_d);
-
-      franka::JointPositions output = add(q_start, delta_q_d);
-      output.motion_finished = motion_finished;
-      return output;
-    });
-    std::cout << std::endl << "Motion finished" << std::endl;
+    std::cout << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
@@ -127,6 +127,8 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
+namespace {
 
 bool calculateDesiredValues(double t,
                             const std::array<double, 7>& delta_q,
@@ -216,3 +218,34 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
     }
   }
 }
+
+MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7>& q_goal)
+    : q_goal_(q_goal) {
+  for (size_t i = 0; i < 7; i++) {
+    dq_max_[i] *= speed_factor;
+    ddq_max_start_[i] *= speed_factor;
+    ddq_max_goal_[i] *= speed_factor;
+  }
+}
+
+franka::JointPositions MotionGenerator::operator()(const franka::RobotState& robot_state,
+                                                   franka::Duration time_step) {
+  if (time_ == 0.0) {
+    q_start_ = robot_state.q_d;
+    delta_q_ = subtract(q_goal_, q_start_);
+    calculateSynchronizedValues(delta_q_, dq_max_, ddq_max_start_, ddq_max_goal_, &dq_max_sync_,
+                                &t_1_sync_, &t_2_sync_, &t_f_sync_, &q_1_);
+  }
+
+  time_ += time_step.toSec();
+
+  std::array<double, 7> delta_q_d;
+  bool motion_finished = calculateDesiredValues(time_, delta_q_, dq_max_sync_, t_1_sync_, t_2_sync_,
+                                                t_f_sync_, q_1_, &delta_q_d);
+
+  franka::JointPositions output = add(q_start_, delta_q_d);
+  output.motion_finished = motion_finished;
+  return output;
+}
+
+}  // anonymous namespace

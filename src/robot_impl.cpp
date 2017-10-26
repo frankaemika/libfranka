@@ -9,6 +9,19 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
+namespace {
+inline ControlException createControlException(const CommandException& command_exception,
+                                               const RobotState& robot_state,
+                                               const std::vector<Record> log = {}) {
+  if (robot_state.robot_mode == RobotMode::kReflex) {
+    return ControlException(
+        command_exception.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
+        log);
+  }
+  return ControlException(command_exception.what(), log);
+}
+}  // anonymous namespace
+
 Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config, size_t log_size)
     : network_{std::move(network)}, logger_{log_size}, realtime_config_{realtime_config} {
   if (!network_) {
@@ -47,13 +60,7 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
       handleCommandResponse<research_interface::robot::Move>(
           network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
     } catch (const CommandException& e) {
-      // Rethrow as control exception to be consistent with starting/stopping of motions.
-      if (robot_state.robot_mode == RobotMode::kReflex) {
-        throw ControlException(
-            e.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
-            logger_.makeLog());
-      }
-      throw ControlException(e.what(), logger_.makeLog());
+      throw createControlException(e, robot_state, logger_.makeLog());
     }
   }
 }
@@ -201,12 +208,7 @@ uint32_t Robot::Impl::startMotion(
         break;
       }
     } catch (const CommandException& e) {
-      if (robot_state.robot_mode == RobotMode::kReflex) {
-        throw ControlException(
-            e.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
-            logger_.makeLog());
-      }
-      throw ControlException(e.what(), logger_.makeLog());
+      throw createControlException(e, robot_state, logger_.makeLog());
     }
 
     robot_state = update();
@@ -236,11 +238,17 @@ void Robot::Impl::finishMotion(
   // The TCP response for the finished Move might arrive while the robot state still shows that the
   // motion is running, or afterwards. To handle both situations, we do not process TCP packages in
   // this loop and explicitly wait for the Move response over TCP afterwards.
+  RobotState robot_state{};
   while (motionGeneratorRunning()) {
-    update(&motion_finished_command, control_command);
+    robot_state = update(&motion_finished_command, control_command);
   }
-  handleCommandResponse<research_interface::robot::Move>(
-      network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+
+  try {
+    handleCommandResponse<research_interface::robot::Move>(
+        network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+  } catch (const CommandException& e) {
+    throw createControlException(e, robot_state);
+  }
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
@@ -248,7 +256,12 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
     return;
   }
 
-  executeCommand<research_interface::robot::StopMove>();
+  try {
+    executeCommand<research_interface::robot::StopMove>();
+  } catch (const CommandException& e) {
+    throw ControlException(e.what());
+  }
+
   while (motionGeneratorRunning()) {
     receiveRobotState();
   }

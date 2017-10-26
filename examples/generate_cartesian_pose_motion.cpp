@@ -30,27 +30,31 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    auto initial_pose = robot.readOnce().O_T_EE_d;
-    double radius = 0.3;
+    constexpr double radius = 0.3;
+    std::array<double, 16> initial_pose;
     double time = 0.0;
-    robot.control(
-        [=, &time](const franka::RobotState&, franka::Duration time_step) -> franka::CartesianPose {
-          time += time_step.toSec();
+    robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
+                                         franka::Duration time_step) -> franka::CartesianPose {
+      if (time == 0.0) {
+        initial_pose = robot_state.O_T_EE_d;
+      }
 
-          double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
-          double delta_x = radius * std::sin(angle);
-          double delta_z = radius * (std::cos(angle) - 1);
+      time += time_step.toSec();
 
-          std::array<double, 16> new_pose = initial_pose;
-          new_pose[12] += delta_x;
-          new_pose[14] += delta_z;
+      double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
+      double delta_x = radius * std::sin(angle);
+      double delta_z = radius * (std::cos(angle) - 1);
 
-          if (time >= 10.0) {
-            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-            return franka::MotionFinished(new_pose);
-          }
-          return new_pose;
-        });
+      std::array<double, 16> new_pose = initial_pose;
+      new_pose[12] += delta_x;
+      new_pose[14] += delta_z;
+
+      if (time >= 10.0) {
+        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+        return franka::MotionFinished(new_pose);
+      }
+      return new_pose;
+    });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
