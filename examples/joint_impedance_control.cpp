@@ -230,6 +230,7 @@ std::array<double, 7> saturateTorqueRate(
     const std::array<double, 7>& gravity) {
   std::array<double, 7> tau_d_saturated{};
   for (size_t i = 0; i < 7; i++) {
+    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
     double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
     tau_d_saturated[i] =
         (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
