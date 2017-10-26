@@ -4,6 +4,7 @@
 
   * **BREAKING** change on the network protocol:
     - Added `tau_J_d` to the robot state.
+  * Added logs to ControlException.
 
 ## 0.1.0 - 2017-09-15
 
