@@ -4,7 +4,9 @@
 
 #include <deque>
 #include <string>
+#include <vector>
 
+#include <franka/log.h>
 #include <franka/robot_state.h>
 #include <research_interface/robot/rbk_types.h>
 
@@ -17,7 +19,7 @@ class Logger {
   void log(RobotState state, research_interface::robot::RobotCommand command);
   void clear();
 
-  std::string makeLog();
+  std::vector<franka::Record> makeLog();
 
  protected:
   std::deque<RobotState> states_;

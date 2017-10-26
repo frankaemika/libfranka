@@ -3,6 +3,7 @@
 #pragma once
 
 #include "franka/gripper_state.h"
+#include "franka/log.h"
 #include "franka/robot_state.h"
 #include "research_interface/gripper/types.h"
 #include "research_interface/robot/rbk_types.h"
@@ -25,6 +26,8 @@ void testControllerCommandsAreEqual(const research_interface::robot::ControllerC
                                     const research_interface::robot::ControllerCommand& actual);
 void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
                                const research_interface::robot::RobotCommand& actual);
+void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
+                               const franka::RobotCommand actual);
 
 namespace research_interface {
 namespace robot {

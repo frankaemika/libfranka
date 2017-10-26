@@ -57,7 +57,7 @@ class Robot {
    */
   explicit Robot(const std::string& franka_address,
                  RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
-                 size_t log_size = 20);
+                 size_t log_size = 50);
 
   /**
    * Move-constructs a new Robot instance.

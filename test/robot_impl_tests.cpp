@@ -701,14 +701,17 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
     robot.throwOnMotionError(robot_state, id);
     FAIL() << "Expected ControlException";
   } catch (const ControlException& exception) {
-    franka::Logger logger(log_size);
+    EXPECT_EQ(log_size, exception.log().size());
     for (size_t i = 0; i < log_size - 1; i++) {
       // robot.startMotion calls update(), so there's one state more than there are commands
       size_t start_index = commands_sent_in_loop - log_size + 1;
-      logger.log(franka::convertRobotState(states[start_index + 1 + i]), commands[start_index + i]);
+      testRobotStatesAreEqual(franka::convertRobotState(states[start_index + 1 + i]),
+                              exception.log()[i].state);
+      testRobotCommandsAreEqual(commands[start_index + i], exception.log()[i].command);
     }
-    logger.log(franka::convertRobotState(states.back()), last_command);
-    EXPECT_STREQ(logger.makeLog().c_str(), exception.log().c_str());
+    franka::Record last = exception.log().back();
+    testRobotStatesAreEqual(franka::convertRobotState(states.back()), last.state);
+    testRobotCommandsAreEqual(last_command, last.command);
   } catch (...) {
     FAIL() << "Expected ControlException";
   }
@@ -758,7 +761,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
         .spinOnce()
         .onReceiveRobotCommand([](const RobotCommand&) {})
         .spinOnce();
-    RobotCommand sent_command;
+    RobotCommand sent_command{};
     sent_command.motion.motion_generation_finished = false;
     sent_command.message_id = message_id - 1;
     robot.update(&sent_command.motion, &sent_command.control);
@@ -777,7 +780,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  RobotCommand last_command;
+  RobotCommand last_command{};
   last_command.message_id = message_id - 1;
   auto robot_state = robot.update(&last_command.motion, &last_command.control);
 
@@ -849,13 +852,15 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
     robot.throwOnMotionError(robot_state, id);
     FAIL() << "Expected ControlException";
   } catch (const ControlException& exception) {
-    franka::Logger logger(log_size);
+    EXPECT_EQ(commands_sent_second_loop + 1, exception.log().size());
     for (size_t i = 0; i < commands_sent_second_loop; i++) {
       // robot.startMotion calls update(), so there's one state more than there are commands
-      logger.log(franka::convertRobotState(states[i + 1]), commands[i]);
+      testRobotStatesAreEqual(franka::convertRobotState(states[i + 1]), exception.log()[i].state);
+      testRobotCommandsAreEqual(commands[i], exception.log()[i].command);
     }
-    logger.log(franka::convertRobotState(states.back()), last_command);
-    EXPECT_STREQ(logger.makeLog().c_str(), exception.log().c_str());
+    franka::Record last = exception.log().back();
+    testRobotStatesAreEqual(franka::convertRobotState(states.back()), last.state);
+    testRobotCommandsAreEqual(last_command, last.command);
   } catch (...) {
     FAIL() << "Expected ControlException";
   }

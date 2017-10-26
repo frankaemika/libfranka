@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include <franka/log.h>
 #include "helpers.h"
 #include "logger.h"
 
@@ -95,6 +96,9 @@ TEST(Logger, LoggerEmptyAfterClear) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
   }
 
+  EXPECT_EQ(log_count, logger.states_.size());
+  EXPECT_EQ(log_count, logger.commands_.size());
+
   logger.clear();
 
   EXPECT_EQ(0u, logger.states_.size());
@@ -109,7 +113,7 @@ TEST(Logger, WellFormattedString) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
   }
 
-  std::string log = logger.makeLog();
+  std::string log = franka::logToCSV(logger.makeLog());
 
   EXPECT_PRED2(stringContains, log, "duration");
   EXPECT_PRED2(stringContains, log, "success rate");
@@ -120,7 +124,6 @@ TEST(Logger, WellFormattedString) {
   EXPECT_PRED2(stringContains, log, "tau_J");
   EXPECT_PRED2(stringContains, log, "tau_ext_hat_filtered");
   EXPECT_PRED2(stringContains, log, "sent commands");
-  EXPECT_PRED2(stringContains, log, "id");
   EXPECT_PRED2(stringContains, log, "q_d");
   EXPECT_PRED2(stringContains, log, "dq_d");
   EXPECT_PRED2(stringContains, log, "O_T_EE_d");
@@ -129,4 +132,13 @@ TEST(Logger, WellFormattedString) {
 
   size_t newlines_count = std::count(log.begin(), log.end(), '\n');
   EXPECT_EQ(log_count + 1, newlines_count);
+}
+
+TEST(Logger, EmptyLogEmptyString) {
+  size_t log_count = 5;
+  Logger logger(log_count);
+
+  std::string log = franka::logToCSV(logger.makeLog());
+
+  EXPECT_STREQ(log.c_str(), "");
 }

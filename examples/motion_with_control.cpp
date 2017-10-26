@@ -106,7 +106,7 @@ std::vector<double> generateTrajectory(double a_max) {
 
 }  // anonymous namespace
 
-void writeLogToFile(const std::string& log);
+void writeLogToFile(const std::vector<franka::Record>& log);
 
 int main(int argc, char** argv) {
   if (argc != 7) {
@@ -180,7 +180,7 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-void writeLogToFile(const std::string& log) {
+void writeLogToFile(const std::vector<franka::Record>& log) {
   if (log.empty()) {
     return;
   }
@@ -200,7 +200,7 @@ void writeLogToFile(const std::string& log) {
       return;
     }
     std::ofstream log_stream(log_file.path().c_str());
-    log_stream << log;
+    log_stream << franka::logToCSV(log);
 
     std::cout << "Log file written to: " << log_file.path() << std::endl;
   } catch (...) {
