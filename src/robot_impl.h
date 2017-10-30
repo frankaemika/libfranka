@@ -22,8 +22,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
 class Robot::Impl : public RobotControl {
  public:
   explicit Impl(std::unique_ptr<Network> network,
-                RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
-                size_t log_size = 20);
+                size_t log_size,
+                RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update(
       const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,

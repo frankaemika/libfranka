@@ -17,9 +17,8 @@ class Logger {
   explicit Logger(size_t log_size);
 
   void log(RobotState state, research_interface::robot::RobotCommand command);
-  void clear();
 
-  std::vector<franka::Record> makeLog();
+  std::vector<franka::Record> flush();
 
  protected:
   std::deque<RobotState> states_;

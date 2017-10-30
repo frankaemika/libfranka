@@ -11,15 +11,9 @@
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
-struct Logger : public ::franka::Logger {
-  using ::franka::Logger::Logger;
-  using ::franka::Logger::commands_;
-  using ::franka::Logger::states_;
-};
-
 TEST(Logger, LogIsFIFO) {
   size_t log_count = 5;
-  Logger logger(log_count);
+  franka::Logger logger(log_count);
 
   std::vector<franka::RobotState> states;
   std::vector<research_interface::robot::RobotCommand> commands;
@@ -36,15 +30,16 @@ TEST(Logger, LogIsFIFO) {
     logger.log(state, command);
   }
 
+  std::vector<franka::Record> log = logger.flush();
   for (size_t i = 0; i < log_count; i++) {
-    testRobotStatesAreEqual(states[i], logger.states_[i]);
-    testRobotCommandsAreEqual(commands[i], logger.commands_[i]);
+    testRobotStatesAreEqual(states[i], log[i].state);
+    testRobotCommandsAreEqual(commands[i], log[i].command);
   }
 }
 
 TEST(Logger, LogIsAFixedSizeRing) {
   size_t ring = 5;
-  Logger logger(ring);
+  franka::Logger logger(ring);
 
   std::vector<franka::RobotState> states;
   std::vector<research_interface::robot::RobotCommand> commands;
@@ -63,57 +58,51 @@ TEST(Logger, LogIsAFixedSizeRing) {
   }
 
   size_t expected_offset = logs - ring;
+  std::vector<franka::Record> log = logger.flush();
   for (size_t i = 0; i < ring; i++) {
-    testRobotStatesAreEqual(states[i + expected_offset], logger.states_[i]);
-    testRobotCommandsAreEqual(commands[i + expected_offset], logger.commands_[i]);
+    testRobotStatesAreEqual(states[i + expected_offset], log[i].state);
+    testRobotCommandsAreEqual(commands[i + expected_offset], log[i].command);
   }
-  EXPECT_EQ(ring, logger.states_.size());
-  EXPECT_EQ(ring, logger.commands_.size());
+  EXPECT_EQ(ring, log.size());
 }
 
-TEST(Logger, LoggerEmptyAfterWrite) {
+TEST(Logger, LoggerEmptyAfterFlush) {
   size_t log_count = 5;
-  Logger logger(log_count);
+  franka::Logger logger(log_count);
 
   for (size_t i = 0; i < log_count; i++) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
   }
 
-  EXPECT_EQ(log_count, logger.states_.size());
-  EXPECT_EQ(log_count, logger.commands_.size());
+  std::vector<franka::Record> log = logger.flush();
+  EXPECT_EQ(log_count, log.size());
 
-  logger.makeLog();
+  log = logger.flush();
 
-  EXPECT_EQ(0u, logger.states_.size());
-  EXPECT_EQ(0u, logger.commands_.size());
+  EXPECT_EQ(0u, log.size());
 }
 
-TEST(Logger, LoggerEmptyAfterClear) {
-  size_t log_count = 5;
-  Logger logger(log_count);
+TEST(Logger, NoLogWhenLogSizeZero) {
+  franka::Logger logger(0);
 
+  size_t log_count = 50;
   for (size_t i = 0; i < log_count; i++) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
   }
 
-  EXPECT_EQ(log_count, logger.states_.size());
-  EXPECT_EQ(log_count, logger.commands_.size());
-
-  logger.clear();
-
-  EXPECT_EQ(0u, logger.states_.size());
-  EXPECT_EQ(0u, logger.commands_.size());
+  std::vector<franka::Record> log = logger.flush();
+  EXPECT_EQ(0u, log.size());
 }
 
 TEST(Logger, WellFormattedString) {
   size_t log_count = 5;
-  Logger logger(log_count);
+  franka::Logger logger(log_count);
 
   for (size_t i = 0; i < log_count; i++) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
   }
 
-  std::string log = franka::logToCSV(logger.makeLog());
+  std::string log = franka::logToCSV(logger.flush());
 
   EXPECT_PRED2(stringContains, log, "duration");
   EXPECT_PRED2(stringContains, log, "success rate");
@@ -136,9 +125,9 @@ TEST(Logger, WellFormattedString) {
 
 TEST(Logger, EmptyLogEmptyString) {
   size_t log_count = 5;
-  Logger logger(log_count);
+  franka::Logger logger(log_count);
 
-  std::string log = franka::logToCSV(logger.makeLog());
+  std::string csv_string = franka::logToCSV(logger.flush());
 
-  EXPECT_STREQ(log.c_str(), "");
+  EXPECT_STREQ("", csv_string.c_str());
 }

@@ -60,22 +60,15 @@ struct ControlException : public Exception {
   /**
    * Creates the exception with an explanatory string and a Log object.
    * @param[in] what Explanatory string.
-   * @param[in] log string with the last received robot states and commands.
+   * @param[in] log Vector of last received states and commands.
    */
   explicit ControlException(std::string what, std::vector<franka::Record> log = {})
-      : Exception(std::move(what)), log_(std::move(log)){};
+      : Exception(std::move(what)), log(std::move(log)){};
 
   /**
-  * Returns a reference to a log string containing the last received robot states and sent commands
-  *
-  *
-  * The log can be empty if no states were received yet.
-  * @return a const reference to the log string
+  * Vector of states and commands logged just before the exception occured.
   */
-  const std::vector<franka::Record>& log() const { return log_; }
-
- private:
-  std::vector<franka::Record> log_;
+  const std::vector<franka::Record> log;
 };
 
 /**

@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
         });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
-    writeLogToFile(e.log());
+    writeLogToFile(e.log);
     return -1;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

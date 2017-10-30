@@ -12,7 +12,7 @@ namespace franka {
 namespace {
 inline ControlException createControlException(const CommandException& command_exception,
                                                const RobotState& robot_state,
-                                               const std::vector<Record> log = {}) {
+                                               const std::vector<Record>& log = {}) {
   if (robot_state.robot_mode == RobotMode::kReflex) {
     return ControlException(
         command_exception.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
@@ -22,7 +22,7 @@ inline ControlException createControlException(const CommandException& command_e
 }
 }  // anonymous namespace
 
-Robot::Impl::Impl(std::unique_ptr<Network> network, RealtimeConfig realtime_config, size_t log_size)
+Robot::Impl::Impl(std::unique_ptr<Network> network, size_t log_size, RealtimeConfig realtime_config)
     : network_{std::move(network)}, logger_{log_size}, realtime_config_{realtime_config} {
   if (!network_) {
     throw std::invalid_argument("libfranka robot: Invalid argument");
@@ -60,7 +60,7 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
       handleCommandResponse<research_interface::robot::Move>(
           network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
     } catch (const CommandException& e) {
-      throw createControlException(e, robot_state, logger_.makeLog());
+      throw createControlException(e, robot_state, logger_.flush());
     }
   }
 }
@@ -208,13 +208,13 @@ uint32_t Robot::Impl::startMotion(
         break;
       }
     } catch (const CommandException& e) {
-      throw createControlException(e, robot_state, logger_.makeLog());
+      throw createControlException(e, robot_state, logger_.flush());
     }
 
     robot_state = update();
   }
 
-  logger_.clear();
+  logger_.flush();
 
   return move_command_id;
 }

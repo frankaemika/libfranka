@@ -7,6 +7,10 @@ namespace franka {
 Logger::Logger(size_t log_size) : log_size_(log_size) {}
 
 void Logger::log(RobotState state, research_interface::robot::RobotCommand command) {
+  if (log_size_ == 0) {
+    return;
+  }
+
   if (commands_.size() >= log_size_) {
     commands_.pop_front();
   }
@@ -18,7 +22,7 @@ void Logger::log(RobotState state, research_interface::robot::RobotCommand comma
   states_.push_back(state);
 }
 
-std::vector<Record> Logger::makeLog() {
+std::vector<Record> Logger::flush() {
   std::vector<Record> log;
   while (!states_.empty()) {
     research_interface::robot::RobotCommand fci_command = commands_.front();
@@ -37,11 +41,6 @@ std::vector<Record> Logger::makeLog() {
     commands_.pop_front();
   }
   return log;
-}
-
-void Logger::clear() {
-  states_.clear();
-  commands_.clear();
 }
 
 }  // namespace franka
