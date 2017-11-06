@@ -8,7 +8,14 @@ set(GTEST_LIBRARIES gtest gmock gmock_main)
 include(SetupGoogleTest)
 
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
-set(TEST_DEPENDENCIES franka libfranka-common ${GTEST_LIBRARIES})
+set(TEST_DEPENDENCIES
+  ${GTEST_LIBRARIES}
+  Poco::Foundation
+  Poco::Net
+  Threads::Threads
+  franka
+  libfranka-common
+)
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
 
 ## Test libraries
