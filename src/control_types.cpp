@@ -41,8 +41,8 @@ inline bool isHomogeneousTransformation(const std::array<double, 16>& transform)
 inline void checkHomogeneousTransformation(const std::array<double, 16>& transform) {
   if (!isHomogeneousTransformation(transform)) {
     throw std::invalid_argument(
-        "libfranka: Attempt to set invalid transformation in motion"
-        "generator. Has to be column major!");
+        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
+        "major!");
   }
 }
 
