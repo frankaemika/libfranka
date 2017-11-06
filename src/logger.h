@@ -18,7 +18,7 @@ class Logger {
 
   void log(const RobotState& state, const research_interface::robot::RobotCommand& command);
 
-  std::vector<franka::Record> flush
+  std::vector<franka::Record> flush();
 
  private:
   std::vector<RobotState> states_;
