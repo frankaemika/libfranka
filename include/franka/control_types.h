@@ -48,7 +48,7 @@ class Torques : public Finishable {
    *
    * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
    */
-  Torques(const std::array<double, 7>& torques) noexcept;
+  Torques(const std::array<double, 7>& torques);
 
   /**
    * Creates a new Torques instance.
@@ -75,7 +75,7 @@ class JointPositions : public Finishable {
    *
    * @param[in] joint_positions Desired joint angles in [rad].
    */
-  JointPositions(const std::array<double, 7>& joint_positions) noexcept;
+  JointPositions(const std::array<double, 7>& joint_positions);
 
   /**
    * Creates a new JointPositions instance.
@@ -102,7 +102,7 @@ class JointVelocities : public Finishable {
    *
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
    */
-  JointVelocities(const std::array<double, 7>& joint_velocities) noexcept;
+  JointVelocities(const std::array<double, 7>& joint_velocities);
 
   /**
    * Creates a new JointVelocities instance.
@@ -212,7 +212,7 @@ class CartesianVelocities : public Finishable {
    * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
-  CartesianVelocities(const std::array<double, 6>& cartesian_velocities) noexcept;
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities);
 
   /**
    * Creates a new CartesianVelocities instance.
