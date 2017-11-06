@@ -16,15 +16,16 @@ class Logger {
  public:
   explicit Logger(size_t log_size);
 
-  void log(RobotState state, research_interface::robot::RobotCommand command);
+  void log(const RobotState& state, const research_interface::robot::RobotCommand& command);
 
-  std::vector<franka::Record> flush();
-
- protected:
-  std::deque<RobotState> states_;
-  std::deque<research_interface::robot::RobotCommand> commands_;
+  std::vector<franka::Record> flush
 
  private:
+  std::vector<RobotState> states_;
+  std::vector<research_interface::robot::RobotCommand> commands_;
+  size_t ring_front_{0};
+  size_t ring_size_{0};
+
   const size_t log_size_;
 };
 

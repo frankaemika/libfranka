@@ -4,42 +4,44 @@
 
 namespace franka {
 
-Logger::Logger(size_t log_size) : log_size_(log_size) {}
+Logger::Logger(size_t log_size) : log_size_(log_size) {
+  states_.resize(log_size);
+  commands_.resize(log_size);
+}
 
-void Logger::log(RobotState state, research_interface::robot::RobotCommand command) {
+void Logger::log(const RobotState& state, const research_interface::robot::RobotCommand& command) {
   if (log_size_ == 0) {
     return;
   }
 
-  if (commands_.size() >= log_size_) {
-    commands_.pop_front();
-  }
-  commands_.push_back(command);
+  commands_[ring_front_] = command;
+  states_[ring_front_] = state;
 
-  if (states_.size() >= log_size_) {
-    states_.pop_front();
-  }
-  states_.push_back(state);
+  ring_front_ = (ring_front_ + 1) % log_size_;
+  ring_size_ = std::min(log_size_, ring_size_ + 1);
 }
 
 std::vector<Record> Logger::flush() {
   std::vector<Record> log;
-  while (!states_.empty()) {
-    research_interface::robot::RobotCommand fci_command = commands_.front();
+
+  for (size_t i = 0; i < ring_size_; i++) {
+    size_t wrapped_index = (ring_front_ + i) % ring_size_;
+
     RobotCommand command;
-    command.joint_positions = fci_command.motion.q_d;
-    command.joint_velocities = fci_command.motion.dq_d;
-    command.cartesian_pose.O_T_EE = fci_command.motion.O_T_EE_d;
-    command.cartesian_velocities.O_dP_EE = fci_command.motion.O_dP_EE_d;
-    command.torques.tau_J = fci_command.control.tau_J_d;
+    command.joint_positions = commands_[wrapped_index].motion.q_d;
+    command.joint_velocities = commands_[wrapped_index].motion.dq_d;
+    command.cartesian_pose.O_T_EE = commands_[wrapped_index].motion.O_T_EE_d;
+    command.cartesian_velocities.O_dP_EE = commands_[wrapped_index].motion.O_dP_EE_d;
+    command.torques.tau_J = commands_[wrapped_index].control.tau_J_d;
+
     Record record;
-    record.state = states_.front();
+    record.state = states_[wrapped_index];
     record.command = command;
     log.push_back(record);
-
-    states_.pop_front();
-    commands_.pop_front();
   }
+
+  ring_front_ = 0;
+  ring_size_ = 0;
   return log;
 }
 
