@@ -4,8 +4,15 @@
 
 #include <franka/control_types.h>
 #include <franka/exception.h>
+#include <algorithm>
 
 namespace franka {
+
+namespace {
+  bool isValidNumber(double number) {
+    return std::isfinite(number);
+  }
+} // anonymous namespace
 
 Torques MotionFinished(const Torques& command) {  // NOLINT (readability-identifier-naming)
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
@@ -48,6 +55,9 @@ Torques::Torques(std::initializer_list<double> torques) {
   if (torques.size() != tau_J.size()) {
     throw ControlException("Invalid number of elements in tau_J.");
   }
+  if (!std::all_of(tau_J.begin(), tau_J.end(), isValidNumber)) {
+    throw std::invalid_argument("tau_J is infinite or NaN");
+  }
   std::copy(torques.begin(), torques.end(), tau_J.begin());
 }
 
@@ -57,6 +67,9 @@ JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (moderniz
 JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   if (joint_positions.size() != q.size()) {
     throw ControlException("Invalid number of elements in joint_positions.");
+  }
+  if (!std::all_of(joint_positions.begin(), joint_positions.end(), isValidNumber)) {
+    throw std::invalid_argument("q is infinite or NaN");
   }
   std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
 }
@@ -68,18 +81,27 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
   if (joint_velocities.size() != dq.size()) {
     throw ControlException("Invalid number of elements in joint_velocities.");
   }
+  if (!std::all_of(joint_velocities.begin(), joint_velocities.end(), isValidNumber)) {
+    throw std::invalid_argument("dq is infinite or NaN");
+  }
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
 }
 
 CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
                              cartesian_pose)
     : O_T_EE(cartesian_pose) {
+  if (!std::all_of(cartesian_pose.begin(), cartesian_pose.end(), isValidNumber)) {
+    throw std::invalid_argument("O_T_EE is infinite or NaN");
+  }
   checkHomogeneousTransformation();
 }
 
 CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose) {
   if (cartesian_pose.size() != O_T_EE.size()) {
     throw ControlException("Invalid number of elements in cartesian_pose.");
+  }
+  if (!std::all_of(cartesian_pose.begin(), cartesian_pose.end(), isValidNumber)) {
+    throw std::invalid_argument("O_T_EE is infinite or NaN");
   }
   std::copy(cartesian_pose.begin(), cartesian_pose.end(), O_T_EE.begin());
   checkHomogeneousTransformation();
@@ -119,11 +141,18 @@ bool CartesianPose::isHomogeneousTransformation(const std::array<double, 16>& tr
 CartesianVelocities::CartesianVelocities(
     const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
     cartesian_velocities)
-    : O_dP_EE(cartesian_velocities) {}
+    : O_dP_EE(cartesian_velocities) {
+  if (!std::all_of(cartesian_velocities.begin(), cartesian_velocities.end(), isValidNumber)) {
+    throw std::invalid_argument("O_T_EE is infinite or NaN");
+  }
+}
 
 CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian_velocities) {
   if (cartesian_velocities.size() != O_dP_EE.size()) {
     throw ControlException("Invalid number of elements in cartesian_velocities.");
+  }
+  if (!std::all_of(cartesian_velocities.begin(), cartesian_velocities.end(), isValidNumber)) {
+    throw std::invalid_argument("O_T_EE is infinite or NaN");
   }
   std::copy(cartesian_velocities.begin(), cartesian_velocities.end(), O_dP_EE.begin());
 }
