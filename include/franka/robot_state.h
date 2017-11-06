@@ -77,52 +77,62 @@ struct RobotState {
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow{};
 
   /**
-   * Desired elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Desired elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow_d{};
 
   /**
    * \f$\tau_{J}\f$
-   * Measured joint torque. Unit: \f$[Nm]\f$
+   * Measured link-side joint torque sensor signals. Unit: \f$[Nm]\f$
    */
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$\tau_{J}_d\f$
+   * Desired link-side joint torque sensor signals with gravity. Unit: \f$[Nm]\f$
+   */
+  std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * \f$\dot{\tau_{J}}\f$
-   * Derivative of measured joint torque. Unit: \f$[\frac{Nm}{s}]\f$
+   * Derivative of measured link-side joint torque sensor signals. Unit: \f$[\frac{Nm}{s}]\f$
    */
   std::array<double, 7> dtau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$q\f$
-   * Measured link side position (joint values). Unit: \f$[rad]\f$
+   * Measured joint position. Unit: \f$[rad]\f$
    */
   std::array<double, 7> q{};
 
   /**
    * \f$q_d\f$
-   * Desired link side position. Unit: \f$[rad]\f$
+   * Desired joint position. Unit: \f$[rad]\f$
    */
   std::array<double, 7> q_d{};
 
   /**
    * \f$\dot{q}\f$
-   * Measured link side velocity. Unit: \f$[\frac{rad}{s}]\f$
+   * Measured joint velocity. Unit: \f$[\frac{rad}{s}]\f$
    */
   std::array<double, 7> dq{};
 
   /**
    * \f$\dot{q}_d\f$
-   * Desired link side velocity. Unit: \f$[\frac{rad}{s}]\f$
+   * Desired joint velocity. Unit: \f$[\frac{rad}{s}]\f$
    */
   std::array<double, 7> dq_d{};
 

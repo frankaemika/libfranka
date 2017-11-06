@@ -13,6 +13,10 @@
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
+std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 7>& max_joint_acc,
+                                                       const std::array<double, 7>& dq_d,
+                                                       const std::array<double, 7>& last_dq_d);
+
 int main(int argc, char** argv) {
   if (argc != 2) {
     std::cerr << "Usage: ./generate_joint_velocity_motion <robot-hostname>" << std::endl;
@@ -29,10 +33,12 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    double time_max = 4.0;
-    double omega_max = 0.2;
+    const std::array<double, 7> max_joint_acc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
+
+    double time_max = 1.0;
+    double omega_max = 1.0;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState&,
+    robot.control([=, &time](const franka::RobotState& state,
                              franka::Duration time_step) -> franka::JointVelocities {
       time += time_step.toSec();
 
@@ -45,7 +51,15 @@ int main(int argc, char** argv) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
         return franka::MotionFinished(velocities);
       }
-      return velocities;
+      // state.q_d contains the last joint velocity command received by the robot.
+      // In case of packet loss due to bad connection or due to a slow control loop
+      // not reaching the 1kHz rate, even if your desired velocity trajectory
+      // is smooth, discontinuities might occur.
+      // Saturating the acceleration computed with respect to the last command received
+      // by the robot will prevent from getting discontinuity errors.
+      // Note that if the robot does not receive a command it will try to extrapolate
+      // the desired behavior assuming a constant acceleration model
+      return saturateDesiredJointAcceleration(max_joint_acc, velocities.dq, state.dq_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
@@ -54,3 +68,15 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
+std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 7>& max_joint_acc,
+                                                       const std::array<double, 7>& dq_d,
+                                                       const std::array<double, 7>& last_dq_d) {
+  std::array<double, 7> dq_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    double accel = (dq_d[i] - last_dq_d[i]) / 1e-3;
+    dq_d_saturated[i] =
+        last_dq_d[i] + std::max(std::min(accel, max_joint_acc[i]), -max_joint_acc[i]) * 1e-3;
+  }
+  return dq_d_saturated;
+};

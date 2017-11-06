@@ -23,7 +23,7 @@ class Model;
 
 /**
  * Maintains a network connection to the robot, provides the current robot state, gives access to
- * the model library and allows to execute commands, motions, and torque control.
+ * the model library and allows to control the robot.
  *
  * @note
  * The members of this class are threadsafe.
@@ -78,10 +78,10 @@ class Robot {
   ~Robot() noexcept;
 
   /**
-   * @name Motion generation and torque control
+   * @name Motion generation and joint-level torque commands
    *
-   * The following methods allow to perform torque control and/or motion generation by providing
-   * callback functions.
+   * The following methods allow to perform motion generation and/or send gravity- and
+   * friction-compensated joint-level torque commands by providing callback functions.
    *
    * Only one of these methods can be active at the same time; a franka::ControlException is thrown
    * otherwise.
@@ -115,13 +115,13 @@ class Robot {
    */
 
   /**
-   * Starts a control loop for torque control.
+   * Starts a control loop for sending joint-level torque commands.
    *
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
-   * for more details.
+   * @param[in] control_callback Callback function providing joint-level torque commands.
+   * See @ref callback-docs "here" for more details.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -133,13 +133,13 @@ class Robot {
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback);
 
   /**
-   * Starts a control loop for a joint position motion generator with torque control.
+   * Starts a control loop for sending joint-level torque commands and joint positions.
    *
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
-   * for more details.
+   * @param[in] control_callback Callback function providing joint-level torque commands.
+   * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    *
@@ -155,13 +155,13 @@ class Robot {
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback);
 
   /**
-   * Starts a control loop for a joint velocity motion generator with torque control.
+   * Starts a control loop for sending joint-level torque commands and joint velocities.
    *
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
-   * for more details.
+   * @param[in] control_callback Callback function providing joint-level torque commands.
+   * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    *
@@ -177,13 +177,13 @@ class Robot {
                    motion_generator_callback);
 
   /**
-   * Starts a control loop for a Cartesian pose motion generator with torque control.
+   * Starts a control loop for sending joint-level torque commands and Cartesian poses.
    *
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
-   * for more details.
+   * @param[in] control_callback Callback function providing joint-level torque commands.
+   * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    *
@@ -199,13 +199,13 @@ class Robot {
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback);
 
   /**
-   * Starts a control loop for a Cartesian velocity motion generator with torque control.
+   * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
    *
    * Sets realtime priority for the current thread.
    * Cannot be executed while another control or motion generator loop is active.
    *
-   * @param[in] control_callback Callback function for torque control. See @ref callback-docs "here"
-   * for more details.
+   * @param[in] control_callback Callback function providing joint-level torque commands.
+   * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    *

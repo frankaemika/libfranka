@@ -39,6 +39,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.tau_J.size(); i++) {
     EXPECT_EQ(0.0, actual.tau_J[i]);
   }
+  for (size_t i = 0; i < actual.tau_J_d.size(); i++) {
+    EXPECT_EQ(0.0, actual.tau_J_d[i]);
+  }
   for (size_t i = 0; i < actual.dtau_J.size(); i++) {
     EXPECT_EQ(0.0, actual.dtau_J[i]);
   }
@@ -92,6 +95,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
+  EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
   EXPECT_EQ(expected.dtau_J, actual.dtau_J);
   EXPECT_EQ(expected.q, actual.q);
   EXPECT_EQ(expected.dq, actual.dq);
@@ -123,6 +127,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
+  EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
   EXPECT_EQ(expected.dtau_J, actual.dtau_J);
   EXPECT_EQ(expected.q, actual.q);
   EXPECT_EQ(expected.dq, actual.dq);
@@ -202,6 +207,9 @@ void randomRobotState(franka::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.tau_J) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.tau_J_d) {
     element = randomDouble();
   }
   for (double& element : robot_state.dtau_J) {
