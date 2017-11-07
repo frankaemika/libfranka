@@ -48,64 +48,121 @@ struct MockMotionCallback {
   MOCK_METHOD2_T(invoke, T(const RobotState&, Duration));
 };
 
+struct JointPositionMotion {
+  using Motion = JointPositions;
+};
+struct JointVelocityMotion {
+  using Motion = JointVelocities;
+};
+struct CartesianPoseMotion {
+  using Motion = CartesianPose;
+};
+struct CartesianPoseMotionWithElbow {
+  using Motion = CartesianPose;
+};
+struct CartesianVelocityMotion {
+  using Motion = CartesianVelocities;
+};
+struct CartesianVelocityMotionWithElbow {
+  using Motion = CartesianVelocities;
+};
+
 template <typename T>
 class ControlLoops : public ::testing::Test {
  public:
-  using Loop = ControlLoop<T>;
-  using TMotion = T;
+  using TMotion = typename T::Motion;
+  using Loop = ControlLoop<TMotion>;
   using MotionGeneratorCallback = typename Loop::MotionGeneratorCallback;
   using ControlCallback = typename Loop::ControlCallback;
 
   const research_interface::robot::Move::MotionGeneratorMode kMotionGeneratorMode =
-      franka::MotionGeneratorTraits<T>::kMotionGeneratorMode;
+      franka::MotionGeneratorTraits<TMotion>::kMotionGeneratorMode;
 
-  T createMotion();
-  auto getField(const T& values);
+  TMotion createMotion();
+  auto getField(const TMotion& values);
 };
 
 template <>
-JointPositions ControlLoops<JointPositions>::createMotion() {
+JointPositions ControlLoops<JointPositionMotion>::createMotion() {
   return JointPositions({0, 1, 2, 3, 4, 5, 6});
 }
 
 template <>
-auto ControlLoops<JointPositions>::getField(const JointPositions& values) {
+auto ControlLoops<JointPositionMotion>::getField(const JointPositions& values) {
   return Field(&research_interface::robot::MotionGeneratorCommand::q_d, Eq(values.q));
 }
 
 template <>
-JointVelocities ControlLoops<JointVelocities>::createMotion() {
+JointVelocities ControlLoops<JointVelocityMotion>::createMotion() {
   return JointVelocities({0, 1, 2, 3, 4, 5, 6});
 }
 
 template <>
-auto ControlLoops<JointVelocities>::getField(const JointVelocities& velocities) {
+auto ControlLoops<JointVelocityMotion>::getField(const JointVelocities& velocities) {
   return Field(&research_interface::robot::MotionGeneratorCommand::dq_d, Eq(velocities.dq));
 }
 
 template <>
-CartesianPose ControlLoops<CartesianPose>::createMotion() {
+CartesianPose ControlLoops<CartesianPoseMotion>::createMotion() {
   return CartesianPose({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1});
 }
 
 template <>
-auto ControlLoops<CartesianPose>::getField(const CartesianPose& pose) {
-  return Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE));
+auto ControlLoops<CartesianPoseMotion>::getField(const CartesianPose& pose) {
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE)),
+               Field(&research_interface::robot::MotionGeneratorCommand::elbow_d,
+                     Eq(std::array<double, 2>({0, 0}))),
+               Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(false)));
 }
 
 template <>
-CartesianVelocities ControlLoops<CartesianVelocities>::createMotion() {
+CartesianPose ControlLoops<CartesianPoseMotionWithElbow>::createMotion() {
+  return CartesianPose({1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}, {0, 1});
+}
+
+template <>
+auto ControlLoops<CartesianPoseMotionWithElbow>::getField(const CartesianPose& pose) {
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_d, Eq(pose.O_T_EE)),
+               Field(&research_interface::robot::MotionGeneratorCommand::elbow_d, Eq(pose.elbow)),
+               Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
+}
+
+template <>
+CartesianVelocities ControlLoops<CartesianVelocityMotion>::createMotion() {
   return CartesianVelocities({0, 1, 2, 3, 4, 5});
 }
 
 template <>
-auto ControlLoops<CartesianVelocities>::getField(const CartesianVelocities& cartesian_velocities) {
-  return Field(&research_interface::robot::MotionGeneratorCommand::O_dP_EE_d,
-               Eq(cartesian_velocities.O_dP_EE));
+auto ControlLoops<CartesianVelocityMotion>::getField(
+    const CartesianVelocities& cartesian_velocities) {
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_dP_EE_d,
+                     Eq(cartesian_velocities.O_dP_EE)),
+               Field(&research_interface::robot::MotionGeneratorCommand::elbow_d,
+                     Eq(std::array<double, 2>({0, 0}))),
+               Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(false)));
 }
 
-using MotionTypes =
-    ::testing::Types<JointPositions, JointVelocities, CartesianPose, CartesianVelocities>;
+template <>
+CartesianVelocities ControlLoops<CartesianVelocityMotionWithElbow>::createMotion() {
+  return CartesianVelocities({0, 1, 2, 3, 4, 5}, {0, -1});
+}
+
+template <>
+auto ControlLoops<CartesianVelocityMotionWithElbow>::getField(
+    const CartesianVelocities& cartesian_velocities) {
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_dP_EE_d,
+                     Eq(cartesian_velocities.O_dP_EE)),
+               Field(&research_interface::robot::MotionGeneratorCommand::elbow_d,
+                     Eq(cartesian_velocities.elbow)),
+               Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
+}
+
+using MotionTypes = ::testing::Types<JointPositionMotion,
+                                     JointVelocityMotion,
+                                     CartesianPoseMotion,
+                                     CartesianPoseMotionWithElbow,
+                                     CartesianVelocityMotion,
+                                     CartesianVelocityMotionWithElbow>;
 TYPED_TEST_CASE(ControlLoops, MotionTypes);
 
 TYPED_TEST(ControlLoops, CanNotConstructWithoutMotionCallback) {

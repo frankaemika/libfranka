@@ -55,7 +55,7 @@ class Torques : public Finishable {
    *
    * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
    *
-   * @throw ControlException Invalid number of elements in torques.
+   * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   Torques(std::initializer_list<double> torques);
 
@@ -82,7 +82,7 @@ class JointPositions : public Finishable {
    *
    * @param[in] joint_positions Desired joint angles in [rad].
    *
-   * @throw ControlException Invalid number of elements in joint_positions.
+   * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   JointPositions(std::initializer_list<double> joint_positions);
 
@@ -109,7 +109,7 @@ class JointVelocities : public Finishable {
    *
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
    *
-   * @throw ControlException Invalid number of elements in joint_velocities.
+   * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   JointVelocities(std::initializer_list<double> joint_velocities);
 
@@ -127,12 +127,12 @@ class CartesianPose : public Finishable {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @throw ControlException if cartesian_pose is not a valid vectorized
-   *                         homogeneous transformation matrix (column-major).
-   *
    * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
    * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
    * base frame \f$O\f$.
+   *
+   * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
+   * transformation matrix (column-major).
    */
   CartesianPose(const std::array<double, 16>& cartesian_pose);
 
@@ -142,11 +142,41 @@ class CartesianPose : public Finishable {
    * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
    * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
    * base frame \f$O\f$.
+   * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
-   * @throw ControlException if cartesian_pose is not a valid vectorized
-   *                         homogeneous transformation matrix (column-major).
+   * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
+   * transformation matrix (column-major).
+   * @throw std::invalid_argument if the given elbow configuration is invalid.
+   */
+  CartesianPose(const std::array<double, 16>& cartesian_pose, const std::array<double, 2>& elbow);
+
+  /**
+   * Creates a new CartesianPose instance.
+   *
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$.
+   *
+   * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
+   * transformation matrix (column-major).
+   * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   CartesianPose(std::initializer_list<double> cartesian_pose);
+
+  /**
+   * Creates a new CartesianPose instance.
+   *
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
+   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$.
+   * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
+   *
+   * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
+   * transformation matrix (column-major).
+   * @throw std::invalid_argument if a given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given elbow configuration is invalid.
+   */
+  CartesianPose(std::initializer_list<double> cartesian_pose, std::initializer_list<double> elbow);
 
   /**
    * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
@@ -154,18 +184,21 @@ class CartesianPose : public Finishable {
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
- private:
-  void checkHomogeneousTransformation();
+  /**
+   * Elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> elbow{};
 
   /**
-   * Checks a a homogeneous transformation for validity.
+   * Determines whether the stored elbow configuration is valid.
    *
-   * @param[in] transform Homogeneous transformation to be checked, passed as column major array.
-   *
-   * @return True if transformation has ortho-normal rotation matrix, the last row is [0 0 0 1] and
-   * the array defines a column major matrix.
+   * @return True if the stored elbow configuration is valid, false otherwise.
    */
-  static bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept;
+  bool hasValidElbow() const noexcept;
 };
 
 /**
@@ -179,7 +212,19 @@ class CartesianVelocities : public Finishable {
    * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
-  CartesianVelocities(const std::array<double, 6>& cartesian_velocities);
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities) noexcept;
+
+  /**
+   * Creates a new CartesianVelocities instance.
+   *
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
+   *
+   * @throw std::invalid_argument if the given elbow configuration is invalid.
+   */
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
+                      const std::array<double, 2>& elbow);
 
   /**
    * Creates a new CartesianVelocities instance.
@@ -187,15 +232,44 @@ class CartesianVelocities : public Finishable {
    * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    *
-   * @throw ControlException Invalid number of elements in cartesian_pose.
+   * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   CartesianVelocities(std::initializer_list<double> cartesian_velocities);
+
+  /**
+   * Creates a new CartesianVelocities instance.
+   *
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
+   *
+   * @throw std::invalid_argument if a given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given elbow configuration is invalid.
+   */
+  CartesianVelocities(std::initializer_list<double> cartesian_velocities,
+                      std::initializer_list<double> elbow);
 
   /**
    * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> elbow{};
+
+  /**
+   * Determines whether the stored elbow configuration is valid.
+   *
+   * @return True if the stored elbow configuration is valid, false otherwise.
+   */
+  bool hasValidElbow() const noexcept;
 };
 
 /**
