@@ -248,7 +248,7 @@ TYPED_TEST_CASE(Command, CommandTypes);
 TYPED_TEST(Command, CanSendAndReceiveSuccess) {
   RobotMockServer server;
   Robot::Impl robot(
-      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -265,7 +265,7 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
 TYPED_TEST(Command, CanSendAndReceiveAbort) {
   RobotMockServer server;
   Robot::Impl robot(
-      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -282,7 +282,7 @@ TYPED_TEST(Command, CanSendAndReceiveAbort) {
 TYPED_TEST(Command, CanSendAndReceiveRejected) {
   RobotMockServer server;
   Robot::Impl robot(
-      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
@@ -299,7 +299,7 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
 TYPED_TEST(Command, CanSendAndReceivePreempted) {
   RobotMockServer server;
   Robot::Impl robot(
-      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort));
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
   server
       .waitForCommand<typename TestFixture::TCommand>(

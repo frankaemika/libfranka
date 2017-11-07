@@ -3,7 +3,8 @@
 ## 0.2.0 - unreleased
 
   * **BREAKING** change on the network protocol:
-    - Added `tau_J_d` to the robot state
+    - Added `tau_J_d` to the robot state.
+  * Added logs to ControlException.
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Changed examples to read initial states inside control loops (after controller switching)
   * Always throw `ControlException`s for control-related command responses

@@ -10,9 +10,10 @@
 
 namespace franka {
 
-Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config)
+Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config, size_t log_size)
     : impl_{new Robot::Impl(
           std::make_unique<Network>(franka_address, research_interface::robot::kCommandPort),
+          log_size,
           realtime_config)} {}
 
 // Has to be declared here, as the Impl type is incomplete in the header.

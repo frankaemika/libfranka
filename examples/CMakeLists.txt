@@ -31,6 +31,7 @@ foreach(example ${EXAMPLES})
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)
+target_link_libraries(motion_with_control Poco::Foundation)
 
 include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}

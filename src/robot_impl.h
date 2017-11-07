@@ -11,6 +11,7 @@
 #include <research_interface/robot/service_traits.h>
 #include <research_interface/robot/service_types.h>
 
+#include "logger.h"
 #include "network.h"
 #include "robot_control.h"
 
@@ -21,6 +22,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
 class Robot::Impl : public RobotControl {
  public:
   explicit Impl(std::unique_ptr<Network> network,
+                size_t log_size,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
   RobotState update(
@@ -57,12 +59,15 @@ class Robot::Impl : public RobotControl {
   template <typename T>
   void handleCommandResponse(const typename T::Response& response) const;
 
-  void sendRobotCommand(const research_interface::robot::MotionGeneratorCommand* motion_command,
-                        const research_interface::robot::ControllerCommand* control_command) const;
+  research_interface::robot::RobotCommand sendRobotCommand(
+      const research_interface::robot::MotionGeneratorCommand* motion_command,
+      const research_interface::robot::ControllerCommand* control_command) const;
   research_interface::robot::RobotState receiveRobotState();
   void updateState(const research_interface::robot::RobotState& robot_state);
 
   std::unique_ptr<Network> network_;
+
+  Logger logger_;
 
   const RealtimeConfig realtime_config_;
   uint16_t ri_version_;

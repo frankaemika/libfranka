@@ -37,6 +37,7 @@ add_executable(run_all_tests
   gripper_command_tests.cpp
   gripper_tests.cpp
   helpers.cpp
+  logger_tests.cpp
   mock_server.cpp
   model_tests.cpp
   robot_command_tests.cpp
