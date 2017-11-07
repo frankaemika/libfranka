@@ -73,8 +73,12 @@ target_include_directories(franka PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation Threads::Threads)
-target_link_libraries(franka PRIVATE libfranka-common)
+target_link_libraries(franka PRIVATE
+  Poco::Foundation
+  Poco::Net
+  Threads::Threads
+  libfranka-common
+)
 
 ## Installation
 include(GNUInstallDirs)

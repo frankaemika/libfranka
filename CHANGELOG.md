@@ -8,6 +8,7 @@
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Changed examples to read initial states inside control loops (after controller switching)
   * Always throw `ControlException`s for control-related command responses
+  * Removed unnecessary public dependencies for libfranka
 
 ## 0.1.0 - 2017-09-15
 
