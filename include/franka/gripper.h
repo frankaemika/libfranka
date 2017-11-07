@@ -80,6 +80,9 @@ class Gripper {
    * Grasps an object.
    *
    * @param[in] width Size of the object to grasp. [m]
+   * @param[in] epsilon_inner Inner epsilon window of grasp. [m]
+   * @param[in] epsilon_outer Outher epsilon window of grasp. [m]
+   * @param[in] width Size of the object to grasp. [m]
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [N]
    *
@@ -87,7 +90,11 @@ class Gripper {
    *
    * @throw CommandException if an error occurred.
    */
-  bool grasp(double width, double speed, double force) const;
+  bool grasp(double width,
+             double epsilon_inner,
+             double epsilon_outer,
+             double speed,
+             double force) const;
 
   /**
    * Moves the gripper fingers to a specified width.
