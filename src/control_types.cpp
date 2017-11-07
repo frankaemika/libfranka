@@ -24,15 +24,15 @@ inline bool isHomogeneousTransformation(const std::array<double, 16>& transform)
   }
   for (size_t j = 0; j < 3; ++j) {  // i..column
     if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) + std::pow(transform[j * 4 + 1], 2) +
-        std::pow(transform[j * 4 + 2], 2)) -
-        1.0) > kOrthonormalThreshold) {
+                           std::pow(transform[j * 4 + 2], 2)) -
+                 1.0) > kOrthonormalThreshold) {
       return false;
     }
   }
   for (size_t i = 0; i < 3; ++i) {  // j..row
     if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) + std::pow(transform[1 * 4 + i], 2) +
-        std::pow(transform[2 * 4 + i], 2)) -
-        1.0) > kOrthonormalThreshold) {
+                           std::pow(transform[2 * 4 + i], 2)) -
+                 1.0) > kOrthonormalThreshold) {
       return false;
     }
   }
@@ -60,7 +60,7 @@ inline void checkElbow(const std::array<double, 2>& elbow) {
   if (!isValidElbow(elbow)) {
     throw std::invalid_argument(
         "Invalid elbow configuration given! Only +1 or -1 are allowed for the sign of the 4th "
-            "joint.");
+        "joint.");
   }
 }
 
@@ -101,7 +101,7 @@ CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
 }
 
 Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-torques)
+                 torques)
     : tau_J(torques) {
   checkFinite(tau_J);
 }
@@ -115,7 +115,7 @@ Torques::Torques(std::initializer_list<double> torques) {
 }
 
 JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-joint_positions)
+                               joint_positions)
     : q(joint_positions) {
   checkFinite(q);
 }
@@ -129,7 +129,7 @@ JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
 }
 
 JointVelocities::JointVelocities(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-joint_velocities)
+                                 joint_velocities)
     : dq(joint_velocities) {
   checkFinite(dq);
 }
@@ -143,7 +143,7 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
 }
 
 CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
-cartesian_pose)
+                             cartesian_pose)
     : O_T_EE(cartesian_pose) {
   checkMatrix(O_T_EE);
 }
