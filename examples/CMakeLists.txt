@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Franka REQUIRED)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 set(EXAMPLES
   echo_robot_state
   execute_trajectory
@@ -26,6 +29,8 @@ foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
   target_link_libraries(${example} Franka::Franka)
 endforeach()
+
+target_link_libraries(joint_impedance_control Threads::Threads)
 
 include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}

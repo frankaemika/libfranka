@@ -50,8 +50,8 @@ inline void checkMatrix(const std::array<double, 16>& transform) {
   checkFinite(transform);
   if (!isHomogeneousTransformation(transform)) {
     throw std::invalid_argument(
-        "libfranka: Attempt to set invalid transformation in motion"
-            "generator. Has to be column major!");
+        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
+        "major!");
   }
 }
 
