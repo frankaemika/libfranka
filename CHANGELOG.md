@@ -8,6 +8,7 @@
   * Changed examples to read initial states inside control loops (after controller switching)
   * Always throw `ControlException`s for control-related command responses
   * Add support for commanding elbow positions for Cartesian motions
+  * Removed unnecessary public dependencies for libfranka
 
 ## 0.1.0 - 2017-09-15
 
