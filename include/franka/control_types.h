@@ -76,7 +76,7 @@ class JointPositions : public Finishable {
    * Creates a new JointPositions instance.
    *
    * @param[in] joint_positions Desired joint angles in [rad].
-   * 
+   *
    * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   JointPositions(const std::array<double, 7>& joint_positions);
@@ -106,7 +106,7 @@ class JointVelocities : public Finishable {
    * Creates a new JointVelocities instance.
    *
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
-   * 
+   *
    * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   JointVelocities(const std::array<double, 7>& joint_velocities);
@@ -260,7 +260,7 @@ class CartesianVelocities : public Finishable {
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
    * @throw std::invalid_argument if a given initializer list has an invalid number of arguments.
-   * @throw std::invalid_argument if the given values are NaN or infinity. 
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given elbow configuration is invalid.
    */
   CartesianVelocities(std::initializer_list<double> cartesian_velocities,
