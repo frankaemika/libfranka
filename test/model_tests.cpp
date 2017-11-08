@@ -270,7 +270,7 @@ TEST_F(Model, CanGetJointPoses) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kKFrame; joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto pose = model.pose(joint, robot_state);
     EXPECT_EQ(expected_pose, pose);
   }
@@ -334,7 +334,7 @@ TEST_F(Model, CanGetBodyJacobian) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kKFrame; joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto jacobian = model.bodyJacobian(joint, robot_state);
     EXPECT_EQ(expected_jacobian, jacobian);
   }
@@ -398,7 +398,7 @@ TEST_F(Model, CanGetZeroJacobian) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kKFrame; joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto jacobian = model.zeroJacobian(joint, robot_state);
     EXPECT_EQ(expected_jacobian, jacobian);
   }

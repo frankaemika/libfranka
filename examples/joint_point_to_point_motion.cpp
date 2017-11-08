@@ -95,7 +95,7 @@ class MotionGenerator {
 int main(int argc, char** argv) {
   if (argc != 10) {
     std::cerr << "Usage: ./generate_joint_pose_motion "
-              << "<robot-hostname> <goal-position> <speed-factor>" << std::endl
+              << "<robot-hostname> <joint-positions> <speed-factor>" << std::endl
               << "speed-factor must be between zero and one." << std::endl;
     return -1;
   }
