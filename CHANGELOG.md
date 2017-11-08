@@ -10,6 +10,7 @@
   * Always throw `ControlException`s for control-related command responses
   * Add support for commanding elbow positions for Cartesian motions
   * Removed unnecessary public dependencies for libfranka
+  * Throw `std::invalid_argument` if any of the commanded values are NaN or infinity.
 
 ## 0.1.0 - 2017-09-15
 
