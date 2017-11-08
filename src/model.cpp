@@ -11,6 +11,41 @@
 
 using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
+namespace {
+
+/**
+ * Computes matrix multiplication C=A*B
+ */
+inline std::array<double, 16> matMul(const std::array<double, 16>& mat_a,
+                                     const std::array<double, 16>& mat_b) {
+  std::array<double, 16> mat_c;
+
+  const double(&a)[4][4] = *reinterpret_cast<const double(*)[4][4]>(mat_a.data());
+  const double(&b)[4][4] = *reinterpret_cast<const double(*)[4][4]>(mat_b.data());
+  double(&c)[4][4] = *reinterpret_cast<double(*)[4][4]>(mat_c.data());
+
+  c[0][0] = a[0][0] * b[0][0] + a[1][0] * b[0][1] + a[2][0] * b[0][2] + a[3][0] * b[0][3];
+  c[0][1] = a[0][1] * b[0][0] + a[1][1] * b[0][1] + a[2][1] * b[0][2] + a[3][1] * b[0][3];
+  c[0][2] = a[0][2] * b[0][0] + a[1][2] * b[0][1] + a[2][2] * b[0][2] + a[3][2] * b[0][3];
+  c[0][3] = a[0][3] * b[0][0] + a[1][3] * b[0][1] + a[2][3] * b[0][2] + a[3][3] * b[0][3];
+  c[1][0] = a[0][0] * b[1][0] + a[1][0] * b[1][1] + a[2][0] * b[1][2] + a[3][0] * b[1][3];
+  c[1][1] = a[0][1] * b[1][0] + a[1][1] * b[1][1] + a[2][1] * b[1][2] + a[3][1] * b[1][3];
+  c[1][2] = a[0][2] * b[1][0] + a[1][2] * b[1][1] + a[2][2] * b[1][2] + a[3][2] * b[1][3];
+  c[1][3] = a[0][3] * b[1][0] + a[1][3] * b[1][1] + a[2][3] * b[1][2] + a[3][3] * b[1][3];
+  c[2][0] = a[0][0] * b[2][0] + a[1][0] * b[2][1] + a[2][0] * b[2][2] + a[3][0] * b[2][3];
+  c[2][1] = a[0][1] * b[2][0] + a[1][1] * b[2][1] + a[2][1] * b[2][2] + a[3][1] * b[2][3];
+  c[2][2] = a[0][2] * b[2][0] + a[1][2] * b[2][1] + a[2][2] * b[2][2] + a[3][2] * b[2][3];
+  c[2][3] = a[0][3] * b[2][0] + a[1][3] * b[2][1] + a[2][3] * b[2][2] + a[3][3] * b[2][3];
+  c[3][0] = a[0][0] * b[3][0] + a[1][0] * b[3][1] + a[2][0] * b[3][2] + a[3][0] * b[3][3];
+  c[3][1] = a[0][1] * b[3][0] + a[1][1] * b[3][1] + a[2][1] * b[3][2] + a[3][1] * b[3][3];
+  c[3][2] = a[0][2] * b[3][0] + a[1][2] * b[3][1] + a[2][2] * b[3][2] + a[3][2] * b[3][3];
+  c[3][3] = a[0][3] * b[3][0] + a[1][3] * b[3][1] + a[2][3] * b[3][2] + a[3][3] * b[3][3];
+
+  return mat_c;
+}
+
+}  // anonymous namespace
+
 namespace franka {
 
 Frame operator++(Frame& frame, int /* dummy */) noexcept {
@@ -56,6 +91,10 @@ std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_
     case Frame::kEndEffector:
       library_->ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
+    case Frame::kKFrame:
+      library_->ee(robot_state.q.data(), matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                   output.data());
+      break;
     default:
       throw std::invalid_argument("Invalid frame given.");
   }
@@ -94,6 +133,11 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
     case Frame::kEndEffector:
       library_->body_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
+    case Frame::kKFrame:
+      library_->body_jacobian_ee(robot_state.q.data(),
+                                 matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                                 output.data());
+      break;
     default:
       throw std::invalid_argument("Invalid frame given.");
   }
@@ -131,6 +175,11 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
       break;
     case Frame::kEndEffector:
       library_->zero_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
+      break;
+    case Frame::kKFrame:
+      library_->zero_jacobian_ee(robot_state.q.data(),
+                                 matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                                 output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
