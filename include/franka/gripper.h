@@ -82,11 +82,11 @@ class Gripper {
    * @param[in] width Size of the object to grasp. [m]
    * @param[in] epsilon_inner Inner epsilon window of grasp. [m]
    * @param[in] epsilon_outer Outher epsilon window of grasp. [m]
-   * @param[in] width Size of the object to grasp. [m]
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [N]
    *
-   * @return True if an object has been grasped, false otherwise.
+   * @return True if an object has been grasped, i.e.: the distance between the gripper fingers is
+   * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
    *
    * @throw CommandException if an error occurred.
    */
