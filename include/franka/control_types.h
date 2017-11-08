@@ -47,8 +47,9 @@ class Torques : public Finishable {
    * Creates a new Torques instance.
    *
    * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
-  Torques(const std::array<double, 7>& torques) noexcept;
+  Torques(const std::array<double, 7>& torques);
 
   /**
    * Creates a new Torques instance.
@@ -56,6 +57,7 @@ class Torques : public Finishable {
    * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   Torques(std::initializer_list<double> torques);
 
@@ -74,8 +76,10 @@ class JointPositions : public Finishable {
    * Creates a new JointPositions instance.
    *
    * @param[in] joint_positions Desired joint angles in [rad].
+   *
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
-  JointPositions(const std::array<double, 7>& joint_positions) noexcept;
+  JointPositions(const std::array<double, 7>& joint_positions);
 
   /**
    * Creates a new JointPositions instance.
@@ -83,6 +87,7 @@ class JointPositions : public Finishable {
    * @param[in] joint_positions Desired joint angles in [rad].
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   JointPositions(std::initializer_list<double> joint_positions);
 
@@ -101,8 +106,10 @@ class JointVelocities : public Finishable {
    * Creates a new JointVelocities instance.
    *
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
+   *
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
-  JointVelocities(const std::array<double, 7>& joint_velocities) noexcept;
+  JointVelocities(const std::array<double, 7>& joint_velocities);
 
   /**
    * Creates a new JointVelocities instance.
@@ -110,6 +117,7 @@ class JointVelocities : public Finishable {
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   JointVelocities(std::initializer_list<double> joint_velocities);
 
@@ -133,6 +141,7 @@ class CartesianPose : public Finishable {
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   CartesianPose(const std::array<double, 16>& cartesian_pose);
 
@@ -146,6 +155,7 @@ class CartesianPose : public Finishable {
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given elbow configuration is invalid.
    */
   CartesianPose(const std::array<double, 16>& cartesian_pose, const std::array<double, 2>& elbow);
@@ -159,6 +169,7 @@ class CartesianPose : public Finishable {
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    */
   CartesianPose(std::initializer_list<double> cartesian_pose);
@@ -174,6 +185,7 @@ class CartesianPose : public Finishable {
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
    * @throw std::invalid_argument if a given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given elbow configuration is invalid.
    */
   CartesianPose(std::initializer_list<double> cartesian_pose, std::initializer_list<double> elbow);
@@ -211,8 +223,10 @@ class CartesianVelocities : public Finishable {
    *
    * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
+   *
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
-  CartesianVelocities(const std::array<double, 6>& cartesian_velocities) noexcept;
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities);
 
   /**
    * Creates a new CartesianVelocities instance.
@@ -221,6 +235,7 @@ class CartesianVelocities : public Finishable {
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given elbow configuration is invalid.
    */
   CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
@@ -233,6 +248,7 @@ class CartesianVelocities : public Finishable {
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   CartesianVelocities(std::initializer_list<double> cartesian_velocities);
 
@@ -244,6 +260,7 @@ class CartesianVelocities : public Finishable {
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
    * @throw std::invalid_argument if a given initializer list has an invalid number of arguments.
+   * @throw std::invalid_argument if the given values are NaN or infinity.
    * @throw std::invalid_argument if the given elbow configuration is invalid.
    */
   CartesianVelocities(std::initializer_list<double> cartesian_velocities,
