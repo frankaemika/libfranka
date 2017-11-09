@@ -11,6 +11,7 @@
 #include <research_interface/robot/service_types.h>
 
 #include "helpers.h"
+#include "matmul.h"
 #include "mock_server.h"
 #include "model_library_interface.h"
 
@@ -92,19 +93,6 @@ struct Model : public ::testing::Test {
  private:
   std::vector<char> buffer_;
 };
-
-inline std::array<double, 16> matMul(const std::array<double, 16>& a,
-                                     const std::array<double, 16>& b) {
-  std::array<double, 16> c{};
-  for (size_t row = 0; row < 4; row++) {
-    for (size_t col = 0; col < 4; col++) {
-      for (size_t inner = 0; inner < 4; inner++) {
-        c[row + col * 4] += a[row + inner * 4] * b[inner + col * 4];
-      }
-    }
-  }
-  return c;
-}
 
 TEST(InvalidModel, ThrowsIfNoModelReceived) {
   RobotMockServer server;
@@ -256,7 +244,7 @@ TEST_F(Model, CanGetJointPoses) {
       })));
   EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);
@@ -320,7 +308,7 @@ TEST_F(Model, CanGetBodyJacobian) {
       })));
   EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);
@@ -384,7 +372,7 @@ TEST_F(Model, CanGetZeroJacobian) {
       })));
   EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);
