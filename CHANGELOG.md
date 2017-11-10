@@ -11,6 +11,7 @@
   * Add support for commanding elbow positions for Cartesian motions
   * Removed unnecessary public dependencies for libfranka
   * Throw `std::invalid_argument` if any of the commanded values are NaN or infinity.
+  * Added support for K frame to Model
 
 ## 0.1.0 - 2017-09-15
 

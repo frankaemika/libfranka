@@ -6,6 +6,7 @@
 
 #include <research_interface/robot/service_types.h>
 
+#include "matmul.h"
 #include "model_library.h"
 #include "network.h"
 
@@ -56,6 +57,10 @@ std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_
     case Frame::kEndEffector:
       library_->ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
+    case Frame::kStiffness:
+      library_->ee(robot_state.q.data(), matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                   output.data());
+      break;
     default:
       throw std::invalid_argument("Invalid frame given.");
   }
@@ -94,6 +99,11 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
     case Frame::kEndEffector:
       library_->body_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
       break;
+    case Frame::kStiffness:
+      library_->body_jacobian_ee(robot_state.q.data(),
+                                 matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                                 output.data());
+      break;
     default:
       throw std::invalid_argument("Invalid frame given.");
   }
@@ -131,6 +141,11 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
       break;
     case Frame::kEndEffector:
       library_->zero_jacobian_ee(robot_state.q.data(), robot_state.F_T_EE.data(), output.data());
+      break;
+    case Frame::kStiffness:
+      library_->zero_jacobian_ee(robot_state.q.data(),
+                                 matMul(robot_state.F_T_EE, robot_state.EE_T_K).data(),
+                                 output.data());
       break;
     default:
       throw std::invalid_argument("Invalid frame given.");
