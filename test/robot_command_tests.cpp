@@ -310,7 +310,8 @@ TYPED_TEST(SetterCommand, CanSendAndReceiveInvalidArgument) {
           [this](const typename TestFixture::TCommand::Request& request) ->
           typename TestFixture::TCommand::Response {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(request, TestFixture::TCommand::Status::kInvalidArgumentRejected);
+            return this->createResponse(request,
+                                        TestFixture::TCommand::Status::kInvalidArgumentRejected);
           })
       .spinOnce();
 
