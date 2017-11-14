@@ -27,7 +27,8 @@ enum class Frame {
   kJoint6,
   kJoint7,
   kFlange,
-  kEndEffector
+  kEndEffector,
+  kStiffness
 };
 
 /**

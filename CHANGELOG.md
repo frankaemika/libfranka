@@ -14,6 +14,7 @@
   * Removed unnecessary public dependencies for libfranka
   * **BREAKING** Added epsilon to grasp operation.
   * Throw `std::invalid_argument` if any of the commanded values are NaN or infinity.
+  * Added support for K frame to Model
 
 ## 0.1.0 - 2017-09-15
 
