@@ -64,9 +64,8 @@ bool Gripper::homing() const {
 
 bool Gripper::grasp(double width, GraspEpsilon epsilon, double speed, double force) const {
   return executeCommand<research_interface::gripper::Grasp>(
-      *network_, width,
-      research_interface::gripper::Grasp::GraspEpsilon{.inner = epsilon.inner,
-                                                       .outer = epsilon.outer},
+      *network_, width, research_interface::gripper::Grasp::GraspEpsilon{.inner = epsilon.inner,
+                                                                         .outer = epsilon.outer},
       speed, force);
 }
 
