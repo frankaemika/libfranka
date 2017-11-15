@@ -291,6 +291,25 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
   EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
 }
 
+TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
+  RobotMockServer server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
+
+  typename TestFixture::TCommand::Status invalid_value = static_cast<decltype(invalid_value)>(-1);
+
+  server
+      .waitForCommand<typename TestFixture::TCommand>(
+          [ this, invalid_value ](const typename TestFixture::TCommand::Request& request) ->
+          typename TestFixture::TCommand::Response {
+            EXPECT_TRUE(this->compare(request, this->getExpected()));
+            return this->createResponse(request, invalid_value);
+          })
+      .spinOnce();
+
+  EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
+}
+
 using SetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                             SetJointImpedance,
                                             SetCartesianImpedance,
@@ -316,30 +335,6 @@ TYPED_TEST(SetterCommand, CanSendAndReceiveInvalidArgument) {
       .spinOnce();
 
   EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
-}
-
-using OtherCommandTypes = ::testing::Types<AutomaticErrorRecovery, StopMove>;
-
-TYPED_TEST_CASE(OtherCommand, OtherCommandTypes);
-
-TYPED_TEST(OtherCommand, ThrowsProtocolExceptionIfInvalidResponseReceived) {
-  RobotMockServer server;
-  Robot::Impl robot(
-      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
-
-  typename TestFixture::TCommand::Status invalid_value = static_cast<decltype(invalid_value)>(
-      research_interface::robot::SetJointImpedance::Status::kInvalidArgumentRejected);
-
-  server
-      .waitForCommand<typename TestFixture::TCommand>(
-          [ this, invalid_value ](const typename TestFixture::TCommand::Request& request) ->
-          typename TestFixture::TCommand::Response {
-            EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(request, invalid_value);
-          })
-      .spinOnce();
-
-  EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
 }
 
 TEST_F(MoveCommand, CanReceiveMotionStarted) {

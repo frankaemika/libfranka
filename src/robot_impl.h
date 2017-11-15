@@ -61,10 +61,10 @@ class Robot::Impl : public RobotControl {
   void handleCommandResponse(const typename T::Response& response) const;
   template <typename T>
   void handleBaseCommandResponse(const typename T::Response& response,
-                                 std::true_type const& /* is_setter */) const;
+                                 std::true_type /* is_setter */) const;
   template <typename T>
   void handleBaseCommandResponse(const typename T::Response& response,
-                                 std::false_type const& /* is_setter */) const;
+                                 std::false_type /* is_setter */) const;
 
   research_interface::robot::RobotCommand sendRobotCommand(
       const research_interface::robot::MotionGeneratorCommand* motion_command,
@@ -93,7 +93,7 @@ void Robot::Impl::handleCommandResponse(const typename T::Response& response) co
 
 template <typename T>
 void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response,
-                                            std::true_type const& /* is_setter */) const {
+                                            std::true_type /* is_setter */) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
@@ -101,7 +101,7 @@ void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response
       break;
     case T::Status::kCommandNotPossibleRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected!");
+                             " command rejected: command not possible in the current mode!");
     case T::Status::kInvalidArgumentRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                              " command rejected: invalid argument!");
@@ -113,7 +113,7 @@ void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response
 
 template <typename T>
 void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response,
-                                            std::false_type const& /* is_setter */) const {
+                                            std::false_type /* is_setter */) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
@@ -121,7 +121,7 @@ void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response
       break;
     case T::Status::kCommandNotPossibleRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected!");
+                             " command rejected: command not possible in the current mode!");
     default:
       throw ProtocolException("libfranka: Unexpected response while handling "s +
                               research_interface::robot::CommandTraits<T>::kName + " command!");
@@ -163,7 +163,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-          " command rejected: commad not possible in the current mode!");
+          " command rejected: command not possible in the current mode!");
     case research_interface::robot::Move::Status::kStartAtSingularPoseRejected:
       throw CommandException(
           "libfranka: "s +
