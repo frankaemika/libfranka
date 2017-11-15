@@ -13,6 +13,10 @@
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
+std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d);
+
 int main(int argc, char** argv) {
   if (argc != 2) {
     std::cerr << "Usage: ./generate_joint_position_motion <robot-hostname>" << std::endl;
@@ -30,24 +34,39 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    auto initial_position = robot.readOnce().q_d;
+    constexpr std::array<double, 7> max_joint_vel{
+        {2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
+
+    std::array<double, 7> initial_position;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration time_step) -> franka::JointPositions {
+    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
+                                             franka::Duration time_step) -> franka::JointPositions {
+      if (time == 0.0) {
+        initial_position = robot_state.q_d;
+      }
+
       time += time_step.toSec();
 
-      double delta_angle = M_PI / 8 * (1 - std::cos(M_PI / 5.0 * time));
+      double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
 
       franka::JointPositions output = {{initial_position[0], initial_position[1],
                                         initial_position[2], initial_position[3] + delta_angle,
                                         initial_position[4] + delta_angle, initial_position[5],
                                         initial_position[6] + delta_angle}};
 
-      if (time >= 10.0) {
+      if (time >= 5.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
         return franka::MotionFinished(output);
       }
-      return output;
+      // state.q_d contains the last joint position command received by the robot.
+      // In case of packet loss due to bad connection or due to a slow control loop
+      // not reaching the 1kHz rate, even if your desired trajectory
+      // is smooth, discontinuities might occur.
+      // Saturating the velocity computed with respect to the last command received
+      // by the robot will prevent from getting discontinuity errors.
+      // Note that if the robot does not receive a command it will try to extrapolate
+      // the desired behavior assuming a constant acceleration model
+      return saturateDesiredJointVelocity(max_joint_vel, output.q, robot_state.q_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
@@ -56,3 +75,15 @@ int main(int argc, char** argv) {
 
   return 0;
 }
+
+std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
+                                                   const std::array<double, 7>& q_d,
+                                                   const std::array<double, 7>& last_q_d) {
+  std::array<double, 7> q_d_saturated{};
+  for (size_t i = 0; i < 7; i++) {
+    double vel = (q_d[i] - last_q_d[i]) / 1e-3;
+    q_d_saturated[i] =
+        last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i]) * 1e-3;
+  }
+  return q_d_saturated;
+};

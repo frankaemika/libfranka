@@ -11,6 +11,7 @@
 #include <research_interface/robot/service_types.h>
 
 #include "helpers.h"
+#include "matmul.h"
 #include "mock_server.h"
 #include "model_library_interface.h"
 
@@ -241,6 +242,14 @@ TEST_F(Model, CanGetJointPoses) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
       })));
+  EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), _, _))
+      .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> input_array;
+        std::copy(&input[0], &input[16], input_array.data());
+        EXPECT_EQ(expected, input_array);
+        std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
+      })));
   EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_pose.cbegin(), expected_pose.cend(), output);
@@ -249,8 +258,7 @@ TEST_F(Model, CanGetJointPoses) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto pose = model.pose(joint, robot_state);
     EXPECT_EQ(expected_pose, pose);
   }
@@ -298,6 +306,14 @@ TEST_F(Model, CanGetBodyJacobian) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));
+  EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), _, _))
+      .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> input_array;
+        std::copy(&input[0], &input[16], input_array.data());
+        EXPECT_EQ(expected, input_array);
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
   EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
@@ -306,8 +322,7 @@ TEST_F(Model, CanGetBodyJacobian) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto jacobian = model.bodyJacobian(joint, robot_state);
     EXPECT_EQ(expected_jacobian, jacobian);
   }
@@ -355,6 +370,14 @@ TEST_F(Model, CanGetZeroJacobian) {
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
       })));
+  EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), _, _))
+      .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
+        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> input_array;
+        std::copy(&input[0], &input[16], input_array.data());
+        EXPECT_EQ(expected, input_array);
+        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+      })));
   EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), robot_state.F_T_EE.data(), _))
       .WillOnce(WithArgs<2>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
@@ -363,8 +386,7 @@ TEST_F(Model, CanGetZeroJacobian) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kEndEffector;
-       joint++) {
+  for (franka::Frame joint = franka::Frame::kJoint1; joint <= franka::Frame::kStiffness; joint++) {
     auto jacobian = model.zeroJacobian(joint, robot_state);
     EXPECT_EQ(expected_jacobian, jacobian);
   }

@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <franka/log.h>
+
 /**
  * @file exception.h
  * Contains exception definitions.
@@ -50,9 +52,23 @@ struct IncompatibleVersionException : public Exception {
 
 /**
  * ControlException is thrown if an error occurs during motion generation or torque control.
+ * The exception holds a vector with the last received robot states. The number of recorded
+ * states can be configured in the Robot constructor.
+ *
  */
 struct ControlException : public Exception {
-  using Exception::Exception;
+  /**
+   * Creates the exception with an explanatory string and a Log object.
+   * @param[in] what Explanatory string.
+   * @param[in] log Vector of last received states and commands.
+   */
+  explicit ControlException(std::string what, std::vector<franka::Record> log = {})
+      : Exception(std::move(what)), log(std::move(log)){};
+
+  /**
+  * Vector of states and commands logged just before the exception occured.
+  */
+  const std::vector<franka::Record> log;
 };
 
 /**

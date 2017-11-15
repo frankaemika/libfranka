@@ -56,7 +56,7 @@ struct RobotState {
 
   /**
    * \f$^{EE}T_{K}\f$
-   * K frame pose in end effector frame.
+   * Stiffness frame pose in end effector frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
@@ -77,16 +77,20 @@ struct RobotState {
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow{};
 
   /**
-   * Desired elbow pose.
-   * Elbow is defined as the joint position of 3rd joint and the sign of the 4th joint. Unit:
-   * \f$[rad]\f$
+   * Desired elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
    */
   std::array<double, 2> elbow_d{};
 
@@ -174,15 +178,15 @@ struct RobotState {
 
   /**
    * \f$^OF_{K,\text{ext}}\f$
-   * External wrench (force, torque) scaled by a factor acting on K frame, expressed relative to the
-   * base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) scaled by a factor acting on stiffness frame, expressed
+   * relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
-   * External wrench (force, torque) acting on K frame, expressed relative to the end effector
-   * frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) acting on stiffness frame, expressed relative to the end
+   * effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 

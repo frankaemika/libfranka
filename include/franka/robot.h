@@ -28,13 +28,13 @@ class Model;
  * @note
  * The members of this class are threadsafe.
  *
- * @par End effector frame
+ * @par End effector frame EE
  * While the end effector parameters are set in a configuration file, it is possible to change the
  * end effector frame with Robot::setEE.
  *
- * @par K frame
- * The K frame is used for Cartesian impedance control and measuring forces and torques. It can be
- * set with Robot::setK.
+ * @par Stiffness frame K
+ * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
+ * It can be set with Robot::setK.
  */
 class Robot {
  public:
@@ -49,12 +49,15 @@ class Robot {
    * @param[in] franka_address IP/hostname of the robot.
    * @param[in] realtime_config if set to Enforce, an exception will be thrown if realtime priority
    * cannot be set when required. Setting realtime_config to Ignore disables this behavior.
+   * @param[in] log_size sets how many last states should be kept for logging purposes.
+   * The log is provided when a ControlException is thrown.
    *
    * @throw NetworkException if the connection is unsuccessful.
    * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
    */
   explicit Robot(const std::string& franka_address,
-                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
+                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce,
+                 size_t log_size = 50);
 
   /**
    * Move-constructs a new Robot instance.
@@ -457,7 +460,7 @@ class Robot {
   void setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow);
 
   /**
-   * Sets the transformation \f$^{EE}T_K\f$ from end effector to K frame.
+   * Sets the transformation \f$^{EE}T_K\f$ from end effector frame to stiffness frame.
    *
    * The transformation matrix is represented as a vectorized 4x4 matrix in column-major format.
    *
@@ -465,7 +468,7 @@ class Robot {
    *
    * @throw CommandException if an error occurred.
    *
-   * @see Robot for an explanation of the K frame.
+   * @see Robot for an explanation of the stiffness frame.
    */
   void setK(const std::array<double, 16>& EE_T_K);  // NOLINT (readability-identifier-naming)
 

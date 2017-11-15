@@ -7,15 +7,15 @@
 #include <franka/robot.h>
 
 /**
- * @example generate_cartesian_pose_motion.cpp
- * An example showing how to generate a Cartesian motion.
+ * @example generate_elbow_motion.cpp
+ * An example showing how to move the robot's elbow.
  *
- * @warning Before executing this example, make sure there is enough space in front of the robot.
+ * @warning Before executing this example, make sure that the elbow has enough space to move.
  */
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_cartesian_pose_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: ./generate_elbow_motion <robot-hostname>" << std::endl;
     return -1;
   }
 
@@ -30,30 +30,30 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    constexpr double radius = 0.3;
     std::array<double, 16> initial_pose;
+    std::array<double, 2> initial_elbow;
     double time = 0.0;
-    robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
-                                         franka::Duration time_step) -> franka::CartesianPose {
+    robot.control([&time, &initial_pose, &initial_elbow](
+                      const franka::RobotState& robot_state,
+                      franka::Duration time_step) -> franka::CartesianPose {
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_d;
+        initial_elbow = robot_state.elbow_d;
       }
 
       time += time_step.toSec();
 
-      double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
-      double delta_x = radius * std::sin(angle);
-      double delta_z = radius * (std::cos(angle) - 1);
+      double angle = M_PI / 10.0 * (1.0 - std::cos(M_PI / 5.0 * time));
 
-      std::array<double, 16> new_pose = initial_pose;
-      new_pose[12] += delta_x;
-      new_pose[14] += delta_z;
+      auto elbow = initial_elbow;
+      elbow[0] += angle;
 
       if (time >= 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(new_pose);
+        return franka::MotionFinished({initial_pose, elbow});
       }
-      return new_pose;
+
+      return {initial_pose, elbow};
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

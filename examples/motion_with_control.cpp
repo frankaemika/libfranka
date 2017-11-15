@@ -1,9 +1,14 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <cmath>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <vector>
+
+#include <Poco/DateTimeFormatter.h>
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
@@ -11,6 +16,9 @@
 /**
  * @example motion_with_control.cpp
  * An example showing how to use a joint velocity motion generator and torque control.
+ *
+ * Additionally, this example shows how to capture and write logs in case an exception is thrown
+ * during a motion.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
@@ -98,6 +106,8 @@ std::vector<double> generateTrajectory(double a_max) {
 
 }  // anonymous namespace
 
+void writeLogToFile(const std::vector<franka::Record>& log);
+
 int main(int argc, char** argv) {
   if (argc != 7) {
     std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>"
@@ -158,10 +168,42 @@ int main(int argc, char** argv) {
           }
           return velocities;
         });
+  } catch (const franka::ControlException& e) {
+    std::cout << e.what() << std::endl;
+    writeLogToFile(e.log);
+    return -1;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
   }
 
   return 0;
+}
+
+void writeLogToFile(const std::vector<franka::Record>& log) {
+  if (log.empty()) {
+    return;
+  }
+  try {
+    Poco::Path temp_dir_path(Poco::Path::temp());
+    temp_dir_path.pushDirectory("libfranka-logs");
+
+    Poco::File temp_dir(temp_dir_path);
+    temp_dir.createDirectories();
+
+    std::string now_string =
+        Poco::DateTimeFormatter::format(Poco::Timestamp{}, "%Y-%m-%d-%h-%m-%S-%i");
+    std::string filename = std::string{"log-" + now_string + ".csv"};
+    Poco::File log_file(Poco::Path(temp_dir_path, filename));
+    if (!log_file.createFile()) {
+      std::cout << "Failed to write log file." << std::endl;
+      return;
+    }
+    std::ofstream log_stream(log_file.path().c_str());
+    log_stream << franka::logToCSV(log);
+
+    std::cout << "Log file written to: " << log_file.path() << std::endl;
+  } catch (...) {
+    std::cout << "Failed to write log file." << std::endl;
+  }
 }

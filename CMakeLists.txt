@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.1.0
+  VERSION 0.2.0
   LANGUAGES CXX
 )
 
@@ -51,6 +51,8 @@ add_library(franka SHARED
   src/gripper_state.cpp
   src/library_downloader.cpp
   src/library_loader.cpp
+  src/log.cpp
+  src/logger.cpp
   src/model.cpp
   src/model_library.cpp
   src/network.cpp
@@ -71,8 +73,12 @@ target_include_directories(franka PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(franka PUBLIC Poco::Net Poco::Foundation Threads::Threads)
-target_link_libraries(franka PRIVATE libfranka-common)
+target_link_libraries(franka PRIVATE
+  Poco::Foundation
+  Poco::Net
+  Threads::Threads
+  libfranka-common
+)
 
 ## Installation
 include(GNUInstallDirs)

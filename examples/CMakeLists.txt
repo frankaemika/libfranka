@@ -9,12 +9,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Franka REQUIRED)
 
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 set(EXAMPLES
   echo_robot_state
   execute_trajectory
   generate_cartesian_pose_motion
   generate_cartesian_velocity_motion
   generate_consecutive_motions
+  generate_elbow_motion
   generate_joint_position_motion
   generate_joint_velocity_motion
   grasp_object
@@ -28,6 +32,9 @@ foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
   target_link_libraries(${example} Franka::Franka)
 endforeach()
+
+target_link_libraries(joint_impedance_control Threads::Threads)
+target_link_libraries(motion_with_control Poco::Foundation)
 
 include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}
