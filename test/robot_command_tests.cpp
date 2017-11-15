@@ -46,9 +46,6 @@ class Command : public ::testing::Test {
 template <typename T>
 class SetterCommand : public Command<T> {};
 
-template <typename T>
-class OtherCommand : public Command<T> {};
-
 class MoveCommand : public Command<research_interface::robot::Move>,
                     public ::testing::WithParamInterface<research_interface::robot::Move::Status> {
 };
