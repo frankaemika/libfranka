@@ -69,11 +69,11 @@ int main(int argc, char** argv) {
     Eigen::Vector3d initial_position;
     double time = 0.0;
     auto get_position = [](const franka::RobotState& robot_state) {
-      return Eigen::Vector3d(robot_state.O_T_EE[12],
-                             robot_state.O_T_EE[13],
+      return Eigen::Vector3d(robot_state.O_T_EE[12], robot_state.O_T_EE[13],
                              robot_state.O_T_EE[14]);
     };
-    auto force_control_callback = [&](const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
+    auto force_control_callback = [&](const franka::RobotState& robot_state,
+                                      franka::Duration period) -> franka::Torques {
       if (time == 0.0) {
         initial_position = get_position(robot_state);
       }
