@@ -63,6 +63,25 @@ class Gripper {
   ~Gripper() noexcept;
 
   /**
+   * Indicates the epsilon window for grasp command.
+   *
+   * @see Gripper::grasp
+   */
+  struct GraspEpsilon {
+    /**
+     * Maximum tolerated deviation when the actual grasped width is smaller than the commanded grasp
+     * width. Unit: \f$[m]\f$.
+     */
+    double inner;
+
+    /**
+     * Maximum tolerated deviation when the actual grasped width is bigger than the commanded grasp
+     * width. Unit: \f$[m]\f$.
+     */
+    double outer;
+  };
+
+  /**
    * Performs homing of the gripper.
    *
    * After changing the gripper fingers, a homing needs to be done.
@@ -80,8 +99,7 @@ class Gripper {
    * Grasps an object.
    *
    * @param[in] width Size of the object to grasp. [m]
-   * @param[in] epsilon_inner Inner epsilon window of grasp. [m]
-   * @param[in] epsilon_outer Outer epsilon window of grasp. [m]
+   * @param[in] epsilon The epsilon window of the grasp.
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [N]
    *
@@ -89,12 +107,10 @@ class Gripper {
    * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
    *
    * @throw CommandException if an error occurred.
+   *
+   * @see GraspEpsilon
    */
-  bool grasp(double width,
-             double epsilon_inner,
-             double epsilon_outer,
-             double speed,
-             double force) const;
+  bool grasp(double width, GraspEpsilon epsilon, double speed, double force) const;
 
   /**
    * Moves the gripper fingers to a specified width.
