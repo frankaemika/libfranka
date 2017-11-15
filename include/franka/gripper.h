@@ -81,7 +81,7 @@ class Gripper {
    *
    * @param[in] width Size of the object to grasp. [m]
    * @param[in] epsilon_inner Inner epsilon window of grasp. [m]
-   * @param[in] epsilon_outer Outher epsilon window of grasp. [m]
+   * @param[in] epsilon_outer Outer epsilon window of grasp. [m]
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [N]
    *
