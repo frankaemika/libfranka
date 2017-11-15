@@ -66,9 +66,24 @@ int main(int argc, char** argv) {
     tau_error_integral.setZero();
 
     // define callback for the torque control loop
-    std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        force_control_callback =
-            [&](const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
+    Eigen::Vector3d initial_position;
+    double time = 0.0;
+    auto get_position = [](const franka::RobotState& robot_state) {
+      return Eigen::Vector3d(robot_state.O_T_EE[12],
+                             robot_state.O_T_EE[13],
+                             robot_state.O_T_EE[14]);
+    };
+    auto force_control_callback = [&](const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
+      if (time == 0.0) {
+        initial_position = get_position(robot_state);
+      }
+
+      time += period.toSec();
+
+      if (time > 0 && (get_position(robot_state) - initial_position).norm() > 0.01) {
+        throw std::runtime_error("Aborting; too far away from starting pose!");
+      }
+
       // get state variables
       std::array<double, 42> jacobian_array =
           model.zeroJacobian(franka::Frame::kEndEffector, robot_state);
@@ -97,7 +112,7 @@ int main(int argc, char** argv) {
     // start real-time control loop
     robot.control(force_control_callback);
 
-  } catch (const franka::Exception& ex) {
+  } catch (const std::exception& ex) {
     // print exception
     std::cout << ex.what() << std::endl;
   }
