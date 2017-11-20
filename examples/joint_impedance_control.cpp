@@ -95,8 +95,10 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < 7; ++i) {
           tau_d_actual[i] = print_data.tau_d_last[i] + print_data.gravity[i];
           tau_error[i] = tau_d_actual[i] - print_data.robot_state.tau_J[i];
-          error_rms += std::sqrt(std::pow(tau_error[i], 2.0)) / tau_error.size();
+          error_rms += std::pow(tau_error[i], 2.0) / tau_error.size();
         }
+        error_rms = std::sqrt(error_rms);
+
         // Print data to console
         std::cout << "tau_error [Nm]: " << tau_error << std::endl
                   << "tau_commanded [Nm]: " << tau_d_actual << std::endl
