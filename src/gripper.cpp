@@ -67,9 +67,7 @@ bool Gripper::grasp(double width,
                     double force,
                     double epsilon_inner,
                     double epsilon_outer) const {
-  research_interface::gripper::Grasp::GraspEpsilon epsilon;
-  epsilon.inner = epsilon_inner;
-  epsilon.outer = epsilon_outer;
+  research_interface::gripper::Grasp::GraspEpsilon epsilon(epsilon_inner, epsilon_outer);
   return executeCommand<research_interface::gripper::Grasp>(*network_, width, epsilon, speed,
                                                             force);
 }
