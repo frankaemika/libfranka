@@ -43,8 +43,7 @@ int main(int argc, char** argv) {
     }
 
     // Grasp the object.
-    franka::Gripper::GraspEpsilon epsilon{.inner = 0.005, .outer = 0.005};
-    if (!gripper.grasp(grasping_width, epsilon, 0.1, 300)) {
+    if (!gripper.grasp(grasping_width, 0.1, 300)) {
       std::cout << "Failed to grasp object." << std::endl;
       return -1;
     }

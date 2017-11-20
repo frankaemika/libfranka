@@ -99,9 +99,12 @@ class Gripper {
    * Grasps an object.
    *
    * @param[in] width Size of the object to grasp. [m]
-   * @param[in] epsilon The epsilon window of the grasp.
    * @param[in] speed Closing speed. [m/s]
    * @param[in] force Grasping force. [N]
+   * @param[in] epsilon_inner Maximum tolerated deviation when the actual grasped width is smaller
+   * than the commanded grasp width.
+   * @param[in] epsilon_outer Maximum tolerated deviation when the actual grasped width is larger
+   * than the commanded grasp width.
    *
    * @return True if an object has been grasped, i.e.: the distance between the gripper fingers is
    * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
@@ -110,7 +113,11 @@ class Gripper {
    *
    * @see GraspEpsilon
    */
-  bool grasp(double width, GraspEpsilon epsilon, double speed, double force) const;
+  bool grasp(double width,
+             double speed,
+             double force,
+             double epsilon_inner = 0.005,
+             double epsilon_outer = 0.005) const;
 
   /**
    * Moves the gripper fingers to a specified width.

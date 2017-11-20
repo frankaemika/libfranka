@@ -8,11 +8,11 @@
 #include "helpers.h"
 #include "mock_server.h"
 
-using franka::Network;
+using franka::CommandException;
 using franka::Gripper;
 using franka::GripperState;
-using franka::CommandException;
 using franka::IncompatibleVersionException;
+using franka::Network;
 
 using namespace research_interface::gripper;
 
@@ -90,7 +90,7 @@ bool GripperCommand<Grasp>::executeCommand(Gripper& gripper) {
   double epsilon_outer = 0.005;
   double speed = 0.1;
   double force = 400.0;
-  return gripper.grasp(width, {epsilon_inner, epsilon_outer}, speed, force);
+  return gripper.grasp(width, speed, force, epsilon_inner, epsilon_outer);
 }
 
 template <>
