@@ -9,4 +9,5 @@ RUN apt-get update && apt-get install -y \
     graphviz \
     lcov \
     libpoco-dev \
-    valgrind
+    valgrind \
+    libeigen3-dev
