@@ -19,14 +19,14 @@ namespace franka {
  */
 struct GripperState {
   /**
-   * Current gripper opening width.
+   * Current gripper opening width. Unit: \f$[m]\f$.
    */
   double width{};
 
   /**
    * Maximum gripper opening width.
    * This parameter is estimated by homing the gripper.
-   * After changing the gripper fingers, a homing needs to be done.
+   * After changing the gripper fingers, a homing needs to be done. Unit: \f$[m]\f$.
    *
    * @see Gripper::homing.
    */
@@ -38,7 +38,7 @@ struct GripperState {
   bool is_grasped{};
 
   /**
-   * Current gripper temperature in °C.
+   * Current gripper temperature. Unit: \f$[°C]\f$.
    */
   uint16_t temperature{};
 

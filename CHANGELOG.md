@@ -2,8 +2,10 @@
 
 ## 0.2.0 - unreleased
 
-  * **BREAKING** change on the network protocol:
-    - Added `tau_J_d` to the robot state.
+### Requires panda system version `>= 1.0.9`
+
+  * **BREAKING** Added epsilon to grasp operation.
+  * Change on the network protocol, Added `tau_J_d` to the robot state.
   * Added logs to ControlException.
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Changed examples to read initial states inside control loops (after controller switching)
