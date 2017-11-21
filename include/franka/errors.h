@@ -17,7 +17,7 @@ namespace franka {
  */
 struct Errors {
  private:
-  std::array<bool, 33> errors_{};
+  std::array<bool, 35> errors_{};
 
  public:
   /**
@@ -46,7 +46,7 @@ struct Errors {
    *
    * @param errors Array of error flags.
    */
-  Errors(const std::array<bool, 33>& errors);
+  Errors(const std::array<bool, 35>& errors);
 
   /**
    * Check if any error flag is set to true.
@@ -195,7 +195,9 @@ struct Errors {
    */
   const bool& controller_torque_discontinuity;
   /**
-   * True if the start elbow sign was inconsistent. Applies only to motions started from Desk.
+   * True if the start elbow sign was inconsistent.
+   *
+   * Applies only to motions started from Desk.
    */
   const bool& start_elbow_sign_inconsistent;
   /**
@@ -206,6 +208,16 @@ struct Errors {
    * True if commanded values would result in exceeding the power limit.
    */
   const bool& power_limit_violation;
+  /**
+   * True if the robot is overloaded for the required motion.
+   *
+   * Applies only to motions started from Desk.
+   */
+  const bool& joint_p2p_insufficient_torque_for_planning;
+  /**
+   * True if the measured torque signal is out of the safe range.
+   */
+  const bool& tau_j_range_violation;
 };
 
 /**
