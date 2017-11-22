@@ -2,17 +2,29 @@
 
 ## 0.2.0 - unreleased
 
-  * **BREAKING** change on the network protocol:
-    - Added `tau_J_d` to the robot state.
-    - Changed Command statuses.
-  * Added logs to ControlException.
+Requires Panda system version >= 1.0.9
+
+### New features
+
+  * Added two new errors to the robot state
+  * Added `epsilon` parameters to gripper grasp method
+  * Added `tau_J_d` to the robot state
+  * Added logs to ControlException
   * Added saturation to joint velocity, joint position, and joint impedance examples
+  * Added support for commanding elbow positions for Cartesian motions
+  * Fail earlier (by throwing exception) if any of the commanded values are NaN or infinity
+  * Added support for stiffness frame to model
+
+### Bugfixes
+
   * Changed examples to read initial states inside control loops (after controller switching)
   * Always throw `ControlException`s for control-related command responses
-  * Add support for commanding elbow positions for Cartesian motions
+
+### Other changes
+
+  * Changes in network protocol for new panda system version
   * Removed unnecessary public dependencies for libfranka
-  * Throw `std::invalid_argument` if any of the commanded values are NaN or infinity.
-  * Added support for K frame to Model
+  * More descriptive exception messages
 
 ## 0.1.0 - 2017-09-15
 
