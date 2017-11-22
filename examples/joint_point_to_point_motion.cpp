@@ -221,7 +221,9 @@ void calculateSynchronizedValues(const std::array<double, 7>& delta_q,
   }
 }
 
-MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7>& q_goal)
+MotionGenerator::MotionGenerator(
+    double speed_factor,
+    const std::array<double, 7>& q_goal)  // NOLINT (modernize-pass-by-value)
     : q_goal_(q_goal) {
   for (size_t i = 0; i < 7; i++) {
     dq_max_[i] *= speed_factor;

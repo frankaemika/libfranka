@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    constexpr double radius = 0.3;
+    constexpr double kRadius = 0.3;
     std::array<double, 16> initial_pose;
     double time = 0.0;
     robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
       time += time_step.toSec();
 
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
-      double delta_x = radius * std::sin(angle);
-      double delta_z = radius * (std::cos(angle) - 1);
+      double delta_x = kRadius * std::sin(angle);
+      double delta_z = kRadius * (std::cos(angle) - 1);
 
       std::array<double, 16> new_pose = initial_pose;
       new_pose[12] += delta_x;
