@@ -30,6 +30,13 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (size_t i = 0; i < actual.I_load.size(); i++) {
     EXPECT_EQ(0.0, actual.I_load[i]);
   }
+  EXPECT_EQ(0.0, actual.m_ee);
+  for (size_t i = 0; i < actual.F_x_Cee.size(); i++) {
+    EXPECT_EQ(0.0, actual.F_x_Cee[i]);
+  }
+  for (size_t i = 0; i < actual.I_ee.size(); i++) {
+    EXPECT_EQ(0.0, actual.I_ee[i]);
+  }
   for (size_t i = 0; i < actual.elbow.size(); i++) {
     EXPECT_EQ(0.0, actual.elbow[i]);
   }
@@ -92,6 +99,9 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.m_load, actual.m_load);
   EXPECT_EQ(expected.F_x_Cload, actual.F_x_Cload);
   EXPECT_EQ(expected.I_load, actual.I_load);
+  EXPECT_EQ(expected.m_ee, actual.m_ee);
+  EXPECT_EQ(expected.F_x_Cee, actual.F_x_Cee);
+  EXPECT_EQ(expected.I_ee, actual.I_ee);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);

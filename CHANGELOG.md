@@ -2,13 +2,13 @@
 
 ## 0.2.0 - unreleased
 
-Requires Panda system version >= 1.0.9
+Requires Panda system version > 1.0.9
 
 ### New features
 
   * Added two new errors to the robot state
   * Added `epsilon` parameters to gripper grasp method
-  * Added `tau_J_d` to the robot state
+  * Added `tau_J_d`, `m_ee`, `F_x_Cee` and `I_ee` to the robot state
   * Added logs to ControlException
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Added support for commanding elbow positions for Cartesian motions

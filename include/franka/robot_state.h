@@ -77,6 +77,21 @@ struct RobotState {
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * Configured mass of the end effector.
+   */
+  double m_ee{};
+
+  /**
+   * Configured rotational inertia matrix of the end effector load w.r.t.\ center of mass.
+   */
+  std::array<double, 9> I_ee{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured center of mass of the end effector load w.r.t.\ flange frame.
+   */
+  std::array<double, 3> F_x_Cee{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * Elbow configuration.
    *
    * The values of the array are:

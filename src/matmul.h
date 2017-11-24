@@ -12,12 +12,13 @@ namespace franka {
  */
 template <size_t T>
 inline std::array<double, T> matMul(const std::array<double, T>& a,
-                                     const std::array<double, T>& b) {
+                                    const std::array<double, T>& b) {
   std::array<double, T> c{};
   for (size_t row = 0; row < std::sqrt(T); row++) {
     for (size_t col = 0; col < std::sqrt(T); col++) {
       for (size_t inner = 0; inner < std::sqrt(T); inner++) {
-        c[row + col * std::sqrt(T)] += a[row + inner * std::sqrt(T)] * b[inner + col * std::sqrt(T)];
+        c[row + col * std::sqrt(T)] +=
+            a[row + inner * std::sqrt(T)] * b[inner + col * std::sqrt(T)];
       }
     }
   }
