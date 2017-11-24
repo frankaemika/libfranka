@@ -27,14 +27,6 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname>  <desired-mass [kg]>" << std::endl;
     return -1;
   }
-  std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
-               "joint is "
-               "in contact with a horizontal rigid surface before starting. Keep in mind that "
-               "collision thresholds are set to high values."
-            << std::endl
-            << "Press Enter to continue..." << std::endl;
-  std::cin.ignore();
-
   // parameters
   const double target_mass{std::stod(argv[2])};
   double desired_mass{0.0};
@@ -109,7 +101,13 @@ int main(int argc, char** argv) {
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_cmd;
       return tau_d_array;
     };
-
+    std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
+                 "joint is "
+                 "in contact with a horizontal rigid surface before starting. Keep in mind that "
+                 "collision thresholds are set to high values."
+              << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
     // start real-time control loop
     robot.control(force_control_callback);
 

@@ -12,9 +12,7 @@
 
 /**
  * @example joint_point_to_point_motion.cpp
- * An example showing how to generate a joint pose motion to a goal position. Adapted from:
- * Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots
- * (Kogan Page Science Paper edition).
+ * An example that moves the robot to a target position by commanding joint positions.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
@@ -28,9 +26,6 @@ int main(int argc, char** argv) {
               << "speed-factor must be between zero and one." << std::endl;
     return -1;
   }
-  std::cout << "WARNING: This example will move the robot! "
-            << "Please make sure to have the user stop button at hand!" << std::endl
-            << "Press Enter to continue..." << std::endl;
   try {
     franka::Robot robot(argv[1]);
     std::array<double, 7> q_goal;
@@ -48,8 +43,11 @@ int main(int argc, char** argv) {
         {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
 
     MotionGenerator motion_generator(speed_factor, q_goal);
+    std::cout << "WARNING: This example will move the robot! "
+              << "Please make sure to have the user stop button at hand!" << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
     robot.control(motion_generator);
-
     std::cout << "Motion finished" << std::endl;
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

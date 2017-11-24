@@ -4,24 +4,32 @@
 
 #include <franka/robot.h>
 
+/**
+ * Saturates an input vector of joint values considering the max and last values.
+ *
+ * @param[in] max_value Maximum possible values.
+ * @param[in] desired_value Desired values.
+ * @param[in] desired_value Last values.
+ *
+ * @return Saturated vector of desired values.
+ */
 std::array<double, 7> saturate(const std::array<double, 7>& max_value,
                                const std::array<double, 7>& desired_value,
                                const std::array<double, 7>& last_value);
-int sgn(double x);
-std::array<double, 7> add(const std::array<double, 7>& a, const std::array<double, 7>& b);
-std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<double, 7>& b);
 
 /**
- * Example joint position motion generator.
+ * An example showing how to generate a joint pose motion to a goal position. Adapted from:
+ * Wisama Khalil and Etienne Dombre. 2002. Modeling, Identification and Control of Robots
+ * (Kogan Page Science Paper edition).
  */
 class MotionGenerator {
  public:
   /**
-  * Creates a new MotionGenerator instance for a target q.
-  *
-  * @param[in] speed_factor General speed factor in range [0, 1].
-  * @param[in] q_goal Target joint positions.
-  */
+   * Creates a new MotionGenerator instance for a target q.
+   *
+   * @param[in] speed_factor General speed factor in range [0, 1].
+   * @param[in] q_goal Target joint positions.
+   */
   MotionGenerator(double speed_factor, const std::array<double, 7> q_goal);
 
   /**

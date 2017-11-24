@@ -14,6 +14,8 @@
 /**
  * @example execute_trajectory.cpp
  * An example showing how to execute a joint trajectory loaded from a CSV file.
+ *
+ * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
 template <class T, size_t N>
@@ -30,11 +32,6 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
     return -1;
   }
-  std::cout << "WARNING: This example will move the robot! "
-            << "Please make sure to have the user stop button at hand!" << std::endl
-            << "Press Enter to continue..." << std::endl;
-  std::cin.ignore();
-
   std::cout << "Loading csv trajectory" << std::endl;
   std::fstream csv_file_stream;
   csv_file_stream.open(argv[2], std::fstream::in);
@@ -70,6 +67,10 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
+    std::cout << "WARNING: This example will move the robot! "
+              << "Please make sure to have the user stop button at hand!" << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
     robot.control([&](const franka::RobotState& robot_state,
                       franka::Duration time_step) -> franka::JointPositions {
       states.push_back(robot_state);

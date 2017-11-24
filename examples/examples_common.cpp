@@ -9,17 +9,7 @@
 
 #include "examples_common.h"
 
-std::array<double, 7> saturate(const std::array<double, 7>& max_value,
-                               const std::array<double, 7>& desired_value,
-                               const std::array<double, 7>& last_value) {
-  std::array<double, 7> saturated_value{};
-  for (size_t i = 0; i < 7; i++) {
-    double vel = (desired_value[i] - last_value[i]) / 1e-3;
-    saturated_value[i] =
-        last_value[i] + std::max(std::min(vel, max_value[i]), -max_value[i]) * 1e-3;
-  }
-  return saturated_value;
-};
+namespace {
 
 int sgn(double x) {
   if (x == 0) {
@@ -43,6 +33,20 @@ std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<
   }
   return result;
 }
+
+}  // anonymous namespace
+
+std::array<double, 7> saturate(const std::array<double, 7>& max_value,
+                               const std::array<double, 7>& desired_value,
+                               const std::array<double, 7>& last_value) {
+  std::array<double, 7> saturated_value{};
+  for (size_t i = 0; i < 7; i++) {
+    double vel = (desired_value[i] - last_value[i]) / 1e-3;
+    saturated_value[i] =
+        last_value[i] + std::max(std::min(vel, max_value[i]), -max_value[i]) * 1e-3;
+  }
+  return saturated_value;
+};
 
 MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal)
     : q_goal_(q_goal) {
