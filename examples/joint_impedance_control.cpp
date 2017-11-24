@@ -14,6 +14,8 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 namespace {
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
@@ -46,13 +48,15 @@ std::array<double, 7> saturateTorqueRate(
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
   if (argc != 5) {
-    std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>"
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>"
               << " <radius in [m]>"
               << " <vel_max in [m/s]>"
               << " <print_rate in [Hz]>" << std::endl;
     return -1;
   }
-
+  std::cout << "WARNING: This example will move the robot! "
+            << "Please make sure to have the user stop button at hand!" << std::endl
+            << "Press Enter to continue..." << std::endl;
   // Set and initialize trajectory parameters.
   const double radius = std::stod(argv[2]);
   const double vel_max = std::stod(argv[3]);
@@ -114,7 +118,11 @@ int main(int argc, char** argv) {
   try {
     // Connect to robot.
     franka::Robot robot(argv[1]);
-
+    // First move the robot to a suitable joint configuration
+    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_init);
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
     // Set collision behavior.
     robot.setCollisionBehavior(
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},

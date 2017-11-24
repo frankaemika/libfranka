@@ -24,15 +24,16 @@
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 3) {
-    std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>  <desired-mass [kg]>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>  <desired-mass [kg]>" << std::endl;
     return -1;
   }
-  std::cout << "Make sure sure that no endeffector is mounted and that the robot's last joint is "
+  std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
+               "joint is "
                "in contact with a horizontal rigid surface before starting. Keep in mind that "
                "collision thresholds are set to high values."
             << std::endl
             << "Press Enter to continue..." << std::endl;
-  std::cin.get();
+  std::cin.ignore();
 
   // parameters
   const double target_mass{std::stod(argv[2])};

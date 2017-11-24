@@ -6,6 +6,8 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example generate_joint_position_motion.cpp
  * An example showing how to generate a joint position motion.
@@ -13,18 +15,22 @@
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
-std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                   const std::array<double, 7>& q_d,
-                                                   const std::array<double, 7>& last_q_d);
-
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_joint_position_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
-
+  std::cout << "WARNING: This example will move the robot! "
+            << "Please make sure to have the user stop button at hand!" << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.ignore();
   try {
     franka::Robot robot(argv[1]);
+    // First move the robot to a suitable joint configuration
+    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_init);
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
 
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
@@ -34,13 +40,14 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    constexpr std::array<double, 7> max_joint_vel{
+    constexpr std::array<double, 7> kMaxJointVelocities{
         {2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
 
     std::array<double, 7> initial_position;
     double time = 0.0;
-    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-                                             franka::Duration time_step) -> franka::JointPositions {
+    robot.control([&initial_position, &time, kMaxJointVelocities](
+                      const franka::RobotState& robot_state,
+                      franka::Duration time_step) -> franka::JointPositions {
       if (time == 0.0) {
         initial_position = robot_state.q_d;
       }
@@ -66,7 +73,7 @@ int main(int argc, char** argv) {
       // by the robot will prevent from getting discontinuity errors.
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return saturateDesiredJointVelocity(max_joint_vel, output.q, robot_state.q_d);
+      return saturate(kMaxJointVelocities, output.q, robot_state.q_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
@@ -75,15 +82,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
-std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                   const std::array<double, 7>& q_d,
-                                                   const std::array<double, 7>& last_q_d) {
-  std::array<double, 7> q_d_saturated{};
-  for (size_t i = 0; i < 7; i++) {
-    double vel = (q_d[i] - last_q_d[i]) / 1e-3;
-    q_d_saturated[i] =
-        last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i]) * 1e-3;
-  }
-  return q_d_saturated;
-};

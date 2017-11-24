@@ -9,14 +9,12 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example execute_trajectory.cpp
  * An example showing how to execute a joint trajectory loaded from a CSV file.
  */
-
-std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                   const std::array<double, 7>& q_d,
-                                                   const std::array<double, 7>& last_q_d);
 
 template <class T, size_t N>
 std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
@@ -32,16 +30,19 @@ int main(int argc, char** argv) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname> <trajectory-csv> <output>" << std::endl;
     return -1;
   }
+  std::cout << "WARNING: This example will move the robot! "
+            << "Please make sure to have the user stop button at hand!" << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.ignore();
 
   std::cout << "Loading csv trajectory" << std::endl;
   std::fstream csv_file_stream;
   csv_file_stream.open(argv[2], std::fstream::in);
-
   std::vector<std::array<double, 7>> samples;
   while (csv_file_stream) {
     std::array<double, 7> q;
     char delimiter;
-    for (int i = 0; i < 7; i++) {
+    for (size_t i = 0; i < 7; i++) {
       csv_file_stream >> q[i] >> delimiter;
     }
     samples.push_back(q);
@@ -51,6 +52,10 @@ int main(int argc, char** argv) {
   std::vector<franka::RobotState> states;
   try {
     franka::Robot robot(argv[1]);
+    // First move the robot to a suitable joint configuration
+    MotionGenerator motion_generator(0.5, samples[0]);
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
 
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
@@ -82,7 +87,7 @@ int main(int argc, char** argv) {
       // by the robot will prevent from getting discontinuity errors.
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return saturateDesiredJointVelocity(max_joint_vel, samples[index], robot_state.q_d);
+      return saturate(max_joint_vel, samples[index], robot_state.q_d);
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
@@ -106,15 +111,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
-std::array<double, 7> saturateDesiredJointVelocity(const std::array<double, 7>& max_joint_vel,
-                                                   const std::array<double, 7>& q_d,
-                                                   const std::array<double, 7>& last_q_d) {
-  std::array<double, 7> q_d_saturated{};
-  for (size_t i = 0; i < 7; i++) {
-    double vel = (q_d[i] - last_q_d[i]) / 1e-3;
-    q_d_saturated[i] =
-        last_q_d[i] + std::max(std::min(vel, max_joint_vel[i]), -max_joint_vel[i]) * 1e-3;
-  }
-  return q_d_saturated;
-};

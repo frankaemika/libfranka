@@ -6,6 +6,8 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example generate_elbow_motion.cpp
  * An example showing how to move the robot's elbow.
@@ -15,12 +17,20 @@
 
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_elbow_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
-
+  std::cout << "WARNING: This example will move the robot! "
+            << "Please make sure to have the user stop button at hand!" << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.ignore();
   try {
     franka::Robot robot(argv[1]);
+    // First move the robot to a suitable joint configuration
+    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_init);
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
 
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.

@@ -6,6 +6,8 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example generate_joint_velocity_motion.cpp
  * An example showing how to generate a joint velocity motion.
@@ -13,18 +15,22 @@
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
-std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 7>& max_joint_acc,
-                                                       const std::array<double, 7>& dq_d,
-                                                       const std::array<double, 7>& last_dq_d);
-
 int main(int argc, char** argv) {
   if (argc != 2) {
-    std::cerr << "Usage: ./generate_joint_velocity_motion <robot-hostname>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
+  std::cout << "WARNING: This example will move the robot! "
+            << "Please make sure to have the user stop button at hand!" << std::endl
+            << "Press Enter to continue..." << std::endl;
+  std::cin.ignore();
   try {
     franka::Robot robot(argv[1]);
-
+    // First move the robot to a suitable joint configuration
+    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_init);
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
     robot.setCollisionBehavior(
@@ -59,7 +65,7 @@ int main(int argc, char** argv) {
       // by the robot will prevent from getting discontinuity errors.
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return saturateDesiredJointAcceleration(max_joint_acc, velocities.dq, state.dq_d);
+      return saturate(max_joint_acc, velocities.dq, state.dq_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
@@ -68,15 +74,3 @@ int main(int argc, char** argv) {
 
   return 0;
 }
-
-std::array<double, 7> saturateDesiredJointAcceleration(const std::array<double, 7>& max_joint_acc,
-                                                       const std::array<double, 7>& dq_d,
-                                                       const std::array<double, 7>& last_dq_d) {
-  std::array<double, 7> dq_d_saturated{};
-  for (size_t i = 0; i < 7; i++) {
-    double accel = (dq_d[i] - last_dq_d[i]) / 1e-3;
-    dq_d_saturated[i] =
-        last_dq_d[i] + std::max(std::min(accel, max_joint_acc[i]), -max_joint_acc[i]) * 1e-3;
-  }
-  return dq_d_saturated;
-};
