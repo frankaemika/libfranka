@@ -40,12 +40,11 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    constexpr std::array<double, 7> kMaxJointVelocities{
-        {2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
+    constexpr std::array<double, 7> kMaxJointVel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
 
     std::array<double, 7> initial_position;
     double time = 0.0;
-    robot.control([&initial_position, &time, kMaxJointVelocities](
+    robot.control([kMaxJointVel, &initial_position, &time](
                       const franka::RobotState& robot_state,
                       franka::Duration time_step) -> franka::JointPositions {
       if (time == 0.0) {
@@ -73,7 +72,7 @@ int main(int argc, char** argv) {
       // by the robot will prevent from getting discontinuity errors.
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return saturate(kMaxJointVelocities, output.q, robot_state.q_d);
+      return saturate(kMaxJointVel, output.q, robot_state.q_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
