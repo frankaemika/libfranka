@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <gmock/gmock.h>
+#include <Eigen/Dense>
 
 #include <franka/exception.h>
 #include <franka/model.h>
@@ -11,7 +12,6 @@
 #include <research_interface/robot/service_types.h>
 
 #include "helpers.h"
-#include "matmul.h"
 #include "mock_server.h"
 #include "model_library_interface.h"
 
@@ -244,7 +244,10 @@ TEST_F(Model, CanGetJointPoses) {
       })));
   EXPECT_CALL(mock, O_T_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> expected;
+        Eigen::Map<Eigen::Matrix4d>(expected.data(), 4, 4) =
+            (Eigen::Matrix4d(robot_state.F_T_EE.data()) *
+             Eigen::Matrix4d(robot_state.EE_T_K.data()));
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);
@@ -308,7 +311,10 @@ TEST_F(Model, CanGetBodyJacobian) {
       })));
   EXPECT_CALL(mock, Ji_J_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> expected;
+        Eigen::Map<Eigen::Matrix4d>(expected.data(), 4, 4) =
+            (Eigen::Matrix4d(robot_state.F_T_EE.data()) *
+             Eigen::Matrix4d(robot_state.EE_T_K.data()));
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);
@@ -372,7 +378,10 @@ TEST_F(Model, CanGetZeroJacobian) {
       })));
   EXPECT_CALL(mock, O_J_J9(robot_state.q.data(), _, _))
       .WillOnce(WithArgs<1, 2>(Invoke([=](const double* input, double* output) {
-        auto expected = franka::matMul(robot_state.F_T_EE, robot_state.EE_T_K);
+        std::array<double, 16> expected;
+        Eigen::Map<Eigen::Matrix4d>(expected.data(), 4, 4) =
+            Eigen::Matrix4d(Eigen::Matrix4d(robot_state.F_T_EE.data()) *
+                            Eigen::Matrix4d(robot_state.EE_T_K.data()));
         std::array<double, 16> input_array;
         std::copy(&input[0], &input[16], input_array.data());
         EXPECT_EQ(expected, input_array);

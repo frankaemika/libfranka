@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Franka REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -37,6 +38,9 @@ endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)
 target_link_libraries(motion_with_control Poco::Foundation)
+
+target_link_libraries(cartesian_impedance_control Eigen3::Eigen3)
+target_link_libraries(force_control Eigen3::Eigen3)
 
 include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}

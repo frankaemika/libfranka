@@ -12,6 +12,7 @@ set(TEST_DEPENDENCIES
   ${GTEST_LIBRARIES}
   Poco::Foundation
   Poco::Net
+  Eigen3::Eigen3
   Threads::Threads
   franka
   libfranka-common
@@ -38,7 +39,6 @@ add_executable(run_all_tests
   gripper_tests.cpp
   helpers.cpp
   logger_tests.cpp
-  matmul_tests.cpp
   mock_server.cpp
   model_tests.cpp
   robot_command_tests.cpp
