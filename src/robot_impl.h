@@ -153,7 +153,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-          " command aborted: motion error!");
+          " command aborted: motion aborted by reflex!");
     case research_interface::robot::Move::Status::kInputErrorAborted:
       throw CommandException(
           "libfranka: "s +
