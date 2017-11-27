@@ -51,6 +51,10 @@ int main(int argc, char** argv) {
     franka::Robot robot(argv[1]);
     // First move the robot to a suitable joint configuration
     MotionGenerator motion_generator(0.5, samples[0]);
+    std::cout << "WARNING: This example will move the robot! "
+              << "Please make sure to have the user stop button at hand!" << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
     robot.control(motion_generator);
     std::cout << "Finished moving to initial joint configuration." << std::endl;
 
@@ -67,10 +71,6 @@ int main(int argc, char** argv) {
     robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
 
     size_t index = 0;
-    std::cout << "WARNING: This example will move the robot! "
-              << "Please make sure to have the user stop button at hand!" << std::endl
-              << "Press Enter to continue..." << std::endl;
-    std::cin.ignore();
     robot.control([&](const franka::RobotState& robot_state,
                       franka::Duration time_step) -> franka::JointPositions {
       states.push_back(robot_state);
