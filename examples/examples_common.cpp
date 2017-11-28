@@ -36,17 +36,18 @@ std::array<double, 7> subtract(const std::array<double, 7>& a, const std::array<
 
 }  // anonymous namespace
 
-std::array<double, 7> saturate(const std::array<double, 7>& max_value,
-                               const std::array<double, 7>& desired_value,
-                               const std::array<double, 7>& last_value) {
-  std::array<double, 7> saturated_value{};
+std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
+                                const std::array<double, 7>& desired_values,
+                                const std::array<double, 7>& last_desired_values) {
+  std::array<double, 7> limited_values{};
   for (size_t i = 0; i < 7; i++) {
-    double vel = (desired_value[i] - last_value[i]) / 1e-3;
-    saturated_value[i] =
-        last_value[i] + std::max(std::min(vel, max_value[i]), -max_value[i]) * 1e-3;
+    double desired_difference = (desired_values[i] - last_desired_values[i]) / 1e-3;
+    limited_values[i] =
+        last_desired_values[i] +
+        std::max(std::min(desired_difference, max_derivatives[i]), -max_derivatives[i]) * 1e-3;
   }
-  return saturated_value;
-};
+  return limited_values;
+}
 
 MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal)
     : q_goal_(q_goal) {
@@ -65,7 +66,7 @@ bool MotionGenerator::calculateDesiredValues(double t, std::array<double, 7>* de
 
   for (size_t i = 0; i < 7; i++) {
     sign_delta_q[i] = sgn(delta_q_[i]);
-    if (std::abs(delta_q_[i]) < kDeltaQMotionFinished_) {
+    if (std::abs(delta_q_[i]) < kDeltaQMotionFinished) {
       (*delta_q_d)[i] = 0;
       joint_motion_finished[i] = true;
     } else {
@@ -101,7 +102,7 @@ void MotionGenerator::calculateSynchronizedValues() {
   int sign_delta_q_[7];
   for (size_t i = 0; i < 7; i++) {
     sign_delta_q_[i] = sgn(delta_q_[i]);
-    if (std::abs(delta_q_[i]) > kDeltaQMotionFinished_) {
+    if (std::abs(delta_q_[i]) > kDeltaQMotionFinished) {
       if (std::abs(delta_q_[i]) < (3.0 / 4.0 * (std::pow(dq_max_[i], 2) / ddq_max_start_[i]) +
                                    3.0 / 4.0 * (std::pow(dq_max_[i], 2) / ddq_max_goal_[i]))) {
         dq_max_reach[i] = std::sqrt(4.0 / 3.0 * delta_q_[i] * sign_delta_q_[i] *
@@ -115,7 +116,7 @@ void MotionGenerator::calculateSynchronizedValues() {
   }
   double max_t_f = *std::max_element(t_f.begin(), t_f.end());
   for (size_t i = 0; i < 7; i++) {
-    if (std::abs(delta_q_[i]) > kDeltaQMotionFinished_) {
+    if (std::abs(delta_q_[i]) > kDeltaQMotionFinished) {
       double a = 1.5 / 2.0 * (ddq_max_goal_[i] + ddq_max_start_[i]);
       double b = -1.0 * max_t_f * ddq_max_goal_[i] * ddq_max_start_[i];
       double c = std::abs(delta_q_[i]) * ddq_max_goal_[i] * ddq_max_start_[i];

@@ -1,21 +1,30 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#pragma once
+
 #include <array>
 
-#include <franka/robot.h>
+#include <franka/duration.h>
+#include <franka/robot_state.h>
 
 /**
- * Saturates an input vector of joint values considering the max and last values.
- *
- * @param[in] max_value Maximum possible values.
- * @param[in] desired_value Desired values.
- * @param[in] desired_value Last values.
- *
- * @return Saturated vector of desired values.
+ * @file examples_common.h
+ * Contains common types and functions for the examples.
  */
-std::array<double, 7> saturate(const std::array<double, 7>& max_value,
-                               const std::array<double, 7>& desired_value,
-                               const std::array<double, 7>& last_value);
+
+/**
+ * Limits the rate of an input vector of per-joint commands considering the maximum allowed time
+ * derivatives.
+ *
+ * @param[in] max_derivatives Per-joint maximum allowed time derivative.
+ * @param[in] desired_values Desired values of the current time step.
+ * @param[in] last_desired_values Desired values of the previous time step.
+ *
+ * @return Rate-limited vector of desired values.
+ */
+std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
+                                const std::array<double, 7>& desired_values,
+                                const std::array<double, 7>& last_desired_values);
 
 /**
  * An example showing how to generate a joint pose motion to a goal position. Adapted from:
@@ -47,7 +56,7 @@ class MotionGenerator {
   bool calculateDesiredValues(double t, std::array<double, 7>* delta_q_d) const;
   void calculateSynchronizedValues();
 
-  const double kDeltaQMotionFinished_ = 1e-6;
+  static constexpr double kDeltaQMotionFinished = 1e-6;
   const std::array<double, 7> q_goal_;
 
   std::array<double, 7> q_start_;

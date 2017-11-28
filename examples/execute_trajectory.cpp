@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
   std::vector<franka::RobotState> states;
   try {
     franka::Robot robot(argv[1]);
+
     // First move the robot to a suitable joint configuration
     MotionGenerator motion_generator(0.5, samples[0]);
     std::cout << "WARNING: This example will move the robot! "
@@ -88,7 +89,7 @@ int main(int argc, char** argv) {
       // by the robot will prevent from getting discontinuity errors.
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return saturate(max_joint_vel, samples[index], robot_state.q_d);
+      return limitRate(max_joint_vel, samples[index], robot_state.q_d);
     });
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
