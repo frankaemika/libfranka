@@ -25,6 +25,7 @@ Requires Panda system version >= 1.0.9
   * Changes in network protocol for new panda system version
   * Removed unnecessary public dependencies for libfranka
   * More descriptive exception messages
+  * CI: Run linter on examples
 
 ## 0.1.0 - 2017-09-15
 
