@@ -58,13 +58,15 @@ class Robot::Impl : public RobotControl {
 
  private:
   template <typename T>
-  void handleCommandResponse(const typename T::Response& response) const;
+  using IsBaseOfSetter =
+      std::is_base_of<research_interface::robot::SetterCommandBase<T, T::kCommand>, T>;
+
   template <typename T>
-  void handleBaseCommandResponse(const typename T::Response& response,
-                                 std::true_type /* is_setter */) const;
+  std::enable_if_t<IsBaseOfSetter<T>::value> handleCommandResponse(
+      const typename T::Response& response) const;
   template <typename T>
-  void handleBaseCommandResponse(const typename T::Response& response,
-                                 std::false_type /* is_setter */) const;
+  std::enable_if_t<!IsBaseOfSetter<T>::value> handleCommandResponse(
+      const typename T::Response& response) const;
 
   research_interface::robot::RobotCommand sendRobotCommand(
       const research_interface::robot::MotionGeneratorCommand* motion_command,
@@ -85,15 +87,8 @@ class Robot::Impl : public RobotControl {
 };
 
 template <typename T>
-void Robot::Impl::handleCommandResponse(const typename T::Response& response) const {
-  using is_setter =
-      std::is_base_of<research_interface::robot::SetterCommandBase<T, T::kCommand>, T>;
-  handleBaseCommandResponse<T>(response, typename is_setter::type());
-}
-
-template <typename T>
-void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response,
-                                            std::true_type /* is_setter */) const {
+std::enable_if_t<Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+    const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
@@ -112,8 +107,8 @@ void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response
 }
 
 template <typename T>
-void Robot::Impl::handleBaseCommandResponse(const typename T::Response& response,
-                                            std::false_type /* is_setter */) const {
+std::enable_if_t<!Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+    const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
