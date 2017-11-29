@@ -31,6 +31,7 @@ list(APPEND TEST_DEPENDENCIES fcimodels)
 
 ## Test runner
 add_executable(run_all_tests
+  calculations_tests.cpp
   control_loop_tests.cpp
   control_types_tests.cpp
   duration_tests.cpp

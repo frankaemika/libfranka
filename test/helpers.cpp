@@ -6,6 +6,8 @@
 
 #include <gtest/gtest.h>
 
+#include "calculations.h"
+
 bool stringContains(const std::string& actual, const std::string& expected) {
   return actual.find(expected) != std::string::npos;
 }
@@ -36,6 +38,13 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   }
   for (size_t i = 0; i < actual.I_ee.size(); i++) {
     EXPECT_EQ(0.0, actual.I_ee[i]);
+  }
+  EXPECT_EQ(0.0, actual.m_total);
+  for (size_t i = 0; i < actual.F_x_Ctotal.size(); i++) {
+    EXPECT_EQ(0.0, actual.F_x_Ctotal[i]);
+  }
+  for (size_t i = 0; i < actual.I_total.size(); i++) {
+    EXPECT_EQ(0.0, actual.I_total[i]);
   }
   for (size_t i = 0; i < actual.elbow.size(); i++) {
     EXPECT_EQ(0.0, actual.elbow[i]);
@@ -102,6 +111,9 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.m_ee, actual.m_ee);
   EXPECT_EQ(expected.F_x_Cee, actual.F_x_Cee);
   EXPECT_EQ(expected.I_ee, actual.I_ee);
+  EXPECT_EQ(expected.m_total, actual.m_total);
+  EXPECT_EQ(expected.F_x_Ctotal, actual.F_x_Ctotal);
+  EXPECT_EQ(expected.I_total, actual.I_total);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
@@ -134,6 +146,17 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.m_load, actual.m_load);
   EXPECT_EQ(expected.F_x_Cload, actual.F_x_Cload);
   EXPECT_EQ(expected.I_load, actual.I_load);
+  EXPECT_EQ(expected.m_ee, actual.m_ee);
+  EXPECT_EQ(expected.F_x_Cee, actual.F_x_Cee);
+  EXPECT_EQ(expected.I_ee, actual.I_ee);
+  EXPECT_EQ(expected.m_ee + expected.m_load, actual.m_total);
+  EXPECT_EQ(franka::combineCenterOfMass(expected.m_ee, expected.F_x_Cee, expected.m_load,
+                                        expected.F_x_Cload),
+            actual.F_x_Ctotal);
+  EXPECT_EQ(franka::combineInertiaTensor(expected.m_ee, expected.F_x_Cee, expected.I_ee,
+                                         expected.m_load, expected.F_x_Cload, expected.I_load,
+                                         actual.m_total, actual.F_x_Ctotal),
+            actual.I_total);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
@@ -208,6 +231,20 @@ void randomRobotState(franka::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.I_load) {
+    element = randomDouble();
+  }
+  robot_state.m_ee = randomDouble();
+  for (double& element : robot_state.F_x_Cee) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.I_ee) {
+    element = randomDouble();
+  }
+  robot_state.m_total = randomDouble();
+  for (double& element : robot_state.F_x_Ctotal) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.I_total) {
     element = randomDouble();
   }
   for (double& element : robot_state.elbow) {
@@ -291,6 +328,13 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.I_load) {
+    element = randomDouble();
+  }
+  robot_state.m_ee = randomDouble();
+  for (double& element : robot_state.F_x_Cee) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.I_ee) {
     element = randomDouble();
   }
   for (double& element : robot_state.elbow) {

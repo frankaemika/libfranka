@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "robot_impl.h"
 
+#include "calculations.h"
+
 // `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
 // have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
@@ -286,6 +288,12 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.m_ee = robot_state.m_ee;
   converted.F_x_Cee = robot_state.F_x_Cee;
   converted.I_ee = robot_state.I_ee;
+  converted.m_total = robot_state.m_load + robot_state.m_ee;
+  converted.F_x_Ctotal = combineCenterOfMass(robot_state.m_ee, robot_state.F_x_Cee,
+                                             robot_state.m_load, robot_state.F_x_Cload);
+  converted.I_total = combineInertiaTensor(
+      robot_state.m_ee, robot_state.F_x_Cee, robot_state.I_ee, robot_state.m_load,
+      robot_state.F_x_Cload, robot_state.I_load, converted.m_total, converted.F_x_Ctotal);
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
   converted.tau_J = robot_state.tau_J;
