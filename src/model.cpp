@@ -163,12 +163,12 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
 
 std::array<double, 49> franka::Model::mass(
     const franka::RobotState& robot_state,
-    const std::array<double, 9>& load_inertia,
-    double load_mass,
-    const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& total_inertia,
+    double total_mass,
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 49> output;
-  library_->mass(robot_state.q.data(), load_inertia.data(), load_mass, F_x_Cload.data(),
+  library_->mass(robot_state.q.data(), total_inertia.data(), total_mass, F_x_Ctotal.data(),
                  output.data());
 
   return output;
@@ -176,24 +176,24 @@ std::array<double, 49> franka::Model::mass(
 
 std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
-    const std::array<double, 9>& load_inertia,
-    double load_mass,
-    const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& total_inertia,
+    double total_mass,
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 7> output;
-  library_->coriolis(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(), load_mass,
-                     F_x_Cload.data(), output.data());
+  library_->coriolis(robot_state.q.data(), robot_state.dq.data(), total_inertia.data(), total_mass,
+                     F_x_Ctotal.data(), output.data());
 
   return output;
 }
 
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
-    double load_mass,
-    const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+    double total_mass,
+    const std::array<double, 3>& F_x_Ctotal,  // NOLINT (readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
-  library_->gravity(robot_state.q.data(), gravity_earth.data(), load_mass, F_x_Cload.data(),
+  library_->gravity(robot_state.q.data(), gravity_earth.data(), total_mass, F_x_Ctotal.data(),
                     output.data());
 
   return output;
