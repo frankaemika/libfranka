@@ -135,12 +135,13 @@ TEST_F(Model, CanCreateModel) {
 TEST_F(Model, CanGetMassMatrix) {
   franka::RobotState robot_state;
   randomRobotState(robot_state);
-  std::array<double, 9> load_inertia{0, 1, 2, 3, 4, 5, 6, 7, 8};
-  double load_mass = 0.75;
-  std::array<double, 3> F_x_Cload{9, 10, 11};
+  std::array<double, 9> total_inertia{0, 1, 2, 3, 4, 5, 6, 7, 8};
+  double total_mass = 0.75;
+  std::array<double, 3> F_x_Ctotal{9, 10, 11};
 
   MockModel mock;
-  EXPECT_CALL(mock, M_NE(robot_state.q.data(), load_inertia.data(), load_mass, F_x_Cload.data(), _))
+  EXPECT_CALL(mock,
+              M_NE(robot_state.q.data(), total_inertia.data(), total_mass, F_x_Ctotal.data(), _))
       .WillOnce(WithArgs<4>(Invoke([=](double* output) {
         for (size_t i = 0; i < 49; i++) {
           output[i] = i;
@@ -150,7 +151,7 @@ TEST_F(Model, CanGetMassMatrix) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  auto matrix = model.mass(robot_state, load_inertia, load_mass, F_x_Cload);
+  auto matrix = model.mass(robot_state, total_inertia, total_mass, F_x_Ctotal);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
   }
@@ -159,14 +160,14 @@ TEST_F(Model, CanGetMassMatrix) {
 TEST_F(Model, CanGetCoriolisVector) {
   franka::RobotState robot_state;
   randomRobotState(robot_state);
-  std::array<double, 9> load_inertia{0, 1, 2, 3, 4, 5, 6, 7, 8};
-  double load_mass = 0.75;
-  std::array<double, 3> F_x_Cload{9, 10, 11};
+  std::array<double, 9> total_inertia{0, 1, 2, 3, 4, 5, 6, 7, 8};
+  double total_mass = 0.75;
+  std::array<double, 3> F_x_Ctotal{9, 10, 11};
   std::array<double, 7> expected_vector{12, 13, 14, 15, 16, 17, 18};
 
   MockModel mock;
-  EXPECT_CALL(mock, c_NE(robot_state.q.data(), robot_state.dq.data(), load_inertia.data(),
-                         load_mass, F_x_Cload.data(), _))
+  EXPECT_CALL(mock, c_NE(robot_state.q.data(), robot_state.dq.data(), total_inertia.data(),
+                         total_mass, F_x_Ctotal.data(), _))
       .WillOnce(WithArgs<5>(Invoke([=](double* output) {
         std::copy(expected_vector.cbegin(), expected_vector.cend(), output);
       })));
@@ -174,20 +175,20 @@ TEST_F(Model, CanGetCoriolisVector) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  auto vector = model.coriolis(robot_state, load_inertia, load_mass, F_x_Cload);
+  auto vector = model.coriolis(robot_state, total_inertia, total_mass, F_x_Ctotal);
   EXPECT_EQ(expected_vector, vector);
 }
 
 TEST_F(Model, CanGetGravity) {
   franka::RobotState robot_state;
   randomRobotState(robot_state);
-  double load_mass = 0.75;
-  std::array<double, 3> F_x_Cload{1, 2, 3};
+  double total_mass = 0.75;
+  std::array<double, 3> F_x_Ctotal{1, 2, 3};
   std::array<double, 3> gravity_earth{4, 5, 6};
 
   MockModel mock;
   EXPECT_CALL(mock,
-              g_NE(robot_state.q.data(), gravity_earth.data(), load_mass, F_x_Cload.data(), _))
+              g_NE(robot_state.q.data(), gravity_earth.data(), total_mass, F_x_Ctotal.data(), _))
       .WillOnce(WithArgs<4>(Invoke([=](double* output) {
         for (size_t i = 0; i < 7; i++) {
           output[i] = i;
@@ -197,7 +198,7 @@ TEST_F(Model, CanGetGravity) {
   model_library_interface = &mock;
 
   franka::Model model(robot.loadModel());
-  auto matrix = model.gravity(robot_state, load_mass, F_x_Cload, gravity_earth);
+  auto matrix = model.gravity(robot_state, total_mass, F_x_Ctotal, gravity_earth);
   for (size_t i = 0; i < matrix.size(); i++) {
     EXPECT_EQ(i, matrix[i]);
   }
