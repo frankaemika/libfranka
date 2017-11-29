@@ -56,11 +56,13 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"m_load\": " << robot_state.m_load << ", \"F_x_Cload\": " << robot_state.F_x_Cload
           << ", \"I_load\": " << robot_state.I_load << ", \"m_ee\": " << robot_state.m_ee
           << ", \"F_x_Cee\": " << robot_state.F_x_Cee << ", \"I_ee\": " << robot_state.I_ee
-          << ", \"elbow\": " << robot_state.elbow << ", \"elbow_d\": " << robot_state.elbow_d
-          << ", \"tau_J\": " << robot_state.tau_J << ", \"tau_J_d\": " << robot_state.tau_J_d
-          << ", \"dtau_J\": " << robot_state.dtau_J << ", \"q\": " << robot_state.q
-          << ", \"dq\": " << robot_state.dq << ", \"q_d\": " << robot_state.q_d
-          << ", \"dq_d\": " << robot_state.dq_d
+          << ", \"m_total\": " << robot_state.m_total
+          << ", \"F_x_Ctotal\": " << robot_state.F_x_Ctotal
+          << ", \"I_total\": " << robot_state.I_total << ", \"elbow\": " << robot_state.elbow
+          << ", \"elbow_d\": " << robot_state.elbow_d << ", \"tau_J\": " << robot_state.tau_J
+          << ", \"tau_J_d\": " << robot_state.tau_J_d << ", \"dtau_J\": " << robot_state.dtau_J
+          << ", \"q\": " << robot_state.q << ", \"dq\": " << robot_state.dq
+          << ", \"q_d\": " << robot_state.q_d << ", \"dq_d\": " << robot_state.dq_d
           << ", \"joint_contact\": " << robot_state.joint_contact
           << ", \"cartesian_contact\": " << robot_state.cartesian_contact
           << ", \"joint_collision\": " << robot_state.joint_collision

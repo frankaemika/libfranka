@@ -5,19 +5,21 @@
 #include <Eigen/Dense>
 
 namespace franka {
-std::array<double, 3> combineCenterOfMass(double m_ee,
-                                          const std::array<double, 3>& F_x_Cee,
-                                          double m_load,
-                                          const std::array<double, 3>& F_x_Cload);
+std::array<double, 3> combineCenterOfMass(
+    double m_ee,
+    const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
+    double m_load,
+    const std::array<double, 3>& F_x_Cload);  // NOLINT (readability-identifier-naming)
 
 Eigen::Matrix3d skewSymmetricMatrixFromVector(Eigen::Vector3d& input);
 
-std::array<double, 9> combineInertiaTensor(double m_ee,
-                                           const std::array<double, 3>& F_x_Cee,
-                                           const std::array<double, 9>& I_ee,
-                                           double m_load,
-                                           const std::array<double, 3>& F_x_Cload,
-                                           const std::array<double, 9>& I_load,
-                                           double m_total,
-                                           const std::array<double, 3>& F_x_total);
+std::array<double, 9> combineInertiaTensor(
+    double m_ee,
+    const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& I_ee,     // NOLINT (readability-identifier-naming)
+    double m_load,
+    const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& I_load,     // NOLINT (readability-identifier-naming)
+    double m_total,
+    const std::array<double, 3>& F_x_total);  // NOLINT (readability-identifier-naming)
 }  // namespace franka
