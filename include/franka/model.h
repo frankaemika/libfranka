@@ -124,9 +124,9 @@ class Model {
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
@@ -145,9 +145,9 @@ class Model {
    * dq\f$, in \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the Coriolis force vector should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load inclusive end-effector, relative to
+   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
@@ -165,7 +165,7 @@ class Model {
    * Calculates the gravity vector. Unit: \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the gravity vector should be calculated.
-   * @param[in] total_mass Weight of the attached total load inclusive end-effector.
+   * @param[in] total_mass Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
