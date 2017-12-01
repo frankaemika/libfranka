@@ -10,17 +10,17 @@ std::array<double, 3> combineCenterOfMass(
     const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
     double m_load,
     const std::array<double, 3>& F_x_Cload) {  // NOLINT (readability-identifier-naming)
-  std::array<double, 3> F_x_total{};           // NOLINT (readability-identifier-naming)
+  std::array<double, 3> F_x_Ctotal{};          // NOLINT (readability-identifier-naming)
   if (m_load + m_ee > 0) {
     std::transform(
-        F_x_Cload.cbegin(), F_x_Cload.cend(), F_x_Cee.cbegin(), F_x_total.begin(),
+        F_x_Cload.cbegin(), F_x_Cload.cend(), F_x_Cee.cbegin(), F_x_Ctotal.begin(),
         [&m_load, &m_ee](double current_center_of_mass_load,
                          double current_center_of_mass_ee) -> double {
           return ((m_load * current_center_of_mass_load + m_ee * current_center_of_mass_ee) /
                   (m_load + m_ee));
         });
   }
-  return F_x_total;
+  return F_x_Ctotal;
 }
 
 Eigen::Matrix3d skewSymmetricMatrixFromVector(Eigen::Vector3d& input) {
@@ -37,7 +37,7 @@ std::array<double, 9> combineInertiaTensor(
     const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
     const std::array<double, 9>& I_load,     // NOLINT (readability-identifier-naming)
     double m_total,
-    const std::array<double, 3>& F_x_total) {  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal) {  // NOLINT (readability-identifier-naming)
   // If the combined mass equals to zero, the combined inertia is also zero.
   if (m_total == 0) {
     return std::array<double, 9>{};
@@ -45,7 +45,7 @@ std::array<double, 9> combineInertiaTensor(
 
   Eigen::Vector3d center_of_mass_load(F_x_Cload.data());
   Eigen::Vector3d center_of_mass_ee(F_x_Cee.data());
-  Eigen::Vector3d center_of_mass_total(F_x_total.data());
+  Eigen::Vector3d center_of_mass_total(F_x_Ctotal.data());
 
   Eigen::Matrix3d inertia_load(I_load.data());
   Eigen::Matrix3d inertia_load_flange = Eigen::Matrix3d::Zero();

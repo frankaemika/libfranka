@@ -21,5 +21,5 @@ std::array<double, 9> combineInertiaTensor(
     const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
     const std::array<double, 9>& I_load,     // NOLINT (readability-identifier-naming)
     double m_total,
-    const std::array<double, 3>& F_x_total);  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal);  // NOLINT (readability-identifier-naming)
 }  // namespace franka
