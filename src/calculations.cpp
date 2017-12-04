@@ -5,6 +5,7 @@
 #include <algorithm>
 
 namespace franka {
+
 std::array<double, 3> combineCenterOfMass(
     double m_ee,
     const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
@@ -23,7 +24,7 @@ std::array<double, 3> combineCenterOfMass(
   return F_x_Ctotal;
 }
 
-Eigen::Matrix3d skewSymmetricMatrixFromVector(Eigen::Vector3d& input) {
+Eigen::Matrix3d skewSymmetricMatrixFromVector(const Eigen::Vector3d& input) {
   Eigen::Matrix3d input_hat;
   input_hat << 0, -input(2), input(1), input(2), 0, -input(0), -input(1), input(0), 0;
   return input_hat;
@@ -82,4 +83,5 @@ std::array<double, 9> combineInertiaTensor(
   Eigen::Map<Eigen::Matrix3d>(I_total.data(), 3, 3) = inertia_total;
   return I_total;
 }
+
 }  // namespace franka
