@@ -13,6 +13,8 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example motion_with_control.cpp
  * An example showing how to use a joint velocity motion generator and torque control.
@@ -110,7 +112,7 @@ void writeLogToFile(const std::vector<franka::Record>& log);
 
 int main(int argc, char** argv) {
   if (argc != 7) {
-    std::cerr << "Usage: ./" << argv[0] << " <robot-hostname>"
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>"
               << " <filter size>"
               << " <K_P>"
               << " <K_D>"
@@ -118,7 +120,6 @@ int main(int argc, char** argv) {
               << " <a_max>" << std::endl;
     return -1;
   }
-
   size_t filter_size = std::stoul(argv[2]);
   std::array<double, 7> K_P;  // NOLINT
   std::array<double, 7> K_D;  // NOLINT
@@ -136,7 +137,15 @@ int main(int argc, char** argv) {
 
   try {
     franka::Robot robot(argv[1]);
-
+    // First move the robot to a suitable joint configuration
+    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_init);
+    std::cout << "WARNING: This example will move the robot! "
+              << "Please make sure to have the user stop button at hand!" << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
+    robot.control(motion_generator);
+    std::cout << "Finished moving to initial joint configuration." << std::endl;
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
     robot.setCollisionBehavior(

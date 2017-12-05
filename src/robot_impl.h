@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <memory>
+#include <type_traits>
 
 #include <franka/model.h>
 #include <franka/robot.h>
@@ -57,7 +58,15 @@ class Robot::Impl : public RobotControl {
 
  private:
   template <typename T>
-  void handleCommandResponse(const typename T::Response& response) const;
+  using IsBaseOfSetter =
+      std::is_base_of<research_interface::robot::SetterCommandBase<T, T::kCommand>, T>;
+
+  template <typename T>
+  std::enable_if_t<IsBaseOfSetter<T>::value> handleCommandResponse(
+      const typename T::Response& response) const;
+  template <typename T>
+  std::enable_if_t<!IsBaseOfSetter<T>::value> handleCommandResponse(
+      const typename T::Response& response) const;
 
   research_interface::robot::RobotCommand sendRobotCommand(
       const research_interface::robot::MotionGeneratorCommand* motion_command,
@@ -78,21 +87,36 @@ class Robot::Impl : public RobotControl {
 };
 
 template <typename T>
-void Robot::Impl::handleCommandResponse(const typename T::Response& response) const {
+std::enable_if_t<Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+    const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
   switch (response.status) {
     case T::Status::kSuccess:
       break;
-    case T::Status::kAborted:
+    case T::Status::kCommandNotPossibleRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command aborted!");
-    case T::Status::kRejected:
+                             " command rejected: command not possible in the current mode!");
+    case T::Status::kInvalidArgumentRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected!");
-    case T::Status::kPreempted:
+                             " command rejected: invalid argument!");
+    default:
+      throw ProtocolException("libfranka: Unexpected response while handling "s +
+                              research_interface::robot::CommandTraits<T>::kName + " command!");
+  }
+}
+
+template <typename T>
+std::enable_if_t<!Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+    const typename T::Response& response) const {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+  switch (response.status) {
+    case T::Status::kSuccess:
+      break;
+    case T::Status::kCommandNotPossibleRejected:
       throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command preempted!");
+                             " command rejected: command not possible in the current mode!");
     default:
       throw ProtocolException("libfranka: Unexpected response while handling "s +
                               research_interface::robot::CommandTraits<T>::kName + " command!");
@@ -115,16 +139,36 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
             " received unexpected motion started message.");
       }
       break;
-    case research_interface::robot::Move::Status::kAborted:
+    case research_interface::robot::Move::Status::kEmergencyAborted:
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-          " command aborted!");
-    case research_interface::robot::Move::Status::kRejected:
+          " command aborted: User Stop pressed!");
+    case research_interface::robot::Move::Status::kReflexAborted:
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-          " command rejected!");
+          " command aborted: motion aborted by reflex!");
+    case research_interface::robot::Move::Status::kInputErrorAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command aborted: invalid input provided!");
+    case research_interface::robot::Move::Status::kCommandNotPossibleRejected:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected: command not possible in the current mode!");
+    case research_interface::robot::Move::Status::kStartAtSingularPoseRejected:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected: cannot start at singular pose!");
+    case research_interface::robot::Move::Status::kOutOfRangeRejected:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected: maximum path deviation out of range!");
     case research_interface::robot::Move::Status::kPreempted:
       throw CommandException(
           "libfranka: "s +
