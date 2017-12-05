@@ -24,15 +24,10 @@
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 4) {
-    std::cerr << "Usage: ./" << argv[0]
+    std::cerr << "Usage: " << argv[0]
               << " <robot-hostname> <translational-stiffness> <rotational-stiffness>" << std::endl;
     return -1;
   }
-  std::cout
-      << "Collision thresholds are set to high values. Make sure you have the user stop at hand!"
-      << std::endl
-      << "Press Enter to continue..." << std::endl;
-  std::cin.get();
 
   // Compliance parameters
   Eigen::MatrixXd stiffness(6, 6), damping(6, 6);
@@ -110,6 +105,10 @@ int main(int argc, char** argv) {
     };
 
     // start real-time control loop
+    std::cout << "WARNING: Collision thresholds are set to high values."
+              << "Make sure you have the user stop at hand!" << std::endl
+              << "Press Enter to continue..." << std::endl;
+    std::cin.ignore();
     robot.control(impedance_control_callback);
 
   } catch (const franka::Exception& ex) {

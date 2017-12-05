@@ -13,6 +13,12 @@ find_package(Eigen3 REQUIRED)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+add_library(examples_common STATIC
+  examples_common.cpp
+)
+
+target_link_libraries(examples_common PUBLIC Franka::Franka)
+
 set(EXAMPLES
   cartesian_impedance_control
   echo_robot_state
@@ -33,7 +39,7 @@ set(EXAMPLES
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
-  target_link_libraries(${example} Franka::Franka)
+  target_link_libraries(${example} Franka::Franka examples_common)
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)

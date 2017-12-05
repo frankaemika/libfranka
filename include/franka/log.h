@@ -7,6 +7,11 @@
 #include <franka/control_types.h>
 #include <franka/robot_state.h>
 
+/**
+ * @file log.h
+ * Contains helper types for logging sent commands and received robot states.
+ */
+
 namespace franka {
 
 /**

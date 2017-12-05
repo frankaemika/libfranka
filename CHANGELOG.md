@@ -25,8 +25,10 @@ Requires Panda system version > 1.0.9
 
   * Changes in network protocol for new panda system version
   * Removed unnecessary public dependencies for libfranka
+  * More descriptive exception messages
   * CI: Run linter on examples
   * New build-time dependency on Eigen3
+  * Examples first move to an initial joint position
 
 ## 0.1.0 - 2017-09-15
 
