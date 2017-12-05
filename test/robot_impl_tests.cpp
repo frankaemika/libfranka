@@ -432,7 +432,8 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
       .waitForCommand<Move>(
           [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
           &move_id)
-      .queueResponse<Move>(move_id, []() { return Move::Response(Move::Status::kRejected); })
+      .queueResponse<Move>(
+          move_id, []() { return Move::Response(Move::Status::kCommandNotPossibleRejected); })
       .doForever([&]() {
         bool continue_sending = send.test_and_set();
         if (continue_sending) {
@@ -561,7 +562,7 @@ TEST(RobotImpl, StopMotionErrorThrowsControlException) {
         robot_state.controller_mode = ControllerMode::kCartesianImpedance;
         robot_state.robot_mode = RobotMode::kIdle;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kEmergencyAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand& command) {
         EXPECT_TRUE(command.motion.motion_generation_finished);
@@ -654,7 +655,7 @@ TEST(RobotImpl, CancelMotionErrorThrowsControlException) {
       .waitForCommand<StopMove>([&](const StopMove::Request&) {
         server.sendResponse<Move>(move_id,
                                   []() { return Move::Response(Move::Status::kPreempted); });
-        return StopMove::Response(StopMove::Status::kAborted);
+        return StopMove::Response(StopMove::Status::kCommandNotPossibleRejected);
       })
       .spinOnce();
 
@@ -757,7 +758,7 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
         robot_state.errors[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -833,7 +834,7 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
         robot_state.message_id = ++message_id;
         states.push_back(robot_state);
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -921,7 +922,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = ++message_id;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -984,7 +985,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
         robot_state.message_id = ++message_id;
         states.push_back(robot_state);
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -1060,7 +1061,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = message_id + 1;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -1165,7 +1166,7 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
         robot_state.errors[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
@@ -1232,7 +1233,7 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
         robot_state.errors[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
-      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kAborted); })
+      .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
       .spinOnce()
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
