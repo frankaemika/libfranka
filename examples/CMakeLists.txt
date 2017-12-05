@@ -39,14 +39,11 @@ set(EXAMPLES
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
-  target_link_libraries(${example} Franka::Franka examples_common)
+  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3)
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)
 target_link_libraries(motion_with_control Poco::Foundation)
-
-target_link_libraries(cartesian_impedance_control Eigen3::Eigen3)
-target_link_libraries(force_control Eigen3::Eigen3)
 
 include(GNUInstallDirs)
 install(TARGETS ${EXAMPLES}

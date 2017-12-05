@@ -3,6 +3,7 @@
 #pragma once
 
 #include <array>
+#include <eigen3/Eigen/Core>
 
 #include <franka/duration.h>
 #include <franka/robot_state.h>
@@ -53,24 +54,27 @@ class MotionGenerator {
                                     franka::Duration time_step);
 
  private:
-  bool calculateDesiredValues(double t, std::array<double, 7>* delta_q_d) const;
+  using Vector7d = Eigen::Matrix<double, 7, 1, Eigen::ColMajor>;
+  using Vector7i = Eigen::Matrix<int, 7, 1, Eigen::ColMajor>;
+
+  bool calculateDesiredValues(double t, Vector7d* delta_q_d) const;
   void calculateSynchronizedValues();
 
   static constexpr double kDeltaQMotionFinished = 1e-6;
-  const std::array<double, 7> q_goal_;
+  const Vector7d q_goal_;
 
-  std::array<double, 7> q_start_;
-  std::array<double, 7> delta_q_;
+  Vector7d q_start_;
+  Vector7d delta_q_;
 
-  std::array<double, 7> dq_max_sync_;
-  std::array<double, 7> t_1_sync_;
-  std::array<double, 7> t_2_sync_;
-  std::array<double, 7> t_f_sync_;
-  std::array<double, 7> q_1_;
+  Vector7d dq_max_sync_;
+  Vector7d t_1_sync_;
+  Vector7d t_2_sync_;
+  Vector7d t_f_sync_;
+  Vector7d q_1_;
 
   double time_ = 0.0;
 
-  std::array<double, 7> dq_max_ = {{2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5}};
-  std::array<double, 7> ddq_max_start_ = {{5, 5, 5, 5, 5, 5, 5}};
-  std::array<double, 7> ddq_max_goal_ = {{5, 5, 5, 5, 5, 5, 5}};
+  Vector7d dq_max_ = (Vector7d() << 2.0, 2.0, 2.0, 2.0, 2.5, 2.5, 2.5).finished();
+  Vector7d ddq_max_start_ = (Vector7d() << 5, 5, 5, 5, 5, 5, 5).finished();
+  Vector7d ddq_max_goal_ = (Vector7d() << 5, 5, 5, 5, 5, 5, 5).finished();
 };
