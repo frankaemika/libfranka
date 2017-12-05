@@ -124,9 +124,9 @@ class Model {
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
+   * @param[in] I_total Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load including end effector.
+   * @param[in] m_total Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
@@ -135,8 +135,8 @@ class Model {
    */
   std::array<double, 49> mass(
       const franka::RobotState& robot_state,
-      const std::array<double, 9>& total_inertia,
-      double total_mass,
+      const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+      double m_total,
       const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
@@ -145,9 +145,9 @@ class Model {
    * dq\f$, in \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the Coriolis force vector should be calculated.
-   * @param[in] total_inertia Inertia of the attached total load including end effector, relative to
+   * @param[in] I_total Inertia of the attached total load including end effector, relative to
    * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] total_mass Weight of the attached total load including end effector.
+   * @param[in] m_total Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
@@ -156,8 +156,8 @@ class Model {
    */
   std::array<double, 7> coriolis(
       const franka::RobotState& robot_state,
-      const std::array<double, 9>& total_inertia,
-      double total_mass,
+      const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+      double m_total,
       const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
@@ -165,7 +165,7 @@ class Model {
    * Calculates the gravity vector. Unit: \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the gravity vector should be calculated.
-   * @param[in] total_mass Weight of the attached total load including end effector.
+   * @param[in] m_total Weight of the attached total load including end effector.
    * Unit: \f$[kg]\f$.
    * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
@@ -176,7 +176,7 @@ class Model {
    */
   std::array<double, 7> gravity(
       const franka::RobotState& robot_state,
-      double total_mass,
+      double m_total,
       const std::array<double, 3>& F_x_Ctotal,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const noexcept;
 

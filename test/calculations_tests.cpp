@@ -3,13 +3,14 @@
 
 #include <gtest/gtest.h>
 
-#include "calculations.h"
+#include "load_calculations.h"
 
 TEST(CalculationTest, CombineCenterOfMassZeroMassInput) {
-  double m_load = 0;
   double m_ee = 0;
+  double m_load = 0;
   std::array<double, 3> F_x_Ctotal =
       franka::combineCenterOfMass(m_ee, std::array<double, 3>{}, m_load, std::array<double, 3>{});
+
   std::array<double, 3> expected{};
   EXPECT_EQ(expected, F_x_Ctotal);
 }
@@ -19,6 +20,7 @@ TEST(CalculationTest, CombineCenterOfMassEEWithZeroLoad) {
   std::array<double, 3> F_x_Cee{-0.01, 0, 0.03};
   double m_load = 0.0;
   std::array<double, 3> F_x_Cload{};
+
   std::array<double, 3> F_x_Ctotal = franka::combineCenterOfMass(m_ee, F_x_Cee, m_load, F_x_Cload);
 
   EXPECT_EQ(F_x_Cee, F_x_Ctotal);
@@ -29,7 +31,6 @@ TEST(CalculationTest, CombineCenterOfMassLoadWithZeroEE) {
   std::array<double, 3> F_x_Cee{};
   double m_load = 0.73;
   std::array<double, 3> F_x_Cload{-0.01, 0, 0.03};
-
   std::array<double, 3> F_x_Ctotal = franka::combineCenterOfMass(m_ee, F_x_Cee, m_load, F_x_Cload);
 
   EXPECT_EQ(F_x_Cload, F_x_Ctotal);
@@ -40,7 +41,6 @@ TEST(CalculationTest, CombineCenterOfMassEEWithLoad) {
   std::array<double, 3> F_x_Cee{-0.01, 0, -0.03};
   double m_load = 0.5;
   std::array<double, 3> F_x_Cload{0.01, -0.2, 0.03};
-
   std::array<double, 3> F_x_Ctotal = franka::combineCenterOfMass(m_ee, F_x_Cee, m_load, F_x_Cload);
 
   std::array<double, 3> expected{-0.00186991869918699, -0.08130081300813009, -0.00560975609756098};

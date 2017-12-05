@@ -44,7 +44,6 @@ add_subdirectory(common)
 
 ## Library
 add_library(franka SHARED
-  src/calculations.cpp
   src/control_loop.cpp
   src/control_types.cpp
   src/duration.cpp
@@ -53,6 +52,7 @@ add_library(franka SHARED
   src/gripper_state.cpp
   src/library_downloader.cpp
   src/library_loader.cpp
+  src/load_calculations.cpp
   src/log.cpp
   src/logger.cpp
   src/model.cpp

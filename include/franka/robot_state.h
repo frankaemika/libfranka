@@ -62,21 +62,6 @@ struct RobotState {
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Configured mass of the external load.
-   */
-  double m_load{};
-
-  /**
-   * Configured rotational inertia matrix of the external load w.r.t.\ center of mass.
-   */
-  std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
-
-  /**
-   * Configured center of mass of the external load w.r.t.\ flange frame.
-   */
-  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
-
-  /**
    * Configured mass of the end effector.
    */
   double m_ee{};
@@ -90,6 +75,21 @@ struct RobotState {
    * Configured center of mass of the end effector load w.r.t.\ flange frame.
    */
   std::array<double, 3> F_x_Cee{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured mass of the external load.
+   */
+  double m_load{};
+
+  /**
+   * Configured rotational inertia matrix of the external load w.r.t.\ center of mass.
+   */
+  std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * Configured center of mass of the external load w.r.t.\ flange frame.
+   */
+  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
    * Sum of the mass of the end effector and the external load.

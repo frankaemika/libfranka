@@ -53,9 +53,9 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
   ostream << "{\"O_T_EE\": " << robot_state.O_T_EE << ", \"O_T_EE_d\": " << robot_state.O_T_EE_d
           << ", \"F_T_EE\": " << robot_state.F_T_EE << ", \"EE_T_K\": " << robot_state.EE_T_K
-          << ", \"m_load\": " << robot_state.m_load << ", \"F_x_Cload\": " << robot_state.F_x_Cload
-          << ", \"I_load\": " << robot_state.I_load << ", \"m_ee\": " << robot_state.m_ee
-          << ", \"F_x_Cee\": " << robot_state.F_x_Cee << ", \"I_ee\": " << robot_state.I_ee
+          << ", \"m_ee\": " << robot_state.m_ee << ", \"F_x_Cee\": " << robot_state.F_x_Cee
+          << ", \"I_ee\": " << robot_state.I_ee << ", \"m_load\": " << robot_state.m_load
+          << ", \"F_x_Cload\": " << robot_state.F_x_Cload << ", \"I_load\": " << robot_state.I_load
           << ", \"m_total\": " << robot_state.m_total
           << ", \"F_x_Ctotal\": " << robot_state.F_x_Ctotal
           << ", \"I_total\": " << robot_state.I_total << ", \"elbow\": " << robot_state.elbow

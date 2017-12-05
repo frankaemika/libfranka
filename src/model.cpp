@@ -163,25 +163,24 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
 
 std::array<double, 49> franka::Model::mass(
     const franka::RobotState& robot_state,
-    const std::array<double, 9>& total_inertia,
-    double total_mass,
+    const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+    double m_total,
     const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 49> output;
-  library_->mass(robot_state.q.data(), total_inertia.data(), total_mass, F_x_Ctotal.data(),
-                 output.data());
+  library_->mass(robot_state.q.data(), I_total.data(), m_total, F_x_Ctotal.data(), output.data());
 
   return output;
 }
 
 std::array<double, 7> franka::Model::coriolis(
     const franka::RobotState& robot_state,
-    const std::array<double, 9>& total_inertia,
-    double total_mass,
+    const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+    double m_total,
     const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
     const noexcept {
   std::array<double, 7> output;
-  library_->coriolis(robot_state.q.data(), robot_state.dq.data(), total_inertia.data(), total_mass,
+  library_->coriolis(robot_state.q.data(), robot_state.dq.data(), I_total.data(), m_total,
                      F_x_Ctotal.data(), output.data());
 
   return output;
@@ -189,11 +188,11 @@ std::array<double, 7> franka::Model::coriolis(
 
 std::array<double, 7> franka::Model::gravity(
     const franka::RobotState& robot_state,
-    double total_mass,
+    double m_total,
     const std::array<double, 3>& F_x_Ctotal,  // NOLINT (readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
-  library_->gravity(robot_state.q.data(), gravity_earth.data(), total_mass, F_x_Ctotal.data(),
+  library_->gravity(robot_state.q.data(), gravity_earth.data(), m_total, F_x_Ctotal.data(),
                     output.data());
 
   return output;
