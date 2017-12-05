@@ -2,7 +2,7 @@
 
 ## 0.2.0 - unreleased
 
-Requires Panda system version >= 1.0.9
+Requires Panda system version >= 1.1.0
 
 ### New features
 
