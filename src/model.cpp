@@ -2,8 +2,9 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/model.h>
 
-#include <Eigen/Dense>
 #include <sstream>
+
+#include <Eigen/Core>
 
 #include <research_interface/robot/service_types.h>
 

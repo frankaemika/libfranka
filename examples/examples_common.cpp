@@ -1,13 +1,13 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#include "examples_common.h"
+
 #include <algorithm>
 #include <array>
 #include <cmath>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
-
-#include "examples_common.h"
 
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& desired_values,

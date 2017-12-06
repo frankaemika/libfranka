@@ -3,8 +3,10 @@
 #pragma once
 
 #include <array>
-#include <eigen3/Eigen/Core>
 
+#include <Eigen/Core>
+
+#include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/robot_state.h>
 

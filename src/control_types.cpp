@@ -6,7 +6,6 @@
 #include <type_traits>
 
 #include <franka/control_types.h>
-#include <algorithm>
 
 namespace franka {
 

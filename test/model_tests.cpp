@@ -4,7 +4,7 @@
 #include <memory>
 
 #include <gmock/gmock.h>
-#include <Eigen/Dense>
+#include <Eigen/Core>
 
 #include <franka/exception.h>
 #include <franka/model.h>

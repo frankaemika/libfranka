@@ -5,12 +5,12 @@
 #include <functional>
 #include <iostream>
 
+#include <Eigen/Dense>
+
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
-
-#include <eigen3/Eigen/Dense>
 
 /**
  * @example cartesian_impedance_control.cpp
