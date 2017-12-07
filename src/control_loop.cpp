@@ -177,7 +177,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {
-  constexpr int kThreadPriority = 20;
+  const int kThreadPriority = sched_get_priority_max(SCHED_FIFO);
   sched_param thread_param{};
   thread_param.sched_priority = kThreadPriority;
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
