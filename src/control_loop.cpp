@@ -2,9 +2,9 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
 
-#include <errno.h>
 #include <pthread.h>
 
+#include <cerrno>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -181,13 +181,14 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
   const int thread_priority = sched_get_priority_max(SCHED_FIFO);
   if (thread_priority == -1) {
     throw RealtimeException("libfranka: unable to get maximum possible thread priority: "s +
-                            strerror(errno));
+                            std::strerror(errno));
   }
   sched_param thread_param{};
   thread_param.sched_priority = thread_priority;
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
     if (throw_on_error) {
-      throw RealtimeException("libfranka: unable to set realtime scheduling: "s + strerror(errno));
+      throw RealtimeException("libfranka: unable to set realtime scheduling: "s +
+                              std::strerror(errno));
     }
   }
 }
