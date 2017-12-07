@@ -27,6 +27,7 @@ Requires Panda system version >= 1.1.0
   * More descriptive exception messages
   * CI: Run linter on examples
   * Examples first move to an initial joint position
+  * Changed thread priority to the maximum allowed value
 
 ## 0.1.0 - 2017-09-15
 
