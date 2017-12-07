@@ -14,8 +14,8 @@
 
 /**
  * @example cartesian_impedance_control.cpp
- * An example showing a simple cartesian impedance controller that renders a spring damper system
- * where the equilibrium is the initial configuration.
+ * An example showing a simple cartesian impedance controller without inertia shaping
+ * that renders a spring damper system where the equilibrium is the initial configuration.
  * After starting the controller try to push the robot around and try different stiffness levels.
  *
  * @warning collision thresholds are set to high values. Make sure you have the user stop at hand!
@@ -73,8 +73,6 @@ int main(int argc, char** argv) {
       Eigen::Map<const Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
       Eigen::Map<const Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
       Eigen::Map<const Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
-      Eigen::Map<const Eigen::Matrix<double, 7, 1> > tau_ext(
-          robot_state.tau_ext_hat_filtered.data());
       Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
       Eigen::Vector3d position(transform.translation());
       Eigen::Quaterniond orientation(transform.linear());
@@ -97,7 +95,7 @@ int main(int argc, char** argv) {
 
       // Spring damper system with damping ratio=1
       tau_task << jacobian.transpose() * (-stiffness * error - damping * (jacobian * dq));
-      tau_d << tau_task + coriolis - tau_ext;
+      tau_d << tau_task + coriolis;
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_d;
