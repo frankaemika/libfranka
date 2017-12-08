@@ -29,6 +29,7 @@ Requires Panda system version >= 1.1.0
   * CI: Run linter on examples
   * New build-time dependency on Eigen3
   * Examples first move to an initial joint position
+  * Changed thread priority to the maximum allowed value
 
 ## 0.1.0 - 2017-09-15
 
