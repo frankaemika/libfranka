@@ -10,7 +10,7 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 /**
  * @example cartesian_impedance_control.cpp
