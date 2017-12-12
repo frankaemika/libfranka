@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <franka/log.h>
+
 #include "helpers.h"
 #include "logger.h"
 

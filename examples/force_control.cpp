@@ -5,12 +5,12 @@
 #include <functional>
 #include <iostream>
 
+#include <Eigen/Core>
+
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
-
-#include <eigen3/Eigen/Dense>
 
 /**
  * @example force_control.cpp
@@ -50,7 +50,8 @@ int main(int argc, char** argv) {
 
     Eigen::VectorXd initial_tau_ext(7), tau_error_integral(7);
     // Bias torque sensor
-    std::array<double, 7> gravity_array = model.gravity(initial_state, 0.0, {{0.0, 0.0, 0.0}});
+    std::array<double, 7> gravity_array =
+        model.gravity(initial_state, initial_state.m_total, initial_state.F_x_Ctotal);
     Eigen::Map<Eigen::Matrix<double, 7, 1> > initial_tau_measured(initial_state.tau_J.data());
     Eigen::Map<Eigen::Matrix<double, 7, 1> > initial_gravity(gravity_array.data());
     initial_tau_ext = initial_tau_measured - initial_gravity;

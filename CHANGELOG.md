@@ -8,7 +8,8 @@ Requires Panda system version >= 1.1.0
 
   * Added two new errors to the robot state
   * Added `epsilon` parameters to gripper grasp method
-  * Added `tau_J_d` to the robot state
+  * Added `tau_J_d`, `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal` and `I_total`
+    to the robot state
   * Added logs to ControlException
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Added support for commanding elbow positions for Cartesian motions
@@ -26,6 +27,7 @@ Requires Panda system version >= 1.1.0
   * Removed unnecessary public dependencies for libfranka
   * More descriptive exception messages
   * CI: Run linter on examples
+  * New build-time dependency on Eigen3
   * Examples first move to an initial joint position
   * Changed thread priority to the maximum allowed value
 

@@ -124,19 +124,20 @@ class Model {
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
    * @param[in] robot_state State from which the pose should be calculated.
-   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
-   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
-   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * @param[in] I_total Inertia of the attached total load including end effector, relative to
+   * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] m_total Weight of the attached total load including end effector.
+   * Unit: \f$[kg]\f$.
+   * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
    *
    * @return Vectorized 7x7 mass matrix, column-major.
    */
   std::array<double, 49> mass(
       const franka::RobotState& robot_state,
-      const std::array<double, 9>& load_inertia,
-      double load_mass,
-      const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+      double m_total,
+      const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
   /**
@@ -144,27 +145,29 @@ class Model {
    * dq\f$, in \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the Coriolis force vector should be calculated.
-   * @param[in] load_inertia Inertia of the load, relative to center of mass, given as vectorized
-   * 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
-   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
-   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * @param[in] I_total Inertia of the attached total load including end effector, relative to
+   * center of mass, given as vectorized 3x3 column-major matrix. Unit: \f$[kg \times m^2]\f$.
+   * @param[in] m_total Weight of the attached total load including end effector.
+   * Unit: \f$[kg]\f$.
+   * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
    *
    * @return Coriolis force vector.
    */
   std::array<double, 7> coriolis(
       const franka::RobotState& robot_state,
-      const std::array<double, 9>& load_inertia,
-      double load_mass,
-      const std::array<double, 3>& F_x_Cload)  // NOLINT (readability-identifier-naming)
+      const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+      double m_total,
+      const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
       const noexcept;
 
   /**
    * Calculates the gravity vector. Unit: \f$[Nm]\f$.
    *
    * @param[in] robot_state State from which the gravity vector should be calculated.
-   * @param[in] load_mass Weight of the load. Unit: \f$[kg]\f$.
-   * @param[in] F_x_Cload Translation from flange to center of mass of load.
+   * @param[in] m_total Weight of the attached total load including end effector.
+   * Unit: \f$[kg]\f$.
+   * @param[in] F_x_Ctotal Translation from flange to center of mass of the attached total load.
    * Unit: \f$[m]\f$.
    * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
    * Default to {0.0, 0.0, -9.81}.
@@ -173,8 +176,8 @@ class Model {
    */
   std::array<double, 7> gravity(
       const franka::RobotState& robot_state,
-      double load_mass,
-      const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+      double m_total,
+      const std::array<double, 3>& F_x_Ctotal,  // NOLINT (readability-identifier-naming)
       const std::array<double, 3>& gravity_earth = {{0., 0., -9.81}}) const noexcept;
 
   Model(const Model&) = delete;

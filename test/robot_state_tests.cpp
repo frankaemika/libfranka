@@ -1,13 +1,13 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <gtest/gtest.h>
-
 #include <sstream>
 
+#include <gtest/gtest.h>
+
 #include <franka/robot_state.h>
-#include <robot_impl.h>
 
 #include "helpers.h"
+#include "robot_impl.h"
 
 using namespace franka;
 
@@ -28,9 +28,15 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "O_T_EE_d");
   EXPECT_PRED2(stringContains, output, "EE_T_K");
   EXPECT_PRED2(stringContains, output, "F_T_EE");
+  EXPECT_PRED2(stringContains, output, "m_ee");
+  EXPECT_PRED2(stringContains, output, "F_x_Cee");
+  EXPECT_PRED2(stringContains, output, "I_ee");
   EXPECT_PRED2(stringContains, output, "m_load");
   EXPECT_PRED2(stringContains, output, "F_x_Cload");
   EXPECT_PRED2(stringContains, output, "I_load");
+  EXPECT_PRED2(stringContains, output, "m_total");
+  EXPECT_PRED2(stringContains, output, "F_x_Ctotal");
+  EXPECT_PRED2(stringContains, output, "I_total");
   EXPECT_PRED2(stringContains, output, "elbow");
   EXPECT_PRED2(stringContains, output, "elbow_d");
   EXPECT_PRED2(stringContains, output, "tau_J");

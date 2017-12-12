@@ -6,9 +6,8 @@
 #include <fstream>
 #include <vector>
 
-#include <research_interface/robot/service_types.h>
-
 #include <franka/exception.h>
+#include <research_interface/robot/service_types.h>
 
 namespace franka {
 

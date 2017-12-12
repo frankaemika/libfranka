@@ -1,9 +1,9 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#include <gmock/gmock.h>
+
 #include <franka/exception.h>
 #include <franka/gripper.h>
-
-#include <gmock/gmock.h>
 
 #include "helpers.h"
 #include "mock_server.h"

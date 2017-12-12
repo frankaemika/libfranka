@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Franka REQUIRED)
+find_package(Eigen3 REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -16,11 +17,13 @@ add_library(examples_common STATIC
   examples_common.cpp
 )
 
-target_link_libraries(examples_common PUBLIC Franka::Franka)
+target_link_libraries(examples_common PUBLIC Franka::Franka Eigen3::Eigen3)
 
 set(EXAMPLES
+  cartesian_impedance_control
   echo_robot_state
   execute_trajectory
+  force_control
   generate_cartesian_pose_motion
   generate_cartesian_velocity_motion
   generate_consecutive_motions
@@ -36,7 +39,7 @@ set(EXAMPLES
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
-  target_link_libraries(${example} Franka::Franka examples_common)
+  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3)
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)
@@ -47,23 +50,3 @@ install(TARGETS ${EXAMPLES}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-option(BUILD_EXAMPLES_EIGEN3 "Build examples that require Eigen3" ON)
-if(BUILD_EXAMPLES_EIGEN3)
-  find_package(Eigen3 REQUIRED)
-
-  set(EIGEN3_EXAMPLES
-    cartesian_impedance_control
-    force_control
-  )
-
-  foreach(example ${EIGEN3_EXAMPLES})
-    add_executable(${example} ${example}.cpp)
-    target_link_libraries(${example} Franka::Franka Eigen3::Eigen3)
-  endforeach()
-
-  install(TARGETS ${EIGEN3_EXAMPLES}
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  )
-endif()

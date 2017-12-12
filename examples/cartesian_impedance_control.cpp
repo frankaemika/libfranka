@@ -5,12 +5,12 @@
 #include <functional>
 #include <iostream>
 
+#include <Eigen/Dense>
+
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
 #include <franka/robot.h>
-
-#include <Eigen/Dense>
 
 /**
  * @example cartesian_impedance_control.cpp
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
                                          franka::Duration /*duration*/) -> franka::Torques {
       // get state variables
       std::array<double, 7> coriolis_array = model.coriolis(
-          robot_state, {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}}, 0.0, {{0.0, 0.0, 0.0}});
+          robot_state, robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
       std::array<double, 42> jacobian_array =
           model.zeroJacobian(franka::Frame::kEndEffector, robot_state);
 
