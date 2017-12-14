@@ -116,8 +116,8 @@ int main(int argc, char** argv) {
     // Connect to robot.
     franka::Robot robot(argv[1]);
     // First move the robot to a suitable joint configuration
-    std::array<double, 7> q_init = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
-    MotionGenerator motion_generator(0.5, q_init);
+    std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
+    MotionGenerator motion_generator(0.5, q_goal);
     std::cout << "WARNING: This example will move the robot! "
               << "Please make sure to have the user stop button at hand!" << std::endl
               << "Press Enter to continue..." << std::endl;
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
         const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose {
       if (time == 0.0) {
         // Read the initial pose to start the motion from in the first time step.
-        initial_pose = robot_state.O_T_EE;
+        initial_pose = robot_state.O_T_EE_d;
       }
 
       // Update time.
