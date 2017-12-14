@@ -45,12 +45,12 @@ int main(int argc, char** argv) {
     std::array<double, 16> initial_pose;
     double time = 0.0;
     robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
-                                         franka::Duration time_step) -> franka::CartesianPose {
+                                         franka::Duration period) -> franka::CartesianPose {
+      time += period.toSec();
+
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_d;
       }
-
-      time += time_step.toSec();
 
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
       double delta_x = kRadius * std::sin(angle);

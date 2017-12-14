@@ -45,13 +45,13 @@ int main(int argc, char** argv) {
     double time = 0.0;
     robot.control([&time, &initial_pose, &initial_elbow](
                       const franka::RobotState& robot_state,
-                      franka::Duration time_step) -> franka::CartesianPose {
+                      franka::Duration period) -> franka::CartesianPose {
+      time += period.toSec();
+
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_d;
         initial_elbow = robot_state.elbow_d;
       }
-
-      time += time_step.toSec();
 
       double angle = M_PI / 10.0 * (1.0 - std::cos(M_PI / 5.0 * time));
 

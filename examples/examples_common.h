@@ -48,12 +48,12 @@ class MotionGenerator {
    * Sends joint position calculations
    *
    * @param[in] robot_state Current state of the robot.
-   * @param[in] time_step Duration of execution.
+   * @param[in] period Duration of execution.
    *
    * @return Joint positions for use inside a control loop.
    */
   franka::JointPositions operator()(const franka::RobotState& robot_state,
-                                    franka::Duration time_step);
+                                    franka::Duration period);
 
  private:
   using Vector7d = Eigen::Matrix<double, 7, 1, Eigen::ColMajor>;

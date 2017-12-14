@@ -105,8 +105,8 @@ void MotionGenerator::calculateSynchronizedValues() {
 }
 
 franka::JointPositions MotionGenerator::operator()(const franka::RobotState& robot_state,
-                                                   franka::Duration time_step) {
-  time_ += time_step.toSec();
+                                                   franka::Duration period) {
+  time_ += period.toSec();
 
   if (time_ == 0.0) {
     q_start_ = Vector7d(robot_state.q_d.data());

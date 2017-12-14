@@ -47,12 +47,12 @@ int main(int argc, char** argv) {
     double time = 0.0;
     robot.control([kMaxJointVel, &initial_position, &time](
                       const franka::RobotState& robot_state,
-                      franka::Duration time_step) -> franka::JointPositions {
+                      franka::Duration period) -> franka::JointPositions {
+      time += period.toSec();
+
       if (time == 0.0) {
         initial_position = robot_state.q_d;
       }
-
-      time += time_step.toSec();
 
       double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
 
