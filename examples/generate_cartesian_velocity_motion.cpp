@@ -61,8 +61,8 @@ int main(int argc, char** argv) {
     double angle = M_PI / 4.0;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration time_step) -> franka::CartesianVelocities {
-      time += time_step.toSec();
+                             franka::Duration period) -> franka::CartesianVelocities {
+      time += period.toSec();
 
       double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double v = cycle * v_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));

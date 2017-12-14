@@ -162,8 +162,8 @@ int main(int argc, char** argv) {
         [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
           return controller.step(robot_state);
         },
-        [&](const franka::RobotState&, franka::Duration time_step) -> franka::JointVelocities {
-          index += time_step.toMSec();
+        [&](const franka::RobotState&, franka::Duration period) -> franka::JointVelocities {
+          index += period.toMSec();
 
           if (index >= trajectory.size()) {
             index = trajectory.size() - 1;

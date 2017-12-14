@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
     double omega_max = 1.0;
     double time = 0.0;
     robot.control([=, &time](const franka::RobotState& state,
-                             franka::Duration time_step) -> franka::JointVelocities {
-      time += time_step.toSec();
+                             franka::Duration period) -> franka::JointVelocities {
+      time += period.toSec();
 
       double cycle = std::floor(std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
       double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));

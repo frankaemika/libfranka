@@ -68,11 +68,11 @@ int main(int argc, char** argv) {
     };
     auto force_control_callback = [&](const franka::RobotState& robot_state,
                                       franka::Duration period) -> franka::Torques {
+      time += period.toSec();
+
       if (time == 0.0) {
         initial_position = get_position(robot_state);
       }
-
-      time += period.toSec();
 
       if (time > 0 && (get_position(robot_state) - initial_position).norm() > 0.01) {
         throw std::runtime_error("Aborting; too far away from starting pose!");

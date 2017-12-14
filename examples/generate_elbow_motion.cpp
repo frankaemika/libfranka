@@ -43,28 +43,28 @@ int main(int argc, char** argv) {
     std::array<double, 16> initial_pose;
     std::array<double, 2> initial_elbow;
     double time = 0.0;
-    robot.control([&time, &initial_pose, &initial_elbow](
-                      const franka::RobotState& robot_state,
-                      franka::Duration time_step) -> franka::CartesianPose {
-      if (time == 0.0) {
-        initial_pose = robot_state.O_T_EE_d;
-        initial_elbow = robot_state.elbow_d;
-      }
+    robot.control(
+        [&time, &initial_pose, &initial_elbow](const franka::RobotState& robot_state,
+                                               franka::Duration period) -> franka::CartesianPose {
+          time += period.toSec();
 
-      time += time_step.toSec();
+          if (time == 0.0) {
+            initial_pose = robot_state.O_T_EE_d;
+            initial_elbow = robot_state.elbow_d;
+          }
 
-      double angle = M_PI / 10.0 * (1.0 - std::cos(M_PI / 5.0 * time));
+          double angle = M_PI / 10.0 * (1.0 - std::cos(M_PI / 5.0 * time));
 
-      auto elbow = initial_elbow;
-      elbow[0] += angle;
+          auto elbow = initial_elbow;
+          elbow[0] += angle;
 
-      if (time >= 10.0) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished({initial_pose, elbow});
-      }
+          if (time >= 10.0) {
+            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+            return franka::MotionFinished({initial_pose, elbow});
+          }
 
-      return {initial_pose, elbow};
-    });
+          return {initial_pose, elbow};
+        });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
