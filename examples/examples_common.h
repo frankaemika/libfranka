@@ -52,8 +52,7 @@ class MotionGenerator {
    *
    * @return Joint positions for use inside a control loop.
    */
-  franka::JointPositions operator()(const franka::RobotState& robot_state,
-                                    franka::Duration period);
+  franka::JointPositions operator()(const franka::RobotState& robot_state, franka::Duration period);
 
  private:
   using Vector7d = Eigen::Matrix<double, 7, 1, Eigen::ColMajor>;
