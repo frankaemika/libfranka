@@ -234,9 +234,9 @@ template <>
 GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
     const GetCartesianLimit::Request&,
     GetCartesianLimit::Status status) {
-  std::array<double, 3> object_p_min{-1, 1, 1}, object_p_max{2, 2, 2};
+  std::array<double, 3> object_world_size{2, 2, 2};
   std::array<double, 16> object_frame{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  return GetCartesianLimit::Response(status, object_p_min, object_p_max, object_frame, true);
+  return GetCartesianLimit::Response(status, object_world_size, object_frame, true);
 }
 
 using CommandTypes = ::testing::Types<GetCartesianLimit,

@@ -202,8 +202,7 @@ inline uint32_t Robot::Impl::executeCommand<research_interface::robot::GetCartes
       network_->tcpBlockingReceiveResponse<GetCartesianLimit>(command_id);
 
   virtual_wall_cuboid->p_frame = response.object_frame;
-  virtual_wall_cuboid->p_max = response.object_p_max;
-  virtual_wall_cuboid->p_min = response.object_p_min;
+  virtual_wall_cuboid->object_world_size = response.object_world_size;
   virtual_wall_cuboid->active = response.object_activation;
   virtual_wall_cuboid->id = id;
 
