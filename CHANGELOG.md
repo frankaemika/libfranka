@@ -30,6 +30,7 @@ Requires Panda system version >= 1.1.0
   * New build-time dependency on Eigen3
   * Examples first move to an initial joint position
   * Changed thread priority to the maximum allowed value
+  * Prepare for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
 
 ## 0.1.0 - 2017-09-15
 
