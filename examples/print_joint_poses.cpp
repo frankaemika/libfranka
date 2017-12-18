@@ -7,8 +7,9 @@
 #include <franka/model.h>
 
 /**
- * @example print_joint_positions.cpp
- * An example showing how to use the model library.
+ * @example print_joint_poses.cpp
+ * An example showing how to use the model library that prints the transformation
+ * matrix of each joint with respect to the base frame.
  */
 
 template <class T, size_t N>
