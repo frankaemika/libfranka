@@ -505,6 +505,27 @@ class Robot {
                const std::array<double, 9>& load_inertia);
 
   /**
+   * Sets the cut off frequency for the given motion generator or controller.
+   *
+   * @param[in] external_joint_position_filter_frequency Frequency at which the commanded joint
+   * position is cut off.
+   * @param[in] external_joint_velocity_filter_frequency Frequency at which the commanded joint
+   * velocity is cut off.
+   * @param[in] external_cartesian_position_filter_frequency Frequency at which the commanded
+   * Cartesian position is cut off.
+   * @param[in] external_cartesian_velocity_filter_frequency Frequency at which the commanded
+   * Cartesian velocity is cut off.
+   * @param[in] external_controller_filter_frequency Frequency at which the commanded torque is cut
+   * off.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void setFciFilters(double external_joint_position_filter_frequency,
+                     double external_joint_velocity_filter_frequency,
+                     double external_cartesian_position_filter_frequency,
+                     double external_cartesian_velocity_filter_frequency,
+                     double external_controller_filter_frequency);
+  /**
    * Runs automatic error recovery on the robot.
    *
    * Automatic error recovery e.g. resets the robot after a collision occurred.

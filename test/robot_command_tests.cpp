@@ -8,9 +8,9 @@
 #include "mock_server.h"
 
 using franka::CommandException;
-using franka::ProtocolException;
 using franka::IncompatibleVersionException;
 using franka::Network;
+using franka::ProtocolException;
 using franka::RealtimeConfig;
 using franka::Robot;
 using franka::RobotState;
@@ -25,6 +25,7 @@ using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
 using research_interface::robot::SetFToEE;
+using research_interface::robot::SetFciFilters;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
@@ -123,6 +124,21 @@ bool Command<SetFToEE>::compare(const SetFToEE::Request& request_one,
 }
 
 template <>
+bool Command<SetFciFilters>::compare(const SetFciFilters::Request& request_one,
+                                     const SetFciFilters::Request& request_two) {
+  return request_one.external_joint_position_filter_frequency ==
+             request_two.external_joint_position_filter_frequency &&
+         request_one.external_joint_velocity_filter_frequency ==
+             request_two.external_joint_velocity_filter_frequency &&
+         request_one.external_cartesian_position_filter_frequency ==
+             request_two.external_cartesian_position_filter_frequency &&
+         request_one.external_cartesian_velocity_filter_frequency ==
+             request_two.external_cartesian_velocity_filter_frequency &&
+         request_one.external_controller_filter_frequency ==
+             request_two.external_controller_filter_frequency;
+}
+
+template <>
 bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
                                const SetLoad::Request& request_two) {
   return request_one.F_x_Cload == request_two.F_x_Cload &&
@@ -202,6 +218,11 @@ SetFToEE::Request Command<SetFToEE>::getExpected() {
 }
 
 template <>
+SetFciFilters::Request Command<SetFciFilters>::getExpected() {
+  return SetFciFilters::Request(1, 10, 100, 100, 1000);
+}
+
+template <>
 SetLoad::Request Command<SetLoad>::getExpected() {
   double m_load = 1.5;
   std::array<double, 3> F_x_Cload{0.01, 0.01, 0.1};
@@ -247,6 +268,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetEEToK,
                                       SetFToEE,
                                       SetLoad,
+                                      SetFciFilters,
                                       Move,
                                       StopMove,
                                       AutomaticErrorRecovery>;
@@ -312,7 +334,8 @@ using SetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                             SetCartesianImpedance,
                                             SetEEToK,
                                             SetFToEE,
-                                            SetLoad>;
+                                            SetLoad,
+                                            SetFciFilters>;
 
 TYPED_TEST_CASE(SetterCommand, SetterCommandTypes);
 
@@ -347,9 +370,9 @@ TEST_F(MoveCommand, CanReceiveMotionStarted) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-                EXPECT_TRUE(this->compare(request, request));
-                return this->createResponse(request, Move::Status::kMotionStarted);
-              })
+            EXPECT_TRUE(this->compare(request, request));
+            return this->createResponse(request, Move::Status::kMotionStarted);
+          })
       .spinOnce();
 
   robot.executeCommand<Move>(request);
@@ -368,9 +391,9 @@ TEST_P(MoveCommand, CanReceiveMoveResponses) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-                EXPECT_TRUE(this->compare(request, request));
-                return this->createResponse(request, GetParam());
-              })
+            EXPECT_TRUE(this->compare(request, request));
+            return this->createResponse(request, GetParam());
+          })
       .spinOnce();
 
   EXPECT_THROW(robot.executeCommand<Move>(request), CommandException);
