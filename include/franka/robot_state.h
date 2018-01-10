@@ -222,6 +222,18 @@ struct RobotState {
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$\theta\f$
+   * Motor position. Unit: \f$[rad]\f$
+   */
+  std::array<double, 7> theta{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * \f$\dot{\theta}\f$
+   * Motor velocity. Unit: \f$[rad]\f$
+   */
+  std::array<double, 7> dtheta{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * Current error state.
    */
   Errors current_errors{};

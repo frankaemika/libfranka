@@ -370,9 +370,9 @@ TEST_F(MoveCommand, CanReceiveMotionStarted) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-            EXPECT_TRUE(this->compare(request, request));
-            return this->createResponse(request, Move::Status::kMotionStarted);
-          })
+                EXPECT_TRUE(this->compare(request, request));
+                return this->createResponse(request, Move::Status::kMotionStarted);
+              })
       .spinOnce();
 
   robot.executeCommand<Move>(request);
@@ -391,9 +391,9 @@ TEST_P(MoveCommand, CanReceiveMoveResponses) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-            EXPECT_TRUE(this->compare(request, request));
-            return this->createResponse(request, GetParam());
-          })
+                EXPECT_TRUE(this->compare(request, request));
+                return this->createResponse(request, GetParam());
+              })
       .spinOnce();
 
   EXPECT_THROW(robot.executeCommand<Move>(request), CommandException);
