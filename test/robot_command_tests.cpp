@@ -25,7 +25,7 @@ using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
 using research_interface::robot::SetFToEE;
-using research_interface::robot::SetFciFilters;
+using research_interface::robot::SetFilters;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
@@ -124,18 +124,17 @@ bool Command<SetFToEE>::compare(const SetFToEE::Request& request_one,
 }
 
 template <>
-bool Command<SetFciFilters>::compare(const SetFciFilters::Request& request_one,
-                                     const SetFciFilters::Request& request_two) {
-  return request_one.external_joint_position_filter_frequency ==
-             request_two.external_joint_position_filter_frequency &&
-         request_one.external_joint_velocity_filter_frequency ==
-             request_two.external_joint_velocity_filter_frequency &&
-         request_one.external_cartesian_position_filter_frequency ==
-             request_two.external_cartesian_position_filter_frequency &&
-         request_one.external_cartesian_velocity_filter_frequency ==
-             request_two.external_cartesian_velocity_filter_frequency &&
-         request_one.external_controller_filter_frequency ==
-             request_two.external_controller_filter_frequency;
+bool Command<SetFilters>::compare(const SetFilters::Request& request_one,
+                                  const SetFilters::Request& request_two) {
+  return request_one.joint_position_filter_frequency ==
+             request_two.joint_position_filter_frequency &&
+         request_one.joint_velocity_filter_frequency ==
+             request_two.joint_velocity_filter_frequency &&
+         request_one.cartesian_position_filter_frequency ==
+             request_two.cartesian_position_filter_frequency &&
+         request_one.cartesian_velocity_filter_frequency ==
+             request_two.cartesian_velocity_filter_frequency &&
+         request_one.controller_filter_frequency == request_two.controller_filter_frequency;
 }
 
 template <>
@@ -218,8 +217,8 @@ SetFToEE::Request Command<SetFToEE>::getExpected() {
 }
 
 template <>
-SetFciFilters::Request Command<SetFciFilters>::getExpected() {
-  return SetFciFilters::Request(1, 10, 100, 100, 1000);
+SetFilters::Request Command<SetFilters>::getExpected() {
+  return SetFilters::Request(1, 10, 100, 100, 1000);
 }
 
 template <>
@@ -268,7 +267,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetEEToK,
                                       SetFToEE,
                                       SetLoad,
-                                      SetFciFilters,
+                                      SetFilters,
                                       Move,
                                       StopMove,
                                       AutomaticErrorRecovery>;
@@ -335,7 +334,7 @@ using SetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                             SetEEToK,
                                             SetFToEE,
                                             SetLoad,
-                                            SetFciFilters>;
+                                            SetFilters>;
 
 TYPED_TEST_CASE(SetterCommand, SetterCommandTypes);
 

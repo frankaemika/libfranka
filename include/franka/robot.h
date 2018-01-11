@@ -510,24 +510,24 @@ class Robot {
    * If the value is set to maximum (1000Hz) then no filtering is done.
    * Default value of all filters is 100Hz.
    *
-   * @param[in] external_joint_position_filter_frequency Frequency at which the commanded joint
+   * @param[in] joint_position_filter_frequency Frequency at which the commanded joint
    * position is cut off.
-   * @param[in] external_joint_velocity_filter_frequency Frequency at which the commanded joint
+   * @param[in] joint_velocity_filter_frequency Frequency at which the commanded joint
    * velocity is cut off.
-   * @param[in] external_cartesian_position_filter_frequency Frequency at which the commanded
+   * @param[in] cartesian_position_filter_frequency Frequency at which the commanded
    * Cartesian position is cut off.
-   * @param[in] external_cartesian_velocity_filter_frequency Frequency at which the commanded
+   * @param[in] cartesian_velocity_filter_frequency Frequency at which the commanded
    * Cartesian velocity is cut off.
-   * @param[in] external_controller_filter_frequency Frequency at which the commanded torque is cut
+   * @param[in] controller_filter_frequency Frequency at which the commanded torque is cut
    * off.
    *
    * @throw CommandException if an error occurred.
    */
-  void setFciFilters(double external_joint_position_filter_frequency,
-                     double external_joint_velocity_filter_frequency,
-                     double external_cartesian_position_filter_frequency,
-                     double external_cartesian_velocity_filter_frequency,
-                     double external_controller_filter_frequency);
+  void setFilters(double joint_position_filter_frequency,
+                  double joint_velocity_filter_frequency,
+                  double cartesian_position_filter_frequency,
+                  double cartesian_velocity_filter_frequency,
+                  double controller_filter_frequency);
   /**
    * Runs automatic error recovery on the robot.
    *

@@ -15,7 +15,7 @@ Requires Panda system version >= 1.1.0
   * Added support for commanding elbow positions for Cartesian motions
   * Fail earlier (by throwing exception) if any of the commanded values are NaN or infinity
   * Added support for stiffness frame to model
-  * Added `setFciFilter` command
+  * Added `setFilter` command
 
 ### Bugfixes
 
