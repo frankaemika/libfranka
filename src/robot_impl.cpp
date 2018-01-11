@@ -16,9 +16,10 @@ inline ControlException createControlException(const CommandException& command_e
                                                const RobotState& robot_state,
                                                const std::vector<Record>& log = {}) {
   if (robot_state.robot_mode == RobotMode::kReflex) {
-    return ControlException(
-        command_exception.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
-        log);
+    std::ostringstream message_stream;
+    message_stream << command_exception.what() << " "s << static_cast<std::string>(robot_state.last_motion_errors);
+    message_stream << std::endl << "control_command_success_rate: " << robot_state.control_command_success_rate;
+    return ControlException(message_stream.str(), log);
   }
   return ControlException(command_exception.what(), log);
 }
