@@ -395,6 +395,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (double& element : robot_state.O_F_ext_hat_K) {
     element = randomDouble();
   }
+  for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.theta) {
     element = randomDouble();
   }

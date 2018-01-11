@@ -48,10 +48,10 @@ struct RobotState {
   std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
 
   /**
- * \f$^{F}T_{EE}\f$
- * End effector frame pose in flange frame.
- * Pose is represented as a 4x4 matrix in column-major format.
- */
+   * \f$^{F}T_{EE}\f$
+   * End effector frame pose in flange frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
   std::array<double, 16> F_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
@@ -225,13 +225,13 @@ struct RobotState {
    * \f$\theta\f$
    * Motor position. Unit: \f$[rad]\f$
    */
-  std::array<double, 7> theta{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> theta{};
 
   /**
    * \f$\dot{\theta}\f$
    * Motor velocity. Unit: \f$[rad]\f$
    */
-  std::array<double, 7> dtheta{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> dtheta{};
 
   /**
    * Current error state.

@@ -506,6 +506,9 @@ class Robot {
 
   /**
    * Sets the cut off frequency for the given motion generator or controller.
+   * Allowed input range for all the filters is between 1.0 Hz and 1000.0 Hz.
+   * If the value is set to maximum (1000Hz) then no filtering is done.
+   * Default value of all filters is 100Hz.
    *
    * @param[in] external_joint_position_filter_frequency Frequency at which the commanded joint
    * position is cut off.
