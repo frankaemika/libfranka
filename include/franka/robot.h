@@ -505,6 +505,30 @@ class Robot {
                const std::array<double, 9>& load_inertia);
 
   /**
+   * Sets the cut off frequency for the given motion generator or controller.
+   * Allowed input range for all the filters is between 1.0 Hz and 1000.0 Hz.
+   * If the value is set to maximum (1000Hz) then no filtering is done.
+   * Default value of all filters is 100Hz.
+   *
+   * @param[in] joint_position_filter_frequency Frequency at which the commanded joint
+   * position is cut off.
+   * @param[in] joint_velocity_filter_frequency Frequency at which the commanded joint
+   * velocity is cut off.
+   * @param[in] cartesian_position_filter_frequency Frequency at which the commanded
+   * Cartesian position is cut off.
+   * @param[in] cartesian_velocity_filter_frequency Frequency at which the commanded
+   * Cartesian velocity is cut off.
+   * @param[in] controller_filter_frequency Frequency at which the commanded torque is cut
+   * off.
+   *
+   * @throw CommandException if an error occurred.
+   */
+  void setFilters(double joint_position_filter_frequency,
+                  double joint_velocity_filter_frequency,
+                  double cartesian_position_filter_frequency,
+                  double cartesian_velocity_filter_frequency,
+                  double controller_filter_frequency);
+  /**
    * Runs automatic error recovery on the robot.
    *
    * Automatic error recovery e.g. resets the robot after a collision occurred.

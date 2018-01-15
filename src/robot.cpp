@@ -256,6 +256,17 @@ void Robot::setLoad(double load_mass,
   impl_->executeCommand<research_interface::robot::SetLoad>(load_mass, F_x_Cload, load_inertia);
 }
 
+void Robot::setFilters(double joint_position_filter_frequency,
+                       double joint_velocity_filter_frequency,
+                       double cartesian_position_filter_frequency,
+                       double cartesian_velocity_filter_frequency,
+                       double controller_filter_frequency) {
+  impl_->executeCommand<research_interface::robot::SetFilters>(
+      joint_position_filter_frequency, joint_velocity_filter_frequency,
+      cartesian_position_filter_frequency, cartesian_velocity_filter_frequency,
+      controller_filter_frequency);
+}
+
 void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
