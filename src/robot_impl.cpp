@@ -310,6 +310,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.tau_ext_hat_filtered = robot_state.tau_ext_hat_filtered;
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
+  converted.theta = robot_state.theta;
+  converted.dtheta = robot_state.dtheta;
   converted.current_errors = robot_state.errors;
   converted.last_motion_errors = robot_state.reflex_reason;
   converted.control_command_success_rate = robot_state.control_command_success_rate;
