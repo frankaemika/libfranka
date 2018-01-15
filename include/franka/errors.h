@@ -221,7 +221,7 @@ struct Errors {
   /**
    * True if an instability is detected.
    */
-  const bool& instability_detection;
+  const bool& instability_detected;
 };
 
 /**

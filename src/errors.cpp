@@ -88,7 +88,7 @@ Errors::Errors(const std::array<bool, 36>& errors)  // NOLINT (modernize-pass-by
       joint_p2p_insufficient_torque_for_planning(
           errors_[static_cast<size_t>(Error::kJointP2PInsufficientTorqueForPlanning)]),
       tau_j_range_violation(errors_[static_cast<size_t>(Error::kTauJRangeViolation)]),
-      instability_detection(errors_[static_cast<size_t>(Error::kInstabilityDetection)]) {}
+      instability_detected(errors_[static_cast<size_t>(Error::kInstabilityDetection)]) {}
 
 Errors::operator bool() const noexcept {
   return std::any_of(errors_.cbegin(), errors_.cend(), [](bool x) { return x; });
