@@ -55,6 +55,8 @@ class Robot::Impl : public RobotControl {
  protected:
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
+  bool motionGeneratorModeHasChanged() const noexcept;
+  bool controllerModeHasChanged() const noexcept;
 
  private:
   template <typename T>
@@ -82,7 +84,11 @@ class Robot::Impl : public RobotControl {
   uint16_t ri_version_;
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
-  research_interface::robot::ControllerMode controller_mode_;
+  research_interface::robot::MotionGeneratorMode expected_motion_generator_mode_ =
+      research_interface::robot::MotionGeneratorMode::kIdle;
+  research_interface::robot::ControllerMode controller_mode_ =
+      research_interface::robot::ControllerMode::kOther;
+  research_interface::robot::ControllerMode expected_controller_mode_;
   uint64_t message_id_;
 };
 

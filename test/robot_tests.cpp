@@ -174,6 +174,153 @@ TEST(Robot, CanControlRobot) {
   server.ignoreUdpBuffer();
 }
 
+TEST(Robot, StopAfterControllerChange) {
+  RobotMockServer server;
+  Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
+
+  uint32_t move_id;
+
+  std::atomic_flag send = ATOMIC_FLAG_INIT;
+  send.test_and_set();
+
+  uint32_t stopped_message_id = 0;
+  server
+      .onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
+        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
+        robot_state.controller_mode = robot::ControllerMode::kExternalController;
+        robot_state.robot_mode = robot::RobotMode::kMove;
+      })
+      .spinOnce()
+      .waitForCommand<Move>(
+          [&](const Move::Request&) {
+            server
+                .doForever([&]() {
+                  bool continue_sending = send.test_and_set();
+                  if (continue_sending) {
+                    server.onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
+                      robot_state.motion_generator_mode =
+                          robot::MotionGeneratorMode::kJointPosition;
+                      robot_state.controller_mode = robot::ControllerMode::kExternalController;
+                      robot_state.robot_mode = robot::RobotMode::kMove;
+                    });
+                  }
+                  return continue_sending;
+                })
+                .onSendUDP<robot::RobotState>([&](robot::RobotState& robot_state) {
+                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
+                  robot_state.controller_mode = robot::ControllerMode::kOther;
+                  robot_state.robot_mode = robot::RobotMode::kMove;
+                  stopped_message_id = robot_state.message_id;
+                })
+                .sendResponse<Move>(move_id,
+                                    []() { return Move::Response(Move::Status::kReflexAborted); })
+                .waitForCommand<StopMove>(
+                    [&](const StopMove::Request&) {
+                      return StopMove::Response(StopMove::Status::kSuccess);
+                    },
+                    &move_id);
+            return Move::Response(Move::Status::kMotionStarted);
+          },
+          &move_id)
+      .spinOnce();
+
+  // Ignore remaining RobotCommands that might have been sent to the server.
+  server.ignoreUdpBuffer();
+
+  int count = 0;
+  JointPositions joint_positions{{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}};
+  Torques torques{{10, 10, 10, 10, 10, 10, 10}};
+  EXPECT_THROW(robot.control([&](const franka::RobotState&,
+                                 franka::Duration) -> franka::Torques { return torques; },
+                             [&](const RobotState&, Duration time_step) -> JointPositions {
+                               if (count == 0) {
+                                 EXPECT_EQ(0u, time_step.toMSec());
+                               } else {
+                                 EXPECT_GE(time_step.toMSec(), 1u);
+                               }
+                               if (++count < 4) {
+                                 return joint_positions;
+                               }
+                               send.clear();
+                               return joint_positions;
+                             }),
+               ControlException);
+
+  ASSERT_NE(0u, stopped_message_id);
+  ASSERT_GE(5, count);
+}
+
+TEST(Robot, StopAfterMotionGeneratorChange) {
+  RobotMockServer server;
+  Robot robot("127.0.0.1", RealtimeConfig::kIgnore);
+
+  uint32_t move_id;
+
+  std::atomic_flag send = ATOMIC_FLAG_INIT;
+  send.test_and_set();
+
+  uint32_t stopped_message_id = 0;
+  server
+      .onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
+        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
+        robot_state.controller_mode = robot::ControllerMode::kExternalController;
+        robot_state.robot_mode = robot::RobotMode::kMove;
+      })
+      .spinOnce()
+      .waitForCommand<Move>(
+          [&](const Move::Request&) {
+            server
+                .doForever([&]() {
+                  bool continue_sending = send.test_and_set();
+                  if (continue_sending) {
+                    server.onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
+                      robot_state.motion_generator_mode =
+                          robot::MotionGeneratorMode::kJointPosition;
+                      robot_state.controller_mode = robot::ControllerMode::kExternalController;
+                      robot_state.robot_mode = robot::RobotMode::kMove;
+                    });
+                  }
+                  return continue_sending;
+                })
+                .onSendUDP<robot::RobotState>([&](robot::RobotState& robot_state) {
+                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
+                  robot_state.controller_mode = robot::ControllerMode::kExternalController;
+                  robot_state.robot_mode = robot::RobotMode::kMove;
+                  stopped_message_id = robot_state.message_id;
+                })
+                .sendResponse<Move>(move_id,
+                                    []() { return Move::Response(Move::Status::kReflexAborted); });
+            return Move::Response(Move::Status::kMotionStarted);
+          },
+          &move_id)
+      .spinOnce();
+
+  // Ignore remaining RobotCommands that might have been sent to the server.
+  server.ignoreUdpBuffer();
+
+  int count = 0;
+  JointPositions joint_positions{{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0}};
+  Torques torques{{10, 10, 10, 10, 10, 10, 10}};
+  EXPECT_THROW(robot.control([&](const franka::RobotState&,
+                                 franka::Duration) -> franka::Torques { return torques; },
+                             [&](const RobotState&, Duration time_step) -> JointPositions {
+                               if (count == 0) {
+                                 EXPECT_EQ(0u, time_step.toMSec());
+                               } else {
+                                 EXPECT_GE(time_step.toMSec(), 1u);
+                               }
+                               if (++count < 4) {
+                                 return joint_positions;
+                               }
+                               send.clear();
+                               return joint_positions;
+                             }),
+               ControlException);
+
+  ASSERT_NE(0u, stopped_message_id);
+  ASSERT_GE(5, count);
+}
+
 TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   std::atomic_bool run(true);
 

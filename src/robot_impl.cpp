@@ -50,12 +50,8 @@ RobotState Robot::Impl::update(
 }
 
 void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) {
-  if (robot_state.robot_mode != RobotMode::kMove) {
-    // Wait until robot state shows stopped motion and controller.
-    while (motionGeneratorRunning() || controllerRunning()) {
-      receiveRobotState();
-    }
-
+  if (robot_state.robot_mode != RobotMode::kMove || motionGeneratorModeHasChanged() ||
+      controllerModeHasChanged()) {
     // If a motion generator was running and the robot state shows an error, we will receive a TCP
     // response to the Move command.
     try {
@@ -83,28 +79,32 @@ research_interface::robot::RobotCommand Robot::Impl::sendRobotCommand(
   if (motion_command != nullptr || control_command != nullptr) {
     robot_command.message_id = message_id_;
     if (motion_command != nullptr) {
-      if (!motionGeneratorRunning()) {
-        // Happens for example if guiding button is pressed during motion.
+      if (expected_motion_generator_mode_ ==
+          research_interface::robot::MotionGeneratorMode::kIdle) {
         throw ControlException(
             "libfranka robot: Trying to send motion command, but no motion generator running!");
       }
       robot_command.motion = *motion_command;
     }
     if (control_command != nullptr) {
-      if (!controllerRunning()) {
+      if (expected_controller_mode_ !=
+          research_interface::robot::ControllerMode::kExternalController) {
         throw ControlException(
             "libfranka robot: Trying to send control command, but no controller running!");
       }
       robot_command.control = *control_command;
     }
 
-    if (motionGeneratorRunning() && controllerRunning() &&
+    if (expected_motion_generator_mode_ != research_interface::robot::MotionGeneratorMode::kIdle &&
+        expected_controller_mode_ ==
+            research_interface::robot::ControllerMode::kExternalController &&
         (motion_command == nullptr || control_command == nullptr)) {
       throw ControlException("libfranka robot: Trying to send partial robot command!");
     }
 
     network_->udpSend<research_interface::robot::RobotCommand>(robot_command);
   }
+
   return robot_command;
 }
 
@@ -150,6 +150,14 @@ bool Robot::Impl::controllerRunning() const noexcept {
   return controller_mode_ == research_interface::robot::ControllerMode::kExternalController;
 }
 
+bool Robot::Impl::motionGeneratorModeHasChanged() const noexcept {
+  return motion_generator_mode_ != expected_motion_generator_mode_;
+}
+
+bool Robot::Impl::controllerModeHasChanged() const noexcept {
+  return controller_mode_ != expected_controller_mode_;
+}
+
 RealtimeConfig Robot::Impl::realtimeConfig() const noexcept {
   return realtime_config_;
 }
@@ -163,34 +171,34 @@ uint32_t Robot::Impl::startMotion(
     throw ControlException("libfranka robot: attempted to start multiple motion generators!");
   }
 
-  research_interface::robot::MotionGeneratorMode state_motion_generator_mode;
   switch (motion_generator_mode) {
     case decltype(motion_generator_mode)::kJointPosition:
-      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointPosition;
+      expected_motion_generator_mode_ = decltype(expected_motion_generator_mode_)::kJointPosition;
       break;
     case decltype(motion_generator_mode)::kJointVelocity:
-      state_motion_generator_mode = decltype(state_motion_generator_mode)::kJointVelocity;
+      expected_motion_generator_mode_ = decltype(expected_motion_generator_mode_)::kJointVelocity;
       break;
     case decltype(motion_generator_mode)::kCartesianPosition:
-      state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianPosition;
+      expected_motion_generator_mode_ =
+          decltype(expected_motion_generator_mode_)::kCartesianPosition;
       break;
     case decltype(motion_generator_mode)::kCartesianVelocity:
-      state_motion_generator_mode = decltype(state_motion_generator_mode)::kCartesianVelocity;
+      expected_motion_generator_mode_ =
+          decltype(expected_motion_generator_mode_)::kCartesianVelocity;
       break;
     default:
       throw std::invalid_argument("libfranka: Invalid motion generator mode given.");
   }
 
-  research_interface::robot::ControllerMode state_controller_mode;
   switch (controller_mode) {
     case decltype(controller_mode)::kJointImpedance:
-      state_controller_mode = decltype(state_controller_mode)::kJointImpedance;
+      expected_controller_mode_ = decltype(expected_controller_mode_)::kJointImpedance;
       break;
     case decltype(controller_mode)::kCartesianImpedance:
-      state_controller_mode = decltype(state_controller_mode)::kCartesianImpedance;
+      expected_controller_mode_ = decltype(expected_controller_mode_)::kCartesianImpedance;
       break;
     case decltype(controller_mode)::kExternalController:
-      state_controller_mode = decltype(state_controller_mode)::kExternalController;
+      expected_controller_mode_ = decltype(expected_controller_mode_)::kExternalController;
       break;
     default:
       throw std::invalid_argument("libfranka robot: Invalid controller mode given.");
@@ -200,8 +208,8 @@ uint32_t Robot::Impl::startMotion(
       controller_mode, motion_generator_mode, maximum_path_deviation, maximum_goal_pose_deviation);
 
   RobotState robot_state{};
-  while (motion_generator_mode_ != state_motion_generator_mode ||
-         controller_mode_ != state_controller_mode) {
+  while (motion_generator_mode_ != expected_motion_generator_mode_ ||
+         controller_mode_ != expected_controller_mode_) {
     try {
       if (network_->tcpReceiveResponse<research_interface::robot::Move>(
               move_command_id,
@@ -251,6 +259,8 @@ void Robot::Impl::finishMotion(
   } catch (const CommandException& e) {
     throw createControlException(e, robot_state);
   }
+  expected_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
+  expected_controller_mode_ = research_interface::robot::ControllerMode::kOther;
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
@@ -270,6 +280,8 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
 
   // Ignore Move response.
   network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
+  expected_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
+  expected_controller_mode_ = research_interface::robot::ControllerMode::kOther;
 }
 
 Model Robot::Impl::loadModel() const {
