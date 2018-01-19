@@ -15,7 +15,7 @@ namespace {
 inline ControlException createControlException(const CommandException& command_exception,
                                                const RobotState& robot_state,
                                                const std::vector<Record>& log = {}) {
-  if (robot_state.robot_mode == RobotMode::kReflex) {
+  if (robot_state.last_motion_errors) {
     return ControlException(
         command_exception.what() + " "s + static_cast<std::string>(robot_state.last_motion_errors),
         log);
