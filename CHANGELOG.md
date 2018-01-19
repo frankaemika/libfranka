@@ -32,7 +32,8 @@ Requires Panda system version >= 1.1.0
   * Examples first move to an initial joint position
   * Changed thread priority to the maximum allowed value
   * Adjusted GetCartesianLimits response
-  * Prepare for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
+  * Prepared for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
+  * Use SVG instead of MathML for math rendering in API documentation to support Chrome
 
 ## 0.1.0 - 2017-09-15
 
