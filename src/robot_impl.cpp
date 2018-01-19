@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "robot_impl.h"
 
+#include <sstream>
+
 #include "load_calculations.h"
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
@@ -17,8 +19,12 @@ inline ControlException createControlException(const CommandException& command_e
                                                const std::vector<Record>& log = {}) {
   if (robot_state.robot_mode == RobotMode::kReflex) {
     std::ostringstream message_stream;
-    message_stream << command_exception.what() << " "s << static_cast<std::string>(robot_state.last_motion_errors);
-    message_stream << std::endl << "control_command_success_rate: " << robot_state.control_command_success_rate;
+    message_stream << command_exception.what() << " "s << robot_state.last_motion_errors;
+    if (log.size() >= 2) {
+      // Read second to last control_command_success_rate since the last one will always be zero.
+      message_stream << "\ncontrol_command_success_rate: "
+                     << log[log.size() - 2].state.control_command_success_rate;
+    }
     return ControlException(message_stream.str(), log);
   }
   return ControlException(command_exception.what(), log);
@@ -65,6 +71,7 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
     } catch (const CommandException& e) {
       throw createControlException(e, robot_state, logger_.flush());
     }
+    throw ProtocolException("Unexpected reply to a Move command"s);
   }
 }
 
