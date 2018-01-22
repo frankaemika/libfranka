@@ -36,7 +36,6 @@ Requires Panda system version >= 1.1.0
     * Lowered grasping force in `grasp_object` example
   * Changed thread priority to the maximum allowed value
   * Adjusted GetCartesianLimits response
-  * Adjusted threshold for homogeneous transformation matrix check
 
 ## 0.1.0 - 2017-09-15
 

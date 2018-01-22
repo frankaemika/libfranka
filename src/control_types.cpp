@@ -16,7 +16,7 @@ inline bool isValidElbow(const std::array<double, 2>& elbow) noexcept {
 }
 
 inline bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept {
-  constexpr double kOrthonormalThreshold = 1e-3;
+  constexpr double kOrthonormalThreshold = 1e-5;
 
   if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 || transform[15] != 1.0) {
     return false;
