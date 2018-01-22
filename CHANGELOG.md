@@ -21,19 +21,22 @@ Requires Panda system version >= 1.1.0
 
   * Changed examples to read initial states inside control loops (after controller switching)
   * Always throw `ControlException`s for control-related command responses
+  * Prepared for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
+  * Docu: Use SVG instead of MathML for math rendering in API documentation to support Chrome
 
 ### Other changes
 
   * Changes in network protocol for new panda system version
+  * New build-time dependency on Eigen3
   * Removed unnecessary public dependencies for libfranka
   * More descriptive exception messages
-  * CI: Run linter on examples
-  * New build-time dependency on Eigen3
-  * Examples first move to an initial joint position
+  * Examples:
+    * CI: Run linter on examples
+    * Examples first move to an initial joint position
+    * Lowered grasping force in `grasp_object` example
   * Changed thread priority to the maximum allowed value
   * Adjusted GetCartesianLimits response
-  * Prepared for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
-  * Use SVG instead of MathML for math rendering in API documentation to support Chrome
+  * Adjusted threshold for homogeneous transformation matrix check
 
 ## 0.1.0 - 2017-09-15
 
