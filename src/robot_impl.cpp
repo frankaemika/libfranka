@@ -9,23 +9,26 @@
 namespace franka {
 
 namespace {
-inline ControlException createControlException(const CommandException& command_exception,
-                                               const RobotState& robot_state,
+
+inline ControlException createControlException(const char* message,
+                                               research_interface::robot::Move::Status move_status,
+                                               const Errors& reflex_errors,
                                                const std::vector<Record>& log) {
-  // FIXME: If TCP response shows preempted, we will potentially show an unrelated error.
   std::ostringstream message_stream;
-  message_stream << command_exception.what();
-  if (robot_state.last_motion_errors) {
-    message_stream << " " << robot_state.last_motion_errors;
-  }
-  if (log.size() >= 2) {
-    // Read second to last control_command_success_rate since the last one will always be zero.
-    message_stream << std::endl
-                   << "control_command_success_rate: "
-                   << log[log.size() - 2].state.control_command_success_rate;
+  message_stream << message;
+  if (move_status == decltype(move_status)::kReflexAborted) {
+    message_stream << " " << reflex_errors;
+
+    if (log.size() >= 2) {
+      // Read second to last control_command_success_rate since the last one will always be zero.
+      message_stream << std::endl
+                     << "control_command_success_rate: "
+                     << log[log.size() - 2].state.control_command_success_rate;
+    }
   }
   return ControlException(message_stream.str(), log);
 }
+
 }  // anonymous namespace
 
 Robot::Impl::Impl(std::unique_ptr<Network> network, size_t log_size, RealtimeConfig realtime_config)
@@ -58,11 +61,13 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
       controllerModeHasChanged()) {
     // We detect a move error by changes in the robot state and we will receive a TCP response to
     // the Move command.
+    auto response =
+        network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
     try {
-      handleCommandResponse<research_interface::robot::Move>(
-          network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+      handleCommandResponse<research_interface::robot::Move>(response);
     } catch (const CommandException& e) {
-      throw createControlException(e, convertRobotState(receiveRobotState()), logger_.flush());
+      throw createControlException(e.what(), response.status, robot_state.last_motion_errors,
+                                   logger_.flush());
     }
     throw ProtocolException("Unexpected reply to a Move command");
   }
@@ -172,8 +177,8 @@ uint32_t Robot::Impl::startMotion(
     research_interface::robot::Move::MotionGeneratorMode motion_generator_mode,
     const research_interface::robot::Move::Deviation& maximum_path_deviation,
     const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) {
-  if (motionGeneratorRunning()) {
-    throw ControlException("libfranka robot: attempted to start multiple motion generators!");
+  if (motionGeneratorRunning() || controllerRunning()) {
+    throw ControlException("libfranka robot: Attempted to start multiple motions!");
   }
 
   switch (motion_generator_mode) {
@@ -238,9 +243,7 @@ void Robot::Impl::finishMotion(
     uint32_t motion_id,
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) {
-  // As a motion generator is always running, even if just controlling torques,
-  // checking motionGeneratorRunning() is sufficient.
-  if (!motionGeneratorRunning()) {
+  if (!motionGeneratorRunning() && !controllerRunning()) {
     return;
   }
 
@@ -254,22 +257,23 @@ void Robot::Impl::finishMotion(
   // motion is running, or afterwards. To handle both situations, we do not process TCP packages in
   // this loop and explicitly wait for the Move response over TCP afterwards.
   RobotState robot_state{};
-  while (!motionGeneratorModeHasChanged() && !controllerModeHasChanged()) {
+  while (motionGeneratorRunning() || controllerRunning()) {
     robot_state = update(&motion_finished_command, control_command);
   }
 
+  auto response = network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
   try {
-    handleCommandResponse<research_interface::robot::Move>(
-        network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id));
+    handleCommandResponse<research_interface::robot::Move>(response);
   } catch (const CommandException& e) {
-    throw createControlException(e, robot_state, logger_.flush());
+    throw createControlException(e.what(), response.status, robot_state.last_motion_errors,
+                                 logger_.flush());
   }
   expected_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
   expected_controller_mode_ = research_interface::robot::ControllerMode::kOther;
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
-  if (!motionGeneratorRunning()) {
+  if (!motionGeneratorRunning() && !controllerRunning()) {
     return;
   }
 
@@ -279,7 +283,7 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
     throw ControlException(e.what());
   }
 
-  while (motionGeneratorRunning()) {
+  while (motionGeneratorRunning() || controllerRunning()) {
     receiveRobotState();
   }
 

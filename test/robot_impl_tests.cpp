@@ -755,7 +755,7 @@ TEST(RobotImpl, ThrowsDuringMotionIfErrorReceived) {
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
       .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
@@ -829,7 +829,7 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
         randomRobotState(robot_state);
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = ++message_id;
         states.push_back(robot_state);
@@ -918,7 +918,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
       .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[8] = true;
+        robot_state.reflex_reason[8] = true;
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = ++message_id;
       })
@@ -980,7 +980,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
         randomRobotState(robot_state);
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = ++message_id;
         states.push_back(robot_state);
@@ -1057,7 +1057,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
         robot_state.message_id = message_id + 1;
       })
@@ -1163,7 +1163,7 @@ TEST(RobotImpl, CanStartConsecutiveMotionAfterError) {
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
       .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })
@@ -1230,7 +1230,7 @@ TEST(RobotImpl, CanStartConsecutiveControlAfterError) {
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
         robot_state.controller_mode = ControllerMode::kJointImpedance;
-        robot_state.errors[0] = true;
+        robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;
       })
       .sendResponse<Move>(move_id, []() { return Move::Response(Move::Status::kReflexAborted); })

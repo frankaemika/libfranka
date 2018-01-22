@@ -207,18 +207,13 @@ TEST(Robot, StopAfterControllerChange) {
                   return continue_sending;
                 })
                 .onSendUDP<robot::RobotState>([&](robot::RobotState& robot_state) {
-                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
+                  robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
                   robot_state.controller_mode = robot::ControllerMode::kOther;
                   robot_state.robot_mode = robot::RobotMode::kMove;
                   stopped_message_id = robot_state.message_id;
                 })
                 .sendResponse<Move>(move_id,
-                                    []() { return Move::Response(Move::Status::kReflexAborted); })
-                .waitForCommand<StopMove>(
-                    [&](const StopMove::Request&) {
-                      return StopMove::Response(StopMove::Status::kSuccess);
-                    },
-                    &move_id);
+                                    []() { return Move::Response(Move::Status::kReflexAborted); });
             return Move::Response(Move::Status::kMotionStarted);
           },
           &move_id)
