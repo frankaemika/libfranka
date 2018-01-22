@@ -96,9 +96,9 @@ TEST(Robot, CanControlRobot) {
   uint32_t stopped_message_id = 0;
   server
       .onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
-        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
-        robot_state.controller_mode = robot::ControllerMode::kJointImpedance;
-        robot_state.robot_mode = robot::RobotMode::kMove;
+        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = robot::ControllerMode::kOther;
+        robot_state.robot_mode = robot::RobotMode::kIdle;
       })
       .spinOnce()
       .waitForCommand<Move>(
@@ -186,9 +186,9 @@ TEST(Robot, StopAfterControllerChange) {
   uint32_t stopped_message_id = 0;
   server
       .onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
-        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
-        robot_state.controller_mode = robot::ControllerMode::kExternalController;
-        robot_state.robot_mode = robot::RobotMode::kMove;
+        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = robot::ControllerMode::kOther;
+        robot_state.robot_mode = robot::RobotMode::kIdle;
       })
       .spinOnce()
       .waitForCommand<Move>(
@@ -238,16 +238,15 @@ TEST(Robot, StopAfterControllerChange) {
                                } else {
                                  EXPECT_GE(time_step.toMSec(), 1u);
                                }
-                               if (++count < 4) {
-                                 return joint_positions;
+                               if (++count == 5) {
+                                 send.clear();
                                }
-                               send.clear();
                                return joint_positions;
                              }),
                ControlException);
 
   ASSERT_NE(0u, stopped_message_id);
-  ASSERT_GE(5, count);
+  ASSERT_GE(count, 5);
 }
 
 TEST(Robot, StopAfterMotionGeneratorChange) {
@@ -262,9 +261,9 @@ TEST(Robot, StopAfterMotionGeneratorChange) {
   uint32_t stopped_message_id = 0;
   server
       .onSendUDP<robot::RobotState>([](robot::RobotState& robot_state) {
-        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kJointPosition;
-        robot_state.controller_mode = robot::ControllerMode::kExternalController;
-        robot_state.robot_mode = robot::RobotMode::kMove;
+        robot_state.motion_generator_mode = robot::MotionGeneratorMode::kIdle;
+        robot_state.controller_mode = robot::ControllerMode::kOther;
+        robot_state.robot_mode = robot::RobotMode::kIdle;
       })
       .spinOnce()
       .waitForCommand<Move>(
@@ -309,16 +308,15 @@ TEST(Robot, StopAfterMotionGeneratorChange) {
                                } else {
                                  EXPECT_GE(time_step.toMSec(), 1u);
                                }
-                               if (++count < 4) {
-                                 return joint_positions;
+                               if (++count == 5) {
+                                 send.clear();
                                }
-                               send.clear();
                                return joint_positions;
                              }),
                ControlException);
 
   ASSERT_NE(0u, stopped_message_id);
-  ASSERT_GE(5, count);
+  ASSERT_GE(count, 5);
 }
 
 TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
