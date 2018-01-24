@@ -12,6 +12,8 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example force_control.cpp
  * A simple PI force controller that renders in the Z axis the gravitational force corresponding
@@ -37,6 +39,7 @@ int main(int argc, char** argv) {
   try {
     // connect to robot
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
     // load the kinematics and dynamics model
     franka::Model model = robot.loadModel();
 

@@ -8,6 +8,7 @@
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
+#include <franka/robot.h>
 #include <franka/robot_state.h>
 
 /**
@@ -28,6 +29,13 @@
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& desired_values,
                                 const std::array<double, 7>& last_desired_values);
+
+/**
+ * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
+ *
+ * @param[in] robot Robot instance to set behavior on.
+ */
+void setDefaultBehavior(franka::Robot& robot);
 
 /**
  * An example showing how to generate a joint pose motion to a goal position. Adapted from:
