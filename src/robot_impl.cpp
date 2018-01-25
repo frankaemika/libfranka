@@ -280,10 +280,11 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
   research_interface::robot::RobotState robot_state;
   do {
     robot_state = receiveRobotState();
-  } while (robot_state.robot_mode == research_interface::robot::RobotMode::kMove);
+  } while (motionGeneratorRunning() || controllerRunning());
 
   // Ignore Move response.
-  network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
+  // TODO (FWA): It is not guaranteed that the Move response won't come later
+  network_->tcpReceiveResponse<research_interface::robot::Move>(motion_id, [](auto) {});
   current_move_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
   current_move_controller_mode_ = research_interface::robot::ControllerMode::kOther;
 }
