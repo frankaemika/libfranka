@@ -271,21 +271,16 @@ void Robot::Impl::finishMotion(
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
-  if (!motionGeneratorRunning() && !controllerRunning()) {
-    current_move_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
-    current_move_controller_mode_ = research_interface::robot::ControllerMode::kOther;
-    return;
-  }
-
   try {
     executeCommand<research_interface::robot::StopMove>();
   } catch (const CommandException& e) {
     throw ControlException(e.what());
   }
 
-  while (motionGeneratorRunning() || controllerRunning()) {
-    receiveRobotState();
-  }
+  research_interface::robot::RobotState robot_state;
+  do {
+    robot_state = receiveRobotState();
+  } while (robot_state.robot_mode == research_interface::robot::RobotMode::kMove);
 
   // Ignore Move response.
   network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);

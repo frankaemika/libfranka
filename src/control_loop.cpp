@@ -107,11 +107,7 @@ void ControlLoop<T>::operator()() try {
     }
     robot_.finishMotion(motion_id_, &motion_command, nullptr);
   }
-} catch (const franka::ControlException&) {
-  // Robot already stopped
-  throw;
 } catch (...) {
-  // Error occurred in control loop, cancel motion
   try {
     robot_.cancelMotion(motion_id_);
   } catch (...) {
