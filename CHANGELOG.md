@@ -39,6 +39,7 @@ Requires Panda system version >= 1.1.0
     * CI: Run linter on examples
     * Examples first move to an initial joint position
     * Lowered grasping force in `grasp_object` example
+    * Set default collision behavior, impedances, and filter frequencies
   * Changed thread priority to the maximum allowed value
 
 ## 0.1.0 - 2017-09-15
