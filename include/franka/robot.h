@@ -362,7 +362,7 @@ class Robot {
    *
    * @return Parameters of virtual wall.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   VirtualWallCuboid getVirtualWall(int32_t id);
@@ -390,7 +390,7 @@ class Robot {
    * @param[in] lower_force_thresholds_nominal Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds_nominal Collision force thresholds in \f$[N]\f$.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::cartesian_contact
@@ -423,7 +423,7 @@ class Robot {
    * @param[in] lower_force_thresholds Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds Collision force thresholds in \f$[N]\f$.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::cartesian_contact
@@ -444,7 +444,7 @@ class Robot {
    *
    * @param[in] K_theta Joint impedance values \f$K_{\theta}\f$.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setJointImpedance(
@@ -457,7 +457,7 @@ class Robot {
    *
    * @param[in] K_x Cartesian impedance values \f$K_x=(x, y, z, R, P, Y)\f$.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setCartesianImpedance(
@@ -474,7 +474,7 @@ class Robot {
    * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding mode.
    * @param[in] elbow True if the elbow is free in guiding mode, false otherwise.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow);
@@ -486,7 +486,7 @@ class Robot {
    *
    * @param[in] EE_T_K Vectorized EE-to-K transformation matrix \f$^{EE}T_K\f$, column-major.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see Robot for an explanation of the stiffness frame.
@@ -500,7 +500,7 @@ class Robot {
    *
    * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix \f$^FT_{EE}\f$, column-major.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::O_T_EE for end effector pose in world base frame.
@@ -520,7 +520,7 @@ class Robot {
    * @param[in] load_inertia Inertia matrix \f$I_\text{load}\f$ in \f$[kg \times m^2]\f$,
    * column-major.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setLoad(double load_mass,
@@ -544,7 +544,7 @@ class Robot {
    * @param[in] controller_filter_frequency Frequency at which the commanded torque is cut
    * off.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setFilters(double joint_position_filter_frequency,
@@ -557,7 +557,7 @@ class Robot {
    *
    * Automatic error recovery e.g. resets the robot after a collision occurred.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void automaticErrorRecovery();
@@ -568,7 +568,7 @@ class Robot {
    * If a control or motion generator loop is running in another thread, it will be preempted
    * with a franka::ControlException.
    *
-   * @throw CommandException if the Controller reports an error.
+   * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void stop();
