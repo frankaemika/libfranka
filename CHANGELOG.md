@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.0 - unreleased
+## 0.2.0 - 2018-01-29
 
 Requires Panda system version >= 1.1.0
 
