@@ -42,8 +42,8 @@ bool GripperCommand<T>::compare(const typename T::Request&, const typename T::Re
 template <>
 bool GripperCommand<Grasp>::compare(const Grasp::Request& request_one,
                                     const Grasp::Request& request_two) {
-  return request_one.width == request_two.width &&
-         request_one.speed == request_two.speed && request_one.force == request_two.force;
+  return request_one.width == request_two.width && request_one.speed == request_two.speed &&
+         request_one.force == request_two.force;
 }
 
 template <>
