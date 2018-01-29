@@ -12,7 +12,7 @@ using Error = research_interface::robot::Error;
 
 namespace franka {
 
-Errors::Errors() : Errors(std::array<bool, 35>{}) {}
+Errors::Errors() : Errors(std::array<bool, 36>{}) {}
 
 Errors::Errors(const Errors& other) : Errors(other.errors_) {}
 
@@ -21,7 +21,7 @@ Errors& Errors::operator=(Errors other) {
   return *this;
 }
 
-Errors::Errors(const std::array<bool, 35>& errors)  // NOLINT (modernize-pass-by-value)
+Errors::Errors(const std::array<bool, 36>& errors)  // NOLINT (modernize-pass-by-value)
     : errors_(errors),
       joint_position_limits_violation(
           errors_[static_cast<size_t>(Error::kJointPositionLimitsViolation)]),
@@ -87,7 +87,8 @@ Errors::Errors(const std::array<bool, 35>& errors)  // NOLINT (modernize-pass-by
       power_limit_violation(errors_[static_cast<size_t>(Error::kPowerLimitViolation)]),
       joint_p2p_insufficient_torque_for_planning(
           errors_[static_cast<size_t>(Error::kJointP2PInsufficientTorqueForPlanning)]),
-      tau_j_range_violation(errors_[static_cast<size_t>(Error::kTauJRangeViolation)]) {}
+      tau_j_range_violation(errors_[static_cast<size_t>(Error::kTauJRangeViolation)]),
+      instability_detected(errors_[static_cast<size_t>(Error::kInstabilityDetection)]) {}
 
 Errors::operator bool() const noexcept {
   return std::any_of(errors_.cbegin(), errors_.cend(), [](bool x) { return x; });

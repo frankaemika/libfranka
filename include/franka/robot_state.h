@@ -133,7 +133,7 @@ struct RobotState {
 
   /**
    * \f$\tau_{J}_d\f$
-   * Desired link-side joint torque sensor signals with gravity. Unit: \f$[Nm]\f$
+   * Desired link-side joint torque sensor signals without gravity. Unit: \f$[Nm]\f$
    */
   std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
 
