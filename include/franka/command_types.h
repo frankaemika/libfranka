@@ -24,14 +24,9 @@ struct VirtualWallCuboid {
   int32_t id;
 
   /**
-   * Minimum corner point of the cuboid in p_frame in \f$[m]\f$.
+   * Corner point of the cuboid in world frame in \f$[m]\f$.
    */
-  std::array<double, 3> p_min;
-
-  /**
-   * Maximum corner point of the cuboid in p_frame in \f$[m]\f$.
-   */
-  std::array<double, 3> p_max;
+  std::array<double, 3> object_world_size;
 
   /**
    * 4x4 transformation matrix, column-major.

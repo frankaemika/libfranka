@@ -39,14 +39,14 @@ struct Finishable {
 };
 
 /**
- * Stores gravity- and friction-compensated joint-level torque commands.
+ * Stores joint-level torque commands without gravity and friction.
  */
 class Torques : public Finishable {
  public:
   /**
    * Creates a new Torques instance.
    *
-   * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
+   * @param[in] torques Desired joint-level torques without gravity and friction in [Nm].
    * @throw std::invalid_argument if the given values are NaN or infinity.
    */
   Torques(const std::array<double, 7>& torques);
@@ -54,7 +54,7 @@ class Torques : public Finishable {
   /**
    * Creates a new Torques instance.
    *
-   * @param[in] torques Desired gravity- and friction-compensated joint-level torques in [Nm].
+   * @param[in] torques Desired joint-level torques without gravity and friction in [Nm].
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
    * @throw std::invalid_argument if the given values are NaN or infinity.

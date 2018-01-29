@@ -82,7 +82,11 @@ class Robot::Impl : public RobotControl {
   uint16_t ri_version_;
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
-  research_interface::robot::ControllerMode controller_mode_;
+  research_interface::robot::MotionGeneratorMode current_move_motion_generator_mode_ =
+      research_interface::robot::MotionGeneratorMode::kIdle;
+  research_interface::robot::ControllerMode controller_mode_ =
+      research_interface::robot::ControllerMode::kOther;
+  research_interface::robot::ControllerMode current_move_controller_mode_;
   uint64_t message_id_;
 };
 
@@ -202,8 +206,7 @@ inline uint32_t Robot::Impl::executeCommand<research_interface::robot::GetCartes
       network_->tcpBlockingReceiveResponse<GetCartesianLimit>(command_id);
 
   virtual_wall_cuboid->p_frame = response.object_frame;
-  virtual_wall_cuboid->p_max = response.object_p_max;
-  virtual_wall_cuboid->p_min = response.object_p_min;
+  virtual_wall_cuboid->object_world_size = response.object_world_size;
   virtual_wall_cuboid->active = response.object_activation;
   virtual_wall_cuboid->id = id;
 

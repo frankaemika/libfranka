@@ -83,8 +83,8 @@ class Robot {
   /**
    * @name Motion generation and joint-level torque commands
    *
-   * The following methods allow to perform motion generation and/or send gravity- and
-   * friction-compensated joint-level torque commands by providing callback functions.
+   * The following methods allow to perform motion generation and/or send joint-level torque
+   * commands without gravity and friction by providing callback functions.
    *
    * Only one of these methods can be active at the same time; a franka::ControlException is thrown
    * otherwise.
