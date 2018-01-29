@@ -104,7 +104,7 @@ class Model {
   * @param[in] frame The desired frame.
   * @param[in] q Joint position.
   * @param[in] F_T_EE End effector in flange frame.
-  * @param[in] EE_T_K Stiffness frame K in flange frame.
+  * @param[in] EE_T_K Stiffness frame K in the end effector frame.
   *
   * @return Vectorized 4x4 pose matrix, column-major.
   */
@@ -135,7 +135,7 @@ class Model {
   * @param[in] frame The desired frame.
   * @param[in] q Joint position.
   * @param[in] F_T_EE End effector in flange frame.
-  * @param[in] EE_T_K Stiffness frame K in flange frame.
+  * @param[in] EE_T_K Stiffness frame K in the end effector frame.
   *
   * @return Vectorized 6x7 Jacobian, column-major.
   */
@@ -166,7 +166,7 @@ class Model {
   * @param[in] frame The desired frame.
   * @param[in] q Joint position.
   * @param[in] F_T_EE End effector in flange frame.
-  * @param[in] EE_T_K Stiffness frame K in flange frame.
+  * @param[in] EE_T_K Stiffness frame K in the end effector frame.
   *
   * @return Vectorized 6x7 Jacobian, column-major.
   */

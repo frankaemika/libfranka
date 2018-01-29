@@ -33,6 +33,7 @@ Requires Panda system version >= 1.1.0
   * Changed thread priority to the maximum allowed value
   * Prepared for the removal of the socket-init in the default constructor in POCO releases >= 1.8.0
   * Use SVG instead of MathML for math rendering in API documentation to support Chrome
+  * New overloads in the model library
 
 ## 0.1.0 - 2017-09-15
 

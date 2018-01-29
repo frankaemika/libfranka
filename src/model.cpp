@@ -84,6 +84,7 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
                                            const franka::RobotState& robot_state) const {
   return bodyJacobian(frame, robot_state.q, robot_state.F_T_EE, robot_state.EE_T_K);
 }
+
 std::array<double, 42> Model::bodyJacobian(
     Frame frame,
     const std::array<double, 7>& q,
