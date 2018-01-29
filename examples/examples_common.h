@@ -16,6 +16,19 @@
  */
 
 /**
+ * Maximum torque rate
+ */
+constexpr std::array<double, 7> kMaxTorqueRate{{1000, 1000, 1000, 1000, 1000, 1000, 1000}};
+/**
+ * Soft maximum joint velocity 
+ */
+constexpr std::array<double, 7> kMaxJointVel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
+/**
+ * Soft naximum joint acceleration
+ */
+constexpr std::array<double, 7> kMaxJointAcc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
+
+/**
  * Limits the rate of an input vector of per-joint commands considering the maximum allowed time
  * derivatives.
  *
