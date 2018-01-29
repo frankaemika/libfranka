@@ -31,6 +31,10 @@ enum class RobotMode {
 
 /**
  * Describes the robot state.
+ *
+ * @par Stiffness frame K
+ * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
+ * It can be set with Robot::setK.
  */
 struct RobotState {
   /**
@@ -48,16 +52,19 @@ struct RobotState {
   std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
 
   /**
- * \f$^{F}T_{EE}\f$
- * End effector frame pose in flange frame.
- * Pose is represented as a 4x4 matrix in column-major format.
- */
+   * \f$^{F}T_{EE}\f$
+   * End effector frame pose in flange frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
   std::array<double, 16> F_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{EE}T_{K}\f$
    * Stiffness frame pose in end effector frame.
    * Pose is represented as a 4x4 matrix in column-major format.
+   *
+   * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
+   * It can be set with Robot::setK.
    */
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
@@ -132,7 +139,7 @@ struct RobotState {
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$\tau_{J}_d\f$
+   * \f$\tau_{J_d}\f$
    * Desired link-side joint torque sensor signals with gravity. Unit: \f$[Nm]\f$
    */
   std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
@@ -216,8 +223,8 @@ struct RobotState {
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
-   * External wrench (force, torque) acting on stiffness frame, expressed relative to the end
-   * effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness
+   * frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
@@ -246,7 +253,12 @@ struct RobotState {
   RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
-   * Strictly increasing time for each received robot state.
+   * Time when this robot state was measured on the Controller side.
+   *
+   * Stored as a duration of time that has passed since some internally chosen point in time.
+   * Strictly increasing for each received robot state.
+   *
+   * For most use
    */
   Duration time{};
 };
