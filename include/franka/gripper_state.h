@@ -43,7 +43,10 @@ struct GripperState {
   uint16_t temperature{};
 
   /**
-   * Strictly increasing time for each received gripper state.
+   * Time when this gripper state was measured on the Controller side.
+   *
+   * Stored as a duration of time that has passed since an internally chosen point in time.
+   * Strictly increasing for each received gripper state.
    */
   Duration time{};
 };

@@ -19,23 +19,23 @@ namespace franka {
  */
 struct RobotCommand {
   /**
-   * q_d sent to the robot.
+   * \f$q_d\f$ sent to the robot.
    */
   JointPositions joint_positions{0, 0, 0, 0, 0, 0, 0};
   /**
-   * dq_d sent to the robot.
+   * \f$\dot{q}_d\f$ sent to the robot.
    */
   JointVelocities joint_velocities{0, 0, 0, 0, 0, 0, 0};
   /**
-   * O_T_EE_d sent to the robot.
+   * \f$^O{\mathbf{T}_{EE}}_{d}\f$ sent to the robot.
    */
   CartesianPose cartesian_pose{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
   /**
-   * O_dP_EE sent to the robot.
+   * \f$^O\dot{P}_{EE}\f$ sent to the robot.
    */
   CartesianVelocities cartesian_velocities{0, 0, 0, 0, 0, 0};
   /**
-   * tau_J_d sent to the robot.
+   * \f${\tau_J}_d\f$ sent to the robot.
    */
   Torques torques{0, 0, 0, 0, 0, 0, 0};
 };

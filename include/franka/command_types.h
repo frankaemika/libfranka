@@ -15,6 +15,8 @@ namespace franka {
 /**
  * Parameters of a cuboid used as virtual wall.
  *
+ * TODO: explain what's a p frame
+ *
  * @see Robot::getVirtualWall
  */
 struct VirtualWallCuboid {

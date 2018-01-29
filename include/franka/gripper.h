@@ -71,6 +71,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is unsuccessful.
    *
    * @see GripperState for the maximum grasping width.
    */
@@ -91,6 +92,7 @@ class Gripper {
    * (width - epsilon_inner) < distance < (width + epsilon_outer), false otherwise.
    *
    * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is unsuccessful.
    */
   bool grasp(double width,
              double speed,
@@ -107,6 +109,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is unsuccessful.
    */
   bool move(double width, double speed) const;
 
@@ -116,6 +119,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is unsuccessful.
    */
   bool stop() const;
 
