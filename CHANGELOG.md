@@ -15,7 +15,6 @@ Requires Panda system version >= 1.1.0
     `instability_detected` errors to `franka::RobotState`
   * Added `tau_J_d`, `m_ee`, `F_x_Cee`, `I_ee`, `m_total`, `F_x_Ctotal`, `I_total`,
     `theta` and `dtheta` to `franka::RobotState`
-  * Added `epsilon` parameters to `franka::Gripper::grasp`
   * Added logs to `franka::ControlException`
   * Added saturation to joint velocity, joint position, and joint impedance examples
   * Added support for commanding elbow positions for Cartesian motions
