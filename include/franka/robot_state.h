@@ -268,7 +268,7 @@ struct RobotState {
   /**
    * Time when this robot state was measured on the Controller side.
    *
-   * Stored as a duration of time that has passed since an internally chosen point in time.
+   * Stored as a duration of time that has passed since some internally chosen point in time.
    * Strictly increasing for each received robot state.
    *
    * Inside of control loops @ref callback-docs "time_step" parameter of Robot::control can be used
