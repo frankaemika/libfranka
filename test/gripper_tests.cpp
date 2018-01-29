@@ -31,7 +31,7 @@ TEST(Gripper, CanPerformHandshake) {
   GripperMockServer server;
 
   Gripper gripper("127.0.0.1");
-  EXPECT_EQ(2, gripper.serverVersion());
+  EXPECT_EQ(research_interface::gripper::kVersion, gripper.serverVersion());
 }
 
 TEST(Gripper, ThrowsOnIncompatibleLibraryVersion) {

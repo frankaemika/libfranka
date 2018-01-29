@@ -35,15 +35,12 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
  * that additionally compensates coriolis terms using the libfranka model library. This example
  * also serves to compare commanded vs. measured torques. The results are printed from a separate
  * thread to avoid blocking print functions in the real-time loop.
- *
- * @warning This example assumes that no endeffector is mounted.
  */
 
 std::array<double, 7> saturateTorqueRate(
     const double delta_tau_max,
     const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 7>& gravity);
+    const std::array<double, 7>& tau_J_d);  // NOLINT (readability-identifier-naming)
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
@@ -208,8 +205,7 @@ int main(int argc, char** argv) {
       }
 
       std::array<double, 7> tau_d_saturated =
-          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d,
-                             model.gravity(state, state.m_total, state.F_x_Ctotal));
+          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
@@ -241,14 +237,11 @@ int main(int argc, char** argv) {
 std::array<double, 7> saturateTorqueRate(
     const double delta_tau_max,
     const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 7>& gravity) {
+    const std::array<double, 7>& tau_J_d) {  // NOLINT (readability-identifier-naming)
   std::array<double, 7> tau_d_saturated{};
   for (size_t i = 0; i < 7; i++) {
-    // TODO(sga): After gravity is removed from tau_J_d, do not subtract it any more.
-    double difference = tau_d_calculated[i] - (tau_J_d[i] - gravity[i]);
-    tau_d_saturated[i] =
-        (tau_J_d[i] - gravity[i]) + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
+    double difference = tau_d_calculated[i] - tau_J_d[i];
+    tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
   }
   return tau_d_saturated;
 }
