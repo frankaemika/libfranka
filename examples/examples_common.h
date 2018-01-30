@@ -20,13 +20,15 @@
  */
 constexpr std::array<double, 7> kMaxTorqueRate{{1000, 1000, 1000, 1000, 1000, 1000, 1000}};
 /**
- * Soft maximum joint velocity 
+ * Maximum joint velocity
  */
-constexpr std::array<double, 7> kMaxJointVel{{2.375, 2.375, 2.375, 2.375, 2.375, 2.375, 2.375}};
+constexpr std::array<double, 7> kMaxJointVel{
+    {2.3925, 2.3925, 2.3925, 2.3925, 2.8710, 2.8710, 2.8710}};
 /**
- * Soft naximum joint acceleration
+ * Maximum joint acceleration
  */
-constexpr std::array<double, 7> kMaxJointAcc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
+constexpr std::array<double, 7> kMaxJointAcc{
+    {16.5000, 8.2500, 13.7500, 13.7500, 16.5000, 22.0000, 22.0000}};
 
 /**
  * Limits the rate of an input vector of per-joint commands considering the maximum allowed time

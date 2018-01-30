@@ -43,9 +43,8 @@ int main(int argc, char** argv) {
 
     std::array<double, 7> initial_position;
     double time = 0.0;
-    robot.control([&initial_position, &time](
-                      const franka::RobotState& robot_state,
-                      franka::Duration period) -> franka::JointPositions {
+    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
+                                             franka::Duration period) -> franka::JointPositions {
       time += period.toSec();
 
       if (time == 0.0) {

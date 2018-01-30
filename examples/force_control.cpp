@@ -31,9 +31,9 @@ int main(int argc, char** argv) {
   }
   // parameters
   double desired_mass{0.0};
-  constexpr double target_mass{1.0};
+  constexpr double target_mass{1.0};    // NOLINT (readability-identifier-naming)
   constexpr double k_p{1.0};            // NOLINT (readability-identifier-naming)
-  constexpr double k_i{2.0};           // NOLINT (readability-identifier-naming)
+  constexpr double k_i{2.0};            // NOLINT (readability-identifier-naming)
   constexpr double filter_gain{0.001};  // NOLINT (readability-identifier-naming)
 
   try {

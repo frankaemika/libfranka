@@ -26,8 +26,7 @@
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
   if (argc != 2) {
-    std::cerr << "Usage: " << argv[0]
-              << " <robot-hostname>" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
 
@@ -39,7 +38,8 @@ int main(int argc, char** argv) {
   stiffness.topLeftCorner(3, 3) << translational_stiffness * Eigen::MatrixXd::Identity(3, 3);
   stiffness.bottomRightCorner(3, 3) << rotational_stiffness * Eigen::MatrixXd::Identity(3, 3);
   damping.setZero();
-  damping.topLeftCorner(3, 3) << 2.0 * sqrt(translational_stiffness) * Eigen::MatrixXd::Identity(3, 3);
+  damping.topLeftCorner(3, 3) << 2.0 * sqrt(translational_stiffness) *
+                                     Eigen::MatrixXd::Identity(3, 3);
   damping.bottomRightCorner(3, 3) << 2.0 * sqrt(rotational_stiffness) *
                                          Eigen::MatrixXd::Identity(3, 3);
 
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
       // orientation error
       // "difference" quaternion
       if (orientation_d.coeffs().dot(orientation.coeffs()) < 0.0) {
-          orientation.coeffs() << -orientation.coeffs();
+        orientation.coeffs() << -orientation.coeffs();
       }
       Eigen::Quaterniond error_quaternion(orientation * orientation_d.inverse());
       // convert to axis angle

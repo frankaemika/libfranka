@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
   const double run_time = 20.0;
   // Set print rate for comparing commanded vs. measured torques.
   const double print_rate = 10.0;
-  
+
   double vel_current = 0.0;
   double angle = 0.0;
   double time = 0.0;
