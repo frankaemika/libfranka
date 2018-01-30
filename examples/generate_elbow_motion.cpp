@@ -22,6 +22,8 @@ int main(int argc, char** argv) {
   }
   try {
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
+
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
