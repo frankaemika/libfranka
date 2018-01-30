@@ -37,36 +37,23 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
  * thread to avoid blocking print functions in the real-time loop.
  */
 
-std::array<double, 7> saturateTorqueRate(
-    const double delta_tau_max,
-    const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d);  // NOLINT (readability-identifier-naming)
-
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed.
-  if (argc != 5) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>"
-              << " <radius in [m]>"
-              << " <vel_max in [m/s]>"
-              << " <print_rate in [Hz]>" << std::endl;
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
   // Set and initialize trajectory parameters.
-  const double radius = std::stod(argv[2]);
-  const double vel_max = std::stod(argv[3]);
+  const double radius = 0.05;
+  const double vel_max = 0.25;
   const double acceleration_time = 2.0;
+  const double run_time = 20.0;
+  // Set print rate for comparing commanded vs. measured torques.
+  const double print_rate = 10.0;
+
   double vel_current = 0.0;
   double angle = 0.0;
-
   double time = 0.0;
-  const double run_time = 20.0;
-
-  // Set print rate for comparing commanded vs. measured torques.
-  double print_rate = std::stod(argv[4]);
-  if (print_rate < 0.0) {
-    std::cerr << "print_rate too small, must be >= 0.0" << std::endl;
-    return -1;
-  }
 
   // Initialize data fields for the print thread.
   struct {
@@ -186,13 +173,9 @@ int main(int argc, char** argv) {
     // Damping
     const std::array<double, 7> d_gains = {{50.0, 50.0, 50.0, 50.0, 30.0, 25.0, 15.0}};
 
-    // Maximum torque difference with a sampling rate of 1 kHz. The maximum torque rate is
-    // 1000 * (1 / sampling_time).
-    const double delta_tau_max = 1.0;
-
     // Define callback for the joint torque control loop.
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        impedance_control_callback = [&print_data, &model, k_gains, d_gains, delta_tau_max](
+        impedance_control_callback = [&print_data, &model, k_gains, d_gains](
             const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
       // Read current coriolis terms from model.
       std::array<double, 7> coriolis =
@@ -208,7 +191,7 @@ int main(int argc, char** argv) {
       }
 
       std::array<double, 7> tau_d_saturated =
-          saturateTorqueRate(delta_tau_max, tau_d_calculated, state.tau_J_d);
+          limitRate(kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
@@ -235,16 +218,4 @@ int main(int argc, char** argv) {
     print_thread.join();
   }
   return 0;
-}
-
-std::array<double, 7> saturateTorqueRate(
-    const double delta_tau_max,
-    const std::array<double, 7>& tau_d_calculated,
-    const std::array<double, 7>& tau_J_d) {  // NOLINT (readability-identifier-naming)
-  std::array<double, 7> tau_d_saturated{};
-  for (size_t i = 0; i < 7; i++) {
-    double difference = tau_d_calculated[i] - tau_J_d[i];
-    tau_d_saturated[i] = tau_J_d[i] + std::max(std::min(difference, delta_tau_max), -delta_tau_max);
-  }
-  return tau_d_saturated;
 }

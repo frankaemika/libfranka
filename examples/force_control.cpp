@@ -17,7 +17,7 @@
 /**
  * @example force_control.cpp
  * A simple PI force controller that renders in the Z axis the gravitational force corresponding
- * to a desired mass.
+ * to a target mass of 1 kg.
  *
  * @warning: make sure that no endeffector is mounted and that the robot's last joint is in contact
  * with a horizontal rigid surface before starting.
@@ -25,15 +25,15 @@
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
-  if (argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>  <desired-mass [kg]>" << std::endl;
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
   // parameters
-  const double target_mass{std::stod(argv[2])};
   double desired_mass{0.0};
-  constexpr double k_p{5.0};            // NOLINT (readability-identifier-naming)
-  constexpr double k_i{10.0};           // NOLINT (readability-identifier-naming)
+  constexpr double target_mass{1.0};    // NOLINT (readability-identifier-naming)
+  constexpr double k_p{1.0};            // NOLINT (readability-identifier-naming)
+  constexpr double k_i{2.0};            // NOLINT (readability-identifier-naming)
   constexpr double filter_gain{0.001};  // NOLINT (readability-identifier-naming)
 
   try {
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_cmd;
-      return tau_d_array;
+      return limitRate(kMaxTorqueRate, tau_d_array, robot_state.tau_J_d);
     };
     std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
                  "joint is "
