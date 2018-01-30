@@ -14,7 +14,7 @@ matrix:
         provider: pages
         skip_cleanup: true
         github_token: $GITHUB_TOKEN
-        local_dir: $TRAVIS_BUILD_DIR/build-release/doc/html
+        local_dir: build-release/doc/html
         on:
           branch: master
 
