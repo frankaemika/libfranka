@@ -22,6 +22,7 @@ int main(int argc, char** argv) {
   }
   try {
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
 
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
@@ -40,8 +41,6 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
-
-    const std::array<double, 7> max_joint_acc{{14.25, 7.125, 11.875, 11.875, 14.25, 19.0, 19.0}};
 
     double time_max = 1.0;
     double omega_max = 1.0;
@@ -64,10 +63,11 @@ int main(int argc, char** argv) {
       // not reaching the 1kHz rate, even if your desired velocity trajectory
       // is smooth, discontinuities might occur.
       // Saturating the acceleration computed with respect to the last command received
-      // by the robot will prevent from getting discontinuity errors.
+      // by the robot will prevent from getting discontinuity errors (but will distort
+      // your motion!).
       // Note that if the robot does not receive a command it will try to extrapolate
       // the desired behavior assuming a constant acceleration model
-      return limitRate(max_joint_acc, velocities.dq, state.dq_d);
+      return limitRate(kMaxJointAcc, velocities.dq, state.dq_d);
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

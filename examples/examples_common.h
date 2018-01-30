@@ -8,12 +8,28 @@
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
+#include <franka/robot.h>
 #include <franka/robot_state.h>
 
 /**
  * @file examples_common.h
  * Contains common types and functions for the examples.
  */
+
+/**
+ * Maximum torque rate
+ */
+constexpr std::array<double, 7> kMaxTorqueRate{{1000, 1000, 1000, 1000, 1000, 1000, 1000}};
+/**
+ * Maximum joint velocity
+ */
+constexpr std::array<double, 7> kMaxJointVel{
+    {2.3925, 2.3925, 2.3925, 2.3925, 2.8710, 2.8710, 2.8710}};
+/**
+ * Maximum joint acceleration
+ */
+constexpr std::array<double, 7> kMaxJointAcc{
+    {16.5000, 8.2500, 13.7500, 13.7500, 16.5000, 22.0000, 22.0000}};
 
 /**
  * Limits the rate of an input vector of per-joint commands considering the maximum allowed time
@@ -28,6 +44,13 @@
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& desired_values,
                                 const std::array<double, 7>& last_desired_values);
+
+/**
+ * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
+ *
+ * @param[in] robot Robot instance to set behavior on.
+ */
+void setDefaultBehavior(franka::Robot& robot);
 
 /**
  * An example showing how to generate a joint pose motion to a goal position. Adapted from:
