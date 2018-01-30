@@ -8,6 +8,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include <functional>
 
 #include <franka/robot_state.h>
 #include <research_interface/gripper/types.h>
