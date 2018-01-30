@@ -5,6 +5,7 @@
 ### Examples
 
   * Set default collision behavior, impedances, and filter frequencies
+  * Removed command line parameters to simplify usage
 
 ### Library
 
