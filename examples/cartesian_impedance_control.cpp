@@ -12,6 +12,8 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example cartesian_impedance_control.cpp
  * An example showing a simple cartesian impedance controller without inertia shaping
@@ -42,6 +44,7 @@ int main(int argc, char** argv) {
   try {
     // connect to robot
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
     // load the kinematics and dynamics model
     franka::Model model = robot.loadModel();
 
@@ -103,7 +106,7 @@ int main(int argc, char** argv) {
     };
 
     // start real-time control loop
-    std::cout << "WARNING: Collision thresholds are set to high values."
+    std::cout << "WARNING: Collision thresholds are set to high values. "
               << "Make sure you have the user stop at hand!" << std::endl
               << "Press Enter to continue..." << std::endl;
     std::cin.ignore();

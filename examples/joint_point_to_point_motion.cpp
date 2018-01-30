@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
   }
   try {
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
+
     std::array<double, 7> q_goal;
     for (size_t i = 0; i < 7; i++) {
       q_goal[i] = std::stod(argv[i + 2]);

@@ -2,6 +2,10 @@
 
 ## 0.2.1 - UNRELEASED
 
+### Examples
+
+  * Set default collision behavior, impedances, and filter frequencies
+
 ### Library
 
   * Added additional variables to installed CMake config

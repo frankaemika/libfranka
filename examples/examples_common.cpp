@@ -22,6 +22,17 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
   return limited_values;
 }
 
+void setDefaultBehavior(franka::Robot& robot) {
+  robot.setCollisionBehavior(
+      {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
+      {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}},
+      {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
+      {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
+  robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
+  robot.setCartesianImpedance({{3000, 3000, 3000, 300, 300, 300}});
+  robot.setFilters(100, 100, 100, 100, 100);
+}
+
 MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal)
     : q_goal_(q_goal.data()) {
   dq_max_ *= speed_factor;

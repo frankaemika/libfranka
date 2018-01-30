@@ -112,6 +112,8 @@ int main(int argc, char** argv) {
   try {
     // Connect to robot.
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
+
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
@@ -121,6 +123,8 @@ int main(int argc, char** argv) {
     std::cin.ignore();
     robot.control(motion_generator);
     std::cout << "Finished moving to initial joint configuration." << std::endl;
+
+    // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
     robot.setCollisionBehavior(
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
