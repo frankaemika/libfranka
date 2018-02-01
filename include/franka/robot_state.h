@@ -31,10 +31,6 @@ enum class RobotMode {
 
 /**
  * Describes the robot state.
- *
- * @par Stiffness frame K
- * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
- * It can be set with Robot::setK.
  */
 struct RobotState {
   /**
@@ -45,7 +41,7 @@ struct RobotState {
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$^O{\mathbf{T}_{EE}}_{d}\f$
+   * \f${^OT_{EE}}_{d}\f$
    * Last desired end effector pose of motion generation in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
@@ -63,8 +59,7 @@ struct RobotState {
    * Stiffness frame pose in end effector frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    *
-   * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
-   * It can be set with Robot::setK.
+   * See also @ref k-frame "K frame".
    */
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
@@ -218,14 +213,16 @@ struct RobotState {
   /**
    * \f$^OF_{K,\text{ext}}\f$
    * External wrench (force, torque) scaled by a factor acting on stiffness frame, expressed
-   * relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * relative to the base frame. See also @ref k-frame "K frame".
+   * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
    * External wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness
-   * frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * frame. See also @ref k-frame "K frame".
+   * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 

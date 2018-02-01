@@ -32,8 +32,10 @@ class Model;
  * While the end effector parameters are set in a configuration file, it is possible to change the
  * end effector frame with Robot::setEE.
  *
+ * @anchor k-frame
  * @par Stiffness frame K
- * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
+ * The stiffness frame is used for Cartesian impedance control, and for measuring and applying
+ * forces.
  * It can be set with Robot::setK.
  */
 class Robot {
@@ -90,8 +92,11 @@ class Robot {
    * otherwise.
    *
    * @anchor callback-docs
-   * The callback functions are called with a fixed frequency of 1 KHz and therefore need to be
-   * able to compute outputs within this time frame. Callback functions take two parameters:
+   * When a robot state is received, the callback function is used to calculate the response: the
+   * desired values for that time step. After sending back the response, the callback function will
+   * be called again with the most recently received robot state. Since the Controller is operating
+   * at a 1 kHz frequency, the callback functions have to compute their result in a short time frame
+   * in order to be accepted. Callback functions take two parameters:
    *
    * * A franka::RobotState showing the current robot state.
    * * A franka::Duration to indicate the time since the last callback invocation. Thus, the
@@ -512,7 +517,8 @@ class Robot {
    * Sets dynamic parameters of a payload.
    *
    * @note
-   * This is not for setting end effector parameters, which have to be set in a configuration file.
+   * This is not for setting end effector parameters, which have to be set in the administrator's
+   * interface.
    *
    * @param[in] load_mass Mass of the load in \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load
