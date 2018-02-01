@@ -168,6 +168,7 @@ endif()
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Emika GmbH")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
+set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka")
 
 include(CPack)
 

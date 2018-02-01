@@ -10,6 +10,7 @@
 ### Library
 
   * Added additional variables to installed CMake config
+  * Added conflict with `ros-kinetic-libfranka` to CPack config
 
 ## 0.2.0 - 2018-01-29
 
