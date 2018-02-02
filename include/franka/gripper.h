@@ -71,7 +71,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
-   * @throw NetworkException if the connection is unsuccessful.
+   * @throw NetworkException if the connection got interrupted.
    *
    * @see GripperState for the maximum grasping width.
    */
@@ -87,7 +87,7 @@ class Gripper {
    * @return True if an object has been grasped, false otherwise.
    *
    * @throw CommandException if an error occurred.
-   * @throw NetworkException if the connection is unsuccessful.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   bool grasp(double width, double speed, double force) const;
 
@@ -100,7 +100,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
-   * @throw NetworkException if the connection is unsuccessful.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   bool move(double width, double speed) const;
 
@@ -110,7 +110,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
-   * @throw NetworkException if the connection is unsuccessful.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   bool stop() const;
 

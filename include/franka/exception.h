@@ -45,7 +45,6 @@ struct ProtocolException : public Exception {
 
 /**
  * IncompatibleVersionException is thrown if the robot does not support this version of libfranka.
- * For robot software upgrades, see https://support.franka.de/.
  */
 struct IncompatibleVersionException : public Exception {
   using Exception::Exception;

@@ -94,8 +94,8 @@ class Robot {
    * @anchor callback-docs
    * When a robot state is received, the callback function is used to calculate the response: the
    * desired values for that time step. After sending back the response, the callback function will
-   * be called again with the most recently received robot state. Since the Controller is operating
-   * at a 1 kHz frequency, the callback functions have to compute their result in a short time frame
+   * be called again with the most recently received robot state. Since the robot is controlled with
+   * a 1 kHz frequency, the callback functions have to compute their result in a short time frame
    * in order to be accepted. Callback functions take two parameters:
    *
    * * A franka::RobotState showing the current robot state.
