@@ -47,9 +47,20 @@ struct ProtocolException : public Exception {
  * IncompatibleVersionException is thrown if the robot does not support this version of libfranka.
  */
 struct IncompatibleVersionException : public Exception {
+  /**
+   * Creates the exception using the two different protocol versions.
+   * @param[in] server_version Protocol version on the Control side.
+   * @param[in] library_version Protocol version of libfranka.
+   */
   IncompatibleVersionException(uint16_t server_version, uint16_t library_version) noexcept;
 
+  /**
+   * Control's protocol version.
+   */
   const uint16_t server_version;
+  /**
+   * libfranka protocol version.
+   */
   const uint16_t library_version;
 };
 
