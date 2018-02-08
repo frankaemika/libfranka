@@ -88,7 +88,6 @@ int main(int argc, char** argv) {
       // Try to lock data to avoid read write collisions.
       if (print_data.mutex.try_lock()) {
         if (print_data.has_data) {
-
           std::array<double, 7> tau_error{};
           double error_rms(0.0);
           std::array<double, 7> tau_d_actual{};
@@ -106,7 +105,6 @@ int main(int argc, char** argv) {
                     << "root mean square of tau_error [Nm]: " << error_rms << std::endl
                     << "-----------------------" << std::endl;
           print_data.has_data = false;
-
         }
         print_data.mutex.unlock();
       }
