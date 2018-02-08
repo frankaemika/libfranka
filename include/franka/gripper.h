@@ -71,7 +71,7 @@ class Gripper {
    * @return True if command was successful, false otherwise.
    *
    * @throw CommandException if an error occurred.
-   * @throw NetworkException if the connection got interrupted.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see GripperState for the maximum grasping width.
    */
