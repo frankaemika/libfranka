@@ -6,6 +6,7 @@
 
   * Set default collision behavior, impedances, and filter frequencies
   * Removed command line parameters to simplify usage
+  * Fixed locking bug in `joint_impedance_control`
 
 ### Library
 
