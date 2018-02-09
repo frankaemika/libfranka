@@ -269,7 +269,7 @@ class CartesianVelocities : public Finishable {
                       std::initializer_list<double> elbow);
 
   /**
-   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in
+   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in [m/s], dz in [m/s], omegax in
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
