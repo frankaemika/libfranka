@@ -263,10 +263,7 @@ struct RobotState {
   RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
-   * Time when this robot state was measured on the Control side.
-   *
-   * Stored as a duration of time that has passed since some internally chosen point in time.
-   * Strictly increasing for each received robot state.
+   * Strictly monotonically increasing timestamp since robot start.
    *
    * Inside of control loops @ref callback-docs "time_step" parameter of Robot::control can be used
    * instead.

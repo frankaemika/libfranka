@@ -43,10 +43,7 @@ struct GripperState {
   uint16_t temperature{};
 
   /**
-   * Time when this gripper state was measured on the Control side.
-   *
-   * Stored as a duration of time that has passed since an internally chosen point in time.
-   * Strictly increasing for each received gripper state.
+   * Strictly monotonically increasing timestamp since robot start.
    */
   Duration time{};
 };
