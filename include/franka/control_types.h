@@ -135,9 +135,9 @@ class CartesianPose : public Finishable {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
-   * base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f$^O
+   * {\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
@@ -148,9 +148,9 @@ class CartesianPose : public Finishable {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
-   * base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f$^O
+   * {\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
@@ -163,9 +163,9 @@ class CartesianPose : public Finishable {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
-   * base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f$^O
+   * {\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
    * transformation matrix (column-major).
@@ -177,9 +177,10 @@ class CartesianPose : public Finishable {
   /**
    * Creates a new CartesianPose instance.
    *
-   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f${}_O
-   * \mathbf{T}_{EE,d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
-   * base frame \f$O\f$.
+   * @param[in] cartesian_pose Desired vectorized homogeneous transformation matrix \f$^O
+   * {\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
+   * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
+   *
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
    * @throw std::invalid_argument if cartesian_pose is not a valid vectorized homogeneous
@@ -191,8 +192,9 @@ class CartesianPose : public Finishable {
   CartesianPose(std::initializer_list<double> cartesian_pose, std::initializer_list<double> elbow);
 
   /**
-   * Homogeneous transformation \f${}_O \mathbf{T}_{EE,d}\f$, column major, that transforms from the
-   * end effector frame \f$EE\f$ to base frame \f$O\f$.
+   * Homogeneous transformation \f$^O{\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from
+   * the end effector frame \f$EE\f$ to base frame \f$O\f$.
+   * Equivalently, it is the desired end effector pose in base frame.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
@@ -267,7 +269,7 @@ class CartesianVelocities : public Finishable {
                       std::initializer_list<double> elbow);
 
   /**
-   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in [m/s], dz in [m/s], omegax in
+   * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in [m/s], dz in [m/s], omegax in
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
   std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)

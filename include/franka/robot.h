@@ -32,8 +32,10 @@ class Model;
  * While the end effector parameters are set in a configuration file, it is possible to change the
  * end effector frame with Robot::setEE.
  *
+ * @anchor k-frame
  * @par Stiffness frame K
- * The stiffness frame is used for Cartesian impedance control and measuring forces and torques.
+ * The stiffness frame is used for Cartesian impedance control, and for measuring and applying
+ * forces.
  * It can be set with Robot::setK.
  */
 class Robot {
@@ -90,8 +92,11 @@ class Robot {
    * otherwise.
    *
    * @anchor callback-docs
-   * The callback functions are called with a fixed frequency of 1 KHz and therefore need to be
-   * able to compute outputs within this time frame. Callback functions take two parameters:
+   * When a robot state is received, the callback function is used to calculate the response: the
+   * desired values for that time step. After sending back the response, the callback function will
+   * be called again with the most recently received robot state. Since the robot is controlled with
+   * a 1 kHz frequency, the callback functions have to compute their result in a short time frame
+   * in order to be accepted. Callback functions take two parameters:
    *
    * * A franka::RobotState showing the current robot state.
    * * A franka::Duration to indicate the time since the last callback invocation. Thus, the
@@ -316,6 +321,16 @@ class Robot {
    *
    * Cannot be executed while a control or motion generator loop is running.
    *
+   * This minimal example will print the robot state 100 times:
+   * @code{.cpp}
+   * franka::Robot robot("robot.franka.de");
+   * size_t count = 0;
+   * robot.read([&count](const franka::RobotState& robot_state) {
+   *   std::cout << robot_state << std::endl;
+   *   return count++ < 100;
+   * });
+   * @endcode
+   *
    * @param[in] read_callback Callback function for robot state reading.
    *
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -352,7 +367,8 @@ class Robot {
    *
    * @return Parameters of virtual wall.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   VirtualWallCuboid getVirtualWall(int32_t id);
 
@@ -379,7 +395,8 @@ class Robot {
    * @param[in] lower_force_thresholds_nominal Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds_nominal Collision force thresholds in \f$[N]\f$.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::cartesian_contact
    * @see RobotState::cartesian_collision
@@ -411,7 +428,8 @@ class Robot {
    * @param[in] lower_force_thresholds Contact force thresholds in \f$[N]\f$.
    * @param[in] upper_force_thresholds Collision force thresholds in \f$[N]\f$.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::cartesian_contact
    * @see RobotState::cartesian_collision
@@ -425,21 +443,27 @@ class Robot {
                             const std::array<double, 6>& upper_force_thresholds);
 
   /**
-   * Sets the impedance for each joint.
+   * Sets the impedance for each joint in the internal controller.
+   *
+   * User-provided torques are not affected by this setting.
    *
    * @param[in] K_theta Joint impedance values \f$K_{\theta}\f$.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setJointImpedance(
       const std::array<double, 7>& K_theta);  // NOLINT (readability-identifier-naming)
 
   /**
-   * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw).
+   * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw) in the internal controller.
+   *
+   * User-provided torques are not affected by this setting.
    *
    * @param[in] K_x Cartesian impedance values \f$K_x=(x, y, z, R, P, Y)\f$.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setCartesianImpedance(
       const std::array<double, 6>& K_x);  // NOLINT (readability-identifier-naming)
@@ -455,7 +479,8 @@ class Robot {
    * @param[in] guiding_mode Unlocked movement in (x, y, z, R, P, Y) in guiding mode.
    * @param[in] elbow True if the elbow is free in guiding mode, false otherwise.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow);
 
@@ -466,7 +491,8 @@ class Robot {
    *
    * @param[in] EE_T_K Vectorized EE-to-K transformation matrix \f$^{EE}T_K\f$, column-major.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see Robot for an explanation of the stiffness frame.
    */
@@ -479,7 +505,8 @@ class Robot {
    *
    * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix \f$^FT_{EE}\f$, column-major.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
    * @see RobotState::O_T_EE for end effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
@@ -490,7 +517,8 @@ class Robot {
    * Sets dynamic parameters of a payload.
    *
    * @note
-   * This is not for setting end effector parameters, which have to be set in a configuration file.
+   * This is not for setting end effector parameters, which have to be set in the administrator's
+   * interface.
    *
    * @param[in] load_mass Mass of the load in \f$[kg]\f$.
    * @param[in] F_x_Cload Translation from flange to center of mass of load
@@ -498,7 +526,8 @@ class Robot {
    * @param[in] load_inertia Inertia matrix \f$I_\text{load}\f$ in \f$[kg \times m^2]\f$,
    * column-major.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setLoad(double load_mass,
                const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
@@ -521,7 +550,8 @@ class Robot {
    * @param[in] controller_filter_frequency Frequency at which the commanded torque is cut
    * off.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setFilters(double joint_position_filter_frequency,
                   double joint_velocity_filter_frequency,
@@ -533,7 +563,8 @@ class Robot {
    *
    * Automatic error recovery e.g. resets the robot after a collision occurred.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void automaticErrorRecovery();
 
@@ -543,7 +574,8 @@ class Robot {
    * If a control or motion generator loop is running in another thread, it will be preempted
    * with a franka::ControlException.
    *
-   * @throw CommandException if an error occurred.
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void stop();
 
@@ -557,6 +589,7 @@ class Robot {
    * @return Model instance.
    *
    * @throw ModelException if the model library cannot be loaded.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   Model loadModel();
 

@@ -48,6 +48,7 @@ add_library(franka SHARED
   src/control_types.cpp
   src/duration.cpp
   src/errors.cpp
+  src/exception.cpp
   src/gripper.cpp
   src/gripper_state.cpp
   src/library_downloader.cpp

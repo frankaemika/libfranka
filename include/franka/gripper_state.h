@@ -43,7 +43,7 @@ struct GripperState {
   uint16_t temperature{};
 
   /**
-   * Strictly increasing time for each received gripper state.
+   * Strictly monotonically increasing timestamp since robot start.
    */
   Duration time{};
 };
