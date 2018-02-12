@@ -6,10 +6,12 @@
 
   * Set default collision behavior, impedances, and filter frequencies
   * Removed command line parameters to simplify usage
+  * Fixed locking bug in `joint_impedance_control`
 
 ### Library
 
   * Added additional variables to installed CMake config
+  * Added conflict with `ros-kinetic-libfranka` to Debian packaging
 
 ## 0.2.0 - 2018-01-29
 
