@@ -11,6 +11,7 @@
 ### Library
 
   * Added additional variables to installed CMake config
+  * Updated `SOVERSION` to include minor version number
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation
 
