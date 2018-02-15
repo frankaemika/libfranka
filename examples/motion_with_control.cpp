@@ -48,7 +48,7 @@ class Controller {
     for (size_t i = 0; i < 7; i++) {
       tau_J_d[i] = K_P_[i] * (state.q_d[i] - state.q[i]) + K_D_[i] * (dq_d_[i] - getDQFiltered(i));
     }
-    return tau_J_d;
+    return limitRate(kMaxTorqueRate, tau_J_d, state.tau_J_d);
   }
 
   void updateDQFilter(const franka::RobotState& state) {
@@ -111,32 +111,24 @@ std::vector<double> generateTrajectory(double a_max) {
 void writeLogToFile(const std::vector<franka::Record>& log);
 
 int main(int argc, char** argv) {
-  if (argc != 7) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>"
-              << " <filter size>"
-              << " <K_P>"
-              << " <K_D>"
-              << " <joint>"
-              << " <a_max>" << std::endl;
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
-  size_t filter_size = std::stoul(argv[2]);
-  std::array<double, 7> K_P;  // NOLINT
-  std::array<double, 7> K_D;  // NOLINT
-  for (size_t i = 0; i < 7; i++) {
-    K_P[i] = std::stod(argv[3]);
-    K_D[i] = std::stod(argv[4]);
-  }
 
-  std::cout << "Initializing controller: " << std::endl;
-  for (size_t i = 0; i < 7; i++) {
-    std::cout << i + 1 << ": K_P = " << K_P[i] << "\tK_D = " << K_D[i] << std::endl;
-  }
-  std::cout << "dq filter size: " << filter_size << std::endl;
+  // Parameters
+  const size_t joint_number{3};
+  const size_t filter_size{5};
+  const std::array<double, 7> K_P{{200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0}};  // NOLINT
+  const std::array<double, 7> K_D{{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}};         // NOLINT
+  const double max_acceleration{1.0};
+
   Controller controller(filter_size, K_P, K_D);
 
   try {
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
+
     // First move the robot to a suitable joint configuration
     std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
     MotionGenerator motion_generator(0.5, q_goal);
@@ -146,6 +138,7 @@ int main(int argc, char** argv) {
     std::cin.ignore();
     robot.control(motion_generator);
     std::cout << "Finished moving to initial joint configuration." << std::endl;
+
     // Set additional parameters always before the control loop, NEVER in the control loop!
     // Set collision behavior.
     robot.setCollisionBehavior(
@@ -155,8 +148,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     size_t index = 0;
-    int joint_number = std::stoi(argv[5]);
-    std::vector<double> trajectory = generateTrajectory(std::stod(argv[6]));
+    std::vector<double> trajectory = generateTrajectory(max_acceleration);
 
     robot.control(
         [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {

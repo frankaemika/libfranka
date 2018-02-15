@@ -1,10 +1,24 @@
 # CHANGELOG
 
+## 0.2.1 - UNRELEASED
+
+### Examples
+
+  * Set default collision behavior, impedances, and filter frequencies
+  * Removed command line parameters to simplify usage
+  * Fixed locking bug in `joint_impedance_control`
+
+### Library
+
+  * Added additional variables to installed CMake config
+  * Added conflict with `ros-kinetic-libfranka` to Debian packaging
+  * Minor fixes and improvements for API documentation
+
 ## 0.2.0 - 2018-01-29
 
 Requires Panda system version >= 1.1.0
 
-## Motion and control interfaces
+### Motion and control interfaces
 
   * Improved external torque tracking behavior.
   * Fixed discontinuities in commanding orientation changes via the cartesian
@@ -19,7 +33,7 @@ Requires Panda system version >= 1.1.0
   * **BREAKING** Changed signatures and added overloads in `franka::Model`
   * **BREAKING** Replaced `p_min` and `p_max` of `franka::VirtualWallCuboid` with `object_world_size`
 
-## Error handling
+### Error handling
 
   * **WARNING** Not all robot errors can be recovered using the guiding button
     on the robot anymore. To manually recover from such errors, please use the
@@ -28,7 +42,7 @@ Requires Panda system version >= 1.1.0
   * Fail earlier (by throwing exception) if any of the commanded values are
     `NaN` or `infinity`.
 
-## Examples
+### Examples
 
   * Added saturation to joint velocity, joint position, and joint impedance
     examples.
@@ -38,7 +52,7 @@ Requires Panda system version >= 1.1.0
   * Added new cartesian impedance and force control examples.
   * Lowered grasping force in `grasp_object` example
 
-## Library
+### Library
 
   * **BREAKING** New build-time dependency on Eigen3.
   * Changed thread priority to the maximum allowed value.

@@ -34,14 +34,14 @@ enum class RobotMode {
  */
 struct RobotState {
   /**
-   * \f$^OT_{EE}\f$
+   * \f$^{O}T_{EE}\f$
    * Measured end effector pose in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
   std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$^OT_{EEd}\f$
+   * \f${^OT_{EE}}_{d}\f$
    * Last desired end effector pose of motion generation in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
@@ -58,6 +58,8 @@ struct RobotState {
    * \f$^{EE}T_{K}\f$
    * Stiffness frame pose in end effector frame.
    * Pose is represented as a 4x4 matrix in column-major format.
+   *
+   * See also @ref k-frame "K frame".
    */
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
@@ -67,12 +69,12 @@ struct RobotState {
   double m_ee{};
 
   /**
-   * Configured rotational inertia matrix of the end effector load w.r.t.\ center of mass.
+   * Configured rotational inertia matrix of the end effector load with respect to center of mass.
    */
   std::array<double, 9> I_ee{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Configured center of mass of the end effector load w.r.t.\ flange frame.
+   * Configured center of mass of the end effector load with respect to flange frame.
    */
   std::array<double, 3> F_x_Cee{};  // NOLINT (readability-identifier-naming)
 
@@ -82,12 +84,12 @@ struct RobotState {
   double m_load{};
 
   /**
-   * Configured rotational inertia matrix of the external load w.r.t.\ center of mass.
+   * Configured rotational inertia matrix of the external load with respect to center of mass.
    */
   std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Configured center of mass of the external load w.r.t.\ flange frame.
+   * Configured center of mass of the external load with respect to flange frame.
    */
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
@@ -97,13 +99,14 @@ struct RobotState {
   double m_total{};
 
   /**
-   * Combined rotational inertia matrix of the end effector load and the external load w.r.t.\
-   * center of mass.
+   * Combined rotational inertia matrix of the end effector load and the external load with respect
+   * to the center of mass.
    */
   std::array<double, 9> I_total{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * Combined center of mass of the end effector load and the external load w.r.t.\ flange frame.
+   * Combined center of mass of the end effector load and the external load with respect to flange
+   * frame.
    */
   std::array<double, 3> F_x_Ctotal{};  // NOLINT (readability-identifier-naming)
 
@@ -132,7 +135,7 @@ struct RobotState {
   std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f$\tau_{J}_d\f$
+   * \f${\tau_J}_d\f$
    * Desired link-side joint torque sensor signals without gravity. Unit: \f$[Nm]\f$
    */
   std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
@@ -210,14 +213,16 @@ struct RobotState {
   /**
    * \f$^OF_{K,\text{ext}}\f$
    * External wrench (force, torque) scaled by a factor acting on stiffness frame, expressed
-   * relative to the base frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * relative to the base frame. See also @ref k-frame "K frame".
+   * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
-   * External wrench (force, torque) acting on stiffness frame, expressed relative to the end
-   * effector frame. Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
+   * External wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness
+   * frame. See also @ref k-frame "K frame".
+   * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
@@ -258,7 +263,10 @@ struct RobotState {
   RobotMode robot_mode = RobotMode::kUserStopped;
 
   /**
-   * Strictly increasing time for each received robot state.
+   * Strictly monotonically increasing timestamp since robot start.
+   *
+   * Inside of control loops @ref callback-docs "time_step" parameter of Robot::control can be used
+   * instead.
    */
   Duration time{};
 };

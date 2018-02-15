@@ -47,7 +47,21 @@ struct ProtocolException : public Exception {
  * IncompatibleVersionException is thrown if the robot does not support this version of libfranka.
  */
 struct IncompatibleVersionException : public Exception {
-  using Exception::Exception;
+  /**
+   * Creates the exception using the two different protocol versions.
+   * @param[in] server_version Protocol version on the Control side.
+   * @param[in] library_version Protocol version of libfranka.
+   */
+  IncompatibleVersionException(uint16_t server_version, uint16_t library_version) noexcept;
+
+  /**
+   * Control's protocol version.
+   */
+  const uint16_t server_version;
+  /**
+   * libfranka protocol version.
+   */
+  const uint16_t library_version;
 };
 
 /**
@@ -62,8 +76,7 @@ struct ControlException : public Exception {
    * @param[in] what Explanatory string.
    * @param[in] log Vector of last received states and commands.
    */
-  explicit ControlException(std::string what, std::vector<franka::Record> log = {})
-      : Exception(std::move(what)), log(std::move(log)){};
+  explicit ControlException(std::string what, std::vector<franka::Record> log = {}) noexcept;
 
   /**
   * Vector of states and commands logged just before the exception occured.

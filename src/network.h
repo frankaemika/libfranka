@@ -8,7 +8,6 @@
 #include <cstring>
 #include <functional>
 #include <mutex>
-#include <sstream>
 #include <unordered_map>
 #include <vector>
 
@@ -257,20 +256,13 @@ void connect(Network& network, uint16_t* ri_version) {
   uint32_t command_id = network.tcpSendRequest<T>(network.udpPort());
   typename T::Response connect_response = network.tcpBlockingReceiveResponse<T>(command_id);
   switch (connect_response.status) {
-    case (T::Status::kIncompatibleLibraryVersion): {
-      std::stringstream message;
-      message << "libfranka: incompatible library version. " << std::endl
-              << "Server version: " << connect_response.version << std::endl
-              << "Library version: " << kLibraryVersion;
-      throw IncompatibleVersionException(message.str());
-    }
-    case (T::Status::kSuccess): {
+    case (T::Status::kIncompatibleLibraryVersion):
+      throw IncompatibleVersionException(connect_response.version, kLibraryVersion);
+    case (T::Status::kSuccess):
       *ri_version = connect_response.version;
       break;
-    }
     default:
-      throw ProtocolException(
-          "libfranka gripper: protocol error during gripper connection attempt");
+      throw ProtocolException("libfranka: Protocol error during connection attempt");
   }
 }
 

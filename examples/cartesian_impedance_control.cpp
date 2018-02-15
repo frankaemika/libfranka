@@ -12,6 +12,8 @@
 #include <franka/model.h>
 #include <franka/robot.h>
 
+#include "examples_common.h"
+
 /**
  * @example cartesian_impedance_control.cpp
  * An example showing a simple cartesian impedance controller without inertia shaping
@@ -23,25 +25,28 @@
 
 int main(int argc, char** argv) {
   // Check whether the required arguments were passed
-  if (argc != 4) {
-    std::cerr << "Usage: " << argv[0]
-              << " <robot-hostname> <translational-stiffness> <rotational-stiffness>" << std::endl;
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
 
   // Compliance parameters
+  const double translational_stiffness{150.0};
+  const double rotational_stiffness{10.0};
   Eigen::MatrixXd stiffness(6, 6), damping(6, 6);
   stiffness.setZero();
-  stiffness.topLeftCorner(3, 3) << std::stod(argv[2]) * Eigen::MatrixXd::Identity(3, 3);
-  stiffness.bottomRightCorner(3, 3) << std::stod(argv[3]) * Eigen::MatrixXd::Identity(3, 3);
+  stiffness.topLeftCorner(3, 3) << translational_stiffness * Eigen::MatrixXd::Identity(3, 3);
+  stiffness.bottomRightCorner(3, 3) << rotational_stiffness * Eigen::MatrixXd::Identity(3, 3);
   damping.setZero();
-  damping.topLeftCorner(3, 3) << 2.0 * sqrt(std::stod(argv[2])) * Eigen::MatrixXd::Identity(3, 3);
-  damping.bottomRightCorner(3, 3) << 2.0 * sqrt(std::stod(argv[3])) *
+  damping.topLeftCorner(3, 3) << 2.0 * sqrt(translational_stiffness) *
+                                     Eigen::MatrixXd::Identity(3, 3);
+  damping.bottomRightCorner(3, 3) << 2.0 * sqrt(rotational_stiffness) *
                                          Eigen::MatrixXd::Identity(3, 3);
 
   try {
     // connect to robot
     franka::Robot robot(argv[1]);
+    setDefaultBehavior(robot);
     // load the kinematics and dynamics model
     franka::Model model = robot.loadModel();
 
@@ -83,6 +88,9 @@ int main(int argc, char** argv) {
 
       // orientation error
       // "difference" quaternion
+      if (orientation_d.coeffs().dot(orientation.coeffs()) < 0.0) {
+        orientation.coeffs() << -orientation.coeffs();
+      }
       Eigen::Quaterniond error_quaternion(orientation * orientation_d.inverse());
       // convert to axis angle
       Eigen::AngleAxisd error_quaternion_angle_axis(error_quaternion);
@@ -98,12 +106,13 @@ int main(int argc, char** argv) {
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_d;
-      return tau_d_array;
+      return limitRate(kMaxTorqueRate, tau_d_array, robot_state.tau_J_d);
     };
 
     // start real-time control loop
-    std::cout << "WARNING: Collision thresholds are set to high values."
+    std::cout << "WARNING: Collision thresholds are set to high values. "
               << "Make sure you have the user stop at hand!" << std::endl
+              << "After starting try to push the robot and see how it reacts." << std::endl
               << "Press Enter to continue..." << std::endl;
     std::cin.ignore();
     robot.control(impedance_control_callback);
