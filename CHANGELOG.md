@@ -13,6 +13,7 @@
   * Added additional variables to installed CMake config
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation
+  * **BREAKING** Changed signatures and added overloads in `franka::Model`
 
 ## 0.2.0 - 2018-01-29
 
@@ -30,7 +31,6 @@ Requires Panda system version >= 1.1.0
   * Added `setFilter` command to `franka::Robot`
   * Added support for commanding elbow positions for Cartesian motions.
   * Added stiffness frame `K` to `franka::Model`
-  * **BREAKING** Changed signatures and added overloads in `franka::Model`
   * **BREAKING** Replaced `p_min` and `p_max` of `franka::VirtualWallCuboid` with `object_world_size`
 
 ### Error handling
