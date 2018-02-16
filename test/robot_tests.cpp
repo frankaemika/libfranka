@@ -153,7 +153,7 @@ TEST(Robot, CanControlRobot) {
   // Receive the robot commands sent in the motion loop.
   for (int i = 0; i < count - 1; i++) {
     server
-        .onReceiveRobotCommand([&](const robot::RobotCommand& robot_command) {
+        .onReceiveRobotCommand([=](const robot::RobotCommand& robot_command) {
           EXPECT_EQ(joint_positions.q, robot_command.motion.q_d);
           EXPECT_FALSE(robot_command.motion.motion_generation_finished);
           EXPECT_LT(robot_command.message_id, stopped_message_id);
@@ -165,7 +165,7 @@ TEST(Robot, CanControlRobot) {
   // These will be sent at least once and until Robot received the robot state showing the stopped
   // motion.
   server
-      .onReceiveRobotCommand([&](const robot::RobotCommand& robot_command) {
+      .onReceiveRobotCommand([=](const robot::RobotCommand& robot_command) {
         EXPECT_TRUE(robot_command.motion.motion_generation_finished);
         EXPECT_LT(robot_command.message_id, stopped_message_id);
       })
