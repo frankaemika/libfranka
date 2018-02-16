@@ -53,8 +53,7 @@ int main(int argc, char** argv) {
 
     Eigen::VectorXd initial_tau_ext(7), tau_error_integral(7);
     // Bias torque sensor
-    std::array<double, 7> gravity_array =
-        model.gravity(initial_state, initial_state.m_total, initial_state.F_x_Ctotal);
+    std::array<double, 7> gravity_array = model.gravity(initial_state);
     Eigen::Map<Eigen::Matrix<double, 7, 1> > initial_tau_measured(initial_state.tau_J.data());
     Eigen::Map<Eigen::Matrix<double, 7, 1> > initial_gravity(gravity_array.data());
     initial_tau_ext = initial_tau_measured - initial_gravity;

@@ -68,8 +68,7 @@ int main(int argc, char** argv) {
         impedance_control_callback = [&](const franka::RobotState& robot_state,
                                          franka::Duration /*duration*/) -> franka::Torques {
       // get state variables
-      std::array<double, 7> coriolis_array = model.coriolis(
-          robot_state, robot_state.I_total, robot_state.m_total, robot_state.F_x_Ctotal);
+      std::array<double, 7> coriolis_array = model.coriolis(robot_state);
       std::array<double, 42> jacobian_array =
           model.zeroJacobian(franka::Frame::kEndEffector, robot_state);
 
