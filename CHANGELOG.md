@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.1 - UNRELEASED
+## 0.3.0 - UNRELEASED
+
+Requires Panda system version >= 1.1.0
 
 ### Examples
 
@@ -10,6 +12,7 @@
 
 ### Library
 
+  * **BREAKING** Changed signatures and added overloads in `franka::Model`
   * Added additional variables to installed CMake config
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation

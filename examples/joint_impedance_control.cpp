@@ -180,8 +180,7 @@ int main(int argc, char** argv) {
         impedance_control_callback = [&print_data, &model, k_gains, d_gains](
             const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
       // Read current coriolis terms from model.
-      std::array<double, 7> coriolis =
-          model.coriolis(state, state.I_total, state.m_total, state.F_x_Ctotal);
+      std::array<double, 7> coriolis = model.coriolis(state);
 
       // Compute torque command from joint impedance control law.
       // Note: The answer to our Cartesian pose inverse kinematics is always in state.q_d with one
@@ -200,7 +199,7 @@ int main(int argc, char** argv) {
         print_data.has_data = true;
         print_data.robot_state = state;
         print_data.tau_d_last = tau_d_saturated;
-        print_data.gravity = model.gravity(state, state.m_total, state.F_x_Ctotal);
+        print_data.gravity = model.gravity(state);
         print_data.mutex.unlock();
       }
 
