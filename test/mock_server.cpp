@@ -212,3 +212,6 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
   commands_.emplace(it, "doForever", callback_wrapper);
   return *this;
 }
+
+template class MockServer<RobotTypes>;
+template class MockServer<GripperTypes>;
