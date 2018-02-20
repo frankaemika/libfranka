@@ -9,6 +9,7 @@
 #include <exception>
 #include <fstream>
 
+#include <franka/command_saturation.h>
 #include <franka/exception.h>
 
 #include "motion_generator_traits.h"
@@ -26,10 +27,12 @@ constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDev
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
-                            ControlCallback control_callback)
+                            ControlCallback control_callback,
+                            const bool saturate)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
-      control_callback_(std::move(control_callback)) {
+      control_callback_(std::move(control_callback)),
+      saturate_(saturate) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -40,8 +43,9 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
-                            MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback)) {
+                            MotionGeneratorCallback motion_callback,
+                            const bool saturate)
+    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), saturate) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
@@ -57,8 +61,9 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
-                            MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, std::move(motion_callback), {}) {
+                            MotionGeneratorCallback motion_callback,
+                            const bool saturate)
+    : ControlLoop(robot, std::move(motion_callback), {}, saturate) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
@@ -115,7 +120,11 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  command->tau_J_d = control_output.tau_J;
+  if (saturate_) {
+    command->tau_J_d = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
+  } else {
+    command->tau_J_d = control_output.tau_J;
+  }
   return !control_output.motion_finished;
 }
 
@@ -124,27 +133,38 @@ bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
                                 franka::Duration time_step,
                                 research_interface::robot::MotionGeneratorCommand* command) {
   T motion_output = motion_callback_(robot_state, time_step);
-  convertMotion(motion_output, command);
+  convertMotion(motion_output, robot_state, command);
   return !motion_output.motion_finished;
 }
 
 template <>
 void ControlLoop<JointPositions>::convertMotion(
     const JointPositions& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->q_d = motion.q;
+  if (saturate_) {
+    command->q_d = limitRate(kMaxJointVel, motion.q, robot_state.q_d);
+  } else {
+    command->q_d = motion.q;
+  }
 }
 
 template <>
 void ControlLoop<JointVelocities>::convertMotion(
     const JointVelocities& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->dq_d = motion.dq;
+  if (saturate_) {
+    command->dq_d = limitRate(kMaxJointAcc, motion.dq, robot_state.dq_d);
+  } else {
+    command->dq_d = motion.dq;
+  }
 }
 
 template <>
 void ControlLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
+    const RobotState& /*robot_state*/,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_d = motion.O_T_EE;
 
@@ -160,6 +180,7 @@ void ControlLoop<CartesianPose>::convertMotion(
 template <>
 void ControlLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
+    const RobotState& /*robot_state*/,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_dP_EE_d = motion.O_dP_EE;
 

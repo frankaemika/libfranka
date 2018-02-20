@@ -130,6 +130,8 @@ class Robot {
    *
    * @param[in] control_callback Callback function providing joint-level torque commands.
    * See @ref callback-docs "here" for more details.
+   * @param[in] saturate Flag for activating saturation of control commands. True by default.
+   * Saturation could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -138,7 +140,8 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
-  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               const bool saturate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint positions.
@@ -150,6 +153,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] saturate Flag for activating saturation of motion generator and control commands.
+   * True by default. Saturation could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -160,7 +165,8 @@ class Robot {
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback);
+      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint velocities.
@@ -172,6 +178,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] saturate Flag for activating saturation of motion generator and control commands.
+   * True by default. Saturation could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -180,9 +188,10 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
-  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               std::function<JointVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback);
+  void control(
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian poses.
@@ -194,6 +203,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] saturate Flag for activating saturation of motion generator and control commands.
+   * True by default. Saturation could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -204,7 +215,8 @@ class Robot {
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback);
+      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
@@ -216,6 +228,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] saturate Flag for activating saturation of motion generator and control commands.
+   * True by default. Saturation could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -226,7 +240,8 @@ class Robot {
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback);
+                   motion_generator_callback,
+               const bool saturate = true);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
@@ -237,6 +252,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] saturate Flag for activating saturation of motion generator commands. True by
+   * default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -247,7 +264,8 @@ class Robot {
    */
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
@@ -258,6 +276,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] saturate Flag for activating saturation of motion generator commands. True by
+   * default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -268,7 +288,8 @@ class Robot {
    */
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
@@ -279,6 +300,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] saturate Flag for activating saturation of motion generator commands. True by
+   * default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -289,7 +312,8 @@ class Robot {
    */
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      const bool saturate = true);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
@@ -300,6 +324,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] saturate Flag for activating saturation of motion generator commands. True by
+   * default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -310,7 +336,8 @@ class Robot {
    */
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+               ControllerMode controller_mode = ControllerMode::kJointImpedance,
+               const bool saturate = true);
 
   /**
    * @}

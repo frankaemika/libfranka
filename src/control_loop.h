@@ -28,17 +28,20 @@ class ControlLoop {
 
   ControlLoop(RobotControl& robot,
               ControlCallback control_callback,
-              MotionGeneratorCallback motion_callback);
+              MotionGeneratorCallback motion_callback,
+              bool saturate = true);
   ControlLoop(RobotControl& robot,
               ControllerMode controller_mode,
-              MotionGeneratorCallback motion_callback);
+              MotionGeneratorCallback motion_callback,
+              bool saturate = true);
 
   void operator()();
 
  protected:
   ControlLoop(RobotControl& robot,
               MotionGeneratorCallback motion_callback,
-              ControlCallback control_callback);
+              ControlCallback control_callback,
+              bool saturate = true);
 
   bool spinControl(const RobotState& robot_state,
                    franka::Duration time_step,
@@ -51,9 +54,12 @@ class ControlLoop {
   RobotControl& robot_;
   const MotionGeneratorCallback motion_callback_;
   const ControlCallback control_callback_;
+  const bool saturate_;
   uint32_t motion_id_ = 0;
 
-  void convertMotion(const T& motion, research_interface::robot::MotionGeneratorCommand* command);
+  void convertMotion(const T& motion,
+                     const RobotState& robot_state,
+                     research_interface::robot::MotionGeneratorCommand* command);
 };
 
 }  // namespace franka

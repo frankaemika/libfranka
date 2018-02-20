@@ -44,6 +44,7 @@ add_subdirectory(common)
 
 ## Library
 add_library(franka SHARED
+  src/command_saturation.cpp
   src/control_loop.cpp
   src/control_types.cpp
   src/duration.cpp

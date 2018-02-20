@@ -230,7 +230,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
 
   typename TestFixture::Loop loop(
       robot, ControllerMode::kJointImpedance,
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   RobotCommand command;
   randomRobotCommand(command);
@@ -258,7 +258,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   RobotCommand command;
   randomRobotCommand(command);
