@@ -13,5 +13,5 @@ if(NOT TARGET Franka::Franka)
 endif()
 
 # It is recommended to use target_link_libraries(<target> Franka::Franka) instead.
-get_target_property(Franka_LIBRARIES Franka::Franka LOCATION)
+set(Franka_LIBRARIES Franka::Franka)
 get_target_property(Franka_INCLUDE_DIRS Franka::Franka INTERFACE_INCLUDE_DIRECTORIES)

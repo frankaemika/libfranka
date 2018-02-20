@@ -14,6 +14,7 @@ Requires Panda system version >= 1.1.0
 
   * **BREAKING** Changed signatures and added overloads in `franka::Model`
   * Added additional variables to installed CMake config
+  * Updated `SOVERSION` to include minor version number
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation
   * Fixed build errors on Clang 5.0
