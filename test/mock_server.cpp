@@ -17,7 +17,7 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
       initialized_{false},
       sequence_number_{sequence_number},
       on_connect_{on_connect} {
-  std::unique_lock<std::mutex> lock(command_mutex_);
+  std::unique_lock<std::timed_mutex> lock(command_mutex_);
   server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 
   cv_.wait(lock, [this] { return initialized_; });
@@ -27,12 +27,17 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
 
 template <typename C>
 MockServer<C>::~MockServer() {
-  {
-    std::lock_guard<std::mutex> _(command_mutex_);
+  std::unique_lock<std::timed_mutex> l(command_mutex_, std::defer_lock);
+  // If we can't get the lock, the thread will still be terminated
+  // by its destructor.
+  if (l.try_lock_for(std::chrono::seconds(1))) {
     shutdown_ = true;
+    l.unlock();
+    cv_.notify_one();
+    server_thread_.join();
+  } else {
+    std::cerr << "MockServer: Couldn't terminate the server thread properly." << std::endl;
   }
-  cv_.notify_one();
-  server_thread_.join();
 
   if (!commands_.empty()) {
     std::stringstream ss;
@@ -48,7 +53,7 @@ MockServer<C>::~MockServer() {
 template <typename C>
 MockServer<C>& MockServer<C>::onReceiveRobotCommand(
     ReceiveRobotCommandCallbackT on_receive_robot_command) {
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   commands_.emplace_back("onReceiveRobotCommand", [=](Socket&, Socket& udp_socket) {
     research_interface::robot::RobotCommand robot_command;
     udp_socket.receiveBytes(&robot_command, sizeof(robot_command));
@@ -61,7 +66,7 @@ MockServer<C>& MockServer<C>::onReceiveRobotCommand(
 
 template <typename C>
 MockServer<C>& MockServer<C>::spinOnce() {
-  std::unique_lock<std::mutex> lock(command_mutex_);
+  std::unique_lock<std::timed_mutex> lock(command_mutex_);
   continue_ = true;
   cv_.notify_one();
   if (block_) {
@@ -78,9 +83,9 @@ void MockServer<C>::ignoreUdpBuffer() {
 
 template <typename C>
 void MockServer<C>::serverThread() {
-  std::unique_lock<std::mutex> lock(command_mutex_);
+  std::unique_lock<std::timed_mutex> lock(command_mutex_);
 
-  const std::string kHostname = "localhost";
+  constexpr const char* kHostname = "127.0.0.1";
   Poco::Net::ServerSocket srv;
   srv.bind({kHostname, C::kCommandPort}, true);
   srv.listen();
@@ -89,6 +94,10 @@ void MockServer<C>::serverThread() {
 
   cv_.notify_one();
   cv_.wait(lock, [this] { return continue_; });
+
+  if (shutdown_) {
+    return;
+  }
 
   Poco::Net::SocketAddress remote_address;
   Poco::Net::StreamSocket tcp_socket = srv.acceptConnection(remote_address);
@@ -163,7 +172,7 @@ void MockServer<C>::serverThread() {
 template <typename C>
 MockServer<C>& MockServer<C>::generic(
     std::function<void(MockServer<C>::Socket&, MockServer<C>::Socket&)> generic_command) {
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   commands_.emplace_back("generic", generic_command);
   return *this;
 }
@@ -180,7 +189,7 @@ void MockServer<RobotTypes>::sendInitialState(Socket& udp_socket) {
 
 template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   return doForever(callback, commands_.end());
 }
 
@@ -188,7 +197,7 @@ template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
                                         typename decltype(MockServer<C>::commands_)::iterator it) {
   auto callback_wrapper = [=](Socket&, Socket&) {
-    std::unique_lock<std::mutex> lock(command_mutex_);
+    std::unique_lock<std::timed_mutex> lock(command_mutex_);
     if (shutdown_) {
       return;
     }
@@ -212,3 +221,6 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
   commands_.emplace(it, "doForever", callback_wrapper);
   return *this;
 }
+
+template class MockServer<RobotTypes>;
+template class MockServer<GripperTypes>;

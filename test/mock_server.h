@@ -100,8 +100,8 @@ class MockServer {
   template <typename T>
   MockServer& onSendUDP(std::function<T()> on_send_udp);
 
-  std::condition_variable cv_;
-  std::mutex command_mutex_;
+  std::condition_variable_any cv_;
+  std::timed_mutex command_mutex_;
   std::mutex tcp_mutex_;
   std::mutex udp_mutex_;
   std::thread server_thread_;
@@ -125,7 +125,7 @@ MockServer<C>& MockServer<C>::sendResponse(const uint32_t& command_id,
                                            std::function<typename T::Response()> create_response) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   block_ = true;
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &command_id](Socket& tcp_socket, Socket&) {
@@ -143,7 +143,7 @@ MockServer<C>& MockServer<C>::queueResponse(const uint32_t& command_id,
                                             std::function<typename T::Response()> create_response) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &command_id](Socket& tcp_socket, Socket&) {
                            typename T::template Message<typename T::Response> message(
@@ -176,7 +176,7 @@ MockServer<C>& MockServer<C>::sendRandomState(std::function<void(T&)> random_gen
 template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::onSendUDP(std::function<T()> on_send_udp) {
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   commands_.emplace_back("onSendUDP", [=](Socket&, Socket& udp_socket) {
     T state = on_send_udp();
     udp_socket.sendBytes(&state, sizeof(state));
@@ -243,7 +243,7 @@ MockServer<C>& MockServer<C>::waitForCommand(
     uint32_t* command_id) {
   using namespace std::string_literals;
 
-  std::lock_guard<std::mutex> _(command_mutex_);
+  std::lock_guard<std::timed_mutex> _(command_mutex_);
   std::string name = "waitForCommand<"s + typeid(typename T::Request).name() + ", " +
                      typeid(typename T::Response).name();
   commands_.emplace_back(name, [this, callback, command_id](Socket& tcp_socket, Socket&) {
@@ -251,9 +251,6 @@ MockServer<C>& MockServer<C>::waitForCommand(
   });
   return *this;
 }
-
-template class MockServer<RobotTypes>;
-template class MockServer<GripperTypes>;
 
 using RobotMockServer = MockServer<RobotTypes>;
 using GripperMockServer = MockServer<GripperTypes>;
