@@ -9,6 +9,7 @@
 #include <mutex>
 #include <thread>
 
+#include <franka/command_saturation.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
@@ -192,7 +193,7 @@ int main(int argc, char** argv) {
       }
 
       std::array<double, 7> tau_d_saturated =
-          limitRate(kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
+          franka::limitRate(franka::kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
@@ -208,7 +209,7 @@ int main(int argc, char** argv) {
     };
 
     // Start real-time control loop.
-    robot.control(impedance_control_callback, cartesian_pose_callback);
+    robot.control(impedance_control_callback, cartesian_pose_callback, false);
 
   } catch (const franka::Exception& ex) {
     running = false;

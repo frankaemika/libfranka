@@ -45,30 +45,21 @@ int main(int argc, char** argv) {
     double time_max = 1.0;
     double omega_max = 1.0;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState& state,
-                             franka::Duration period) -> franka::JointVelocities {
-      time += period.toSec();
+    robot.control(
+        [=, &time](const franka::RobotState&, franka::Duration period) -> franka::JointVelocities {
+          time += period.toSec();
 
-      double cycle = std::floor(std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
-      double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
+          double cycle = std::floor(std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
+          double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
 
-      franka::JointVelocities velocities = {{0.0, 0.0, 0.0, omega, omega, omega, omega}};
+          franka::JointVelocities velocities = {{0.0, 0.0, 0.0, omega, omega, omega, omega}};
 
-      if (time >= 2 * time_max) {
-        std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(velocities);
-      }
-      // state.q_d contains the last joint velocity command received by the robot.
-      // In case of packet loss due to bad connection or due to a slow control loop
-      // not reaching the 1kHz rate, even if your desired velocity trajectory
-      // is smooth, discontinuities might occur.
-      // Saturating the acceleration computed with respect to the last command received
-      // by the robot will prevent from getting discontinuity errors (but will distort
-      // your motion!).
-      // Note that if the robot does not receive a command it will try to extrapolate
-      // the desired behavior assuming a constant acceleration model
-      return limitRate(kMaxJointAcc, velocities.dq, state.dq_d);
-    });
+          if (time >= 2 * time_max) {
+            std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+            return franka::MotionFinished(velocities);
+          }
+          return velocities;
+        });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

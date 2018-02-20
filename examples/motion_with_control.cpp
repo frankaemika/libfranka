@@ -48,7 +48,7 @@ class Controller {
     for (size_t i = 0; i < 7; i++) {
       tau_J_d[i] = K_P_[i] * (state.q_d[i] - state.q[i]) + K_D_[i] * (dq_d_[i] - getDQFiltered(i));
     }
-    return limitRate(kMaxTorqueRate, tau_J_d, state.tau_J_d);
+    return tau_J_d;
   }
 
   void updateDQFilter(const franka::RobotState& state) {

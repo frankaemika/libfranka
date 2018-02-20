@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_cmd;
-      return limitRate(kMaxTorqueRate, tau_d_array, robot_state.tau_J_d);
+      return tau_d_array;
     };
     std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
                  "joint is "
