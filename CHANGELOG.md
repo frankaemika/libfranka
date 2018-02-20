@@ -16,6 +16,8 @@ Requires Panda system version >= 1.1.0
   * Added additional variables to installed CMake config
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation
+  * Fixed build errors on Clang 5.0
+  * Fixed test errors for Poco >= 1.8.0
 
 ## 0.2.0 - 2018-01-29
 

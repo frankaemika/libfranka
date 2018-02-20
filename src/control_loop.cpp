@@ -20,11 +20,6 @@ using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
 namespace franka {
 
-template class ControlLoop<JointPositions>;
-template class ControlLoop<JointVelocities>;
-template class ControlLoop<CartesianPose>;
-template class ControlLoop<CartesianVelocities>;
-
 template <typename T>
 constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDeviation;
 
@@ -199,5 +194,10 @@ bool hasRealtimeKernel() {
   realtime >> is_realtime;
   return is_realtime;
 }
+
+template class ControlLoop<JointPositions>;
+template class ControlLoop<JointVelocities>;
+template class ControlLoop<CartesianPose>;
+template class ControlLoop<CartesianVelocities>;
 
 }  // namespace franka
