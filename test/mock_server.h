@@ -252,8 +252,5 @@ MockServer<C>& MockServer<C>::waitForCommand(
   return *this;
 }
 
-template class MockServer<RobotTypes>;
-template class MockServer<GripperTypes>;
-
 using RobotMockServer = MockServer<RobotTypes>;
 using GripperMockServer = MockServer<GripperTypes>;

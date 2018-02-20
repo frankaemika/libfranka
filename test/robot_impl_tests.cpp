@@ -416,43 +416,45 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
 
   uint32_t move_id;
 
-  RobotMockServer server;
-  Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort), 0);
-
   std::atomic_flag send = ATOMIC_FLAG_INIT;
   send.test_and_set();
 
-  server
-      .onSendUDP<RobotState>([=](RobotState& robot_state) {
-        robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
-        robot_state.controller_mode = ControllerMode::kCartesianImpedance;
-        robot_state.robot_mode = RobotMode::kMove;
-      })
-      .spinOnce()
-      .waitForCommand<Move>(
-          [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
-          &move_id)
-      .queueResponse<Move>(
-          move_id, []() { return Move::Response(Move::Status::kCommandNotPossibleRejected); })
-      .doForever([&]() {
-        bool continue_sending = send.test_and_set();
-        if (continue_sending) {
-          server.onSendUDP<RobotState>([](RobotState& robot_state) {
-            robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
-            robot_state.controller_mode = ControllerMode::kCartesianImpedance;
-            robot_state.robot_mode = RobotMode::kIdle;
-          });
-        }
-        return continue_sending;
-      })
-      .spinOnce();
+  {
+    RobotMockServer server;
+    Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort), 0);
 
-  EXPECT_THROW(robot.startMotion(Move::ControllerMode::kCartesianImpedance,
-                                 Move::MotionGeneratorMode::kCartesianVelocity,
-                                 maximum_path_deviation, maximum_goal_pose_deviation),
-               ControlException);
-  send.clear();
-  EXPECT_FALSE(robot.motionGeneratorRunning());
+    server
+        .onSendUDP<RobotState>([=](RobotState& robot_state) {
+          robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+          robot_state.controller_mode = ControllerMode::kCartesianImpedance;
+          robot_state.robot_mode = RobotMode::kMove;
+        })
+        .spinOnce()
+        .waitForCommand<Move>(
+            [&](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); },
+            &move_id)
+        .queueResponse<Move>(
+            move_id, []() { return Move::Response(Move::Status::kCommandNotPossibleRejected); })
+        .doForever([&]() {
+          bool continue_sending = send.test_and_set();
+          if (continue_sending) {
+            server.onSendUDP<RobotState>([](RobotState& robot_state) {
+              robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
+              robot_state.controller_mode = ControllerMode::kCartesianImpedance;
+              robot_state.robot_mode = RobotMode::kIdle;
+            });
+          }
+          return continue_sending;
+        })
+        .spinOnce();
+
+    EXPECT_THROW(robot.startMotion(Move::ControllerMode::kCartesianImpedance,
+                                   Move::MotionGeneratorMode::kCartesianVelocity,
+                                   maximum_path_deviation, maximum_goal_pose_deviation),
+                 ControlException);
+    send.clear();
+    EXPECT_FALSE(robot.motionGeneratorRunning());
+  }
 }
 
 TEST(RobotImpl, CanStopMotion) {
