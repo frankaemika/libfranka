@@ -94,6 +94,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.K_F_ext_hat_K) {
     EXPECT_EQ(0.0, element);
   }
+  for (double element : actual.O_dP_EE_d) {
+    EXPECT_EQ(0.0, element);
+  }
   for (double element : actual.theta) {
     EXPECT_EQ(0.0, element);
   }
@@ -136,6 +139,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
@@ -181,6 +185,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
@@ -305,6 +310,9 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.K_F_ext_hat_K) {
     element = randomDouble();
   }
+  for (double& element : robot_state.O_dP_EE_d) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.theta) {
     element = randomDouble();
   }
@@ -396,6 +404,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.K_F_ext_hat_K) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_dP_EE_d) {
     element = randomDouble();
   }
   for (double& element : robot_state.theta) {

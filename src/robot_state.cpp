@@ -70,7 +70,8 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"tau_ext_hat_filtered\": " << robot_state.tau_ext_hat_filtered
           << ", \"O_F_ext_hat_K\": " << robot_state.O_F_ext_hat_K
           << ", \"K_F_ext_hat_K\": " << robot_state.K_F_ext_hat_K
-          << ", \"theta\": " << robot_state.theta << ", \"dtheta\": " << robot_state.dtheta
+          << ", \"O_dP_EE_d\": " << robot_state.O_dP_EE_d << ", \"theta\": " << robot_state.theta
+          << ", \"dtheta\": " << robot_state.dtheta
           << ", \"current_errors\": " << robot_state.current_errors
           << ", \"last_motion_errors\": " << robot_state.last_motion_errors
           << ", \"control_command_success_rate\": " << robot_state.control_command_success_rate

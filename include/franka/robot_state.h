@@ -227,6 +227,13 @@ struct RobotState {
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f${^OdP_{EE}}_{d}\f$
+   * Velocity of translation and rotation in cartesian space.
+   * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
+   */
+  std::array<double, 6> O_dP_EE_d{};  // NOLINT (readability-identifier-naming)
+
+  /**
    * \f$\theta\f$
    * Motor position. Unit: \f$[rad]\f$
    */
