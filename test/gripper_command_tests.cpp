@@ -42,8 +42,10 @@ bool GripperCommand<T>::compare(const typename T::Request&, const typename T::Re
 template <>
 bool GripperCommand<Grasp>::compare(const Grasp::Request& request_one,
                                     const Grasp::Request& request_two) {
-  return request_one.width == request_two.width && request_one.speed == request_two.speed &&
-         request_one.force == request_two.force;
+  return request_one.width == request_two.width &&
+         request_one.epsilon.inner == request_two.epsilon.inner &&
+         request_one.epsilon.outer == request_two.epsilon.outer &&
+         request_one.speed == request_two.speed && request_one.force == request_two.force;
 }
 
 template <>
@@ -67,9 +69,11 @@ Move::Request GripperCommand<Move>::getExpected() {
 template <>
 Grasp::Request GripperCommand<Grasp>::getExpected() {
   double width = 0.05;
+  double epsilon_inner = 0.004;
+  double epsilon_outer = 0.005;
   double speed = 0.1;
   double force = 400.0;
-  return Grasp::Request(width, speed, force);
+  return Grasp::Request(width, {epsilon_inner, epsilon_outer}, speed, force);
 }
 
 template <>
@@ -82,9 +86,11 @@ bool GripperCommand<Move>::executeCommand(Gripper& gripper) {
 template <>
 bool GripperCommand<Grasp>::executeCommand(Gripper& gripper) {
   double width = 0.05;
+  double epsilon_inner = 0.004;
+  double epsilon_outer = 0.005;
   double speed = 0.1;
   double force = 400.0;
-  return gripper.grasp(width, speed, force);
+  return gripper.grasp(width, speed, force, epsilon_inner, epsilon_outer);
 }
 
 template <>

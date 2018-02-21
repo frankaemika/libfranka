@@ -2,7 +2,11 @@
 
 ## 0.3.0 - UNRELEASED
 
-Requires Panda system version >= 1.1.0
+Requires Panda system version >= 1.2.0
+
+### Motion and control interfaces
+
+  * Added optional `epsilon` parameters to `franka::Gripper::grasp`
 
 ### Examples
 
