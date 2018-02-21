@@ -64,47 +64,56 @@ struct RobotState {
   std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$m_{EE}\f$
    * Configured mass of the end effector.
    */
   double m_ee{};
 
   /**
+   * \f$I_{EE}\f$
    * Configured rotational inertia matrix of the end effector load with respect to center of mass.
    */
   std::array<double, 9> I_ee{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{EE}}\f$
    * Configured center of mass of the end effector load with respect to flange frame.
    */
   std::array<double, 3> F_x_Cee{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$m_{load}\f$
    * Configured mass of the external load.
    */
   double m_load{};
 
   /**
+   * \f$I_{load}\f$
    * Configured rotational inertia matrix of the external load with respect to center of mass.
    */
   std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{load}}\f$
    * Configured center of mass of the external load with respect to flange frame.
    */
   std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$m_{total}\f$
    * Sum of the mass of the end effector and the external load.
    */
   double m_total{};
 
   /**
+   * \f$I_{total}\f$
    * Combined rotational inertia matrix of the end effector load and the external load with respect
    * to the center of mass.
    */
   std::array<double, 9> I_total{};  // NOLINT (readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{total}}\f$
    * Combined center of mass of the end effector load and the external load with respect to flange
    * frame.
    */
@@ -228,7 +237,7 @@ struct RobotState {
 
   /**
    * \f${^OdP_{EE}}_{d}\f$
-   * Velocity of translation and rotation in cartesian space.
+   * Desired end effector twist in base frame.
    * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
    */
   std::array<double, 6> O_dP_EE_d{};  // NOLINT (readability-identifier-naming)
