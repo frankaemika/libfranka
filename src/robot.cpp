@@ -39,7 +39,7 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
 }
 
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-                    const bool saturate) {
+                    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -51,14 +51,14 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
                                     [](const RobotState&, Duration) -> JointVelocities {
                                       return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
                                     },
-                                    saturate);
+                                    limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<Torques(const RobotState&, franka::Duration)> control_callback,
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -67,14 +67,14 @@ void Robot::control(
   }
 
   ControlLoop<JointPositions> loop(*impl_, std::move(control_callback),
-                                   std::move(motion_generator_callback), saturate);
+                                   std::move(motion_generator_callback), limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<Torques(const RobotState&, franka::Duration)> control_callback,
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -83,14 +83,14 @@ void Robot::control(
   }
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                    std::move(motion_generator_callback), saturate);
+                                    std::move(motion_generator_callback), limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<Torques(const RobotState&, franka::Duration)> control_callback,
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -99,14 +99,14 @@ void Robot::control(
   }
 
   ControlLoop<CartesianPose> loop(*impl_, std::move(control_callback),
-                                  std::move(motion_generator_callback), saturate);
+                                  std::move(motion_generator_callback), limit_rate);
   loop();
 }
 
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                     std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                         motion_generator_callback,
-                    const bool saturate) {
+                    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -115,14 +115,14 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   }
 
   ControlLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
-                                        std::move(motion_generator_callback), saturate);
+                                        std::move(motion_generator_callback), limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -131,14 +131,14 @@ void Robot::control(
   }
 
   ControlLoop<JointPositions> loop(*impl_, controller_mode, std::move(motion_generator_callback),
-                                   saturate);
+                                   limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -147,14 +147,14 @@ void Robot::control(
   }
 
   ControlLoop<JointVelocities> loop(*impl_, controller_mode, std::move(motion_generator_callback),
-                                    saturate);
+                                    limit_rate);
   loop();
 }
 
 void Robot::control(
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
     ControllerMode controller_mode,
-    const bool saturate) {
+    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -163,14 +163,14 @@ void Robot::control(
   }
 
   ControlLoop<CartesianPose> loop(*impl_, controller_mode, std::move(motion_generator_callback),
-                                  saturate);
+                                  limit_rate);
   loop();
 }
 
 void Robot::control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                         motion_generator_callback,
                     ControllerMode controller_mode,
-                    const bool saturate) {
+                    const bool limit_rate) {
   std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
   if (!l.owns_lock()) {
     throw InvalidOperationException(
@@ -179,7 +179,7 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&, franka:
   }
 
   ControlLoop<CartesianVelocities> loop(*impl_, controller_mode,
-                                        std::move(motion_generator_callback), saturate);
+                                        std::move(motion_generator_callback), limit_rate);
   loop();
 }
 

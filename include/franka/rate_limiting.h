@@ -5,8 +5,8 @@
 #include <array>
 
 /**
- * @file command_types.h
- * Contains functions for saturating torque, cartesian and joint pose and velocity.
+ * @file rate_limiting.h
+ * Contains functions for limiting the rate of torques, Cartesian and joint pose and velocity.
  */
 
 namespace franka {
@@ -44,5 +44,19 @@ constexpr std::array<double, 7> kMaxJointAcc{
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& desired_values,
                                 const std::array<double, 7>& last_desired_values);
+
+/**
+ * Limits the rate of an input vector of Cartesian velocities considering the maximum allowed time
+ * derivatives.
+ *
+ * @param[in] max_derivatives Maximum allowed time derivative.
+ * @param[in] desired_values Desired values of the current time step.
+ * @param[in] last_desired_values Desired values of the previous time step.
+ *
+ * @return Rate-limited vector of desired values.
+ */
+std::array<double, 6> limitRate(const std::array<double, 6>& max_derivatives,
+                                const std::array<double, 6>& desired_values,
+                                const std::array<double, 6>& last_desired_values);
 
 }  // namespace franka

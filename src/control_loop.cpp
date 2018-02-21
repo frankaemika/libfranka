@@ -9,8 +9,8 @@
 #include <exception>
 #include <fstream>
 
-#include <franka/command_saturation.h>
 #include <franka/exception.h>
+#include <franka/rate_limiting.h>
 
 #include "motion_generator_traits.h"
 
@@ -28,11 +28,11 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
                             ControlCallback control_callback,
-                            const bool saturate)
+                            const bool limit_rate)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
       control_callback_(std::move(control_callback)),
-      saturate_(saturate) {
+      limit_rate_(limit_rate) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -44,8 +44,8 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
                             MotionGeneratorCallback motion_callback,
-                            const bool saturate)
-    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), saturate) {
+                            const bool limit_rate)
+    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), limit_rate) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
@@ -62,8 +62,8 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
                             MotionGeneratorCallback motion_callback,
-                            const bool saturate)
-    : ControlLoop(robot, std::move(motion_callback), {}, saturate) {
+                            const bool limit_rate)
+    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
@@ -120,7 +120,7 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  if (saturate_) {
+  if (limit_rate_) {
     command->tau_J_d = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
   } else {
     command->tau_J_d = control_output.tau_J;
@@ -142,7 +142,7 @@ void ControlLoop<JointPositions>::convertMotion(
     const JointPositions& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  if (saturate_) {
+  if (limit_rate_) {
     command->q_d = limitRate(kMaxJointVel, motion.q, robot_state.q_d);
   } else {
     command->q_d = motion.q;
@@ -154,7 +154,7 @@ void ControlLoop<JointVelocities>::convertMotion(
     const JointVelocities& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  if (saturate_) {
+  if (limit_rate_) {
     command->dq_d = limitRate(kMaxJointAcc, motion.dq, robot_state.dq_d);
   } else {
     command->dq_d = motion.dq;

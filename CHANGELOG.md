@@ -13,7 +13,7 @@ Requires Panda system version >= 1.1.0
 ### Library
 
   * **BREAKING** Changed signatures and added overloads in `franka::Model`
-  * Added saturation of the commanded values as option in the control loop and as a helper function
+  * Added rate limitation of the commanded values as option in the control loop and as a helper function
   * Added additional variables to installed CMake config
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation

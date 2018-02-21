@@ -9,10 +9,10 @@
 #include <mutex>
 #include <thread>
 
-#include <franka/command_saturation.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
+#include <franka/rate_limiting.h>
 #include <franka/robot.h>
 
 #include "examples_common.h"
@@ -192,20 +192,20 @@ int main(int argc, char** argv) {
             k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
       }
 
-      std::array<double, 7> tau_d_saturated =
+      std::array<double, 7> tau_d_rate_limited =
           franka::limitRate(franka::kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
         print_data.has_data = true;
         print_data.robot_state = state;
-        print_data.tau_d_last = tau_d_saturated;
+        print_data.tau_d_last = tau_d_rate_limited;
         print_data.gravity = model.gravity(state);
         print_data.mutex.unlock();
       }
 
       // Send torque command.
-      return tau_d_saturated;
+      return tau_d_rate_limited;
     };
 
     // Start real-time control loop.
