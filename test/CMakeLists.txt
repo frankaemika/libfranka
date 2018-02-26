@@ -42,6 +42,7 @@ add_executable(run_all_tests
   logger_tests.cpp
   mock_server.cpp
   model_tests.cpp
+  rate_limiting_tests.cpp
   robot_command_tests.cpp
   robot_impl_tests.cpp
   robot_state_tests.cpp
