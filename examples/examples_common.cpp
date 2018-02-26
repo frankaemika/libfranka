@@ -17,7 +17,7 @@ void setDefaultBehavior(franka::Robot& robot) {
       {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
   robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
   robot.setCartesianImpedance({{3000, 3000, 3000, 300, 300, 300}});
-  robot.setFilters(100, 100, 100, 100, 100);
+  robot.setFilters(1000, 1000, 1000, 1000, 1000);
 }
 
 MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal)

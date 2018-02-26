@@ -143,7 +143,8 @@ void ControlLoop<JointPositions>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->q_d = limitRate(kMaxJointVel, motion.q, robot_state.q_d);
+    command->q_d = limitRate(kMaxJointVelocity, kMaxJointAcceleration, motion.q, robot_state.q_d,
+                             robot_state.dq_d);
   } else {
     command->q_d = motion.q;
   }
@@ -155,7 +156,8 @@ void ControlLoop<JointVelocities>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->dq_d = limitRate(kMaxJointAcc, motion.dq, robot_state.dq_d);
+    command->dq_d =
+        limitRate(kMaxJointVelocity, kMaxJointAcceleration, motion.dq, robot_state.dq_d);
   } else {
     command->dq_d = motion.dq;
   }
@@ -164,9 +166,15 @@ void ControlLoop<JointVelocities>::convertMotion(
 template <>
 void ControlLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
-    const RobotState& /*robot_state*/,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->O_T_EE_d = motion.O_T_EE;
+  if (limit_rate_) {
+    command->O_T_EE_d = limitRate(kMaxTranslationalVelocity, kMaxTranslationalAcceleration,
+                                  kMaxRotationalVelocity, kMaxRotationalAcceleration, motion.O_T_EE,
+                                  robot_state.O_T_EE_d, robot_state.O_dP_EE_d);
+  } else {
+    command->O_T_EE_d = motion.O_T_EE;
+  }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
@@ -180,9 +188,15 @@ void ControlLoop<CartesianPose>::convertMotion(
 template <>
 void ControlLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
-    const RobotState& /*robot_state*/,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->O_dP_EE_d = motion.O_dP_EE;
+  if (limit_rate_) {
+    command->O_dP_EE_d =
+        limitRate(kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxRotationalVelocity,
+                  kMaxRotationalAcceleration, motion.O_dP_EE, robot_state.O_dP_EE_d);
+  } else {
+    command->O_dP_EE_d = motion.O_dP_EE;
+  }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
