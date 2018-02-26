@@ -141,7 +141,7 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               const bool limit_rate = true);
+               bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint positions.
@@ -166,7 +166,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint velocities.
@@ -191,7 +191,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian poses.
@@ -216,7 +216,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
@@ -241,7 +241,7 @@ class Robot {
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               const bool limit_rate = true);
+               bool limit_rate = true);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
@@ -265,7 +265,7 @@ class Robot {
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
@@ -289,7 +289,7 @@ class Robot {
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
@@ -313,7 +313,7 @@ class Robot {
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      const bool limit_rate = true);
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
@@ -337,7 +337,7 @@ class Robot {
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
                ControllerMode controller_mode = ControllerMode::kJointImpedance,
-               const bool limit_rate = true);
+               bool limit_rate = true);
 
   /**
    * @}
@@ -564,7 +564,7 @@ class Robot {
    * Sets the cut off frequency for the given motion generator or controller.
    * Allowed input range for all the filters is between 1.0 Hz and 1000.0 Hz.
    * If the value is set to maximum (1000Hz) then no filtering is done.
-   * Default value of all filters is 100Hz.
+   * By default all filters are disabled (set to 1000Hz).
    *
    * @param[in] joint_position_filter_frequency Frequency at which the commanded joint
    * position is cut off.

@@ -28,7 +28,7 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
                             ControlCallback control_callback,
-                            const bool limit_rate)
+                            bool limit_rate)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
       control_callback_(std::move(control_callback)),

@@ -168,23 +168,25 @@ TYPED_TEST_CASE(ControlLoops, MotionTypes);
 TYPED_TEST(ControlLoops, CanNotConstructWithoutMotionCallback) {
   StrictMock<MockRobotControl> robot;
 
-  EXPECT_THROW(typename TestFixture::Loop loop(robot,
-                                               [](const RobotState&, Duration) {
-                                                 return Torques({0, 1, 2, 3, 4, 5, 6});
-                                               },
-                                               typename TestFixture::MotionGeneratorCallback()),
-               std::invalid_argument);
+  EXPECT_THROW(
+      typename TestFixture::Loop loop(robot,
+                                      [](const RobotState&, Duration) {
+                                        return Torques({0, 1, 2, 3, 4, 5, 6});
+                                      },
+                                      typename TestFixture::MotionGeneratorCallback(), false),
+      std::invalid_argument);
 
-  EXPECT_THROW(typename TestFixture::Loop loop(robot, ControllerMode::kCartesianImpedance,
-                                               typename TestFixture::MotionGeneratorCallback()),
-               std::invalid_argument);
+  EXPECT_THROW(
+      typename TestFixture::Loop loop(robot, ControllerMode::kCartesianImpedance,
+                                      typename TestFixture::MotionGeneratorCallback(), false),
+      std::invalid_argument);
 }
 
 TYPED_TEST(ControlLoops, CanNotConstructWithoutControlCallback) {
   StrictMock<MockRobotControl> robot;
 
   EXPECT_THROW(typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
-                                               std::bind(&TestFixture::createMotion, this)),
+                                               std::bind(&TestFixture::createMotion, this), false),
                std::invalid_argument);
 }
 
@@ -199,7 +201,7 @@ TYPED_TEST(ControlLoops, CanConstructWithMotionAndControllerCallback) {
                                              [](const RobotState&, Duration) {
                                                return Torques({0, 1, 2, 3, 4, 5, 6});
                                              },
-                                             std::bind(&TestFixture::createMotion, this)));
+                                             std::bind(&TestFixture::createMotion, this), false));
 }
 
 TYPED_TEST(ControlLoops, CanConstructWithMotionCallbackAndControllerMode) {
@@ -210,7 +212,7 @@ TYPED_TEST(ControlLoops, CanConstructWithMotionCallbackAndControllerMode) {
       .WillOnce(Return(200));
 
   EXPECT_NO_THROW(typename TestFixture::Loop(robot, ControllerMode::kCartesianImpedance,
-                                             std::bind(&TestFixture::createMotion, this)));
+                                             std::bind(&TestFixture::createMotion, this), false));
 }
 
 TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
@@ -291,7 +293,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   ControllerCommand control_command{};
   EXPECT_TRUE(loop.spinControl(robot_state, duration, &control_command));
@@ -331,7 +333,7 @@ TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallback) {
   try {
     typename TestFixture::Loop loop(
         robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
     loop();
   } catch (const std::domain_error&) {
@@ -358,7 +360,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
 
   typename TestFixture::Loop loop(
       robot, ControllerMode::kCartesianImpedance,
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   // Use ASSERT to abort on failure because loop() in next line would block otherwise.
   MotionGeneratorCommand motion_command{};
@@ -389,7 +391,7 @@ TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallbackAndControllerMode) {
   try {
     typename TestFixture::Loop loop(
         robot, ControllerMode::kJointImpedance,
-        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
     loop();
   } catch (const std::domain_error&) {
@@ -420,7 +422,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   MotionGeneratorCommand motion_command{};
   EXPECT_TRUE(loop.spinMotion(robot_state, duration, &motion_command));
@@ -459,7 +461,7 @@ TYPED_TEST(ControlLoops, LoopWithThrowingControlCallback) {
   try {
     typename TestFixture::Loop loop(
         robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+        std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
     loop();
   } catch (const std::domain_error&) {
@@ -500,7 +502,7 @@ TYPED_TEST(ControlLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback)
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
   loop();
 }
 
@@ -539,7 +541,7 @@ TYPED_TEST(ControlLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) 
 
   typename TestFixture::Loop loop(
       robot, std::bind(&MockControlCallback::invoke, &control_callback, _1, _2),
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
   loop();
 }
 
@@ -574,7 +576,7 @@ TYPED_TEST(ControlLoops, GetsCorrectTimeStepWithMotionCallback) {
 
   typename TestFixture::Loop loop(
       robot, ControllerMode::kJointImpedance,
-      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2));
+      std::bind(&decltype(motion_callback)::invoke, &motion_callback, _1, _2), false);
 
   loop();
 }
