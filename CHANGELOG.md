@@ -13,7 +13,11 @@ Requires Panda system version >= 1.1.0
 ### Library
 
   * **BREAKING** Changed signatures and added overloads in `franka::Model`
-  * Added rate limitation of the commanded values as option in the control loop and as a helper function
+  * **BREAKING** Added rate limitation of the commanded values as option in the control loop and as
+    a helper function. Rate limitation is activated by default, this could change the behavior of
+    existing programs.
+  * **BREAKING** Set the FCI filters default value to 1000. This could change the behavior of
+    existing programs.
   * Added additional variables to installed CMake config
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation

@@ -44,7 +44,6 @@ add_subdirectory(common)
 
 ## Library
 add_library(franka SHARED
-  src/rate_limiting.cpp
   src/control_loop.cpp
   src/control_types.cpp
   src/duration.cpp
@@ -60,6 +59,7 @@ add_library(franka SHARED
   src/model.cpp
   src/model_library.cpp
   src/network.cpp
+  src/rate_limiting.cpp
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp

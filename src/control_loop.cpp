@@ -44,7 +44,7 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
                             MotionGeneratorCallback motion_callback,
-                            const bool limit_rate)
+                            bool limit_rate)
     : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), limit_rate) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
@@ -62,7 +62,7 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
                             MotionGeneratorCallback motion_callback,
-                            const bool limit_rate)
+                            bool limit_rate)
     : ControlLoop(robot, std::move(motion_callback), {}, limit_rate) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
