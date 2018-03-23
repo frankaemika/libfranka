@@ -68,7 +68,7 @@ add_library(Franka::Franka ALIAS franka)
 
 set_target_properties(franka PROPERTIES
   VERSION ${libfranka_VERSION}
-  SOVERSION ${libfranka_VERSION_MAJOR}
+  SOVERSION ${libfranka_VERSION_MAJOR}.${libfranka_VERSION_MINOR} # Use minor version while we're at 0.x
   EXPORT_NAME Franka
 )
 

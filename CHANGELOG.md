@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 0.3.0 - UNRELEASED
+## 0.3.0 - 2018-02-22
 
-Requires Panda system version >= 1.1.0
+Requires Panda system version >= 1.2.0
+
+### Motion and control interfaces
+
+  * Added optional `epsilon` parameters to `franka::Gripper::grasp`
 
 ### Examples
 
@@ -19,6 +23,7 @@ Requires Panda system version >= 1.1.0
   * **BREAKING** Set the FCI filters default value to 1000. This could change the behavior of
     existing programs.
   * Added additional variables to installed CMake config
+  * Updated `SOVERSION` to include minor version number
   * Added conflict with `ros-kinetic-libfranka` to Debian packaging
   * Minor fixes and improvements for API documentation
   * Fixed build errors on Clang 5.0
