@@ -45,11 +45,16 @@ class Command : public ::testing::Test {
 };
 
 template <typename T>
-class SetterCommand : public Command<T> {};
+class GetterSetterCommand : public Command<T> {};
 
 class MoveCommand : public Command<research_interface::robot::Move>,
                     public ::testing::WithParamInterface<research_interface::robot::Move::Status> {
 };
+
+class AutomaticErrorRecoveryCommand
+    : public Command<research_interface::robot::AutomaticErrorRecovery>,
+      public ::testing::WithParamInterface<
+          research_interface::robot::AutomaticErrorRecovery::Status> {};
 
 template <typename T>
 typename T::Status Command<T>::getSuccess() {
@@ -318,8 +323,7 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
 
   server
       .waitForCommand<typename TestFixture::TCommand>(
-          [ this, invalid_value ](const typename TestFixture::TCommand::Request& request) ->
-          typename TestFixture::TCommand::Response {
+          [this, invalid_value](const typename TestFixture::TCommand::Request& request) {
             EXPECT_TRUE(this->compare(request, this->getExpected()));
             return this->createResponse(request, invalid_value);
           })
@@ -328,17 +332,31 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
   EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
 }
 
-using SetterCommandTypes = ::testing::Types<SetCollisionBehavior,
-                                            SetJointImpedance,
-                                            SetCartesianImpedance,
-                                            SetEEToK,
-                                            SetFToEE,
-                                            SetLoad,
-                                            SetFilters>;
+TEST(StopMoveCommand, CanAbort) {
+  RobotMockServer server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
-TYPED_TEST_CASE(SetterCommand, SetterCommandTypes);
+  server
+      .waitForCommand<StopMove>(
+          [](const StopMove::Request&) { return StopMove::Response(StopMove::Status::kAborted); })
+      .spinOnce();
 
-TYPED_TEST(SetterCommand, CanSendAndReceiveInvalidArgument) {
+  EXPECT_THROW(robot.executeCommand<StopMove>(), CommandException);
+}
+
+using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
+                                                  SetJointImpedance,
+                                                  SetCartesianImpedance,
+                                                  SetEEToK,
+                                                  SetFToEE,
+                                                  SetLoad,
+                                                  SetFilters,
+                                                  GetCartesianLimit>;
+
+TYPED_TEST_CASE(GetterSetterCommand, GetterSetterCommandTypes);
+
+TYPED_TEST(GetterSetterCommand, CanSendAndReceiveInvalidArgument) {
   RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
@@ -369,7 +387,7 @@ TEST_F(MoveCommand, CanReceiveMotionStarted) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-                EXPECT_TRUE(this->compare(request, request));
+                EXPECT_TRUE(this->compare(request, this->getExpected()));
                 return this->createResponse(request, Move::Status::kMotionStarted);
               })
       .spinOnce();
@@ -377,7 +395,7 @@ TEST_F(MoveCommand, CanReceiveMotionStarted) {
   robot.executeCommand<Move>(request);
 }
 
-TEST_P(MoveCommand, CanReceiveMoveResponses) {
+TEST_P(MoveCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
@@ -387,22 +405,50 @@ TEST_P(MoveCommand, CanReceiveMoveResponses) {
                         Move::Deviation(4, 5, 6));
 
   server
-      .waitForCommand<research_interface::robot::Move>(
-          [this](const research_interface::robot::Move::Request& request)
-              -> research_interface::robot::Move::Response {
-                EXPECT_TRUE(this->compare(request, request));
-                return this->createResponse(request, GetParam());
-              })
+      .waitForCommand<::Move>([this](const Move::Request& request) -> Move::Response {
+        EXPECT_TRUE(this->compare(request, this->getExpected()));
+        return this->createResponse(request, GetParam());
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.executeCommand<Move>(request), CommandException);
+}
+
+INSTANTIATE_TEST_CASE_P(
+    AutomaticErrorRecoveryCommandTests,
+    AutomaticErrorRecoveryCommand,
+    ::testing::Values(AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
+                      AutomaticErrorRecovery::Status::kReflexAborted,
+                      AutomaticErrorRecovery::Status::kEmergencyAborted,
+                      AutomaticErrorRecovery::Status::kInputErrorAborted,
+                      AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
+                      AutomaticErrorRecovery::Status::kAborted));
+
+TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
+  RobotMockServer server;
+  Robot::Impl robot(
+      std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
+
+  AutomaticErrorRecovery::Request request;
+
+  server
+      .waitForCommand<AutomaticErrorRecovery>(
+          [this](
+              const AutomaticErrorRecovery::Request& request) -> AutomaticErrorRecovery::Response {
+            EXPECT_TRUE(this->compare(request, this->getExpected()));
+            return this->createResponse(request, GetParam());
+          })
+      .spinOnce();
+
+  EXPECT_THROW(robot.executeCommand<AutomaticErrorRecovery>(request), CommandException);
 }
 
 INSTANTIATE_TEST_CASE_P(MoveCommandTests,
                         MoveCommand,
                         ::testing::Values(Move::Status::kPreempted,
                                           Move::Status::kStartAtSingularPoseRejected,
-                                          Move::Status::kOutOfRangeRejected,
+                                          Move::Status::kInvalidArgumentRejected,
                                           Move::Status::kReflexAborted,
                                           Move::Status::kEmergencyAborted,
-                                          Move::Status::kInputErrorAborted));
+                                          Move::Status::kInputErrorAborted,
+                                          Move::Status::kAborted));
