@@ -280,22 +280,22 @@ struct RobotState {
    * Last commanded end effector pose of motion generation in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE_c{};
+  std::array<double, 16> O_T_EE_c{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f${^OdP_{EE}}_{c}\f$
    * Last commanded end effector twist in base frame.
    * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
    */
-  std::array<double, 6> O_dP_EE_c{};
+  std::array<double, 6> O_dP_EE_c{};  // NOLINT (readability-identifier-naming)
 
   /**
-   * \f${^OdP_{EE}}_{c}\f$
+   * \f${^OddP_{EE}}_{c}\f$
    * Last commanded end effector acceleration in base frame.
    * Unit:
    * \f$[\frac{m}{s^2},\frac{m}{s^2},\frac{m}{s^2},\frac{rad}{s^2},\frac{rad}{s^2},\frac{rad}{s^2}]\f$.
    */
-  std::array<double, 6> O_ddP_EE_c{};
+  std::array<double, 6> O_ddP_EE_c{};  // NOLINT (readability-identifier-naming)
 
   /**
    * \f$\theta\f$
