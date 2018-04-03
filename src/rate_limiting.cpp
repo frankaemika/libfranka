@@ -133,7 +133,7 @@ Eigen::Vector3d limitRate(double max_velocity,
 
   return limited_desired_velocity;
 }
-}
+}  // namespace
 
 std::array<double, 6> limitRate(
     double max_translational_velocity,
