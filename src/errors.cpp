@@ -89,7 +89,8 @@ Errors::Errors(const std::array<bool, 37>& errors)  // NOLINT (modernize-pass-by
           errors_[static_cast<size_t>(Error::kJointP2PInsufficientTorqueForPlanning)]),
       tau_j_range_violation(errors_[static_cast<size_t>(Error::kTauJRangeViolation)]),
       instability_detected(errors_[static_cast<size_t>(Error::kInstabilityDetection)]),
-      joint_move_in_wrong_direction(errors_[static_cast<size_t>(Error::kJointMoveInWrongDirection)]){}
+      joint_move_in_wrong_direction(
+          errors_[static_cast<size_t>(Error::kJointMoveInWrongDirection)]) {}
 
 Errors::operator bool() const noexcept {
   return std::any_of(errors_.cbegin(), errors_.cend(), [](bool x) { return x; });

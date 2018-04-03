@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "robot_impl.h"
 
+#include <iostream>
 #include <sstream>
 
 #include "load_calculations.h"
@@ -313,6 +314,9 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
       robot_state.F_x_Cload, robot_state.I_load, converted.m_total, converted.F_x_Ctotal);
   converted.elbow = robot_state.elbow;
   converted.elbow_d = robot_state.elbow_d;
+  converted.elbow_c = robot_state.elbow_c;
+  converted.delbow_c = robot_state.delbow_c;
+  converted.ddelbow_c = robot_state.ddelbow_c;
   converted.tau_J = robot_state.tau_J;
   converted.tau_J_d = robot_state.tau_J_d;
   converted.dtau_J = robot_state.dtau_J;
@@ -320,6 +324,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.dq = robot_state.dq;
   converted.q_d = robot_state.q_d;
   converted.dq_d = robot_state.dq_d;
+  converted.ddq_d = robot_state.ddq_d;
   converted.joint_contact = robot_state.joint_contact;
   converted.cartesian_contact = robot_state.cartesian_contact;
   converted.joint_collision = robot_state.joint_collision;
@@ -328,6 +333,9 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.O_dP_EE_d = robot_state.O_dP_EE_d;
+  converted.O_T_EE_c = robot_state.O_T_EE_c;
+  converted.O_dP_EE_c = robot_state.O_dP_EE_c;
+  converted.O_ddP_EE_c = robot_state.O_ddP_EE_c;
   converted.theta = robot_state.theta;
   converted.dtheta = robot_state.dtheta;
   converted.current_errors = robot_state.errors;

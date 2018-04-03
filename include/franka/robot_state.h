@@ -138,6 +138,33 @@ struct RobotState {
   std::array<double, 2> elbow_d{};
 
   /**
+   * Commanded elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> elbow_c{};
+
+  /**
+   * Commanded elbow velocity.
+   *
+   * The values of the array are:
+   *  - [0] Velocity of the 3rd joint in [rad/s].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> delbow_c{};
+
+  /**
+   * Commanded elbow acceleration.
+   *
+   * The values of the array are:
+   *  - [0] Acceleration of the 3rd joint in [rad/s^2].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> ddelbow_c{};
+
+  /**
    * \f$\tau_{J}\f$
    * Measured link-side joint torque sensor signals. Unit: \f$[Nm]\f$
    */
@@ -178,6 +205,12 @@ struct RobotState {
    * Desired joint velocity. Unit: \f$[\frac{rad}{s}]\f$
    */
   std::array<double, 7> dq_d{};
+
+  /**
+   * \f$\dot{q}_d\f$
+   * Desired joint acceleration. Unit: \f$[\frac{rad}{s^2}]\f$
+   */
+  std::array<double, 7> ddq_d{};
 
   /**
    * Indicates which contact level is activated in which joint. After contact disappears, value
@@ -241,6 +274,28 @@ struct RobotState {
    * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
    */
   std::array<double, 6> O_dP_EE_d{};  // NOLINT (readability-identifier-naming)
+
+  /**
+   * \f${^OT_{EE}}_{c}\f$
+   * Last commanded end effector pose of motion generation in base frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
+  std::array<double, 16> O_T_EE_c{};
+
+  /**
+   * \f${^OdP_{EE}}_{c}\f$
+   * Last commanded end effector twist in base frame.
+   * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
+   */
+  std::array<double, 6> O_dP_EE_c{};
+
+  /**
+   * \f${^OdP_{EE}}_{c}\f$
+   * Last commanded end effector acceleration in base frame.
+   * Unit:
+   * \f$[\frac{m}{s^2},\frac{m}{s^2},\frac{m}{s^2},\frac{rad}{s^2},\frac{rad}{s^2},\frac{rad}{s^2}]\f$.
+   */
+  std::array<double, 6> O_ddP_EE_c{};
 
   /**
    * \f$\theta\f$
