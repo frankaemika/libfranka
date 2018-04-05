@@ -20,10 +20,15 @@ inline ControlException createControlException(const char* message,
     message_stream << " " << reflex_errors;
 
     if (log.size() >= 2) {
-      // Read second to last control_command_success_rate since the last one will always be zero.
+      // Count number of lost packets in the last and before last packets.
+      uint64_t lost_packets =
+          log[log.size() - 1].state.time.toMSec() - log[log.size() - 2].state.time.toMSec() - 1;
+      // Read second to last control_command_success_rate since the last one will always be zero and
+      // add the packets lost between the last and before last received packets
       message_stream << std::endl
                      << "control_command_success_rate: "
-                     << log[log.size() - 2].state.control_command_success_rate;
+                     << (log[log.size() - 2].state.control_command_success_rate * 100.0 /
+                         (100.0 + static_cast<double>(lost_packets)));
     }
   }
   return ControlException(message_stream.str(), log);
