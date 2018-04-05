@@ -30,7 +30,7 @@ double limitRate(double max_velocity,
       (((desired_velocity - last_desired_velocity) / kDeltaT) - last_desired_acceleration) /
       kDeltaT;
 
-  // Limit jerk
+  // Limit jerk and integrate to get acceleration
   double desired_acceleration =
       last_desired_acceleration + std::max(std::min(desired_jerk, max_jerk), -max_jerk) * kDeltaT;
 
@@ -105,30 +105,32 @@ Eigen::Vector3d limitRate(double max_velocity,
       (((desired_velocity - last_desired_velocity) / kDeltaT) - last_desired_acceleration) /
       kDeltaT;
 
-  // Limit jerk and get desired acceleration
+  // Limit jerk and integrate to get desired acceleration
   Eigen::Vector3d desired_acceleration = last_desired_acceleration;
   if (desired_jerk.norm() > kNormEps) {
     desired_acceleration += (desired_jerk / desired_jerk.norm()) *
                             std::max(std::min(desired_jerk.norm(), max_jerk), -max_jerk) * kDeltaT;
   }
 
-  // Compute acceleration limits
+  // Compute Euclidean distance to the max velocity vector that would be reached starting from
+  // last_desired_velocity with the direction of the desired acceleration
+  Eigen::Vector3d unit_desired_acceleration = desired_acceleration / desired_acceleration.norm();
+  double dot_product = unit_desired_acceleration.transpose() * last_desired_velocity;
+  double distance_to_max_velocity =
+      -dot_product + std::sqrt(pow(dot_product, 2.0) - last_desired_velocity.squaredNorm() +
+                               pow(max_velocity, 2.0));
+
+  // Compute safe acceleration limits
   double safe_max_acceleration =
-      std::min((max_jerk / max_acceleration) * (max_velocity - last_desired_velocity.norm()),
-               max_acceleration);
-  double safe_min_acceleration =
-      std::max((max_jerk / max_acceleration) * (-max_velocity - last_desired_velocity.norm()),
-               -max_acceleration);
+      std::min((max_jerk / max_acceleration) * distance_to_max_velocity, max_acceleration);
 
   // Limit acceleration and integrate to get desired velocities
   Eigen::Vector3d limited_desired_velocity = last_desired_velocity;
 
   if (desired_acceleration.norm() > kNormEps) {
-    limited_desired_velocity +=
-        (desired_acceleration / desired_acceleration.norm()) *
-        std::max(std::min(desired_acceleration.norm(), safe_max_acceleration),
-                 safe_min_acceleration) *
-        kDeltaT;
+    limited_desired_velocity += unit_desired_acceleration *
+                                std::min(desired_acceleration.norm(), safe_max_acceleration) *
+                                kDeltaT;
   }
 
   return limited_desired_velocity;
