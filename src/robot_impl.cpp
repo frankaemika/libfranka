@@ -256,14 +256,8 @@ void Robot::Impl::finishMotion(
   // motion is running, or afterwards. To handle both situations, we do not process TCP packages in
   // this loop and explicitly wait for the Move response over TCP afterwards.
   RobotState robot_state{};
-  try {
-    while (motionGeneratorRunning() || controllerRunning()) {
-      robot_state = update(&motion_finished_command, control_command);
-    }
-  } catch (franka::ControlException ex) {
-    throw new franka::ControlException("Motion finished sent, but the robot is still moving!");
-  } catch (...) {
-    throw;
+  while (motionGeneratorRunning() || controllerRunning()) {
+    robot_state = update(&motion_finished_command, control_command);
   }
 
   auto response = network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
