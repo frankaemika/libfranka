@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.3.1 - UNRELEASED
+
+Requires Panda system version >= 1.2.0
+
+### Library
+
+  * Removed unnecessary CMake script from installation
+
 ## 0.3.0 - 2018-02-22
 
 Requires Panda system version >= 1.2.0
