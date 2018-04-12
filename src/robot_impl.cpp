@@ -261,6 +261,10 @@ void Robot::Impl::finishMotion(
   }
 
   auto response = network_->tcpBlockingReceiveResponse<research_interface::robot::Move>(motion_id);
+  if (response.status == research_interface::robot::Move::Status::kReflexAborted) {
+    throw createControlException("Motion finished commanded, but the robot is still moving!",
+                                 response.status, robot_state.last_motion_errors, logger_.flush());
+  }
   try {
     handleCommandResponse<research_interface::robot::Move>(response);
   } catch (const CommandException& e) {
