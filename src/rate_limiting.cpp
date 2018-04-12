@@ -1,6 +1,7 @@
 #include <franka/rate_limiting.h>
 
 #include <Eigen/Dense>
+#include <iostream>
 
 #include <franka/exception.h>
 
@@ -73,7 +74,6 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
         limitRate(max_velocity[i], max_acceleration[i], max_jerk[i], desired_velocities[i],
                   last_desired_velocities[i], last_desired_accelerations[i]);
   }
-
   return limited_desired_velocities;
 }
 
@@ -182,7 +182,7 @@ std::array<double, 16> limitRate(
 
   // Compute rotational velocity
   auto delta_rotation = (desired_pose.linear() - last_desired_pose.linear()) / kDeltaT;
-  Eigen::Matrix3d rotational_twist = delta_rotation * last_desired_pose.linear();
+  Eigen::Matrix3d rotational_twist = delta_rotation * desired_pose.linear().transpose();
   dx.tail(3) << rotational_twist(2, 1), rotational_twist(0, 2), rotational_twist(1, 0);
 
   // Limit the rate of the twist

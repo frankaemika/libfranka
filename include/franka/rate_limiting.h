@@ -22,7 +22,7 @@ constexpr double kLimitEps = 1e-3;
 /**
  * Epsilon value for limiting Cartesian accelerations/jerks or not
  */
-constexpr double kNormEps = 1e-6;
+constexpr double kNormEps = 1e-12;
 /**
  * Maximum torque rate
  */
@@ -58,7 +58,7 @@ constexpr double kMaxTranslationalAcceleration = 13.0000 - kLimitEps;
 /**
  * Maximum translational jerk
  */
-constexpr double kMaxTranslationalJerk = 6500 - kLimitEps;
+constexpr double kMaxTranslationalJerk = 6500.0 - kLimitEps;
 /**
  * Maximum rotational velocity
  */
@@ -66,11 +66,11 @@ constexpr double kMaxRotationalVelocity = 2.5000 - kLimitEps;
 /**
  * Maximum rotational acceleration
  */
-constexpr double kMaxRotationalAcceleration = 5.0000 - kLimitEps;
+constexpr double kMaxRotationalAcceleration = 25.0000 - kLimitEps;
 /**
  * Maximum rotational jerk
  */
-constexpr double kMaxRotationalJerk = 7000 - kLimitEps;
+constexpr double kMaxRotationalJerk = 12500.0 - kLimitEps;
 /**
  * Maximum elbow velocity
  */
