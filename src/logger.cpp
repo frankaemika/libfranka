@@ -28,10 +28,10 @@ std::vector<Record> Logger::flush() {
     size_t wrapped_index = (ring_front_ + i) % ring_size_;
 
     RobotCommand command;
-    command.joint_positions = commands_[wrapped_index].motion.q_d;
-    command.joint_velocities = commands_[wrapped_index].motion.dq_d;
-    command.cartesian_pose.O_T_EE = commands_[wrapped_index].motion.O_T_EE_d;
-    command.cartesian_velocities.O_dP_EE = commands_[wrapped_index].motion.O_dP_EE_d;
+    command.joint_positions = commands_[wrapped_index].motion.q_c;
+    command.joint_velocities = commands_[wrapped_index].motion.dq_c;
+    command.cartesian_pose.O_T_EE = commands_[wrapped_index].motion.O_T_EE_c;
+    command.cartesian_velocities.O_dP_EE = commands_[wrapped_index].motion.O_dP_EE_c;
     command.torques.tau_J = commands_[wrapped_index].control.tau_J_d;
 
     Record record;

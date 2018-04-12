@@ -144,10 +144,10 @@ void ControlLoop<JointPositions>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->q_d = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.q,
+    command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.q,
                              robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
   } else {
-    command->q_d = motion.q;
+    command->q_c = motion.q;
   }
 }
 
@@ -157,10 +157,10 @@ void ControlLoop<JointVelocities>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->dq_d = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.dq,
+    command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.dq,
                               robot_state.dq_d, robot_state.ddq_d);
   } else {
-    command->dq_d = motion.dq;
+    command->dq_c = motion.dq;
   }
 }
 
@@ -170,27 +170,27 @@ void ControlLoop<CartesianPose>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->O_T_EE_d = limitRate(
+    command->O_T_EE_c = limitRate(
         kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
         kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, motion.O_T_EE,
         robot_state.O_T_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   } else {
-    command->O_T_EE_d = motion.O_T_EE;
+    command->O_T_EE_c = motion.O_T_EE;
   }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     if (limit_rate_) {
-      command->elbow_d[0] =
+      command->elbow_c[0] =
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_d[1] = motion.elbow[1];
+      command->elbow_c[1] = motion.elbow[1];
     } else {
-      command->elbow_d = motion.elbow;
+      command->elbow_c = motion.elbow;
     }
   } else {
     command->valid_elbow = false;
-    command->elbow_d = {};
+    command->elbow_c = {};
   }
 }
 
@@ -200,27 +200,27 @@ void ControlLoop<CartesianVelocities>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   if (limit_rate_) {
-    command->O_dP_EE_d =
+    command->O_dP_EE_c =
         limitRate(kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
                   kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk,
                   motion.O_dP_EE, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   } else {
-    command->O_dP_EE_d = motion.O_dP_EE;
+    command->O_dP_EE_c = motion.O_dP_EE;
   }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     if (limit_rate_) {
-      command->elbow_d[0] =
+      command->elbow_c[0] =
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_d[1] = motion.elbow[1];
+      command->elbow_c[1] = motion.elbow[1];
     } else {
-      command->elbow_d = motion.elbow;
+      command->elbow_c = motion.elbow;
     }
   } else {
     command->valid_elbow = false;
-    command->elbow_d = {};
+    command->elbow_c = {};
   }
 }
 
