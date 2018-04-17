@@ -154,7 +154,7 @@ TEST(Robot, CanControlRobot) {
   for (int i = 0; i < count - 1; i++) {
     server
         .onReceiveRobotCommand([=](const robot::RobotCommand& robot_command) {
-          EXPECT_EQ(joint_positions.q, robot_command.motion.q_d);
+          EXPECT_EQ(joint_positions.q, robot_command.motion.q_c);
           EXPECT_FALSE(robot_command.motion.motion_generation_finished);
           EXPECT_LT(robot_command.message_id, stopped_message_id);
         })

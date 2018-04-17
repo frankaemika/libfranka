@@ -430,19 +430,19 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
 void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
   // Reset to all-zeros first
   robot_command = research_interface::robot::RobotCommand();
-  for (double& element : robot_command.motion.q_d) {
+  for (double& element : robot_command.motion.q_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.dq_d) {
+  for (double& element : robot_command.motion.dq_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.O_T_EE_d) {
+  for (double& element : robot_command.motion.O_T_EE_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.O_dP_EE_d) {
+  for (double& element : robot_command.motion.O_dP_EE_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.elbow_d) {
+  for (double& element : robot_command.motion.elbow_c) {
     element = randomDouble();
   }
   robot_command.motion.valid_elbow = true;
@@ -456,11 +456,11 @@ void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) 
 void testMotionGeneratorCommandsAreEqual(
     const research_interface::robot::MotionGeneratorCommand& expected,
     const research_interface::robot::MotionGeneratorCommand& actual) {
-  EXPECT_EQ(expected.q_d, actual.q_d);
-  EXPECT_EQ(expected.dq_d, actual.dq_d);
-  EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
-  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
-  EXPECT_EQ(expected.elbow_d, actual.elbow_d);
+  EXPECT_EQ(expected.q_c, actual.q_c);
+  EXPECT_EQ(expected.dq_c, actual.dq_c);
+  EXPECT_EQ(expected.O_T_EE_c, actual.O_T_EE_c);
+  EXPECT_EQ(expected.O_dP_EE_c, actual.O_dP_EE_c);
+  EXPECT_EQ(expected.elbow_c, actual.elbow_c);
   EXPECT_EQ(expected.valid_elbow, actual.valid_elbow);
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
@@ -480,10 +480,10 @@ void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& ex
 void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
                                const franka::RobotCommand actual) {
   research_interface::robot::RobotCommand fci_command = expected;
-  fci_command.motion.q_d = actual.joint_positions.q;
-  fci_command.motion.dq_d = actual.joint_velocities.dq;
-  fci_command.motion.O_T_EE_d = actual.cartesian_pose.O_T_EE;
-  fci_command.motion.O_dP_EE_d = actual.cartesian_velocities.O_dP_EE;
+  fci_command.motion.q_c = actual.joint_positions.q;
+  fci_command.motion.dq_c = actual.joint_velocities.dq;
+  fci_command.motion.O_T_EE_c = actual.cartesian_pose.O_T_EE;
+  fci_command.motion.O_dP_EE_c = actual.cartesian_velocities.O_dP_EE;
   fci_command.control.tau_J_d = actual.torques.tau_J;
   testRobotCommandsAreEqual(expected, fci_command);
 }
