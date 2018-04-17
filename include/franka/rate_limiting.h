@@ -3,6 +3,7 @@
 #pragma once
 
 #include <array>
+#include <limits>
 
 /**
  * @file rate_limiting.h
@@ -22,7 +23,7 @@ constexpr double kLimitEps = 1e-3;
 /**
  * Epsilon value for limiting Cartesian accelerations/jerks or not
  */
-constexpr double kNormEps = 1e-12;
+constexpr double kNormEps = std::numeric_limits<double>::epsilon();
 /**
  * Maximum torque rate
  */

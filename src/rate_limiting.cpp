@@ -1,7 +1,6 @@
 #include <franka/rate_limiting.h>
 
 #include <Eigen/Dense>
-#include <iostream>
 
 #include <franka/exception.h>
 
@@ -181,9 +180,8 @@ std::array<double, 16> limitRate(
   dx.head(3) << (desired_pose.translation() - last_desired_pose.translation()) / kDeltaT;
 
   // Compute rotational velocity
-  auto delta_rotation = (desired_pose.linear() - last_desired_pose.linear()) / kDeltaT;
-  Eigen::Matrix3d rotational_twist = delta_rotation * desired_pose.linear().transpose();
-  dx.tail(3) << rotational_twist(2, 1), rotational_twist(0, 2), rotational_twist(1, 0);
+  Eigen::AngleAxisd rot_difference(desired_pose.linear() * last_desired_pose.linear().transpose());
+  dx.tail(3) << rot_difference.axis() * rot_difference.angle() / kDeltaT;
 
   // Limit the rate of the twist
   std::array<double, 6> desired_O_dP_EE_d{};  // NOLINT (readability-identifier-naming)
@@ -195,11 +193,17 @@ std::array<double, 16> limitRate(
   dx = Eigen::Matrix<double, 6, 1>(desired_O_dP_EE_d.data());
 
   // Integrate limited twist
-  Eigen::Matrix3d omega_skew;
-  omega_skew << 0, -dx(5), dx(4), dx(5), 0, -dx(3), -dx(4), dx(3), 0;
-  limited_desired_pose.linear() << last_desired_pose.linear() +
-                                       omega_skew * last_desired_pose.linear() * kDeltaT;
   limited_desired_pose.translation() << last_desired_pose.translation() + dx.head(3) * kDeltaT;
+  limited_desired_pose.linear() << last_desired_pose.linear();
+  if (dx.tail(3).norm() > kNormEps) {
+    Eigen::Matrix3d omega_skew;
+    Eigen::Vector3d w_norm(dx.tail(3) / dx.tail(3).norm());
+    double theta = kDeltaT * dx.tail(3).norm();
+    omega_skew << 0, -w_norm(2), w_norm(1), w_norm(2), 0, -w_norm(0), -w_norm(1), w_norm(0), 0;
+    Eigen::Matrix3d R = Eigen::Matrix3d::Identity() + sin(theta) * omega_skew +  // NOLINT
+                        (1.0 - cos(theta)) * (omega_skew * omega_skew);
+    limited_desired_pose.linear() << R * last_desired_pose.linear();
+  }
 
   std::array<double, 16> limited_values{};
   Eigen::Map<Eigen::Matrix4d>(&limited_values[0], 4, 4) = limited_desired_pose.matrix();
