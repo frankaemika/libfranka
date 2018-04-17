@@ -135,7 +135,7 @@ int main(int argc, char** argv) {
 
       if (time == 0.0) {
         // Read the initial pose to start the motion from in the first time step.
-        initial_pose = robot_state.O_T_EE_d;
+        initial_pose = robot_state.O_T_EE_c;
       }
 
       // Compute Cartesian velocity.

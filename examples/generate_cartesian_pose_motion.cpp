@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
       time += period.toSec();
 
       if (time == 0.0) {
-        initial_pose = robot_state.O_T_EE_d;
+        initial_pose = robot_state.O_T_EE_c;
       }
 
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));

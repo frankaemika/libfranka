@@ -2,7 +2,6 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "robot_impl.h"
 
-#include <iostream>
 #include <sstream>
 
 #include "load_calculations.h"

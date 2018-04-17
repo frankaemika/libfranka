@@ -94,14 +94,14 @@ constexpr double kMaxElbowJerk = 5000 - kLimitEps;
  * FCI filters must be deactivated to work properly.
  *
  * @param[in] max_derivatives Per-joint maximum allowed time derivative.
- * @param[in] desired_values Desired values of the current time step.
- * @param[in] last_desired_values Desired values of the previous time step.
+ * @param[in] commanded_values Commanded values of the current time step.
+ * @param[in] last_commanded_values Commanded values of the previous time step.
  *
  * @return Rate-limited vector of desired values.
  */
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
-                                const std::array<double, 7>& desired_values,
-                                const std::array<double, 7>& last_desired_values);
+                                const std::array<double, 7>& commanded_values,
+                                const std::array<double, 7>& last_commanded_values);
 
 /**
  * Limits the rate of a desired joint velocity considering the limits provided.
@@ -112,19 +112,19 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
  * @param[in] max_velocity Per-joint maximum allowed velocity.
  * @param[in] max_acceleration Per-joint maximum allowed acceleration.
  * @param[in] max_jerk Per-joint maximum allowed jerk.
- * @param[in] desired_position Desired joint position of the current time step.
- * @param[in] last_desired_position Desired joint position of the previous time step.
- * @param[in] last_desired_velocity Desired joint velocities of the previous time step.
- * @param[in] last_desired_acceleration Desired joint accelerations of the previous time step.
+ * @param[in] commanded_position Commanded joint position of the current time step.
+ * @param[in] last_commanded_position Commanded joint position of the previous time step.
+ * @param[in] last_commanded_velocity Commanded joint velocities of the previous time step.
+ * @param[in] last_commanded_acceleration Commanded joint accelerations of the previous time step.
  *
  * @return Rate-limited desired joint velocity.
  */
 double limitRate(double max_velocity,
                  double max_acceleration,
                  double max_jerk,
-                 double desired_velocity,
-                 double last_desired_velocity,
-                 double last_desired_acceleration);
+                 double commanded_velocity,
+                 double last_commanded_velocity,
+                 double last_commanded_acceleration);
 
 /**
  * Limits the rate of a desired joint position considering the limits provided.
@@ -135,20 +135,20 @@ double limitRate(double max_velocity,
  * @param[in] max_velocity Per-joint maximum allowed velocity.
  * @param[in] max_acceleration Per-joint maximum allowed acceleration.
  * @param[in] max_jerk Per-joint maximum allowed jerk.
- * @param[in] desired_position Desired joint position of the current time step.
- * @param[in] last_desired_position Desired joint position of the previous time step.
- * @param[in] last_desired_velocity Desired joint velocities of the previous time step.
- * @param[in] last_desired_acceleration Desired joint accelerations of the previous time step.
+ * @param[in] commanded_position Commanded joint position of the current time step.
+ * @param[in] last_commanded_position Commanded joint position of the previous time step.
+ * @param[in] last_commanded_velocity Commanded joint velocities of the previous time step.
+ * @param[in] last_commanded_acceleration Commanded joint accelerations of the previous time step.
  *
  * @return Rate-limited desired joint position.
  */
 double limitRate(double max_velocity,
                  double max_acceleration,
                  double max_jerk,
-                 double desired_position,
-                 double last_desired_position,
-                 double last_desired_velocity,
-                 double last_desired_acceleration);
+                 double commanded_position,
+                 double last_commanded_position,
+                 double last_commanded_velocity,
+                 double last_commanded_acceleration);
 
 /**
  * Limits the rate of a desired joint velocity considering the limits provided.
@@ -159,18 +159,18 @@ double limitRate(double max_velocity,
  * @param[in] max_velocity Per-joint maximum allowed velocity.
  * @param[in] max_acceleration Per-joint maximum allowed acceleration.
  * @param[in] max_jerk Per-joint maximum allowed jerk.
- * @param[in] desired_velocities Desired joint velocity of the current time step.
- * @param[in] last_desired_velocities Desired joint velocities of the previous time step.
- * @param[in] last_desired_accelerations Desired joint accelerations of the previous time step.
+ * @param[in] commanded_velocities Commanded joint velocity of the current time step.
+ * @param[in] last_commanded_velocities Commanded joint velocities of the previous time step.
+ * @param[in] last_commanded_accelerations Commanded joint accelerations of the previous time step.
  *
  * @return Rate-limited vector of desired joint velocities.
  */
 std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& max_acceleration,
                                 const std::array<double, 7>& max_jerk,
-                                const std::array<double, 7>& desired_velocities,
-                                const std::array<double, 7>& last_desired_velocities,
-                                const std::array<double, 7>& last_desired_accelerations);
+                                const std::array<double, 7>& commanded_velocities,
+                                const std::array<double, 7>& last_commanded_velocities,
+                                const std::array<double, 7>& last_commanded_accelerations);
 
 /**
  * Limits the rate of a desired joint position considering the limits provided.
@@ -181,20 +181,20 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
  * @param[in] max_velocity Per-joint maximum allowed velocity.
  * @param[in] max_acceleration Per-joint maximum allowed velocity.
  * @param[in] max_jerk Per-joint maximum allowed velocity.
- * @param[in] desired_positions Per-joint maximum allowed acceleration.
- * @param[in] last_desired_positions Desired joint positions of the current time step.
- * @param[in] last_desired_velocities Desired joint positions of the previous time step.
- * @param[in] last_desired_accelerations Desired joint velocities of the previous time step.
+ * @param[in] commanded_positions Per-joint maximum allowed acceleration.
+ * @param[in] last_commanded_positions Commanded joint positions of the current time step.
+ * @param[in] last_commanded_velocities Commanded joint positions of the previous time step.
+ * @param[in] last_commanded_accelerations Commanded joint velocities of the previous time step.
  *
  * @return Rate-limited vector of desired joint positions.
  */
 std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& max_acceleration,
                                 const std::array<double, 7>& max_jerk,
-                                const std::array<double, 7>& desired_positions,
-                                const std::array<double, 7>& last_desired_positions,
-                                const std::array<double, 7>& last_desired_velocities,
-                                const std::array<double, 7>& last_desired_accelerations);
+                                const std::array<double, 7>& commanded_positions,
+                                const std::array<double, 7>& last_commanded_positions,
+                                const std::array<double, 7>& last_commanded_velocities,
+                                const std::array<double, 7>& last_commanded_accelerations);
 
 /**
  * Limits the rate of a desired Cartesian velocity considering the limits provided.
@@ -208,9 +208,9 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
  * @param[in] max_rotational_velocity Maximum rotational velocity.
  * @param[in] max_rotational_acceleration Maximum rotational acceleration.
  * @param[in] max_rotational_jerk Maximum rotational jerk.
- * @param[in] O_dP_EE_d Desired end effector twist of the current time step.
- * @param[in] last_O_dP_EE_d Desired end effector twist of the previous time step.
- * @param[in] last_O_ddP_EE_d Desired end effector acceleration of the previous time step.
+ * @param[in] O_dP_EE_c Commanded end effector twist of the current time step.
+ * @param[in] last_O_dP_EE_c Commanded end effector twist of the previous time step.
+ * @param[in] last_O_ddP_EE_c Commanded end effector acceleration of the previous time step.
  *
  * @return Rate-limited desired end effector twist.
  */
@@ -221,9 +221,9 @@ std::array<double, 6> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 6>& O_dP_EE_d,         // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_d,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_d);  // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& O_dP_EE_c,         // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT (readability-identifier-naming)
 
 /**
  * Limits the rate of a desired Cartesian pose considering the limits provided.
@@ -237,10 +237,10 @@ std::array<double, 6> limitRate(
  * @param[in] max_rotational_velocity Maximum rotational velocity.
  * @param[in] max_rotational_acceleration Maximum rotational acceleration.
  * @param[in] max_rotational_jerk Maximum rotational jerk.
- * @param[in] O_T_EE_d Desired pose of the current time step.
- * @param[in] last_O_T_EE_d Desired pose of the previous time step.
- * @param[in] last_O_dP_EE_d Desired end effector twist of the previous time step.
- * @param[in] last_O_ddP_EE_d Desired end effector acceleration of the previous time step.
+ * @param[in] O_T_EE_c Commanded pose of the current time step.
+ * @param[in] last_O_T_EE_c Commanded pose of the previous time step.
+ * @param[in] last_O_dP_EE_c Commanded end effector twist of the previous time step.
+ * @param[in] last_O_ddP_EE_c Commanded end effector acceleration of the previous time step.
  *
  * @return Rate-limited desired pose.
  */
@@ -251,9 +251,9 @@ std::array<double, 16> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 16>& O_T_EE_d,         // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& last_O_T_EE_d,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_d,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_d);  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& O_T_EE_c,         // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& last_O_T_EE_c,    // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT (readability-identifier-naming)
 
 }  // namespace franka
