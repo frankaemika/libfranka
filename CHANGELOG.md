@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 0.3.1 - UNRELEASED
+## 0.4.0 - UNRELEASED
 
-Requires Panda system version >= 1.2.0
+Requires Panda system version >= 2.0.0
+
+### Motion and control interfaces
+
+  * Added `joint_move_in_wrong_direction` error to `franka::RobotState`
 
 ### Library
 
