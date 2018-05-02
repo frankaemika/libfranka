@@ -1,10 +1,5 @@
 get_filename_component(Franka_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
-# Use our own FindPoco.cmake as fallback.
-list(APPEND CMAKE_MODULE_PATH "${Franka_CMAKE_DIR}")
-find_package(Poco REQUIRED COMPONENTS Net Foundation)
-list(REMOVE_AT CMAKE_MODULE_PATH -1)
-
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 

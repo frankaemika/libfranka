@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.3.0
+  VERSION 0.3.1
   LANGUAGES CXX
 )
 
@@ -16,9 +16,6 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
 
 ## Dependencies
-# Don't forget to adjust cmake/FrankaConfig.cmake.in
-# when making changes here.
-
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
 
@@ -108,13 +105,8 @@ configure_package_config_file(cmake/FrankaConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
   INSTALL_DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
 )
-configure_file(cmake/FindPoco.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
-  COPYONLY
-)
 
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
   DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
