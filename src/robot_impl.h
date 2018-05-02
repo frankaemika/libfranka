@@ -58,14 +58,14 @@ class Robot::Impl : public RobotControl {
 
  private:
   template <typename T>
-  using IsBaseOfSetter =
-      std::is_base_of<research_interface::robot::SetterCommandBase<T, T::kCommand>, T>;
+  using IsBaseOfGetterSetter =
+      std::is_base_of<research_interface::robot::GetterSetterCommandBase<T, T::kCommand>, T>;
 
   template <typename T>
-  std::enable_if_t<IsBaseOfSetter<T>::value> handleCommandResponse(
+  std::enable_if_t<IsBaseOfGetterSetter<T>::value> handleCommandResponse(
       const typename T::Response& response) const;
   template <typename T>
-  std::enable_if_t<!IsBaseOfSetter<T>::value> handleCommandResponse(
+  std::enable_if_t<!IsBaseOfGetterSetter<T>::value> handleCommandResponse(
       const typename T::Response& response) const;
 
   research_interface::robot::RobotCommand sendRobotCommand(
@@ -91,7 +91,7 @@ class Robot::Impl : public RobotControl {
 };
 
 template <typename T>
-std::enable_if_t<Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+std::enable_if_t<Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
     const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
@@ -111,7 +111,7 @@ std::enable_if_t<Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleComma
 }
 
 template <typename T>
-std::enable_if_t<!Robot::Impl::IsBaseOfSetter<T>::value> Robot::Impl::handleCommandResponse(
+std::enable_if_t<!Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
     const typename T::Response& response) const {
   using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
 
@@ -168,7 +168,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
           " command rejected: cannot start at singular pose!");
-    case research_interface::robot::Move::Status::kOutOfRangeRejected:
+    case research_interface::robot::Move::Status::kInvalidArgumentRejected:
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
@@ -178,11 +178,89 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
           " command preempted!");
+    case research_interface::robot::Move::Status::kAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command aborted!");
     default:
       throw ProtocolException(
           "libfranka: Unexpected response while handling "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
           " command!");
+  }
+}
+
+template <>
+inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMove>(
+    const research_interface::robot::StopMove::Response& response) const {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+  switch (response.status) {
+    case research_interface::robot::StopMove::Status::kSuccess:
+      break;
+    case research_interface::robot::StopMove::Status::kCommandNotPossibleRejected:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
+          " command rejected: command not possible in the current mode!");
+    case research_interface::robot::StopMove::Status::kAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
+          " command rejected: command not possible in the current mode!");
+    default:
+      throw ProtocolException(
+          "libfranka: Unexpected response while handling "s +
+          research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
+          " command!");
+  }
+}
+
+template <>
+inline void Robot::Impl::handleCommandResponse<research_interface::robot::AutomaticErrorRecovery>(
+    const research_interface::robot::AutomaticErrorRecovery::Response& response) const {
+  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+
+  switch (response.status) {
+    case research_interface::robot::AutomaticErrorRecovery::Status::kSuccess:
+      break;
+    case research_interface::robot::AutomaticErrorRecovery::Status::kEmergencyAborted:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command aborted: User Stop pressed!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::kReflexAborted:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command aborted: motion aborted by reflex!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::kInputErrorAborted:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command aborted: invalid input provided!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::kCommandNotPossibleRejected:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command rejected: command not possible in the current mode!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::
+        kManualErrorRecoveryRequiredRejected:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command rejected: manual error recovery required!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::kAborted:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::AutomaticErrorRecovery>::kName +
+                             " command aborted!");
+    default:
+      throw ProtocolException("libfranka: Unexpected response while handling "s +
+                              research_interface::robot::CommandTraits<
+                                  research_interface::robot::AutomaticErrorRecovery>::kName +
+                              " command!");
   }
 }
 

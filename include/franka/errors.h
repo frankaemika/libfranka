@@ -17,7 +17,7 @@ namespace franka {
  */
 struct Errors {
  private:
-  std::array<bool, 36> errors_{};
+  std::array<bool, 37> errors_{};
 
  public:
   /**
@@ -46,7 +46,7 @@ struct Errors {
    *
    * @param errors Array of error flags.
    */
-  Errors(const std::array<bool, 36>& errors);
+  Errors(const std::array<bool, 37>& errors);
 
   /**
    * Check if any error flag is set to true.
@@ -222,6 +222,11 @@ struct Errors {
    * True if an instability is detected.
    */
   const bool& instability_detected;
+  /**
+   * True if the robot is in joint position limits violation error and the user guides the robot
+   * further towards the limit.
+   */
+  const bool& joint_move_in_wrong_direction;
 };
 
 /**
