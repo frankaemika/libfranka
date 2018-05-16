@@ -192,6 +192,9 @@ int main(int argc, char** argv) {
             k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
       }
 
+      // The following line is only necessary for printing the rate limited torque. As we activated
+      // rate limiting for the control loop (activated by default), the torque would anyway be
+      // adjusted!
       std::array<double, 7> tau_d_rate_limited =
           franka::limitRate(franka::kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
 

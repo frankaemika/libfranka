@@ -26,7 +26,7 @@ constexpr double kLimitEps = 1e-3;
 constexpr double kNormEps = std::numeric_limits<double>::epsilon();
 /**
  * Number of packets losts considered for the definition of velocity limits.
- * When a packet is lost, Control assumes a constant acceleration model
+ * When a packet is lost, FCI assumes a constant acceleration model
  */
 constexpr double kTolNumberPacketsLost = 3.0;
 /**
@@ -104,8 +104,7 @@ constexpr double kMaxElbowVelocity =
 
 /**
  * Limits the rate of an input vector of per-joint commands considering the maximum allowed
- * time
- * derivatives.
+ * time derivatives.
  *
  * @note
  * FCI filters must be deactivated to work properly.
