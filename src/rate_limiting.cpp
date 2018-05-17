@@ -1,8 +1,8 @@
+// Copyright (c) 2017 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/rate_limiting.h>
 
 #include <Eigen/Dense>
-
-#include <franka/exception.h>
 
 namespace franka {
 
@@ -136,7 +136,7 @@ Eigen::Vector3d limitRate(double max_velocity,
 
   return limited_commanded_velocity;
 }
-}  // namespace
+}  // anonymous namespace
 
 std::array<double, 6> limitRate(
     double max_translational_velocity,

@@ -14,8 +14,6 @@ Requires Panda system version >= 1.3.0
   * **BREAKING** Added rate limitation of the commanded values as option in the control loop and as
     a helper function. Rate limitation is activated by default, this could change the behavior of
     existing programs.
-  * **BREAKING** Set the FCI filters default value to 1000. This could change the behavior of
-    existing programs.
 
 ## 0.3.0 - 2018-02-22
 
