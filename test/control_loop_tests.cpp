@@ -368,7 +368,9 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
   EXPECT_THAT(command.motion, this->getField(motion));
   if (TestFixture::kLimitRate) {
     Torques torques({0, 1, 1, 1, 1, 1, 1});
-    EXPECT_EQ(torques.tau_J, command.control.tau_J_d);
+    for (size_t i = 0; i < torques.tau_J.size(); i++) {
+      EXPECT_NEAR(torques.tau_J[i], command.control.tau_J_d[i], 1e-5);
+    }
   } else {
     EXPECT_EQ(torques.tau_J, command.control.tau_J_d);
   }

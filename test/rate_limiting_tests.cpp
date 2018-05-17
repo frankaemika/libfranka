@@ -443,10 +443,14 @@ TEST(RateLimiting, CartesianPose) {
       kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit, max_rotational_jerk,
       differentiateOneSample(cartesian_pose_into_limits, last_cmd_pose, kDeltaT), last_cmd_velocity,
       last_cmd_acceleration, kDeltaT));
-  EXPECT_EQ(cartesian_pose_into_limits,
-            limitRate(kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit,
-                      max_rotational_jerk, cartesian_pose_into_limits, last_cmd_pose,
-                      last_cmd_velocity, last_cmd_acceleration));
+
+  std::array<double, 16> cartesian_pose_limited = limitRate(
+      kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit, max_rotational_jerk,
+      cartesian_pose_into_limits, last_cmd_pose, last_cmd_velocity, last_cmd_acceleration);
+
+  for (size_t i = 0; i < cartesian_pose_into_limits.size(); i++) {
+    EXPECT_NEAR(cartesian_pose_into_limits[i], cartesian_pose_limited[i], 1e-6);
+  }
 
   // Desired values are into limits and unchanged after limitRate (rotational and translational
   // acceleration)
@@ -458,10 +462,15 @@ TEST(RateLimiting, CartesianPose) {
       kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit, max_rotational_acceleration,
       kNoLimit, differentiateOneSample(cartesian_pose_into_limits, last_cmd_pose, kDeltaT),
       last_cmd_velocity, last_cmd_acceleration, kDeltaT));
-  EXPECT_EQ(cartesian_pose_into_limits,
-            limitRate(kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit,
-                      max_rotational_acceleration, kNoLimit, cartesian_pose_into_limits,
-                      last_cmd_pose, last_cmd_velocity, last_cmd_acceleration));
+
+  cartesian_pose_limited =
+      limitRate(kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit,
+                max_rotational_acceleration, kNoLimit, cartesian_pose_into_limits, last_cmd_pose,
+                last_cmd_velocity, last_cmd_acceleration);
+
+  for (size_t i = 0; i < cartesian_pose_into_limits.size(); i++) {
+    EXPECT_NEAR(cartesian_pose_into_limits[i], cartesian_pose_limited[i], 1e-6);
+  }
 
   // Desired values are outside limits (rotational and translational jerk violation) and limited
   // after limitRate

@@ -193,8 +193,8 @@ std::array<double, 16> limitRate(
       limitRate(max_translational_velocity, max_translational_acceleration, max_translational_jerk,
                 kFactorCartesianRotationPoseInterface * max_rotational_velocity,
                 kFactorCartesianRotationPoseInterface * max_rotational_acceleration,
-                kFactorCartesianRotationPoseInterface * max_rotational_jerk,
-                commanded_O_dP_EE_c, last_O_dP_EE_c, last_O_ddP_EE_c);
+                kFactorCartesianRotationPoseInterface * max_rotational_jerk, commanded_O_dP_EE_c,
+                last_O_dP_EE_c, last_O_ddP_EE_c);
   dx = Eigen::Matrix<double, 6, 1>(commanded_O_dP_EE_c.data());
 
   // Integrate limited twist
