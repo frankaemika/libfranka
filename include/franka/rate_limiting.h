@@ -125,13 +125,12 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
  * @note
  * FCI filters must be deactivated to work properly.
  *
- * @param[in] max_velocity Per-joint maximum allowed velocity.
- * @param[in] max_acceleration Per-joint maximum allowed acceleration.
- * @param[in] max_jerk Per-joint maximum allowed jerk.
- * @param[in] commanded_position Commanded joint position of the current time step.
- * @param[in] last_commanded_position Commanded joint position of the previous time step.
- * @param[in] last_commanded_velocity Commanded joint velocities of the previous time step.
- * @param[in] last_commanded_acceleration Commanded joint accelerations of the previous time step.
+ * @param[in] max_velocity Maximum allowed velocity.
+ * @param[in] max_acceleration Maximum allowed acceleration.
+ * @param[in] max_jerk Maximum allowed jerk.
+ * @param[in] commanded_velocity Commanded joint velocity of the current time step.
+ * @param[in] last_commanded_velocity Commanded joint velocitiy of the previous time step.
+ * @param[in] last_commanded_acceleration Commanded joint acceleration of the previous time step.
  *
  * @return Rate-limited desired joint velocity.
  */
@@ -148,13 +147,13 @@ double limitRate(double max_velocity,
  * @note
  * FCI filters must be deactivated to work properly.
  *
- * @param[in] max_velocity Per-joint maximum allowed velocity.
- * @param[in] max_acceleration Per-joint maximum allowed acceleration.
- * @param[in] max_jerk Per-joint maximum allowed jerk.
+ * @param[in] max_velocity Maximum allowed velocity.
+ * @param[in] max_acceleration Maximum allowed acceleration.
+ * @param[in] max_jerk Maximum allowed jerk.
  * @param[in] commanded_position Commanded joint position of the current time step.
  * @param[in] last_commanded_position Commanded joint position of the previous time step.
- * @param[in] last_commanded_velocity Commanded joint velocities of the previous time step.
- * @param[in] last_commanded_acceleration Commanded joint accelerations of the previous time step.
+ * @param[in] last_commanded_velocity Commanded joint velocity of the previous time step.
+ * @param[in] last_commanded_acceleration Commanded joint acceleration of the previous time step.
  *
  * @return Rate-limited desired joint position.
  */
