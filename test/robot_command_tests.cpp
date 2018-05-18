@@ -56,6 +56,10 @@ class AutomaticErrorRecoveryCommand
       public ::testing::WithParamInterface<
           research_interface::robot::AutomaticErrorRecovery::Status> {};
 
+class StopMoveCommand
+    : public Command<research_interface::robot::StopMove>,
+      public ::testing::WithParamInterface<research_interface::robot::StopMove::Status> {};
+
 template <typename T>
 typename T::Status Command<T>::getSuccess() {
   return T::Status::kSuccess;
@@ -332,17 +336,27 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
   EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
 }
 
-TEST(StopMoveCommand, CanAbort) {
+INSTANTIATE_TEST_CASE_P(StopMoveCommandTests,
+                        StopMoveCommand,
+                        ::testing::Values(StopMove::Status::kCommandNotPossibleRejected,
+                                          StopMove::Status::kReflexAborted,
+                                          StopMove::Status::kEmergencyAborted,
+                                          StopMove::Status::kAborted));
+
+TEST_P(StopMoveCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
   Robot::Impl robot(
       std::make_unique<franka::Network>("127.0.0.1", research_interface::robot::kCommandPort), 0);
 
+  StopMove::Request request;
   server
-      .waitForCommand<StopMove>(
-          [](const StopMove::Request&) { return StopMove::Response(StopMove::Status::kAborted); })
+      .waitForCommand<StopMove>([this](const StopMove::Request& request) -> StopMove::Response {
+        EXPECT_TRUE(this->compare(request, this->getExpected()));
+        return this->createResponse(request, GetParam());
+      })
       .spinOnce();
 
-  EXPECT_THROW(robot.executeCommand<StopMove>(), CommandException);
+  EXPECT_THROW(robot.executeCommand<StopMove>(request), CommandException);
 }
 
 using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
@@ -420,7 +434,6 @@ INSTANTIATE_TEST_CASE_P(
     ::testing::Values(AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
                       AutomaticErrorRecovery::Status::kReflexAborted,
                       AutomaticErrorRecovery::Status::kEmergencyAborted,
-                      AutomaticErrorRecovery::Status::kInputErrorAborted,
                       AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
                       AutomaticErrorRecovery::Status::kAborted));
 

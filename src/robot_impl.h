@@ -209,6 +209,16 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMo
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
           " command rejected: command not possible in the current mode!");
+    case research_interface::robot::StopMove::Status::kEmergencyAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
+          " command aborted: User Stop pressed!");
+    case research_interface::robot::StopMove::Status::kReflexAborted:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
+          " command aborted: motion aborted by reflex!");
     default:
       throw ProtocolException(
           "libfranka: Unexpected response while handling "s +
@@ -235,11 +245,6 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Automa
                              research_interface::robot::CommandTraits<
                                  research_interface::robot::AutomaticErrorRecovery>::kName +
                              " command aborted: motion aborted by reflex!");
-    case research_interface::robot::AutomaticErrorRecovery::Status::kInputErrorAborted:
-      throw CommandException("libfranka: "s +
-                             research_interface::robot::CommandTraits<
-                                 research_interface::robot::AutomaticErrorRecovery>::kName +
-                             " command aborted: invalid input provided!");
     case research_interface::robot::AutomaticErrorRecovery::Status::kCommandNotPossibleRejected:
       throw CommandException("libfranka: "s +
                              research_interface::robot::CommandTraits<
