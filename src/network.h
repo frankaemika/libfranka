@@ -128,7 +128,7 @@ T Network::udpBlockingReceiveUnsafe() try {
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: UDP receive: "s + e.what());
 }
 
@@ -141,7 +141,7 @@ void Network::udpSend(const T& data) try {
     throw NetworkException("libfranka: could not send UDP data");
   }
 } catch (const Poco::Exception& e) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: UDP send: "s + e.what());
 }
 
@@ -177,7 +177,7 @@ void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
     }
   }
 } catch (const Poco::Exception& e) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: TCP receive: "s + e.what());
 }
 
@@ -193,14 +193,14 @@ uint32_t Network::tcpSendRequest(TArgs&&... args) try {
 
   return message.header.command_id;
 } catch (const Poco::Exception& e) {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: TCP send bytes: "s + e.what());
 }
 
 template <typename T>
 bool Network::tcpReceiveResponse(uint32_t command_id,
                                  std::function<void(const typename T::Response&)> handler) {
-  using namespace std::literals::chrono_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::literals::chrono_literals;  // NOLINT(google-build-using-namespace)
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {
     return false;
@@ -224,7 +224,7 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
 template <typename T>
 typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
                                                          std::vector<uint8_t>* vl_buffer) {
-  using namespace std::literals::chrono_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::literals::chrono_literals;  // NOLINT(google-build-using-namespace)
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::defer_lock);
   decltype(received_responses_)::const_iterator it;
   do {

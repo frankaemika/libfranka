@@ -73,14 +73,15 @@ struct IncompatibleVersionException : public Exception {
 struct ControlException : public Exception {
   /**
    * Creates the exception with an explanatory string and a Log object.
+   *
    * @param[in] what Explanatory string.
    * @param[in] log Vector of last received states and commands.
    */
-  explicit ControlException(std::string what, std::vector<franka::Record> log = {}) noexcept;
+  explicit ControlException(const std::string& what, std::vector<franka::Record> log = {}) noexcept;
 
   /**
-  * Vector of states and commands logged just before the exception occured.
-  */
+   * Vector of states and commands logged just before the exception occured.
+   */
   const std::vector<franka::Record> log;
 };
 

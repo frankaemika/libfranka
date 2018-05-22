@@ -26,9 +26,8 @@ class Robot::Impl : public RobotControl {
                 size_t log_size,
                 RealtimeConfig realtime_config = RealtimeConfig::kEnforce);
 
-  RobotState update(
-      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
-      const research_interface::robot::ControllerCommand* control_command = nullptr) override;
+  RobotState update(const research_interface::robot::MotionGeneratorCommand* motion_command,
+                    const research_interface::robot::ControllerCommand* control_command) override;
 
   void throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) override;
 
@@ -78,7 +77,7 @@ class Robot::Impl : public RobotControl {
 
   Logger logger_;
 
-  const RealtimeConfig realtime_config_;
+  const RealtimeConfig realtime_config_;  // NOLINT(readability-identifier-naming)
   uint16_t ri_version_;
 
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
@@ -93,7 +92,7 @@ class Robot::Impl : public RobotControl {
 template <typename T>
 std::enable_if_t<Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
     const typename T::Response& response) const {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
   switch (response.status) {
     case T::Status::kSuccess:
@@ -113,7 +112,7 @@ std::enable_if_t<Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handl
 template <typename T>
 std::enable_if_t<!Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
     const typename T::Response& response) const {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
   switch (response.status) {
     case T::Status::kSuccess:
@@ -130,7 +129,7 @@ std::enable_if_t<!Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::hand
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
     const research_interface::robot::Move::Response& response) const {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
   switch (response.status) {
     case research_interface::robot::Move::Status::kSuccess:
@@ -194,7 +193,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMove>(
     const research_interface::robot::StopMove::Response& response) const {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
   switch (response.status) {
     case research_interface::robot::StopMove::Status::kSuccess:
@@ -230,7 +229,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMo
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::AutomaticErrorRecovery>(
     const research_interface::robot::AutomaticErrorRecovery::Response& response) const {
-  using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
   switch (response.status) {
     case research_interface::robot::AutomaticErrorRecovery::Status::kSuccess:
@@ -278,11 +277,10 @@ uint32_t Robot::Impl::executeCommand(TArgs... args) {
 }
 
 template <>
-inline uint32_t Robot::Impl::executeCommand<research_interface::robot::GetCartesianLimit,
-                                            int32_t,
-                                            VirtualWallCuboid*>(
-    int32_t id,
-    VirtualWallCuboid* virtual_wall_cuboid) {
+inline uint32_t Robot::Impl::
+    executeCommand<research_interface::robot::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
+        int32_t id,
+        VirtualWallCuboid* virtual_wall_cuboid) {
   using research_interface::robot::GetCartesianLimit;
   uint32_t command_id = network_->tcpSendRequest<GetCartesianLimit>(id);
   GetCartesianLimit::Response response =

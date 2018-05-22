@@ -8,7 +8,7 @@
 // Included for MSG_PEEK symbol not present in Poco
 #include <sys/socket.h>
 
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 

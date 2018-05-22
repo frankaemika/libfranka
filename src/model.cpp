@@ -11,7 +11,7 @@
 #include "model_library.h"
 #include "network.h"
 
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 
@@ -35,8 +35,8 @@ std::array<double, 16> Model::pose(Frame frame, const franka::RobotState& robot_
 std::array<double, 16> Model::pose(
     Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
   std::array<double, 16> output;
   switch (frame) {
@@ -88,8 +88,8 @@ std::array<double, 42> Model::bodyJacobian(Frame frame,
 std::array<double, 42> Model::bodyJacobian(
     Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
   std::array<double, 42> output;
   switch (frame) {
@@ -141,8 +141,8 @@ std::array<double, 42> Model::zeroJacobian(Frame frame,
 std::array<double, 42> Model::zeroJacobian(
     Frame frame,
     const std::array<double, 7>& q,
-    const std::array<double, 16>& F_T_EE,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& EE_T_K)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& F_T_EE,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& EE_T_K)  // NOLINT(readability-identifier-naming)
     const {
   std::array<double, 42> output;
   switch (frame) {
@@ -192,9 +192,9 @@ std::array<double, 49> franka::Model::mass(const franka::RobotState& robot_state
 
 std::array<double, 49> franka::Model::mass(
     const std::array<double, 7>& q,
-    const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
     double m_total,
-    const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
     const noexcept {
   std::array<double, 49> output;
   library_->mass(q.data(), I_total.data(), m_total, F_x_Ctotal.data(), output.data());
@@ -211,9 +211,9 @@ std::array<double, 7> franka::Model::coriolis(const franka::RobotState& robot_st
 std::array<double, 7> franka::Model::coriolis(
     const std::array<double, 7>& q,
     const std::array<double, 7>& dq,
-    const std::array<double, 9>& I_total,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 9>& I_total,  // NOLINT(readability-identifier-naming)
     double m_total,
-    const std::array<double, 3>& F_x_Ctotal)  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal)  // NOLINT(readability-identifier-naming)
     const noexcept {
   std::array<double, 7> output;
   library_->coriolis(q.data(), dq.data(), I_total.data(), m_total, F_x_Ctotal.data(),
@@ -231,7 +231,7 @@ std::array<double, 7> franka::Model::gravity(const franka::RobotState& robot_sta
 std::array<double, 7> franka::Model::gravity(
     const std::array<double, 7>& q,
     double m_total,
-    const std::array<double, 3>& F_x_Ctotal,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal,  // NOLINT(readability-identifier-naming)
     const std::array<double, 3>& gravity_earth) const noexcept {
   std::array<double, 7> output;
   library_->gravity(q.data(), gravity_earth.data(), m_total, F_x_Ctotal.data(), output.data());

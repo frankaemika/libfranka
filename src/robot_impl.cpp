@@ -227,7 +227,7 @@ uint32_t Robot::Impl::startMotion(
       throw ControlException(e.what());
     }
 
-    robot_state = update();
+    robot_state = update(nullptr, nullptr);
   }
 
   logger_.flush();
