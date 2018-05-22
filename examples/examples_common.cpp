@@ -37,7 +37,7 @@ bool MotionGenerator::calculateDesiredValues(double t, Vector7d* delta_q_d) cons
   Vector7i sign_delta_q;
   sign_delta_q << delta_q_.cwiseSign().cast<int>();
   Vector7d t_d = t_2_sync_ - t_1_sync_;
-  Vector7d delta_t_2_sync_ = t_f_sync_ - t_2_sync_;
+  Vector7d delta_t_2_sync = t_f_sync_ - t_2_sync_;
   std::array<bool, 7> joint_motion_finished{};
 
   for (size_t i = 0; i < 7; i++) {
@@ -51,12 +51,12 @@ bool MotionGenerator::calculateDesiredValues(double t, Vector7d* delta_q_d) cons
       } else if (t >= t_1_sync_[i] && t < t_2_sync_[i]) {
         (*delta_q_d)[i] = q_1_[i] + (t - t_1_sync_[i]) * dq_max_sync_[i] * sign_delta_q[i];
       } else if (t >= t_2_sync_[i] && t < t_f_sync_[i]) {
-        (*delta_q_d)[i] = delta_q_[i] +
-                          0.5 *
-                              (1.0 / std::pow(delta_t_2_sync_[i], 3.0) *
-                                   (t - t_1_sync_[i] - 2.0 * delta_t_2_sync_[i] - t_d[i]) *
+        (*delta_q_d)[i] =
+            delta_q_[i] + 0.5 *
+                              (1.0 / std::pow(delta_t_2_sync[i], 3.0) *
+                                   (t - t_1_sync_[i] - 2.0 * delta_t_2_sync[i] - t_d[i]) *
                                    std::pow((t - t_1_sync_[i] - t_d[i]), 3.0) +
-                               (2.0 * t - 2.0 * t_1_sync_[i] - delta_t_2_sync_[i] - 2.0 * t_d[i])) *
+                               (2.0 * t - 2.0 * t_1_sync_[i] - delta_t_2_sync[i] - 2.0 * t_d[i])) *
                               dq_max_sync_[i] * sign_delta_q[i];
       } else {
         (*delta_q_d)[i] = delta_q_[i];

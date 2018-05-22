@@ -52,9 +52,9 @@ class ControlLoop {
 
  private:
   RobotControl& robot_;
-  const MotionGeneratorCallback motion_callback_;
-  const ControlCallback control_callback_;
-  const bool limit_rate_;
+  const MotionGeneratorCallback motion_callback_;  // NOLINT(readability-identifier-naming)
+  const ControlCallback control_callback_;         // NOLINT(readability-identifier-naming)
+  const bool limit_rate_;                          // NOLINT(readability-identifier-naming)
   uint32_t motion_id_ = 0;
 
   void convertMotion(const T& motion,

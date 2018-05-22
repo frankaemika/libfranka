@@ -6,7 +6,7 @@
 
 #include <franka/exception.h>
 
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 

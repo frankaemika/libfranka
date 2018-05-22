@@ -236,9 +236,9 @@ std::array<double, 6> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 6>& O_dP_EE_c,         // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& O_dP_EE_c,         // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT(readability-identifier-naming)
 
 /**
  * Limits the rate of a desired Cartesian pose considering the limits provided.
@@ -266,9 +266,9 @@ std::array<double, 16> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 16>& O_T_EE_c,         // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& last_O_T_EE_c,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& O_T_EE_c,         // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& last_O_T_EE_c,    // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,    // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c);  // NOLINT(readability-identifier-naming)
 
 }  // namespace franka

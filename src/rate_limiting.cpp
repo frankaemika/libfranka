@@ -6,6 +6,54 @@
 
 namespace franka {
 
+namespace {
+
+Eigen::Vector3d limitRate(double max_velocity,
+                          double max_acceleration,
+                          double max_jerk,
+                          const Eigen::Vector3d& commanded_velocity,
+                          const Eigen::Vector3d& last_commanded_velocity,
+                          const Eigen::Vector3d& last_commanded_acceleration) {
+  // Differentiate to get jerk
+  Eigen::Vector3d commanded_jerk =
+      (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
+      kDeltaT;
+
+  // Limit jerk and integrate to get desired acceleration
+  Eigen::Vector3d commanded_acceleration = last_commanded_acceleration;
+  if (commanded_jerk.norm() > kNormEps) {
+    commanded_acceleration += (commanded_jerk / commanded_jerk.norm()) *
+                              std::max(std::min(commanded_jerk.norm(), max_jerk), -max_jerk) *
+                              kDeltaT;
+  }
+
+  // Compute Euclidean distance to the max velocity vector that would be reached starting from
+  // last_commanded_velocity with the direction of the desired acceleration
+  Eigen::Vector3d unit_commanded_acceleration =
+      commanded_acceleration / commanded_acceleration.norm();
+  double dot_product = unit_commanded_acceleration.transpose() * last_commanded_velocity;
+  double distance_to_max_velocity =
+      -dot_product + std::sqrt(pow(dot_product, 2.0) - last_commanded_velocity.squaredNorm() +
+                               pow(max_velocity, 2.0));
+
+  // Compute safe acceleration limits
+  double safe_max_acceleration =
+      std::min((max_jerk / max_acceleration) * distance_to_max_velocity, max_acceleration);
+
+  // Limit acceleration and integrate to get desired velocities
+  Eigen::Vector3d limited_commanded_velocity = last_commanded_velocity;
+
+  if (commanded_acceleration.norm() > kNormEps) {
+    limited_commanded_velocity += unit_commanded_acceleration *
+                                  std::min(commanded_acceleration.norm(), safe_max_acceleration) *
+                                  kDeltaT;
+  }
+
+  return limited_commanded_velocity;
+}
+
+}  // anonymous namespace
+
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& commanded_values,
                                 const std::array<double, 7>& last_commanded_values) {
@@ -92,52 +140,6 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
   return limited_commanded_positions;
 }
 
-namespace {
-Eigen::Vector3d limitRate(double max_velocity,
-                          double max_acceleration,
-                          double max_jerk,
-                          Eigen::Vector3d commanded_velocity,
-                          Eigen::Vector3d last_commanded_velocity,
-                          Eigen::Vector3d last_commanded_acceleration) {
-  // Differentiate to get jerk
-  Eigen::Vector3d commanded_jerk =
-      (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
-      kDeltaT;
-
-  // Limit jerk and integrate to get desired acceleration
-  Eigen::Vector3d commanded_acceleration = last_commanded_acceleration;
-  if (commanded_jerk.norm() > kNormEps) {
-    commanded_acceleration += (commanded_jerk / commanded_jerk.norm()) *
-                              std::max(std::min(commanded_jerk.norm(), max_jerk), -max_jerk) *
-                              kDeltaT;
-  }
-
-  // Compute Euclidean distance to the max velocity vector that would be reached starting from
-  // last_commanded_velocity with the direction of the desired acceleration
-  Eigen::Vector3d unit_commanded_acceleration =
-      commanded_acceleration / commanded_acceleration.norm();
-  double dot_product = unit_commanded_acceleration.transpose() * last_commanded_velocity;
-  double distance_to_max_velocity =
-      -dot_product + std::sqrt(pow(dot_product, 2.0) - last_commanded_velocity.squaredNorm() +
-                               pow(max_velocity, 2.0));
-
-  // Compute safe acceleration limits
-  double safe_max_acceleration =
-      std::min((max_jerk / max_acceleration) * distance_to_max_velocity, max_acceleration);
-
-  // Limit acceleration and integrate to get desired velocities
-  Eigen::Vector3d limited_commanded_velocity = last_commanded_velocity;
-
-  if (commanded_acceleration.norm() > kNormEps) {
-    limited_commanded_velocity += unit_commanded_acceleration *
-                                  std::min(commanded_acceleration.norm(), safe_max_acceleration) *
-                                  kDeltaT;
-  }
-
-  return limited_commanded_velocity;
-}
-}  // anonymous namespace
-
 std::array<double, 6> limitRate(
     double max_translational_velocity,
     double max_translational_acceleration,
@@ -145,9 +147,9 @@ std::array<double, 6> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 6>& O_dP_EE_c,          // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT (readability-identifier-naming)
+    const std::array<double, 6>& O_dP_EE_c,          // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
   Eigen::Matrix<double, 6, 1> dx(O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_dx(last_O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_ddx(last_O_ddP_EE_c.data());
@@ -169,10 +171,10 @@ std::array<double, 16> limitRate(
     double max_rotational_velocity,
     double max_rotational_acceleration,
     double max_rotational_jerk,
-    const std::array<double, 16>& O_T_EE_c,          // NOLINT (readability-identifier-naming)
-    const std::array<double, 16>& last_O_T_EE_c,     // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT (readability-identifier-naming)
-    const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT (readability-identifier-naming)
+    const std::array<double, 16>& O_T_EE_c,          // NOLINT(readability-identifier-naming)
+    const std::array<double, 16>& last_O_T_EE_c,     // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
+    const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
   Eigen::Matrix<double, 6, 1> dx;
   Eigen::Affine3d commanded_pose(Eigen::Matrix4d::Map(O_T_EE_c.data()));
   Eigen::Affine3d limited_commanded_pose = Eigen::Affine3d::Identity();
@@ -187,7 +189,7 @@ std::array<double, 16> limitRate(
   dx.tail(3) << rot_difference.axis() * rot_difference.angle() / kDeltaT;
 
   // Limit the rate of the twist
-  std::array<double, 6> commanded_O_dP_EE_c{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> commanded_O_dP_EE_c{};  // NOLINT(readability-identifier-naming)
   Eigen::Map<Eigen::Matrix<double, 6, 1>>(&commanded_O_dP_EE_c[0], 6, 1) = dx;
   commanded_O_dP_EE_c =
       limitRate(max_translational_velocity, max_translational_acceleration, max_translational_jerk,
@@ -205,7 +207,8 @@ std::array<double, 16> limitRate(
     Eigen::Vector3d w_norm(dx.tail(3) / dx.tail(3).norm());
     double theta = kDeltaT * dx.tail(3).norm();
     omega_skew << 0, -w_norm(2), w_norm(1), w_norm(2), 0, -w_norm(0), -w_norm(1), w_norm(0), 0;
-    Eigen::Matrix3d R = Eigen::Matrix3d::Identity() + sin(theta) * omega_skew +  // NOLINT
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    Eigen::Matrix3d R = Eigen::Matrix3d::Identity() + sin(theta) * omega_skew +
                         (1.0 - cos(theta)) * (omega_skew * omega_skew);
     limited_commanded_pose.linear() << R * last_commanded_pose.linear();
   }

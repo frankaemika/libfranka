@@ -26,7 +26,7 @@ class Logger {
   size_t ring_front_{0};
   size_t ring_size_{0};
 
-  const size_t log_size_;
+  const size_t log_size_;  // NOLINT(readability-identifier-naming)
 };
 
 }  // namespace franka

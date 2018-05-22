@@ -15,9 +15,9 @@
 #include "mock_server.h"
 #include "model_library_interface.h"
 
-using ::testing::_;
-using ::testing::WithArgs;
 using ::testing::Invoke;
+using ::testing::WithArgs;
+using ::testing::_;
 using namespace research_interface::robot;
 
 struct MockModel : public ModelLibraryInterface {
@@ -268,10 +268,9 @@ TEST_F(Model, CanGetBodyJacobian) {
   }
 
   MockModel mock;
-  EXPECT_CALL(mock, Ji_J_J1(_))
-      .WillOnce(WithArgs<0>(Invoke([=](double* output) {
-        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
-      })));
+  EXPECT_CALL(mock, Ji_J_J1(_)).WillOnce(WithArgs<0>(Invoke([=](double* output) {
+    std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+  })));
   EXPECT_CALL(mock, Ji_J_J2(robot_state.q.data(), _))
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
@@ -335,10 +334,9 @@ TEST_F(Model, CanGetZeroJacobian) {
   }
 
   MockModel mock;
-  EXPECT_CALL(mock, O_J_J1(_))
-      .WillOnce(WithArgs<0>(Invoke([=](double* output) {
-        std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
-      })));
+  EXPECT_CALL(mock, O_J_J1(_)).WillOnce(WithArgs<0>(Invoke([=](double* output) {
+    std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);
+  })));
   EXPECT_CALL(mock, O_J_J2(robot_state.q.data(), _))
       .WillOnce(WithArgs<1>(Invoke([=](double* output) {
         std::copy(expected_jacobian.cbegin(), expected_jacobian.cend(), output);

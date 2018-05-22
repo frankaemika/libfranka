@@ -480,7 +480,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setJointImpedance(
-      const std::array<double, 7>& K_theta);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 7>& K_theta);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw) in the internal controller.
@@ -493,7 +493,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setCartesianImpedance(
-      const std::array<double, 6>& K_x);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 6>& K_x);  // NOLINT(readability-identifier-naming)
 
   /**
    * Locks or unlocks guiding mode movement in (x, y, z, roll, pitch, yaw).
@@ -523,7 +523,7 @@ class Robot {
    *
    * @see Robot for an explanation of the stiffness frame.
    */
-  void setK(const std::array<double, 16>& EE_T_K);  // NOLINT (readability-identifier-naming)
+  void setK(const std::array<double, 16>& EE_T_K);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets the transformation \f$^FT_{EE}\f$ from flange to end effector frame.
@@ -538,7 +538,7 @@ class Robot {
    * @see RobotState::O_T_EE for end effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
    */
-  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT (readability-identifier-naming)
+  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets dynamic parameters of a payload.
@@ -557,7 +557,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setLoad(double load_mass,
-               const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+               const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-identifier-naming)
                const std::array<double, 9>& load_inertia);
 
   /**

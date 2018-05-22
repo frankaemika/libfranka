@@ -17,7 +17,7 @@
 // `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
 // have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 
@@ -84,7 +84,7 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 
 template <typename T>
 void ControlLoop<T>::operator()() try {
-  RobotState robot_state = robot_.update();
+  RobotState robot_state = robot_.update(nullptr, nullptr);
   robot_.throwOnMotionError(robot_state, motion_id_);
 
   Duration previous_time = robot_state.time;
