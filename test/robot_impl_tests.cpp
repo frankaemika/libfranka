@@ -34,7 +34,7 @@ TEST(RobotImpl, CanReceiveRobotState) {
   server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &sent_robot_state)
       .spinOnce();
 
-  auto received_robot_state = robot.update();
+  auto received_robot_state = robot.update(nullptr, nullptr);
   testRobotStatesAreEqual(sent_robot_state, received_robot_state);
 }
 
@@ -45,7 +45,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
   server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 2; })
       .spinOnce();
 
-  auto received_robot_state = robot.update();
+  auto received_robot_state = robot.update(nullptr, nullptr);
   EXPECT_EQ(2u, received_robot_state.time.toMSec());
 
   server.onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 1; })
@@ -54,7 +54,7 @@ TEST(RobotImpl, CanReceiveReorderedRobotStatesCorrectly) {
       .onSendUDP<RobotState>([](RobotState& robot_state) { robot_state.message_id = 3; })
       .spinOnce();
 
-  received_robot_state = robot.update();
+  received_robot_state = robot.update(nullptr, nullptr);
   EXPECT_EQ(4u, received_robot_state.time.toMSec());
 }
 
@@ -62,7 +62,7 @@ TEST(RobotImpl, ThrowsTimeoutIfNoRobotStateArrives) {
   RobotMockServer server;
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort, 200ms), 0);
 
-  EXPECT_THROW(robot.update(), NetworkException);
+  EXPECT_THROW(robot.update(nullptr, nullptr), NetworkException);
 }
 
 TEST(RobotImpl, StopsIfControlConnectionClosed) {
@@ -77,10 +77,11 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
     server.sendRandomState<RobotState>([](auto s) { randomRobotState(s); }, &robot_state)
         .spinOnce();
 
-    testRobotStatesAreEqual(franka::convertRobotState(robot_state), robot->update());
+    testRobotStatesAreEqual(franka::convertRobotState(robot_state),
+                            robot->update(nullptr, nullptr));
   }
 
-  EXPECT_THROW(robot->update(), NetworkException);
+  EXPECT_THROW(robot->update(nullptr, nullptr), NetworkException);
 }
 
 TEST(RobotImpl, CanStartMotion) {
@@ -303,7 +304,7 @@ TEST(RobotImpl, CanSendMotionGeneratorCommand) {
       })
       .spinOnce();
 
-  EXPECT_NO_THROW(robot.update(&sent_command.motion));
+  EXPECT_NO_THROW(robot.update(&sent_command.motion, nullptr));
 }
 
 TEST(RobotImpl, CanSendControllerCommand) {
@@ -497,7 +498,7 @@ TEST(RobotImpl, CanStopMotion) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  robot.update(&sent_command.motion);
+  robot.update(&sent_command.motion, nullptr);
 
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
@@ -556,7 +557,7 @@ TEST(RobotImpl, StopMotionErrorThrowsControlException) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
 
-  robot.update(&sent_command.motion);
+  robot.update(&sent_command.motion, nullptr);
 
   server
       .onSendUDP<RobotState>([](RobotState& robot_state) {
@@ -1114,7 +1115,7 @@ TEST(RobotImpl, CanStartConsecutiveMotion) {
         .onReceiveRobotCommand([](const RobotCommand&) {})
         .spinOnce();
 
-    robot.update(&sent_command.motion);
+    robot.update(&sent_command.motion, nullptr);
     EXPECT_TRUE(robot.motionGeneratorRunning());
 
     server

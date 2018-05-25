@@ -10,7 +10,7 @@
 #include "helpers.h"
 #include "logger.h"
 
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 TEST(Logger, LogIsFIFO) {
   size_t log_count = 5;

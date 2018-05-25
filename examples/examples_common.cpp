@@ -9,19 +9,6 @@
 #include <franka/exception.h>
 #include <franka/robot.h>
 
-std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
-                                const std::array<double, 7>& desired_values,
-                                const std::array<double, 7>& last_desired_values) {
-  std::array<double, 7> limited_values{};
-  for (size_t i = 0; i < 7; i++) {
-    double desired_difference = (desired_values[i] - last_desired_values[i]) / 1e-3;
-    limited_values[i] =
-        last_desired_values[i] +
-        std::max(std::min(desired_difference, max_derivatives[i]), -max_derivatives[i]) * 1e-3;
-  }
-  return limited_values;
-}
-
 void setDefaultBehavior(franka::Robot& robot) {
   robot.setCollisionBehavior(
       {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}}, {{20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0}},
@@ -30,7 +17,6 @@ void setDefaultBehavior(franka::Robot& robot) {
       {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}}, {{10.0, 10.0, 10.0, 10.0, 10.0, 10.0}});
   robot.setJointImpedance({{3000, 3000, 3000, 2500, 2500, 2000, 2000}});
   robot.setCartesianImpedance({{3000, 3000, 3000, 300, 300, 300}});
-  robot.setFilters(100, 100, 100, 100, 100);
 }
 
 MotionGenerator::MotionGenerator(double speed_factor, const std::array<double, 7> q_goal)
@@ -51,7 +37,7 @@ bool MotionGenerator::calculateDesiredValues(double t, Vector7d* delta_q_d) cons
   Vector7i sign_delta_q;
   sign_delta_q << delta_q_.cwiseSign().cast<int>();
   Vector7d t_d = t_2_sync_ - t_1_sync_;
-  Vector7d delta_t_2_sync_ = t_f_sync_ - t_2_sync_;
+  Vector7d delta_t_2_sync = t_f_sync_ - t_2_sync_;
   std::array<bool, 7> joint_motion_finished{};
 
   for (size_t i = 0; i < 7; i++) {
@@ -65,12 +51,12 @@ bool MotionGenerator::calculateDesiredValues(double t, Vector7d* delta_q_d) cons
       } else if (t >= t_1_sync_[i] && t < t_2_sync_[i]) {
         (*delta_q_d)[i] = q_1_[i] + (t - t_1_sync_[i]) * dq_max_sync_[i] * sign_delta_q[i];
       } else if (t >= t_2_sync_[i] && t < t_f_sync_[i]) {
-        (*delta_q_d)[i] = delta_q_[i] +
-                          0.5 *
-                              (1.0 / std::pow(delta_t_2_sync_[i], 3.0) *
-                                   (t - t_1_sync_[i] - 2.0 * delta_t_2_sync_[i] - t_d[i]) *
+        (*delta_q_d)[i] =
+            delta_q_[i] + 0.5 *
+                              (1.0 / std::pow(delta_t_2_sync[i], 3.0) *
+                                   (t - t_1_sync_[i] - 2.0 * delta_t_2_sync[i] - t_d[i]) *
                                    std::pow((t - t_1_sync_[i] - t_d[i]), 3.0) +
-                               (2.0 * t - 2.0 * t_1_sync_[i] - delta_t_2_sync_[i] - 2.0 * t_d[i])) *
+                               (2.0 * t - 2.0 * t_1_sync_[i] - delta_t_2_sync[i] - 2.0 * t_d[i])) *
                               dq_max_sync_[i] * sign_delta_q[i];
       } else {
         (*delta_q_d)[i] = delta_q_[i];

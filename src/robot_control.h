@@ -22,13 +22,13 @@ class RobotControl {
       const research_interface::robot::Move::Deviation& maximum_goal_pose_deviation) = 0;
   virtual void finishMotion(
       uint32_t motion_id,
-      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
-      const research_interface::robot::ControllerCommand* control_command = nullptr) = 0;
+      const research_interface::robot::MotionGeneratorCommand* motion_command,
+      const research_interface::robot::ControllerCommand* control_command) = 0;
   virtual void cancelMotion(uint32_t motion_id) = 0;
 
   virtual RobotState update(
-      const research_interface::robot::MotionGeneratorCommand* motion_command = nullptr,
-      const research_interface::robot::ControllerCommand* control_command = nullptr) = 0;
+      const research_interface::robot::MotionGeneratorCommand* motion_command,
+      const research_interface::robot::ControllerCommand* control_command) = 0;
 
   virtual void throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) = 0;
 

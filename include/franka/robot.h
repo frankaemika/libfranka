@@ -130,6 +130,8 @@ class Robot {
    *
    * @param[in] control_callback Callback function providing joint-level torque commands.
    * See @ref callback-docs "here" for more details.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -138,7 +140,8 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
-  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback);
+  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+               bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint positions.
@@ -150,6 +153,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -160,7 +165,8 @@ class Robot {
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback);
+      std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint velocities.
@@ -172,6 +178,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -180,9 +188,10 @@ class Robot {
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
-  void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               std::function<JointVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback);
+  void control(
+      std::function<Torques(const RobotState&, franka::Duration)> control_callback,
+      std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian poses.
@@ -194,6 +203,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -204,7 +215,8 @@ class Robot {
    */
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback);
+      std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
@@ -216,6 +228,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -226,7 +240,8 @@ class Robot {
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
-                   motion_generator_callback);
+                   motion_generator_callback,
+               bool limit_rate = true);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
@@ -237,6 +252,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -247,7 +264,8 @@ class Robot {
    */
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
@@ -258,6 +276,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -268,7 +288,8 @@ class Robot {
    */
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
@@ -279,6 +300,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -289,7 +312,8 @@ class Robot {
    */
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      ControllerMode controller_mode = ControllerMode::kJointImpedance);
+      ControllerMode controller_mode = ControllerMode::kJointImpedance,
+      bool limit_rate = true);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
@@ -300,6 +324,8 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
+   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * This could distort your motion!
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -310,7 +336,8 @@ class Robot {
    */
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               ControllerMode controller_mode = ControllerMode::kJointImpedance);
+               ControllerMode controller_mode = ControllerMode::kJointImpedance,
+               bool limit_rate = true);
 
   /**
    * @}
@@ -453,7 +480,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setJointImpedance(
-      const std::array<double, 7>& K_theta);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 7>& K_theta);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw) in the internal controller.
@@ -466,7 +493,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setCartesianImpedance(
-      const std::array<double, 6>& K_x);  // NOLINT (readability-identifier-naming)
+      const std::array<double, 6>& K_x);  // NOLINT(readability-identifier-naming)
 
   /**
    * Locks or unlocks guiding mode movement in (x, y, z, roll, pitch, yaw).
@@ -496,7 +523,7 @@ class Robot {
    *
    * @see Robot for an explanation of the stiffness frame.
    */
-  void setK(const std::array<double, 16>& EE_T_K);  // NOLINT (readability-identifier-naming)
+  void setK(const std::array<double, 16>& EE_T_K);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets the transformation \f$^FT_{EE}\f$ from flange to end effector frame.
@@ -511,7 +538,7 @@ class Robot {
    * @see RobotState::O_T_EE for end effector pose in world base frame.
    * @see Robot for an explanation of the EE frame.
    */
-  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT (readability-identifier-naming)
+  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets dynamic parameters of a payload.
@@ -530,14 +557,14 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   void setLoad(double load_mass,
-               const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
+               const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-identifier-naming)
                const std::array<double, 9>& load_inertia);
 
   /**
    * Sets the cut off frequency for the given motion generator or controller.
    * Allowed input range for all the filters is between 1.0 Hz and 1000.0 Hz.
    * If the value is set to maximum (1000Hz) then no filtering is done.
-   * Default value of all filters is 100Hz.
+   * By default all filters are disabled (set to 1000Hz).
    *
    * @param[in] joint_position_filter_frequency Frequency at which the commanded joint
    * position is cut off.

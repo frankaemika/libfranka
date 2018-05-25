@@ -10,13 +10,14 @@
 #include <fstream>
 
 #include <franka/exception.h>
+#include <franka/rate_limiting.h>
 
 #include "motion_generator_traits.h"
 
 // `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
 // have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
-using namespace std::string_literals;  // NOLINT (google-build-using-namespace)
+using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 
@@ -26,10 +27,12 @@ constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDev
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
-                            ControlCallback control_callback)
+                            ControlCallback control_callback,
+                            bool limit_rate)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
-      control_callback_(std::move(control_callback)) {
+      control_callback_(std::move(control_callback)),
+      limit_rate_(limit_rate) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -40,8 +43,9 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
-                            MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback)) {
+                            MotionGeneratorCallback motion_callback,
+                            bool limit_rate)
+    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), limit_rate) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
@@ -57,8 +61,9 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
-                            MotionGeneratorCallback motion_callback)
-    : ControlLoop(robot, std::move(motion_callback), {}) {
+                            MotionGeneratorCallback motion_callback,
+                            bool limit_rate)
+    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
@@ -79,7 +84,7 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 
 template <typename T>
 void ControlLoop<T>::operator()() try {
-  RobotState robot_state = robot_.update();
+  RobotState robot_state = robot_.update(nullptr, nullptr);
   robot_.throwOnMotionError(robot_state, motion_id_);
 
   Duration previous_time = robot_state.time;
@@ -115,7 +120,12 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  command->tau_J_d = control_output.tau_J;
+
+  if (limit_rate_) {
+    command->tau_J_d = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
+  } else {
+    command->tau_J_d = control_output.tau_J;
+  }
   return !control_output.motion_finished;
 }
 
@@ -124,51 +134,93 @@ bool ControlLoop<T>::spinMotion(const RobotState& robot_state,
                                 franka::Duration time_step,
                                 research_interface::robot::MotionGeneratorCommand* command) {
   T motion_output = motion_callback_(robot_state, time_step);
-  convertMotion(motion_output, command);
+  convertMotion(motion_output, robot_state, command);
   return !motion_output.motion_finished;
 }
 
 template <>
 void ControlLoop<JointPositions>::convertMotion(
     const JointPositions& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->q_d = motion.q;
+  if (limit_rate_) {
+    command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.q,
+                             robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
+  } else {
+    command->q_c = motion.q;
+  }
 }
 
 template <>
 void ControlLoop<JointVelocities>::convertMotion(
     const JointVelocities& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->dq_d = motion.dq;
+  if (limit_rate_) {
+    command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.dq,
+                              robot_state.dq_d, robot_state.ddq_d);
+  } else {
+    command->dq_c = motion.dq;
+  }
 }
 
 template <>
 void ControlLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->O_T_EE_d = motion.O_T_EE;
+  if (limit_rate_) {
+    command->O_T_EE_c = limitRate(
+        kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
+        kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, motion.O_T_EE,
+        robot_state.O_T_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
+  } else {
+    command->O_T_EE_c = motion.O_T_EE;
+  }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
-    command->elbow_d = motion.elbow;
+    if (limit_rate_) {
+      command->elbow_c[0] =
+          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
+                    robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
+      command->elbow_c[1] = motion.elbow[1];
+    } else {
+      command->elbow_c = motion.elbow;
+    }
   } else {
     command->valid_elbow = false;
-    command->elbow_d = {};
+    command->elbow_c = {};
   }
 }
 
 template <>
 void ControlLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
+    const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
-  command->O_dP_EE_d = motion.O_dP_EE;
+  if (limit_rate_) {
+    command->O_dP_EE_c =
+        limitRate(kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
+                  kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk,
+                  motion.O_dP_EE, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
+  } else {
+    command->O_dP_EE_c = motion.O_dP_EE;
+  }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
-    command->elbow_d = motion.elbow;
+    if (limit_rate_) {
+      command->elbow_c[0] =
+          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
+                    robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
+      command->elbow_c[1] = motion.elbow[1];
+    } else {
+      command->elbow_c = motion.elbow;
+    }
   } else {
     command->valid_elbow = false;
-    command->elbow_d = {};
+    command->elbow_c = {};
   }
 }
 

@@ -8,10 +8,10 @@ namespace franka {
 
 std::array<double, 3> combineCenterOfMass(
     double m_ee,
-    const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Cee,  // NOLINT(readability-identifier-naming)
     double m_load,
-    const std::array<double, 3>& F_x_Cload) {  // NOLINT (readability-identifier-naming)
-  std::array<double, 3> F_x_Ctotal{};          // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Cload) {  // NOLINT(readability-identifier-naming)
+  std::array<double, 3> F_x_Ctotal{};          // NOLINT(readability-identifier-naming)
   if ((m_ee + m_load) > 0) {
     std::transform(
         F_x_Cload.cbegin(), F_x_Cload.cend(), F_x_Cee.cbegin(), F_x_Ctotal.begin(),
@@ -31,13 +31,13 @@ Eigen::Matrix3d skewSymmetricMatrixFromVector(const Eigen::Vector3d& input) {
 
 std::array<double, 9> combineInertiaTensor(
     double m_ee,
-    const std::array<double, 3>& F_x_Cee,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 9>& I_ee,     // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Cee,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& I_ee,     // NOLINT(readability-identifier-naming)
     double m_load,
-    const std::array<double, 3>& F_x_Cload,  // NOLINT (readability-identifier-naming)
-    const std::array<double, 9>& I_load,     // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& I_load,     // NOLINT(readability-identifier-naming)
     double m_total,
-    const std::array<double, 3>& F_x_Ctotal) {  // NOLINT (readability-identifier-naming)
+    const std::array<double, 3>& F_x_Ctotal) {  // NOLINT(readability-identifier-naming)
   // If the combined mass equals to zero, the combined inertia is also zero.
   if (m_total == 0) {
     return std::array<double, 9>{};
@@ -62,22 +62,21 @@ std::array<double, 9> combineInertiaTensor(
   }
 
   // Calculate inertia tensor of EE and load in flange coordinates.
-  inertia_ee_flange = inertia_ee -
-                      m_ee * (skewSymmetricMatrixFromVector(center_of_mass_ee) *
-                              skewSymmetricMatrixFromVector(center_of_mass_ee));
-  inertia_load_flange = inertia_load -
-                        m_load * (skewSymmetricMatrixFromVector(center_of_mass_load) *
-                                  skewSymmetricMatrixFromVector(center_of_mass_load));
+  inertia_ee_flange = inertia_ee - m_ee * (skewSymmetricMatrixFromVector(center_of_mass_ee) *
+                                           skewSymmetricMatrixFromVector(center_of_mass_ee));
+  inertia_load_flange =
+      inertia_load - m_load * (skewSymmetricMatrixFromVector(center_of_mass_load) *
+                               skewSymmetricMatrixFromVector(center_of_mass_load));
 
   // Calculate combined inertia tensor in flange coordinate.
   inertia_total_flange = inertia_ee_flange + inertia_load_flange;
 
   // Calculate combined inertia tensor in combined body center of mass coordinate.
-  std::array<double, 9> I_total;  // NOLINT (readability-identifier-naming)
+  std::array<double, 9> I_total;  // NOLINT(readability-identifier-naming)
   Eigen::Map<Eigen::Matrix3d> inertia_total(I_total.data(), 3, 3);
-  inertia_total = inertia_total_flange +
-                  m_total * (skewSymmetricMatrixFromVector(center_of_mass_total) *
-                             skewSymmetricMatrixFromVector(center_of_mass_total));
+  inertia_total =
+      inertia_total_flange + m_total * (skewSymmetricMatrixFromVector(center_of_mass_total) *
+                                        skewSymmetricMatrixFromVector(center_of_mass_total));
 
   return I_total;
 }

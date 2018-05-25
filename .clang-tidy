@@ -1,4 +1,4 @@
-Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-constant-array-index,-google-explicit-constructor'
+Checks: 'clang-diagnostic-*,clang-analyzer-*,-clang-analyzer-alpha*,google-*,misc-*,readability-*,modernize-*,performance-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-bounds-constant-array-index,-google-explicit-constructor,-google-runtime-references,-cppcoreguidelines-pro-type-member-init,-cppcoreguidelines-special-member-functions'
 HeaderFilterRegex: '^.*(src|include/franka).*$'
 CheckOptions:
 # Classes, structs, ...

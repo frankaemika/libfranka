@@ -12,12 +12,12 @@
 #include "helpers.h"
 #include "mock_server.h"
 
-using ::testing::_;
 using ::testing::Return;
+using ::testing::_;
 
 using franka::Gripper;
-using franka::NetworkException;
 using franka::IncompatibleVersionException;
+using franka::NetworkException;
 
 using research_interface::gripper::Connect;
 using research_interface::gripper::GripperState;

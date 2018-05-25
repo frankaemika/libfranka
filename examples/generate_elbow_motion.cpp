@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
           time += period.toSec();
 
           if (time == 0.0) {
-            initial_pose = robot_state.O_T_EE_d;
-            initial_elbow = robot_state.elbow_d;
+            initial_pose = robot_state.O_T_EE_c;
+            initial_elbow = robot_state.elbow_c;
           }
 
           double angle = M_PI / 10.0 * (1.0 - std::cos(M_PI / 5.0 * time));

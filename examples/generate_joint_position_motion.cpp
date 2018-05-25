@@ -63,16 +63,7 @@ int main(int argc, char** argv) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
         return franka::MotionFinished(output);
       }
-      // state.q_d contains the last joint position command received by the robot.
-      // In case of packet loss due to bad connection or due to a slow control loop
-      // not reaching the 1kHz rate, even if your desired trajectory
-      // is smooth, discontinuities might occur.
-      // Saturating the velocity computed with respect to the last command received
-      // by the robot will prevent from getting discontinuity errors (but will distort
-      // your motion).
-      // Note that if the robot does not receive a command it will try to extrapolate
-      // the desired behavior assuming a constant acceleration model
-      return limitRate(kMaxJointVel, output.q, robot_state.q_d);
+      return output;
     });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
