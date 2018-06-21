@@ -1,19 +1,21 @@
 # CHANGELOG
 
-## 0.4.0 - UNRELEASED
+## 0.4.0 - 2018-06-21
 
 Requires Panda system version >= 1.3.0
 
 ### Motion and control interfaces
 
+  * **BREAKING** Added rate limiting of commanded values as an option in the control loop and as
+    a helper function. Rate limiting is activated by default, this could change the behavior of
+    existing programs. Only works when filters (`franka::Robot::setFilters`) are deactivated.
   * Added `joint_move_in_wrong_direction` error to `franka::RobotState`
+  * Added first and second derivatives of last commanded signals to `franka::RobotState`
 
 ### Library
 
+  * Added `rate_limiting.h` to public interface
   * Removed unnecessary CMake script from installation
-  * **BREAKING** Added rate limitation of the commanded values as option in the control loop and as
-    a helper function. Rate limitation is activated by default, this could change the behavior of
-    existing programs.
 
 ## 0.3.0 - 2018-02-22
 
