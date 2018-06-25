@@ -38,21 +38,21 @@ struct RobotState {
    * Measured end effector pose in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> O_T_EE{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f${^OT_{EE}}_{d}\f$
    * Last desired end effector pose of motion generation in base frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> O_T_EE_d{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> O_T_EE_d{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$^{F}T_{EE}\f$
    * End effector frame pose in flange frame.
    * Pose is represented as a 4x4 matrix in column-major format.
    */
-  std::array<double, 16> F_T_EE{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> F_T_EE{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$^{EE}T_{K}\f$
@@ -61,54 +61,63 @@ struct RobotState {
    *
    * See also @ref k-frame "K frame".
    */
-  std::array<double, 16> EE_T_K{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> EE_T_K{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$m_{EE}\f$
    * Configured mass of the end effector.
    */
   double m_ee{};
 
   /**
+   * \f$I_{EE}\f$
    * Configured rotational inertia matrix of the end effector load with respect to center of mass.
    */
-  std::array<double, 9> I_ee{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 9> I_ee{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{EE}}\f$
    * Configured center of mass of the end effector load with respect to flange frame.
    */
-  std::array<double, 3> F_x_Cee{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 3> F_x_Cee{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$m_{load}\f$
    * Configured mass of the external load.
    */
   double m_load{};
 
   /**
+   * \f$I_{load}\f$
    * Configured rotational inertia matrix of the external load with respect to center of mass.
    */
-  std::array<double, 9> I_load{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 9> I_load{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{load}}\f$
    * Configured center of mass of the external load with respect to flange frame.
    */
-  std::array<double, 3> F_x_Cload{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 3> F_x_Cload{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$m_{total}\f$
    * Sum of the mass of the end effector and the external load.
    */
   double m_total{};
 
   /**
+   * \f$I_{total}\f$
    * Combined rotational inertia matrix of the end effector load and the external load with respect
    * to the center of mass.
    */
-  std::array<double, 9> I_total{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 9> I_total{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$^{F}x_{C_{total}}\f$
    * Combined center of mass of the end effector load and the external load with respect to flange
    * frame.
    */
-  std::array<double, 3> F_x_Ctotal{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 3> F_x_Ctotal{};  // NOLINT(readability-identifier-naming)
 
   /**
    * Elbow configuration.
@@ -129,22 +138,49 @@ struct RobotState {
   std::array<double, 2> elbow_d{};
 
   /**
+   * Commanded elbow configuration.
+   *
+   * The values of the array are:
+   *  - [0] Position of the 3rd joint in [rad].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> elbow_c{};
+
+  /**
+   * Commanded elbow velocity.
+   *
+   * The values of the array are:
+   *  - [0] Velocity of the 3rd joint in [rad/s].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> delbow_c{};
+
+  /**
+   * Commanded elbow acceleration.
+   *
+   * The values of the array are:
+   *  - [0] Acceleration of the 3rd joint in [rad/s^2].
+   *  - [1] Sign of the 4th joint. Can be +1 or -1.
+   */
+  std::array<double, 2> ddelbow_c{};
+
+  /**
    * \f$\tau_{J}\f$
    * Measured link-side joint torque sensor signals. Unit: \f$[Nm]\f$
    */
-  std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> tau_J{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f${\tau_J}_d\f$
    * Desired link-side joint torque sensor signals without gravity. Unit: \f$[Nm]\f$
    */
-  std::array<double, 7> tau_J_d{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> tau_J_d{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$\dot{\tau_{J}}\f$
    * Derivative of measured link-side joint torque sensor signals. Unit: \f$[\frac{Nm}{s}]\f$
    */
-  std::array<double, 7> dtau_J{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> dtau_J{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$q\f$
@@ -169,6 +205,12 @@ struct RobotState {
    * Desired joint velocity. Unit: \f$[\frac{rad}{s}]\f$
    */
   std::array<double, 7> dq_d{};
+
+  /**
+   * \f$\dot{q}_d\f$
+   * Desired joint acceleration. Unit: \f$[\frac{rad}{s^2}]\f$
+   */
+  std::array<double, 7> ddq_d{};
 
   /**
    * Indicates which contact level is activated in which joint. After contact disappears, value
@@ -216,7 +258,7 @@ struct RobotState {
    * relative to the base frame. See also @ref k-frame "K frame".
    * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
-  std::array<double, 6> O_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> O_F_ext_hat_K{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
@@ -224,7 +266,36 @@ struct RobotState {
    * frame. See also @ref k-frame "K frame".
    * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
-  std::array<double, 6> K_F_ext_hat_K{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> K_F_ext_hat_K{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f${^OdP_{EE}}_{d}\f$
+   * Desired end effector twist in base frame.
+   * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
+   */
+  std::array<double, 6> O_dP_EE_d{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f${^OT_{EE}}_{c}\f$
+   * Last commanded end effector pose of motion generation in base frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   */
+  std::array<double, 16> O_T_EE_c{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f${^OdP_{EE}}_{c}\f$
+   * Last commanded end effector twist in base frame.
+   * Unit: \f$[\frac{m}{s},\frac{m}{s},\frac{m}{s},\frac{rad}{s},\frac{rad}{s},\frac{rad}{s}]\f$.
+   */
+  std::array<double, 6> O_dP_EE_c{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f${^OddP_{EE}}_{c}\f$
+   * Last commanded end effector acceleration in base frame.
+   * Unit:
+   * \f$[\frac{m}{s^2},\frac{m}{s^2},\frac{m}{s^2},\frac{rad}{s^2},\frac{rad}{s^2},\frac{rad}{s^2}]\f$.
+   */
+  std::array<double, 6> O_ddP_EE_c{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$\theta\f$

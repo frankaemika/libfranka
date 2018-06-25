@@ -65,43 +65,42 @@ inline void checkElbow(const std::array<double, 2>& elbow) {
 
 }  // anonymous namespace
 
-Torques MotionFinished(const Torques& command) {  // NOLINT (readability-identifier-naming)
+Torques MotionFinished(const Torques& command) {  // NOLINT(readability-identifier-naming)
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
+JointPositions MotionFinished(  // NOLINT(readability-identifier-naming)
     const JointPositions& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+JointVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
     const JointVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
+CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
     const CartesianPose& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
     const CartesianVelocities& command) {
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
   new_command.motion_finished = true;
   return new_command;
 }
 
-Torques::Torques(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                 torques)
-    : tau_J(torques) {
+// NOLINTNEXTLINE(modernize-pass-by-value)
+Torques::Torques(const std::array<double, 7>& torques) : tau_J(torques) {
   checkFinite(tau_J);
 }
 
@@ -113,9 +112,8 @@ Torques::Torques(std::initializer_list<double> torques) {
   checkFinite(tau_J);
 }
 
-JointPositions::JointPositions(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                               joint_positions)
-    : q(joint_positions) {
+// NOLINTNEXTLINE(modernize-pass-by-value)
+JointPositions::JointPositions(const std::array<double, 7>& joint_positions) : q(joint_positions) {
   checkFinite(q);
 }
 
@@ -127,8 +125,8 @@ JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   checkFinite(q);
 }
 
-JointVelocities::JointVelocities(const std::array<double, 7>&  // NOLINT (modernize-pass-by-value)
-                                 joint_velocities)
+// NOLINTNEXTLINE(modernize-pass-by-value)
+JointVelocities::JointVelocities(const std::array<double, 7>& joint_velocities)
     : dq(joint_velocities) {
   checkFinite(dq);
 }
@@ -141,18 +139,17 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
   checkFinite(dq);
 }
 
-CartesianPose::CartesianPose(const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
-                             cartesian_pose)
+// NOLINTNEXTLINE(modernize-pass-by-value)
+CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose)
     : O_T_EE(cartesian_pose) {
   checkMatrix(O_T_EE);
 }
 
-CartesianPose::CartesianPose(
-    const std::array<double, 16>&  // NOLINT (modernize-pass-by-value)
-    cartesian_pose,
-    const std::array<double, 2>& elbow)  // NOLINT (modernize-pass-by-value)
-    : O_T_EE(cartesian_pose),
-      elbow(elbow) {
+// NOLINTNEXTLINE(modernize-pass-by-value)
+CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose,
+                             // NOLINTNEXTLINE(modernize-pass-by-value)
+                             const std::array<double, 2>& elbow)
+    : O_T_EE(cartesian_pose), elbow(elbow) {
   checkElbow(elbow);
   checkMatrix(O_T_EE);
 }
@@ -183,19 +180,17 @@ bool CartesianPose::hasValidElbow() const noexcept {
   return isValidElbow(elbow);
 }
 
-CartesianVelocities::CartesianVelocities(
-    const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
-    cartesian_velocities)
+// NOLINTNEXTLINE(modernize-pass-by-value)
+CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities)
     : O_dP_EE(cartesian_velocities) {
   checkFinite(O_dP_EE);
 }
 
-CartesianVelocities::CartesianVelocities(
-    const std::array<double, 6>&  // NOLINT (modernize-pass-by-value)
-    cartesian_velocities,
-    const std::array<double, 2>& elbow)  // NOLINT (modernize-pass-by-value)
-    : O_dP_EE(cartesian_velocities),
-      elbow(elbow) {
+// NOLINTNEXTLINE(modernize-pass-by-value)
+CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
+                                         // NOLINTNEXTLINE(modernize-pass-by-value)
+                                         const std::array<double, 2>& elbow)
+    : O_dP_EE(cartesian_velocities), elbow(elbow) {
   checkElbow(elbow);
   checkFinite(O_dP_EE);
 }

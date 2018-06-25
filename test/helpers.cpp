@@ -94,6 +94,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.K_F_ext_hat_K) {
     EXPECT_EQ(0.0, element);
   }
+  for (double element : actual.O_dP_EE_d) {
+    EXPECT_EQ(0.0, element);
+  }
   for (double element : actual.theta) {
     EXPECT_EQ(0.0, element);
   }
@@ -136,6 +139,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
@@ -181,6 +185,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.tau_ext_hat_filtered, actual.tau_ext_hat_filtered);
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
+  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
@@ -305,6 +310,9 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.K_F_ext_hat_K) {
     element = randomDouble();
   }
+  for (double& element : robot_state.O_dP_EE_d) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.theta) {
     element = randomDouble();
   }
@@ -398,6 +406,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (double& element : robot_state.K_F_ext_hat_K) {
     element = randomDouble();
   }
+  for (double& element : robot_state.O_dP_EE_d) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.theta) {
     element = randomDouble();
   }
@@ -419,19 +430,19 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
 void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) {
   // Reset to all-zeros first
   robot_command = research_interface::robot::RobotCommand();
-  for (double& element : robot_command.motion.q_d) {
+  for (double& element : robot_command.motion.q_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.dq_d) {
+  for (double& element : robot_command.motion.dq_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.O_T_EE_d) {
+  for (double& element : robot_command.motion.O_T_EE_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.O_dP_EE_d) {
+  for (double& element : robot_command.motion.O_dP_EE_c) {
     element = randomDouble();
   }
-  for (double& element : robot_command.motion.elbow_d) {
+  for (double& element : robot_command.motion.elbow_c) {
     element = randomDouble();
   }
   robot_command.motion.valid_elbow = true;
@@ -445,11 +456,11 @@ void randomRobotCommand(research_interface::robot::RobotCommand& robot_command) 
 void testMotionGeneratorCommandsAreEqual(
     const research_interface::robot::MotionGeneratorCommand& expected,
     const research_interface::robot::MotionGeneratorCommand& actual) {
-  EXPECT_EQ(expected.q_d, actual.q_d);
-  EXPECT_EQ(expected.dq_d, actual.dq_d);
-  EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
-  EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
-  EXPECT_EQ(expected.elbow_d, actual.elbow_d);
+  EXPECT_EQ(expected.q_c, actual.q_c);
+  EXPECT_EQ(expected.dq_c, actual.dq_c);
+  EXPECT_EQ(expected.O_T_EE_c, actual.O_T_EE_c);
+  EXPECT_EQ(expected.O_dP_EE_c, actual.O_dP_EE_c);
+  EXPECT_EQ(expected.elbow_c, actual.elbow_c);
   EXPECT_EQ(expected.valid_elbow, actual.valid_elbow);
   EXPECT_EQ(expected.motion_generation_finished, actual.motion_generation_finished);
 }
@@ -469,10 +480,10 @@ void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& ex
 void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
                                const franka::RobotCommand actual) {
   research_interface::robot::RobotCommand fci_command = expected;
-  fci_command.motion.q_d = actual.joint_positions.q;
-  fci_command.motion.dq_d = actual.joint_velocities.dq;
-  fci_command.motion.O_T_EE_d = actual.cartesian_pose.O_T_EE;
-  fci_command.motion.O_dP_EE_d = actual.cartesian_velocities.O_dP_EE;
+  fci_command.motion.q_c = actual.joint_positions.q;
+  fci_command.motion.dq_c = actual.joint_velocities.dq;
+  fci_command.motion.O_T_EE_c = actual.cartesian_pose.O_T_EE;
+  fci_command.motion.O_dP_EE_c = actual.cartesian_velocities.O_dP_EE;
   fci_command.control.tau_J_d = actual.torques.tau_J;
   testRobotCommandsAreEqual(expected, fci_command);
 }
@@ -574,8 +585,14 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
              rhs.cartesian_position_motion_generator_invalid_frame &&
          lhs.force_controller_desired_force_tolerance_violation ==
              rhs.force_controller_desired_force_tolerance_violation &&
+         lhs.controller_torque_discontinuity == rhs.controller_torque_discontinuity &&
          lhs.start_elbow_sign_inconsistent == rhs.start_elbow_sign_inconsistent &&
          lhs.communication_constraints_violation == rhs.communication_constraints_violation &&
-         lhs.power_limit_violation == rhs.power_limit_violation;
+         lhs.power_limit_violation == rhs.power_limit_violation &&
+         lhs.joint_p2p_insufficient_torque_for_planning ==
+             rhs.joint_p2p_insufficient_torque_for_planning &&
+         lhs.tau_j_range_violation == rhs.tau_j_range_violation &&
+         lhs.instability_detected == rhs.instability_detected &&
+         lhs.joint_move_in_wrong_direction == rhs.joint_move_in_wrong_direction;
 }
-}
+}  // namespace franka

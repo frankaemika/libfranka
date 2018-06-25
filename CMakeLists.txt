@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.3.0
+  VERSION 0.4.0
   LANGUAGES CXX
 )
 
@@ -16,9 +16,6 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
 
 ## Dependencies
-# Don't forget to adjust cmake/FrankaConfig.cmake.in
-# when making changes here.
-
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
 
@@ -59,6 +56,7 @@ add_library(franka SHARED
   src/model.cpp
   src/model_library.cpp
   src/network.cpp
+  src/rate_limiting.cpp
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
@@ -108,13 +106,8 @@ configure_package_config_file(cmake/FrankaConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
   INSTALL_DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
 )
-configure_file(cmake/FindPoco.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
-  COPYONLY
-)
 
 install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/FindPoco.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
   ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
   DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
@@ -193,7 +186,7 @@ file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
 
-find_program(CLANG_FORMAT_PROG clang-format DOC "'clang-format' executable")
+find_program(CLANG_FORMAT_PROG clang-format-5.0 DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format
     COMMAND ${CLANG_FORMAT_PROG} -i ${SOURCES} ${HEADERS} ${TEST_FILES}
@@ -208,7 +201,7 @@ if(CLANG_FORMAT_PROG)
     VERBATIM
   )
 endif()
-find_program(CLANG_TIDY_PROG clang-tidy DOC "'clang-tidy' executable")
+find_program(CLANG_TIDY_PROG clang-tidy-5.0 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   # Build JSON string for clang-tidy's line filter
   set(TIDY_FILES ${SOURCES} ${HEADERS})

@@ -12,6 +12,7 @@
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
+#include <franka/rate_limiting.h>
 #include <franka/robot.h>
 
 #include "examples_common.h"
@@ -128,13 +129,14 @@ int main(int argc, char** argv) {
 
     // Define callback function to send Cartesian pose goals to get inverse kinematics solved.
     auto cartesian_pose_callback = [=, &time, &vel_current, &running, &angle, &initial_pose](
-        const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose {
+                                       const franka::RobotState& robot_state,
+                                       franka::Duration period) -> franka::CartesianPose {
       // Update time.
       time += period.toSec();
 
       if (time == 0.0) {
         // Read the initial pose to start the motion from in the first time step.
-        initial_pose = robot_state.O_T_EE_d;
+        initial_pose = robot_state.O_T_EE_c;
       }
 
       // Compute Cartesian velocity.
@@ -177,8 +179,9 @@ int main(int argc, char** argv) {
 
     // Define callback for the joint torque control loop.
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        impedance_control_callback = [&print_data, &model, k_gains, d_gains](
-            const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
+        impedance_control_callback =
+            [&print_data, &model, k_gains, d_gains](
+                const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
       // Read current coriolis terms from model.
       std::array<double, 7> coriolis = model.coriolis(state);
 
@@ -191,20 +194,23 @@ int main(int argc, char** argv) {
             k_gains[i] * (state.q_d[i] - state.q[i]) - d_gains[i] * state.dq[i] + coriolis[i];
       }
 
-      std::array<double, 7> tau_d_saturated =
-          limitRate(kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
+      // The following line is only necessary for printing the rate limited torque. As we activated
+      // rate limiting for the control loop (activated by default), the torque would anyway be
+      // adjusted!
+      std::array<double, 7> tau_d_rate_limited =
+          franka::limitRate(franka::kMaxTorqueRate, tau_d_calculated, state.tau_J_d);
 
       // Update data to print.
       if (print_data.mutex.try_lock()) {
         print_data.has_data = true;
         print_data.robot_state = state;
-        print_data.tau_d_last = tau_d_saturated;
+        print_data.tau_d_last = tau_d_rate_limited;
         print_data.gravity = model.gravity(state);
         print_data.mutex.unlock();
       }
 
       // Send torque command.
-      return tau_d_saturated;
+      return tau_d_rate_limited;
     };
 
     // Start real-time control loop.

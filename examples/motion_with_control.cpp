@@ -30,25 +30,22 @@ namespace {
 class Controller {
  public:
   Controller(size_t dq_filter_size,
-             const std::array<double, 7>& K_P,  // NOLINT
-             const std::array<double, 7>& K_D)  // NOLINT
-      : dq_current_filter_position_(0),
-        dq_filter_size_(dq_filter_size),
-        K_P_(K_P),
-        K_D_(K_D) {
+             const std::array<double, 7>& K_P,  // NOLINT(readability-identifier-naming)
+             const std::array<double, 7>& K_D)  // NOLINT(readability-identifier-naming)
+      : dq_current_filter_position_(0), dq_filter_size_(dq_filter_size), K_P_(K_P), K_D_(K_D) {
     std::fill(dq_d_.begin(), dq_d_.end(), 0);
-    dq_buffer_.reset(new double[dq_filter_size_ * 7]);
+    dq_buffer_ = std::make_unique<double[]>(dq_filter_size_ * 7);
     std::fill(&dq_buffer_.get()[0], &dq_buffer_.get()[dq_filter_size_ * 7], 0);
   }
 
   inline franka::Torques step(const franka::RobotState& state) {
     updateDQFilter(state);
 
-    std::array<double, 7> tau_J_d;  // NOLINT
+    std::array<double, 7> tau_J_d;  // NOLINT(readability-identifier-naming)
     for (size_t i = 0; i < 7; i++) {
       tau_J_d[i] = K_P_[i] * (state.q_d[i] - state.q[i]) + K_D_[i] * (dq_d_[i] - getDQFiltered(i));
     }
-    return limitRate(kMaxTorqueRate, tau_J_d, state.tau_J_d);
+    return tau_J_d;
   }
 
   void updateDQFilter(const franka::RobotState& state) {
@@ -70,8 +67,8 @@ class Controller {
   size_t dq_current_filter_position_;
   size_t dq_filter_size_;
 
-  const std::array<double, 7> K_P_;  // NOLINT
-  const std::array<double, 7> K_D_;  // NOLINT
+  const std::array<double, 7> K_P_;  // NOLINT(readability-identifier-naming)
+  const std::array<double, 7> K_D_;  // NOLINT(readability-identifier-naming)
 
   std::array<double, 7> dq_d_;
   std::unique_ptr<double[]> dq_buffer_;
@@ -119,8 +116,11 @@ int main(int argc, char** argv) {
   // Parameters
   const size_t joint_number{3};
   const size_t filter_size{5};
-  const std::array<double, 7> K_P{{200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0}};  // NOLINT
-  const std::array<double, 7> K_D{{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}};         // NOLINT
+
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  const std::array<double, 7> K_P{{200.0, 200.0, 200.0, 200.0, 200.0, 200.0, 200.0}};
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  const std::array<double, 7> K_D{{10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0}};
   const double max_acceleration{1.0};
 
   Controller controller(filter_size, K_P, K_D);

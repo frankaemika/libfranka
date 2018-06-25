@@ -31,10 +31,10 @@ int main(int argc, char** argv) {
   }
   // parameters
   double desired_mass{0.0};
-  constexpr double target_mass{1.0};    // NOLINT (readability-identifier-naming)
-  constexpr double k_p{1.0};            // NOLINT (readability-identifier-naming)
-  constexpr double k_i{2.0};            // NOLINT (readability-identifier-naming)
-  constexpr double filter_gain{0.001};  // NOLINT (readability-identifier-naming)
+  constexpr double target_mass{1.0};    // NOLINT(readability-identifier-naming)
+  constexpr double k_p{1.0};            // NOLINT(readability-identifier-naming)
+  constexpr double k_i{2.0};            // NOLINT(readability-identifier-naming)
+  constexpr double filter_gain{0.001};  // NOLINT(readability-identifier-naming)
 
   try {
     // connect to robot
@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_cmd;
-      return limitRate(kMaxTorqueRate, tau_d_array, robot_state.tau_J_d);
+      return tau_d_array;
     };
     std::cout << "WARNING: Make sure sure that no endeffector is mounted and that the robot's last "
                  "joint is "

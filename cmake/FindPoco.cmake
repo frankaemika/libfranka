@@ -8,11 +8,13 @@ foreach(component ${Poco_FIND_COMPONENTS})
   if(${component_var})
     set(Poco_${component}_FOUND TRUE)
     list(APPEND Poco_LIBRARIES ${component})
-    add_library(Poco::${component} SHARED IMPORTED)
-    set_target_properties(Poco::${component} PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES ${Poco_INCLUDE_DIR}
-      IMPORTED_LOCATION ${${component_var}}
-    )
+    if(NOT TARGET Poco::${component})
+      add_library(Poco::${component} SHARED IMPORTED)
+      set_target_properties(Poco::${component} PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES ${Poco_INCLUDE_DIR}
+        IMPORTED_LOCATION ${${component_var}}
+      )
+    endif()
   endif()
 endforeach()
 

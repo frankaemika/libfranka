@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 
       std::array<double, 7> tau_d_array{};
       Eigen::VectorXd::Map(&tau_d_array[0], 7) = tau_d;
-      return limitRate(kMaxTorqueRate, tau_d_array, robot_state.tau_J_d);
+      return tau_d_array;
     };
 
     // start real-time control loop

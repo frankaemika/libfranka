@@ -64,7 +64,7 @@ class Torques : public Finishable {
   /**
    * Desired torques in [Nm].
    */
-  std::array<double, 7> tau_J{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 7> tau_J{};  // NOLINT(readability-identifier-naming)
 };
 
 /**
@@ -196,7 +196,7 @@ class CartesianPose : public Finishable {
    * the end effector frame \f$EE\f$ to base frame \f$O\f$.
    * Equivalently, it is the desired end effector pose in base frame.
    */
-  std::array<double, 16> O_T_EE{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 16> O_T_EE{};  // NOLINT(readability-identifier-naming)
 
   /**
    * Elbow configuration.
@@ -223,7 +223,7 @@ class CartesianVelocities : public Finishable {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    *
    * @throw std::invalid_argument if the given values are NaN or infinity.
@@ -233,7 +233,7 @@ class CartesianVelocities : public Finishable {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
@@ -246,7 +246,7 @@ class CartesianVelocities : public Finishable {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    *
    * @throw std::invalid_argument if the given initializer list has an invalid number of arguments.
@@ -257,7 +257,7 @@ class CartesianVelocities : public Finishable {
   /**
    * Creates a new CartesianVelocities instance.
    *
-   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dx in
+   * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    *
@@ -272,7 +272,7 @@ class CartesianVelocities : public Finishable {
    * Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in [m/s], dz in [m/s], omegax in
    * [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
-  std::array<double, 6> O_dP_EE{};  // NOLINT (readability-identifier-naming)
+  std::array<double, 6> O_dP_EE{};  // NOLINT(readability-identifier-naming)
 
   /**
    * Elbow configuration.
@@ -299,7 +299,7 @@ class CartesianVelocities : public Finishable {
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifier-naming)
+Torques MotionFinished(const Torques& command);  // NOLINT(readability-identifier-naming)
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -309,7 +309,7 @@ Torques MotionFinished(const Torques& command);  // NOLINT (readability-identifi
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
+JointPositions MotionFinished(  // NOLINT(readability-identifier-naming)
     const JointPositions& command);
 
 /**
@@ -320,7 +320,7 @@ JointPositions MotionFinished(  // NOLINT (readability-identifier-naming)
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+JointVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
     const JointVelocities& command);
 
 /**
@@ -331,7 +331,7 @@ JointVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
+CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
     const CartesianPose& command);
 
 /**
@@ -342,7 +342,7 @@ CartesianPose MotionFinished(  // NOLINT (readability-identifier-naming)
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-CartesianVelocities MotionFinished(  // NOLINT (readability-identifier-naming)
+CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
     const CartesianVelocities& command);
 
 }  // namespace franka
