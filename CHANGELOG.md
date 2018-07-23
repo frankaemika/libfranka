@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.4.1 - UNRELEASED
+
+ * Fix description of log record entries.
+
 ## 0.4.0 - 2018-06-21
 
 Requires Panda system version >= 1.3.0
