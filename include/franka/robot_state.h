@@ -254,7 +254,7 @@ struct RobotState {
 
   /**
    * \f$^OF_{K,\text{ext}}\f$
-   * External wrench (force, torque) scaled by a factor acting on stiffness frame, expressed
+   * Estimated external wrench (force, torque) acting on stiffness frame, expressed
    * relative to the base frame. See also @ref k-frame "K frame".
    * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
@@ -262,8 +262,8 @@ struct RobotState {
 
   /**
    * \f$^{K}F_{K,\text{ext}}\f$
-   * External wrench (force, torque) acting on stiffness frame, expressed relative to the stiffness
-   * frame. See also @ref k-frame "K frame".
+   * Estimated external wrench (force, torque) acting on stiffness frame,
+   * expressed relative to the stiffness frame. See also @ref k-frame "K frame".
    * Unit: \f$[N,N,N,Nm,Nm,Nm]\f$.
    */
   std::array<double, 6> K_F_ext_hat_K{};  // NOLINT(readability-identifier-naming)
