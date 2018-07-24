@@ -41,16 +41,17 @@ struct RobotCommand {
 };
 
 /**
- * One row of the log, containing the received robot state
- * and the corresponding robot command. Provided by the ControlException.
+ * One row of the log contains a robot command of timestamp n and a
+ * corresponding robot state of timestamp n+1.
+ * Provided by the ControlException.
  */
 struct Record {
   /**
-   * Received robot state.
+   * Robot state of timestamp n+1.
    */
   RobotState state;
   /**
-   * Command sent after receiving that state.
+   * Robot command of timestamp n, after rate limiting (if activated).
    */
   RobotCommand command;
 };
