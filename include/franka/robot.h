@@ -132,7 +132,8 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   *
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Disabled by default.
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
@@ -141,7 +142,7 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               bool limit_rate = true);
+               bool limit_rate = true, double cutoff_freq = 1000);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint positions.
@@ -155,6 +156,8 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Disabled by default.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -166,7 +169,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 1000);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint velocities.
@@ -180,6 +183,8 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Disabled by default.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -191,7 +196,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 1000);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian poses.
@@ -205,6 +210,8 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Disabled by default.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -216,7 +223,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 1000);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
@@ -230,6 +237,8 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Disabled by default.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -241,7 +250,7 @@ class Robot {
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               bool limit_rate = true);
+               bool limit_rate = true, double cutoff_freq = 1000);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
@@ -254,6 +263,8 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Set to 100 Hz by default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -265,7 +276,7 @@ class Robot {
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for a joint velocity motion generator with a given controller mode.
@@ -278,6 +289,8 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Set to 100 Hz by default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -289,7 +302,7 @@ class Robot {
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for a Cartesian pose motion generator with a given controller mode.
@@ -302,6 +315,8 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Set to 100 Hz by default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -313,7 +328,7 @@ class Robot {
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for a Cartesian velocity motion generator with a given controller mode.
@@ -326,6 +341,8 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
+   * @param[in] cutoff_freq Cutoff frequency for a first order lowpass filter applied on
+   * the user commanded signal. Set to 100 Hz by default.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -337,7 +354,7 @@ class Robot {
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
                ControllerMode controller_mode = ControllerMode::kJointImpedance,
-               bool limit_rate = true);
+               bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * @}
