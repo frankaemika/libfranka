@@ -145,7 +145,7 @@ TEST(Robot, CanControlRobot) {
         send.clear();
         return MotionFinished(joint_positions);
       },
-      ControllerMode::kJointImpedance, false);
+      ControllerMode::kJointImpedance, false, 1000.0);
 
   ASSERT_NE(0u, stopped_message_id);
   ASSERT_EQ(5, count);
