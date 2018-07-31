@@ -142,7 +142,7 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               bool limit_rate = true, double cutoff_freq = 1000);
+               bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint positions.
@@ -169,7 +169,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true, double cutoff_freq = 1000);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for sending joint-level torque commands and joint velocities.
@@ -196,7 +196,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true, double cutoff_freq = 1000);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian poses.
@@ -223,7 +223,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true, double cutoff_freq = 1000);
+      bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for sending joint-level torque commands and Cartesian velocities.
@@ -250,7 +250,7 @@ class Robot {
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               bool limit_rate = true, double cutoff_freq = 1000);
+               bool limit_rate = true, double cutoff_freq = 100);
 
   /**
    * Starts a control loop for a joint position motion generator with a given controller mode.
