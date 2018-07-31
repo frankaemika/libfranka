@@ -52,7 +52,7 @@ static constexpr double kCutoffNoFilter = 1000.0;
 static constexpr double kCutoffFilter = 100.0;
 
 double getCutoffFreq(bool filter) {
-  return (filter)?kCutoffFilter:kCutoffNoFilter;
+  return (filter) ? kCutoffFilter : kCutoffNoFilter;
 }
 
 template <bool LimitRate, bool Filter>
@@ -309,7 +309,6 @@ CartesianVelocities ControlLoops<CartesianVelocityMotion<false, false>>::createM
   return CartesianVelocities({0, 1, 2, 3, 4, 5});
 }
 
-
 template <>
 auto ControlLoops<CartesianVelocityMotion<true, true>>::getField(
     const CartesianVelocities& cartesian_velocities) {
@@ -410,7 +409,6 @@ auto ControlLoops<CartesianVelocityMotionWithElbow<false, false>>::getField(
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
 }
 
-
 using MotionTypes = ::testing::Types<JointPositionMotion<false, true>,
                                      JointVelocityMotion<false, true>,
                                      CartesianPoseMotion<false, true>,
@@ -440,27 +438,30 @@ TYPED_TEST_CASE(ControlLoops, MotionTypes);
 TYPED_TEST(ControlLoops, CanNotConstructWithoutMotionCallback) {
   StrictMock<MockRobotControl> robot;
 
-  EXPECT_THROW(typename TestFixture::Loop loop(robot,
-                                               [](const RobotState&, Duration) {
-                                                 return Torques({0, 1, 2, 3, 4, 5, 6});
-                                               },
-                                               typename TestFixture::MotionGeneratorCallback(),
-                                               TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
-               std::invalid_argument);
+  EXPECT_THROW(
+      typename TestFixture::Loop loop(robot,
+                                      [](const RobotState&, Duration) {
+                                        return Torques({0, 1, 2, 3, 4, 5, 6});
+                                      },
+                                      typename TestFixture::MotionGeneratorCallback(),
+                                      TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
+      std::invalid_argument);
 
-  EXPECT_THROW(typename TestFixture::Loop loop(robot, ControllerMode::kCartesianImpedance,
-                                               typename TestFixture::MotionGeneratorCallback(),
-                                               TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
-               std::invalid_argument);
+  EXPECT_THROW(
+      typename TestFixture::Loop loop(robot, ControllerMode::kCartesianImpedance,
+                                      typename TestFixture::MotionGeneratorCallback(),
+                                      TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
+      std::invalid_argument);
 }
 
 TYPED_TEST(ControlLoops, CanNotConstructWithoutControlCallback) {
   StrictMock<MockRobotControl> robot;
 
-  EXPECT_THROW(typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
-                                               std::bind(&TestFixture::createMotion, this),
-                                               TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
-               std::invalid_argument);
+  EXPECT_THROW(
+      typename TestFixture::Loop loop(robot, typename TestFixture::ControlCallback(),
+                                      std::bind(&TestFixture::createMotion, this),
+                                      TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)),
+      std::invalid_argument);
 }
 
 TYPED_TEST(ControlLoops, CanConstructWithMotionAndControllerCallback) {
@@ -475,7 +476,8 @@ TYPED_TEST(ControlLoops, CanConstructWithMotionAndControllerCallback) {
                                                return Torques({0, 1, 2, 3, 4, 5, 6});
                                              },
                                              std::bind(&TestFixture::createMotion, this),
-                                             TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)));
+                                             TestFixture::kLimitRate,
+                                             getCutoffFreq(TestFixture::kFilter)));
 }
 
 TYPED_TEST(ControlLoops, CanConstructWithMotionCallbackAndControllerMode) {
@@ -485,9 +487,9 @@ TYPED_TEST(ControlLoops, CanConstructWithMotionCallbackAndControllerMode) {
                                  TestFixture::Loop::kDefaultDeviation))
       .WillOnce(Return(200));
 
-  EXPECT_NO_THROW(typename TestFixture::Loop(robot, ControllerMode::kCartesianImpedance,
-                                             std::bind(&TestFixture::createMotion, this),
-                                             TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)));
+  EXPECT_NO_THROW(typename TestFixture::Loop(
+      robot, ControllerMode::kCartesianImpedance, std::bind(&TestFixture::createMotion, this),
+      TestFixture::kLimitRate, getCutoffFreq(TestFixture::kFilter)));
 }
 
 TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
@@ -552,7 +554,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
       }
     } else {
       for (size_t i = 0; i < torques_limited.tau_J.size(); i++) {
-        EXPECT_PRED_FORMAT2(testing::DoubleLE, command.control.tau_J_d[i], torques_limited.tau_J[i]);
+        EXPECT_PRED_FORMAT2(testing::DoubleLE, command.control.tau_J_d[i],
+                            torques_limited.tau_J[i]);
       }
     }
   } else {
