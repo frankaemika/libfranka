@@ -133,16 +133,16 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  command->tau_J_d = control_output.tau_J;
   if (cutoff_freq_ < 1000.0) {
     for (size_t i = 0; i < 7; i++) {
-      command->tau_J_d[i] =
-          lowpassFilter(kDeltaT, command->tau_J_d[i], robot_state.tau_J_d[i], cutoff_freq_);
+      control_output.tau_J[i] =
+          lowpassFilter(kDeltaT, control_output.tau_J[i], robot_state.tau_J_d[i], cutoff_freq_);
     }
   }
   if (limit_rate_) {
-    command->tau_J_d = limitRate(kMaxTorqueRate, command->tau_J_d, robot_state.tau_J_d);
+    control_output.tau_J = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
   }
+  command->tau_J_d = control_output.tau_J;
   return !control_output.motion_finished;
 }
 
