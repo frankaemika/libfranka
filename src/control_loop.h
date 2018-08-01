@@ -58,7 +58,7 @@ class ControlLoop {
   const MotionGeneratorCallback motion_callback_;  // NOLINT(readability-identifier-naming)
   const ControlCallback control_callback_;         // NOLINT(readability-identifier-naming)
   const bool limit_rate_;                          // NOLINT(readability-identifier-naming)
-  const double cutoff_freq_;                       // NOLINT(readability-identifier-naming)
+  const double cutoff_frequency_;                  // NOLINT(readability-identifier-naming)
   uint32_t motion_id_ = 0;
 
   void convertMotion(const T& motion,

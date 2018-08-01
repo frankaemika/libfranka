@@ -53,6 +53,7 @@ add_library(franka SHARED
   src/load_calculations.cpp
   src/log.cpp
   src/logger.cpp
+  src/lowpass_filter.cpp
   src/model.cpp
   src/model_library.cpp
   src/network.cpp

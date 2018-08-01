@@ -6,6 +6,7 @@
 #include <gmock/gmock.h>
 
 #include "control_loop.h"
+#include "franka/lowpass_filter.h"
 #include "motion_generator_traits.h"
 
 #include "helpers.h"
@@ -48,11 +49,8 @@ struct MockMotionCallback {
   MOCK_METHOD2_T(invoke, T(const RobotState&, Duration));
 };
 
-static constexpr double kCutoffNoFilter = 1000.0;
-static constexpr double kCutoffFilter = 100.0;
-
 double getCutoffFreq(bool filter) {
-  return (filter) ? kCutoffFilter : kCutoffNoFilter;
+  return (filter) ? franka::kDefaultCutoffFrequency : franka::kMaxCutoffFrequency;
 }
 
 template <bool LimitRate, bool Filter>

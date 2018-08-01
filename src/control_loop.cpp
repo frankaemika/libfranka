@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <franka/exception.h>
+#include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
 
 #include "motion_generator_traits.h"
@@ -20,11 +21,6 @@
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
-
-double lowpassFilter(double sample_time, double y, double y_last, double cutoff_frequency) {
-  double gain = sample_time / (sample_time + (1.0 / (2.0 * M_PI * cutoff_frequency)));
-  return gain * y + (1 - gain) * y_last;
-}
 
 template <typename T>
 constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDeviation;
@@ -39,7 +35,7 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
       motion_callback_(std::move(motion_callback)),
       control_callback_(std::move(control_callback)),
       limit_rate_(limit_rate),
-      cutoff_freq_(cutoff_freq) {
+      cutoff_frequency_(cutoff_freq) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -133,10 +129,10 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-  if (cutoff_freq_ < 1000.0) {
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 7; i++) {
-      control_output.tau_J[i] =
-          lowpassFilter(kDeltaT, control_output.tau_J[i], robot_state.tau_J_d[i], cutoff_freq_);
+      control_output.tau_J[i] = lowpassFilter(kDeltaT, control_output.tau_J[i],
+                                              robot_state.tau_J_d[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -161,9 +157,10 @@ void ControlLoop<JointPositions>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->q_c = motion.q;
-  if (cutoff_freq_ < 1000.0) {
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 7; i++) {
-      command->q_c[i] = lowpassFilter(kDeltaT, command->q_c[i], robot_state.q_d[i], cutoff_freq_);
+      command->q_c[i] =
+          lowpassFilter(kDeltaT, command->q_c[i], robot_state.q_d[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -178,10 +175,10 @@ void ControlLoop<JointVelocities>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->dq_c = motion.dq;
-  if (cutoff_freq_ < 1000.0) {
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 7; i++) {
       command->dq_c[i] =
-          lowpassFilter(kDeltaT, command->dq_c[i], robot_state.dq_d[i], cutoff_freq_);
+          lowpassFilter(kDeltaT, command->dq_c[i], robot_state.dq_d[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -196,10 +193,10 @@ void ControlLoop<CartesianPose>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_c = motion.O_T_EE;
-  if (cutoff_freq_ < 1000.0) {
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 16; i++) {
       command->O_T_EE_c[i] =
-          lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_freq_);
+          lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -212,9 +209,9 @@ void ControlLoop<CartesianPose>::convertMotion(
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
-    if (cutoff_freq_ < 1000.0) {
+    if (cutoff_frequency_ < kMaxCutoffFrequency) {
       command->elbow_c[0] =
-          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_freq_);
+          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_frequency_);
     }
     if (limit_rate_) {
       command->elbow_c[0] =
@@ -234,10 +231,10 @@ void ControlLoop<CartesianVelocities>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_dP_EE_c = motion.O_dP_EE;
-  if (cutoff_freq_ < 1000.0) {
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 6; i++) {
-      command->O_dP_EE_c[i] =
-          lowpassFilter(kDeltaT, command->O_dP_EE_c[i], robot_state.O_dP_EE_c[i], cutoff_freq_);
+      command->O_dP_EE_c[i] = lowpassFilter(kDeltaT, command->O_dP_EE_c[i],
+                                            robot_state.O_dP_EE_c[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -250,9 +247,9 @@ void ControlLoop<CartesianVelocities>::convertMotion(
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
-    if (cutoff_freq_ < 1000.0) {
+    if (cutoff_frequency_ < kMaxCutoffFrequency) {
       command->elbow_c[0] =
-          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_freq_);
+          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_frequency_);
     }
     if (limit_rate_) {
       command->elbow_c[0] =
