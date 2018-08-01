@@ -30,12 +30,12 @@ class ControlLoop {
               ControlCallback control_callback,
               MotionGeneratorCallback motion_callback,
               bool limit_rate,
-              double cutoff_freq);
+              double cutoff_frequency);
   ControlLoop(RobotControl& robot,
               ControllerMode controller_mode,
               MotionGeneratorCallback motion_callback,
               bool limit_rate,
-              double cutoff_freq);
+              double cutoff_frequency);
 
   void operator()();
 
@@ -44,7 +44,7 @@ class ControlLoop {
               MotionGeneratorCallback motion_callback,
               ControlCallback control_callback,
               bool limit_rate,
-              double cutoff_freq);
+              double cutoff_frequency);
 
   bool spinControl(const RobotState& robot_state,
                    franka::Duration time_step,
