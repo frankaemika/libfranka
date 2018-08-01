@@ -135,6 +135,7 @@ class Robot {
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
    * the user commanded signal.
+   *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.

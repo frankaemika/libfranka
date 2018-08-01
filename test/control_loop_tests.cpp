@@ -5,8 +5,8 @@
 
 #include <gmock/gmock.h>
 
+#include <franka/lowpass_filter.h>
 #include "control_loop.h"
-#include "franka/lowpass_filter.h"
 #include "motion_generator_traits.h"
 
 #include "helpers.h"
