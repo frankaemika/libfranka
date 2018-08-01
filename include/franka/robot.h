@@ -590,6 +590,9 @@ class Robot {
 
   /**
    * Sets the cut off frequency for the given motion generator or controller.
+   *
+   * @deprecated Use franka::lowpassFilter() instead.
+   *
    * Allowed input range for all the filters is between 1.0 Hz and 1000.0 Hz.
    * If the value is set to maximum (1000Hz) then no filtering is done.
    *
@@ -607,11 +610,12 @@ class Robot {
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  void setFilters(double joint_position_filter_frequency,
-                  double joint_velocity_filter_frequency,
-                  double cartesian_position_filter_frequency,
-                  double cartesian_velocity_filter_frequency,
-                  double controller_filter_frequency);
+  [[deprecated("Use franka::lowpassFilter instead")]] void setFilters(
+      double joint_position_filter_frequency,
+      double joint_velocity_filter_frequency,
+      double cartesian_position_filter_frequency,
+      double cartesian_velocity_filter_frequency,
+      double controller_filter_frequency);
   /**
    * Runs automatic error recovery on the robot.
    *
