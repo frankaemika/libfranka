@@ -30,12 +30,12 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
                             ControlCallback control_callback,
                             bool limit_rate,
-                            double cutoff_freq)
+                            double cutoff_frequency)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
       control_callback_(std::move(control_callback)),
       limit_rate_(limit_rate),
-      cutoff_frequency_(cutoff_freq) {
+      cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -48,12 +48,12 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
                             MotionGeneratorCallback motion_callback,
                             bool limit_rate,
-                            double cutoff_freq)
+                            double cutoff_frequency)
     : ControlLoop(robot,
                   std::move(motion_callback),
                   std::move(control_callback),
                   limit_rate,
-                  cutoff_freq) {
+                  cutoff_frequency) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
@@ -71,8 +71,8 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
                             MotionGeneratorCallback motion_callback,
                             bool limit_rate,
-                            double cutoff_freq)
-    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate, cutoff_freq) {
+                            double cutoff_frequency)
+    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate, cutoff_frequency) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }

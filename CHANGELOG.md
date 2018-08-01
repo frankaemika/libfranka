@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## 0.4.1 - UNRELEASED
-
+## 0.5.0 - UNRELEASED
+ * **BREAKING** Added low-pass filter for all realtime interfaces with default cutoff frequency
+   of 100 Hz.
  * Fix description of log record entries.
 
 ## 0.4.0 - 2018-06-21

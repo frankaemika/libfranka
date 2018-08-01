@@ -134,7 +134,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -160,7 +160,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -188,7 +188,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -216,7 +216,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -244,7 +244,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -271,7 +271,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -298,7 +298,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -325,7 +325,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -352,7 +352,7 @@ class Robot {
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
-   * the user commanded signal.
+   * the user commanded signal. Set to >= 1000 to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
