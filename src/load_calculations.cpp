@@ -62,11 +62,12 @@ std::array<double, 9> combineInertiaTensor(
   }
 
   // Calculate inertia tensor of EE and load in flange coordinates.
-  inertia_ee_flange = inertia_ee - m_ee * (skewSymmetricMatrixFromVector(center_of_mass_ee) *
-                                           skewSymmetricMatrixFromVector(center_of_mass_ee));
-  inertia_load_flange =
-      inertia_load - m_load * (skewSymmetricMatrixFromVector(center_of_mass_load) *
-                               skewSymmetricMatrixFromVector(center_of_mass_load));
+  inertia_ee_flange = inertia_ee -
+                      m_ee * (skewSymmetricMatrixFromVector(center_of_mass_ee) *
+                              skewSymmetricMatrixFromVector(center_of_mass_ee));
+  inertia_load_flange = inertia_load -
+                        m_load * (skewSymmetricMatrixFromVector(center_of_mass_load) *
+                                  skewSymmetricMatrixFromVector(center_of_mass_load));
 
   // Calculate combined inertia tensor in flange coordinate.
   inertia_total_flange = inertia_ee_flange + inertia_load_flange;
@@ -74,9 +75,9 @@ std::array<double, 9> combineInertiaTensor(
   // Calculate combined inertia tensor in combined body center of mass coordinate.
   std::array<double, 9> I_total;  // NOLINT(readability-identifier-naming)
   Eigen::Map<Eigen::Matrix3d> inertia_total(I_total.data(), 3, 3);
-  inertia_total =
-      inertia_total_flange + m_total * (skewSymmetricMatrixFromVector(center_of_mass_total) *
-                                        skewSymmetricMatrixFromVector(center_of_mass_total));
+  inertia_total = inertia_total_flange +
+                  m_total * (skewSymmetricMatrixFromVector(center_of_mass_total) *
+                             skewSymmetricMatrixFromVector(center_of_mass_total));
 
   return I_total;
 }

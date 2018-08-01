@@ -69,7 +69,8 @@ void Robot::control(
   }
 
   ControlLoop<JointPositions> loop(*impl_, std::move(control_callback),
-                                   std::move(motion_generator_callback), limit_rate, cutoff_frequency);
+                                   std::move(motion_generator_callback), limit_rate,
+                                   cutoff_frequency);
   loop();
 }
 
@@ -86,7 +87,8 @@ void Robot::control(
   }
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                    std::move(motion_generator_callback), limit_rate, cutoff_frequency);
+                                    std::move(motion_generator_callback), limit_rate,
+                                    cutoff_frequency);
   loop();
 }
 
@@ -103,7 +105,8 @@ void Robot::control(
   }
 
   ControlLoop<CartesianPose> loop(*impl_, std::move(control_callback),
-                                  std::move(motion_generator_callback), limit_rate, cutoff_frequency);
+                                  std::move(motion_generator_callback), limit_rate,
+                                  cutoff_frequency);
   loop();
 }
 

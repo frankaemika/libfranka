@@ -129,8 +129,7 @@ int main(int argc, char** argv) {
 
     // Define callback function to send Cartesian pose goals to get inverse kinematics solved.
     auto cartesian_pose_callback = [=, &time, &vel_current, &running, &angle, &initial_pose](
-                                       const franka::RobotState& robot_state,
-                                       franka::Duration period) -> franka::CartesianPose {
+        const franka::RobotState& robot_state, franka::Duration period) -> franka::CartesianPose {
       // Update time.
       time += period.toSec();
 
@@ -179,9 +178,8 @@ int main(int argc, char** argv) {
 
     // Define callback for the joint torque control loop.
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
-        impedance_control_callback =
-            [&print_data, &model, k_gains, d_gains](
-                const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
+        impedance_control_callback = [&print_data, &model, k_gains, d_gains](
+            const franka::RobotState& state, franka::Duration /*period*/) -> franka::Torques {
       // Read current coriolis terms from model.
       std::array<double, 7> coriolis = model.coriolis(state);
 

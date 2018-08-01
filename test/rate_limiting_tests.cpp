@@ -132,9 +132,10 @@ std::array<double, 7> generateValuesIntoLimits(std::array<double, 7> last_cmd_va
   std::array<double, 7> cmd_value{};
   for (size_t i = 0; i < 7; i++) {
     // Make sure that the integration yields a value into limits
-    cmd_value[i] = last_cmd_values[i] + (max_derivatives[i] - std::min(std::max(std::abs(eps), 0.0),
-                                                                       2.0 * max_derivatives[i])) *
-                                            delta_t;
+    cmd_value[i] =
+        last_cmd_values[i] +
+        (max_derivatives[i] - std::min(std::max(std::abs(eps), 0.0), 2.0 * max_derivatives[i])) *
+            delta_t;
   }
   return cmd_value;
 }
@@ -161,16 +162,16 @@ std::array<double, 6> generateValuesIntoLimits(std::array<double, 6> last_cmd_va
   Eigen::Matrix<double, 6, 1> values;
   Eigen::Vector3d unit_vector(1.0, 0.0, 0.0);
   std::array<double, 6> result;
-  values.head(3) << last_values.head(3) + unit_vector *
-                                              (max_translational_derivative -
-                                               std::min(std::max(std::abs(eps), 0.0),
-                                                        2.0 * max_translational_derivative)) *
-                                              delta_t;
-  values.tail(3) << last_values.tail(3) + unit_vector *
-                                              (max_rotational_derivative -
-                                               std::min(std::max(std::abs(eps), 0.0),
-                                                        2.0 * max_rotational_derivative)) *
-                                              delta_t;
+  values.head(3) << last_values.head(3) +
+                        unit_vector * (max_translational_derivative -
+                                       std::min(std::max(std::abs(eps), 0.0),
+                                                2.0 * max_translational_derivative)) *
+                            delta_t;
+  values.tail(3) << last_values.tail(3) +
+                        unit_vector * (max_rotational_derivative -
+                                       std::min(std::max(std::abs(eps), 0.0),
+                                                2.0 * max_rotational_derivative)) *
+                            delta_t;
 
   Eigen::Matrix<double, 6, 1>::Map(&result[0], 6) = values;
   return result;
@@ -360,11 +361,10 @@ TEST(RateLimiting, CartesianVelocity) {
 
   // Desired values are into limits and unchanged after limitRate (rotational and translational
   // jerk)
-  std::array<double, 6> cartesian_velocity_into_limits =
-      integrateOneSample<6>(last_cmd_velocity,
-                            generateValuesIntoLimits(last_cmd_acceleration, max_translational_jerk,
-                                                     max_rotational_jerk, eps, kDeltaT),
-                            kDeltaT);
+  std::array<double, 6> cartesian_velocity_into_limits = integrateOneSample<6>(
+      last_cmd_velocity, generateValuesIntoLimits(last_cmd_acceleration, max_translational_jerk,
+                                                  max_rotational_jerk, eps, kDeltaT),
+      kDeltaT);
   ASSERT_FALSE(violatesRateLimits(kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit,
                                   max_rotational_jerk, cartesian_velocity_into_limits,
                                   last_cmd_velocity, last_cmd_acceleration, kDeltaT));
@@ -388,9 +388,8 @@ TEST(RateLimiting, CartesianVelocity) {
   // Desired values are outside limits (rotational and translational jerk violation) and limited
   // after limitRate
   std::array<double, 6> cartesian_velocity_outside_limits = integrateOneSample<6>(
-      last_cmd_velocity,
-      generateValuesOutsideLimits(last_cmd_acceleration, max_translational_jerk,
-                                  max_rotational_jerk, eps, kDeltaT),
+      last_cmd_velocity, generateValuesOutsideLimits(last_cmd_acceleration, max_translational_jerk,
+                                                     max_rotational_jerk, eps, kDeltaT),
       kDeltaT);
   std::array<double, 6> limited_cartesian_velocity =
       limitRate(kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit, max_rotational_jerk,
@@ -455,11 +454,10 @@ TEST(RateLimiting, CartesianPose) {
 
   // Desired values are into limits and unchanged after limitRate (rotational and translational
   // acceleration)
-  cartesian_pose_into_limits =
-      integrateOneSample(last_cmd_pose,
-                         generateValuesIntoLimits(last_cmd_velocity, max_translational_acceleration,
-                                                  max_rotational_acceleration, eps, kDeltaT),
-                         kDeltaT);
+  cartesian_pose_into_limits = integrateOneSample(
+      last_cmd_pose, generateValuesIntoLimits(last_cmd_velocity, max_translational_acceleration,
+                                              max_rotational_acceleration, eps, kDeltaT),
+      kDeltaT);
   ASSERT_FALSE(violatesRateLimits(
       kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit, max_rotational_acceleration,
       kNoLimit, differentiateOneSample(cartesian_pose_into_limits, last_cmd_pose, kDeltaT),
@@ -477,12 +475,11 @@ TEST(RateLimiting, CartesianPose) {
   // Desired values are outside limits (rotational and translational jerk violation) and limited
   // after limitRate
   std::array<double, 16> cartesian_pose_outside_limits = integrateOneSample(
-      last_cmd_pose,
-      integrateOneSample<6>(
-          last_cmd_velocity,
-          generateValuesOutsideLimits(last_cmd_acceleration, max_translational_jerk,
-                                      max_rotational_jerk, eps, kDeltaT),
-          kDeltaT),
+      last_cmd_pose, integrateOneSample<6>(
+                         last_cmd_velocity,
+                         generateValuesOutsideLimits(last_cmd_acceleration, max_translational_jerk,
+                                                     max_rotational_jerk, eps, kDeltaT),
+                         kDeltaT),
       kDeltaT);
   std::array<double, 16> limited_cartesian_pose = limitRate(
       kNoLimit, kNoLimit, max_translational_jerk, kNoLimit, kNoLimit, max_rotational_jerk,
@@ -500,9 +497,8 @@ TEST(RateLimiting, CartesianPose) {
   // Desired values are outside limits (rotational and translational acceleration violation) and
   // limited after limitRate
   cartesian_pose_outside_limits = integrateOneSample(
-      last_cmd_pose,
-      generateValuesOutsideLimits(last_cmd_velocity, max_translational_acceleration,
-                                  max_rotational_acceleration, eps, kDeltaT),
+      last_cmd_pose, generateValuesOutsideLimits(last_cmd_velocity, max_translational_acceleration,
+                                                 max_rotational_acceleration, eps, kDeltaT),
       kDeltaT);
   limited_cartesian_pose =
       limitRate(kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit,
