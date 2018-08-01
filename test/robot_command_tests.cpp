@@ -401,9 +401,9 @@ TEST_F(MoveCommand, CanReceiveMotionStarted) {
       .waitForCommand<research_interface::robot::Move>(
           [this](const research_interface::robot::Move::Request& request)
               -> research_interface::robot::Move::Response {
-                EXPECT_TRUE(this->compare(request, this->getExpected()));
-                return this->createResponse(request, Move::Status::kMotionStarted);
-              })
+            EXPECT_TRUE(this->compare(request, this->getExpected()));
+            return this->createResponse(request, Move::Status::kMotionStarted);
+          })
       .spinOnce();
 
   robot.executeCommand<Move>(request);
@@ -445,12 +445,11 @@ TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
   AutomaticErrorRecovery::Request request;
 
   server
-      .waitForCommand<AutomaticErrorRecovery>(
-          [this](
-              const AutomaticErrorRecovery::Request& request) -> AutomaticErrorRecovery::Response {
-            EXPECT_TRUE(this->compare(request, this->getExpected()));
-            return this->createResponse(request, GetParam());
-          })
+      .waitForCommand<AutomaticErrorRecovery>([this](const AutomaticErrorRecovery::Request& request)
+                                                  -> AutomaticErrorRecovery::Response {
+        EXPECT_TRUE(this->compare(request, this->getExpected()));
+        return this->createResponse(request, GetParam());
+      })
       .spinOnce();
 
   EXPECT_THROW(robot.executeCommand<AutomaticErrorRecovery>(request), CommandException);

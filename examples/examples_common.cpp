@@ -51,8 +51,8 @@ bool MotionGenerator::calculateDesiredValues(double t, Vector7d* delta_q_d) cons
       } else if (t >= t_1_sync_[i] && t < t_2_sync_[i]) {
         (*delta_q_d)[i] = q_1_[i] + (t - t_1_sync_[i]) * dq_max_sync_[i] * sign_delta_q[i];
       } else if (t >= t_2_sync_[i] && t < t_f_sync_[i]) {
-        (*delta_q_d)[i] = delta_q_[i] +
-                          0.5 *
+        (*delta_q_d)[i] =
+            delta_q_[i] + 0.5 *
                               (1.0 / std::pow(delta_t_2_sync[i], 3.0) *
                                    (t - t_1_sync_[i] - 2.0 * delta_t_2_sync[i] - t_d[i]) *
                                    std::pow((t - t_1_sync_[i] - t_d[i]), 3.0) +

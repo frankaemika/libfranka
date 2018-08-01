@@ -277,11 +277,10 @@ uint32_t Robot::Impl::executeCommand(TArgs... args) {
 }
 
 template <>
-inline uint32_t Robot::Impl::executeCommand<research_interface::robot::GetCartesianLimit,
-                                            int32_t,
-                                            VirtualWallCuboid*>(
-    int32_t id,
-    VirtualWallCuboid* virtual_wall_cuboid) {
+inline uint32_t Robot::Impl::
+    executeCommand<research_interface::robot::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
+        int32_t id,
+        VirtualWallCuboid* virtual_wall_cuboid) {
   using research_interface::robot::GetCartesianLimit;
   uint32_t command_id = network_->tcpSendRequest<GetCartesianLimit>(id);
   GetCartesianLimit::Response response =
