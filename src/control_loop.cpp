@@ -217,7 +217,6 @@ void ControlLoop<CartesianPose>::convertMotion(
       command->elbow_c[0] =
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_c[1] = command->elbow_c[1];
     }
   } else {
     command->valid_elbow = false;
@@ -255,7 +254,6 @@ void ControlLoop<CartesianVelocities>::convertMotion(
       command->elbow_c[0] =
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_c[1] = command->elbow_c[1];
     }
   } else {
     command->valid_elbow = false;
