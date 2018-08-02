@@ -24,7 +24,7 @@ constexpr double kDefaultCutoffFrequency = 100.0;
  * @param[in] sample_time Sample time constant
  * @param[in] y Current value of the signal to be filtered
  * @param[in] y_last Value of the signal to be filtered in the previous time step
- * @param[in] cutoff_frequency Cutoff frequency of the lowpass filter
+ * @param[in] cutoff_frequency Cutoff frequency of the low-pass filter
  *
  * @return Filtered value.
  */
