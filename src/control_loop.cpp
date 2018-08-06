@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <franka/exception.h>
+#include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
 
 #include "motion_generator_traits.h"
@@ -28,11 +29,13 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
                             ControlCallback control_callback,
-                            bool limit_rate)
+                            bool limit_rate,
+                            double cutoff_frequency)
     : robot_(robot),
       motion_callback_(std::move(motion_callback)),
       control_callback_(std::move(control_callback)),
-      limit_rate_(limit_rate) {
+      limit_rate_(limit_rate),
+      cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
@@ -44,8 +47,13 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControlCallback control_callback,
                             MotionGeneratorCallback motion_callback,
-                            bool limit_rate)
-    : ControlLoop(robot, std::move(motion_callback), std::move(control_callback), limit_rate) {
+                            bool limit_rate,
+                            double cutoff_frequency)
+    : ControlLoop(robot,
+                  std::move(motion_callback),
+                  std::move(control_callback),
+                  limit_rate,
+                  cutoff_frequency) {
   if (!control_callback_) {
     throw std::invalid_argument("libfranka: Invalid control callback given.");
   }
@@ -62,8 +70,9 @@ template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             ControllerMode controller_mode,
                             MotionGeneratorCallback motion_callback,
-                            bool limit_rate)
-    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate) {
+                            bool limit_rate,
+                            double cutoff_frequency)
+    : ControlLoop(robot, std::move(motion_callback), {}, limit_rate, cutoff_frequency) {
   if (!motion_callback_) {
     throw std::invalid_argument("libfranka: Invalid motion callback given.");
   }
@@ -120,12 +129,16 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
                                  franka::Duration time_step,
                                  research_interface::robot::ControllerCommand* command) {
   Torques control_output = control_callback_(robot_state, time_step);
-
-  if (limit_rate_) {
-    command->tau_J_d = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
-  } else {
-    command->tau_J_d = control_output.tau_J;
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    for (size_t i = 0; i < 7; i++) {
+      control_output.tau_J[i] = lowpassFilter(kDeltaT, control_output.tau_J[i],
+                                              robot_state.tau_J_d[i], cutoff_frequency_);
+    }
   }
+  if (limit_rate_) {
+    control_output.tau_J = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
+  }
+  command->tau_J_d = control_output.tau_J;
   return !control_output.motion_finished;
 }
 
@@ -143,11 +156,16 @@ void ControlLoop<JointPositions>::convertMotion(
     const JointPositions& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
+  command->q_c = motion.q;
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    for (size_t i = 0; i < 7; i++) {
+      command->q_c[i] =
+          lowpassFilter(kDeltaT, command->q_c[i], robot_state.q_d[i], cutoff_frequency_);
+    }
+  }
   if (limit_rate_) {
-    command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.q,
+    command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, command->q_c,
                              robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
-  } else {
-    command->q_c = motion.q;
   }
 }
 
@@ -156,11 +174,16 @@ void ControlLoop<JointVelocities>::convertMotion(
     const JointVelocities& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
+  command->dq_c = motion.dq;
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    for (size_t i = 0; i < 7; i++) {
+      command->dq_c[i] =
+          lowpassFilter(kDeltaT, command->dq_c[i], robot_state.dq_d[i], cutoff_frequency_);
+    }
+  }
   if (limit_rate_) {
-    command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, motion.dq,
-                              robot_state.dq_d, robot_state.ddq_d);
-  } else {
-    command->dq_c = motion.dq;
+    command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk,
+                              command->dq_c, robot_state.dq_d, robot_state.ddq_d);
   }
 }
 
@@ -169,24 +192,31 @@ void ControlLoop<CartesianPose>::convertMotion(
     const CartesianPose& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
+  command->O_T_EE_c = motion.O_T_EE;
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    for (size_t i = 0; i < 16; i++) {
+      command->O_T_EE_c[i] =
+          lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_frequency_);
+    }
+  }
   if (limit_rate_) {
     command->O_T_EE_c = limitRate(
         kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
-        kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, motion.O_T_EE,
+        kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, command->O_T_EE_c,
         robot_state.O_T_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
-  } else {
-    command->O_T_EE_c = motion.O_T_EE;
   }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
+    command->elbow_c = motion.elbow;
+    if (cutoff_frequency_ < kMaxCutoffFrequency) {
+      command->elbow_c[0] =
+          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_frequency_);
+    }
     if (limit_rate_) {
       command->elbow_c[0] =
-          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
+          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_c[1] = motion.elbow[1];
-    } else {
-      command->elbow_c = motion.elbow;
     }
   } else {
     command->valid_elbow = false;
@@ -199,24 +229,31 @@ void ControlLoop<CartesianVelocities>::convertMotion(
     const CartesianVelocities& motion,
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
+  command->O_dP_EE_c = motion.O_dP_EE;
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    for (size_t i = 0; i < 6; i++) {
+      command->O_dP_EE_c[i] = lowpassFilter(kDeltaT, command->O_dP_EE_c[i],
+                                            robot_state.O_dP_EE_c[i], cutoff_frequency_);
+    }
+  }
   if (limit_rate_) {
     command->O_dP_EE_c =
         limitRate(kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
                   kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk,
-                  motion.O_dP_EE, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
-  } else {
-    command->O_dP_EE_c = motion.O_dP_EE;
+                  command->O_dP_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
+    command->elbow_c = motion.elbow;
+    if (cutoff_frequency_ < kMaxCutoffFrequency) {
+      command->elbow_c[0] =
+          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_frequency_);
+    }
     if (limit_rate_) {
       command->elbow_c[0] =
-          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, motion.elbow[0],
+          limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
-      command->elbow_c[1] = motion.elbow[1];
-    } else {
-      command->elbow_c = motion.elbow;
     }
   } else {
     command->valid_elbow = false;

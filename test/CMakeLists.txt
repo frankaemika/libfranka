@@ -40,6 +40,7 @@ add_executable(run_all_tests
   gripper_tests.cpp
   helpers.cpp
   logger_tests.cpp
+  lowpass_filter_tests.cpp
   mock_server.cpp
   model_tests.cpp
   rate_limiting_tests.cpp

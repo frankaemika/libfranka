@@ -29,11 +29,13 @@ class ControlLoop {
   ControlLoop(RobotControl& robot,
               ControlCallback control_callback,
               MotionGeneratorCallback motion_callback,
-              bool limit_rate);
+              bool limit_rate,
+              double cutoff_frequency);
   ControlLoop(RobotControl& robot,
               ControllerMode controller_mode,
               MotionGeneratorCallback motion_callback,
-              bool limit_rate);
+              bool limit_rate,
+              double cutoff_frequency);
 
   void operator()();
 
@@ -41,7 +43,8 @@ class ControlLoop {
   ControlLoop(RobotControl& robot,
               MotionGeneratorCallback motion_callback,
               ControlCallback control_callback,
-              bool limit_rate);
+              bool limit_rate,
+              double cutoff_frequency);
 
   bool spinControl(const RobotState& robot_state,
                    franka::Duration time_step,
@@ -55,6 +58,7 @@ class ControlLoop {
   const MotionGeneratorCallback motion_callback_;  // NOLINT(readability-identifier-naming)
   const ControlCallback control_callback_;         // NOLINT(readability-identifier-naming)
   const bool limit_rate_;                          // NOLINT(readability-identifier-naming)
+  const double cutoff_frequency_;                  // NOLINT(readability-identifier-naming)
   uint32_t motion_id_ = 0;
 
   void convertMotion(const T& motion,

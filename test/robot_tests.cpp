@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <franka/exception.h>
+#include <franka/lowpass_filter.h>
 #include <franka/robot.h>
 
 #include "helpers.h"
@@ -145,7 +146,7 @@ TEST(Robot, CanControlRobot) {
         send.clear();
         return MotionFinished(joint_positions);
       },
-      ControllerMode::kJointImpedance, false);
+      ControllerMode::kJointImpedance, false, franka::kMaxCutoffFrequency);
 
   ASSERT_NE(0u, stopped_message_id);
   ASSERT_EQ(5, count);
