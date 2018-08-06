@@ -133,7 +133,7 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
@@ -159,7 +159,7 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
@@ -187,7 +187,7 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
@@ -215,7 +215,7 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
@@ -243,7 +243,7 @@ class Robot {
    * callback-docs "here" for more details.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
@@ -270,7 +270,7 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -297,7 +297,7 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -324,7 +324,7 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
@@ -351,7 +351,7 @@ class Robot {
    * @param[in] controller_mode Controller to use to execute the motion.
    * @param[in] limit_rate True if rate limiting should be activated. True by default.
    * This could distort your motion!
-   * @param[in] cutoff_frequency Cutoff frequency for a first order lowpass filter applied on
+   * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
    *
    * @throw ControlException if an error related to motion generation occurred.
