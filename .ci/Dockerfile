@@ -10,4 +10,5 @@ RUN apt-get update && apt-get install -y \
     lcov \
     libpoco-dev \
     valgrind \
-    libeigen3-dev
+    libeigen3-dev \
+    && rm -rf /var/lib/apt/lists/*
