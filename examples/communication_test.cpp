@@ -58,8 +58,7 @@ int main(int argc, char** argv) {
             const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
           time += period.toMSec();
           counter++;
-          // Skip the first control_command_success_rate
-          if (time == 0) {
+          if (robot_state.control_command_success_rate == 0.0) {
             return zero_torques;
           }
 
@@ -97,7 +96,7 @@ int main(int argc, char** argv) {
             << std::endl
             << "#######################################################" << std::endl;
   uint64_t lost_robot_states = time - counter;
-  if (lost_robot_states > 0.0) {
+  if (lost_robot_states > 0) {
     std::cout << "The control loop did not get executed " << lost_robot_states << " times in the"
               << std::endl
               << "last " << time << " milliseconds! (lost " << lost_robot_states << " robot states)"
