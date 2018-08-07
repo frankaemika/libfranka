@@ -13,6 +13,10 @@
 
   * Added `lowpass_filter.h` to public interface
 
+### Examples
+
+ * Added `communication_test.cpp` to evaluate network performance.
+
 ## 0.4.0 - 2018-06-21
 
 Requires Panda system version >= 1.3.0
