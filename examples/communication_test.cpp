@@ -1,7 +1,8 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <unistd.h>
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include <franka/duration.h>
 #include <franka/exception.h>
@@ -22,11 +23,11 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  int counter = 0;
+  uint64_t counter = 0;
   double avg_success_rate = 0.0;
   double min_success_rate = 1.0;
   double max_success_rate = 0.0;
-  int time = 0;
+  uint64_t time = 0;
   std::cout.precision(2);
   std::cout << std::fixed;
 
@@ -43,10 +44,8 @@ int main(int argc, char** argv) {
     std::cin.ignore();
     robot.control(motion_generator);
     std::cout << "Finished moving to initial joint configuration." << std::endl << std::endl;
-    std::cout << "Starting udp connection test." << std::endl;
+    std::cout << "Starting communication test." << std::endl;
 
-    // Set additional parameters always before the control loop, NEVER in the control loop!
-    // Set collision behavior.
     robot.setCollisionBehavior(
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
         {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}}, {{20.0, 20.0, 18.0, 18.0, 16.0, 14.0, 12.0}},
@@ -60,15 +59,16 @@ int main(int argc, char** argv) {
           time += period.toMSec();
           counter++;
           // Skip the first control_command_success_rate
-          if (time == 0)
+          if (time == 0) {
             return zero_torques;
+          }
 
           if (counter % 100 == 0) {
             std::cout << "#" << counter
                       << " Current success rate: " << robot_state.control_command_success_rate
                       << std::endl;
           }
-          usleep(150);
+          std::this_thread::sleep_for(std::chrono::microseconds(100));
 
           avg_success_rate += robot_state.control_command_success_rate;
           if (robot_state.control_command_success_rate > max_success_rate) {
@@ -96,9 +96,9 @@ int main(int argc, char** argv) {
   std::cout << std::endl
             << std::endl
             << "#######################################################" << std::endl;
-  int lost_robot_states = time - counter;
+  uint64_t lost_robot_states = time - counter;
   if (lost_robot_states > 0.0) {
-    std::cout << "The Control Loop did not get executed " << lost_robot_states << " times in the"
+    std::cout << "The control loop did not get executed " << lost_robot_states << " times in the"
               << std::endl
               << "last " << time << " milliseconds! (lost " << lost_robot_states << " robot states)"
               << std::endl
@@ -119,7 +119,6 @@ int main(int argc, char** argv) {
     std::cout << "PLEASE INSPECT YOUR SETUP AND FOLLOW ADVICE ON" << std::endl
               << "https://frankaemika.github.io/docs/troubleshooting.html" << std::endl;
   }
-
   std::cout << "#######################################################" << std::endl << std::endl;
 
   return 0;
