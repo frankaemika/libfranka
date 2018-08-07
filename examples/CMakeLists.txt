@@ -22,6 +22,7 @@ target_link_libraries(examples_common PUBLIC Franka::Franka Eigen3::Eigen3)
 
 set(EXAMPLES
   cartesian_impedance_control
+  communication_test
   echo_robot_state
   force_control
   generate_cartesian_pose_motion
