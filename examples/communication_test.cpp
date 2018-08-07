@@ -27,6 +27,8 @@ int main(int argc, char** argv) {
   double min_success_rate = 1.0;
   double max_success_rate = 0.0;
   int time = 0;
+  std::cout.precision(2);
+  std::cout << std::fixed;
 
   try {
     franka::Robot robot(argv[1]);
@@ -104,9 +106,9 @@ int main(int argc, char** argv) {
   }
 
   std::cout << "Control command success rate of " << counter << " samples: " << std::endl;
-  std::cout << "Max: " << max_success_rate << " %" << std::endl;
-  std::cout << "Avg: " << avg_success_rate << " %" << std::endl;
-  std::cout << "Min: " << min_success_rate << " %" << std::endl;
+  std::cout << "Max: " << max_success_rate << std::endl;
+  std::cout << "Avg: " << avg_success_rate << std::endl;
+  std::cout << "Min: " << min_success_rate << std::endl;
 
   if (avg_success_rate < 0.90) {
     std::cout << std::endl
