@@ -663,6 +663,12 @@ class Robot {
 
   class Impl;
 
+  /**
+   * Save the dynamics model library from the robot for offline use to the given path
+   *
+   */
+   void downloadModelLibrary(const std::string& toFile);
+  
  private:
   std::unique_ptr<Impl> impl_;
   std::mutex control_mutex_;

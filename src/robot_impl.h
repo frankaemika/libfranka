@@ -51,6 +51,8 @@ class Robot::Impl : public RobotControl {
 
   Model loadModel() const;
 
+  std::unique_ptr<Network> network_;
+
  protected:
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
@@ -73,7 +75,6 @@ class Robot::Impl : public RobotControl {
   research_interface::robot::RobotState receiveRobotState();
   void updateState(const research_interface::robot::RobotState& robot_state);
 
-  std::unique_ptr<Network> network_;
 
   Logger logger_;
 

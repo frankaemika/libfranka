@@ -7,7 +7,10 @@
 namespace franka {
 
 ModelLibrary::ModelLibrary(franka::Network& network)
-    : loader_(LibraryDownloader(network).path()),
+    : ModelLibrary(LibraryDownloader(network).path()) {}
+
+ModelLibrary::ModelLibrary(const std::string& cachepath)
+    : loader_(cachepath),
       body_jacobian_joint1{reinterpret_cast<decltype(&Ji_J_J1)>(loader_.getSymbol("Ji_J_J1"))},
       body_jacobian_joint2{reinterpret_cast<decltype(&Ji_J_J2)>(loader_.getSymbol("Ji_J_J2"))},
       body_jacobian_joint3{reinterpret_cast<decltype(&Ji_J_J3)>(loader_.getSymbol("Ji_J_J3"))},
