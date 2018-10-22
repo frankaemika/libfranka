@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.5.1 - UNRELEASED
+
+ * Improved documentation for `Robot::setCollisionBehavior`.
+
 ## 0.5.0 - 2018-08-08
 
 ### Motion and control interfaces
