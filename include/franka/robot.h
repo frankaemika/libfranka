@@ -29,9 +29,13 @@ class Model;
  * @note
  * The members of this class are threadsafe.
  *
+ * @par Nominal end effector frame NE
+ * The nominal end effector frame is configured outside of libfranka and cannot be changed here.
+ *
  * @par End effector frame EE
- * While the end effector parameters are set in a configuration file, it is possible to change the
- * end effector frame with Robot::setEE.
+ * By default, the end effector frame EE is the same as the nominal end effector frame NE
+ * (i.e. the transformation between NE and EE is the identity transformation).
+ * With Robot::setEE, a custom transformation matrix can be set.
  *
  * @anchor k-frame
  * @par Stiffness frame K
@@ -554,19 +558,20 @@ class Robot {
   void setK(const std::array<double, 16>& EE_T_K);  // NOLINT(readability-identifier-naming)
 
   /**
-   * Sets the transformation \f$^FT_{EE}\f$ from flange to end effector frame.
+   * Sets the transformation \f$^{NE}T_{EE}\f$ from nominal end effector to end effector frame.
    *
    * The transformation matrix is represented as a vectorized 4x4 matrix in column-major format.
    *
-   * @param[in] F_T_EE Vectorized flange-to-EE transformation matrix \f$^FT_{EE}\f$, column-major.
+   * @param[in] NE_T_EE Vectorized NE-to-EE transformation matrix \f$^{NE}T_{EE}\f$, column-major.
    *
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
+   * //TODO(FWA): add reference to NE frames when they are added
    * @see RobotState::O_T_EE for end effector pose in world base frame.
-   * @see Robot for an explanation of the EE frame.
+   * @see Robot for an explanation of the NE and EE frames.
    */
-  void setEE(const std::array<double, 16>& F_T_EE);  // NOLINT(readability-identifier-naming)
+  void setEE(const std::array<double, 16>& NE_T_EE);  // NOLINT(readability-identifier-naming)
 
   /**
    * Sets dynamic parameters of a payload.

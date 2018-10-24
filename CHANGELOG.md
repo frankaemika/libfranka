@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.5.0 - UNRELEASED
+
+ * **BREAKING** Changed behavior of `franka::Robot::setEE` to set a transformation on top
+   of the nominal end-effector configured in Desk instead of replacing it.
+
 ## 0.5.0 - 2018-08-08
 
 ### Motion and control interfaces
