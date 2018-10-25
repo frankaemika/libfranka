@@ -24,7 +24,7 @@ using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
-using research_interface::robot::SetFToEE;
+using research_interface::robot::SetNEToEE;
 using research_interface::robot::SetFilters;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
@@ -127,9 +127,9 @@ bool Command<SetEEToK>::compare(const SetEEToK::Request& request_one,
 }
 
 template <>
-bool Command<SetFToEE>::compare(const SetFToEE::Request& request_one,
-                                const SetFToEE::Request& request_two) {
-  return request_one.F_T_EE == request_two.F_T_EE;
+bool Command<SetNEToEE>::compare(const SetNEToEE::Request& request_one,
+                                 const SetNEToEE::Request& request_two) {
+  return request_one.NE_T_EE == request_two.NE_T_EE;
 }
 
 template <>
@@ -220,9 +220,9 @@ SetEEToK::Request Command<SetEEToK>::getExpected() {
 }
 
 template <>
-SetFToEE::Request Command<SetFToEE>::getExpected() {
+SetNEToEE::Request Command<SetNEToEE>::getExpected() {
   std::array<double, 16> pose{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  return SetFToEE::Request(pose);
+  return SetNEToEE::Request(pose);
 }
 
 template <>
@@ -274,7 +274,7 @@ using CommandTypes = ::testing::Types<GetCartesianLimit,
                                       SetCartesianImpedance,
                                       SetGuidingMode,
                                       SetEEToK,
-                                      SetFToEE,
+                                      SetNEToEE,
                                       SetLoad,
                                       SetFilters,
                                       Move,
@@ -363,7 +363,7 @@ using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                                   SetJointImpedance,
                                                   SetCartesianImpedance,
                                                   SetEEToK,
-                                                  SetFToEE,
+                                                  SetNEToEE,
                                                   SetLoad,
                                                   SetFilters,
                                                   GetCartesianLimit>;
