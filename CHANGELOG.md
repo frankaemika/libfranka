@@ -1,11 +1,17 @@
 # CHANGELOG
 
-## 0.5.0 - UNRELEASED
+## 0.6.0 - UNRELEASED
 
- * **BREAKING** Changed behavior of `franka::Robot::setEE` to set a transformation on top
-   of the nominal end-effector configured in Desk instead of replacing it.
+Requires Panda system version >= 2.2.1
+
+ * **BREAKING** Changed behavior of `franka::Robot::setEE`. Previously, this method would set the
+   flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
+   `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
+   defaults to the identity transformation.
 
 ## 0.5.0 - 2018-08-08
+
+Requires Panda system version >= 1.3.0
 
 ### Motion and control interfaces
 
