@@ -438,17 +438,21 @@ class Robot {
    * stop moving.
    *
    * @param[in] lower_torque_thresholds_acceleration Contact torque thresholds during
-   * acceleration/deceleration in \f$[Nm]\f$.
+   * acceleration/deceleration for each joint in \f$[Nm]\f$.
    * @param[in] upper_torque_thresholds_acceleration Collision torque thresholds during
-   * acceleration/deceleration in \f$[Nm]\f$.
-   * @param[in] lower_torque_thresholds_nominal Contact torque thresholds in \f$[Nm]\f$.
-   * @param[in] upper_torque_thresholds_nominal Collision torque thresholds in \f$[Nm]\f$.
+   * acceleration/deceleration for each joint in \f$[Nm]\f$.
+   * @param[in] lower_torque_thresholds_nominal Contact torque thresholds for each joint
+   * in \f$[Nm]\f$.
+   * @param[in] upper_torque_thresholds_nominal Collision torque thresholds for each joint
+   * in \f$[Nm]\f$.
    * @param[in] lower_force_thresholds_acceleration Contact force thresholds during
-   * acceleration/deceleration in \f$[N]\f$.
+   * acceleration/deceleration for \f$(x,y,z,R,P,Y)\f$ in \f$[N]\f$.
    * @param[in] upper_force_thresholds_acceleration Collision force thresholds during
-   * acceleration/deceleration in \f$[N]\f$.
-   * @param[in] lower_force_thresholds_nominal Contact force thresholds in \f$[N]\f$.
-   * @param[in] upper_force_thresholds_nominal Collision force thresholds in \f$[N]\f$.
+   * acceleration/deceleration for \f$(x,y,z,R,P,Y)\f$ in \f$[N]\f$.
+   * @param[in] lower_force_thresholds_nominal Contact force thresholds for \f$(x,y,z,R,P,Y)\f$
+   * in \f$[N]\f$.
+   * @param[in] upper_force_thresholds_nominal Collision force thresholds for \f$(x,y,z,R,P,Y)\f$
+   * in \f$[N]\f$.
    *
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
@@ -478,10 +482,12 @@ class Robot {
    * Forces or torques above the upper threshold are registered as collision and cause the robot to
    * stop moving.
    *
-   * @param[in] lower_torque_thresholds Contact torque thresholds in \f$[Nm]\f$.
-   * @param[in] upper_torque_thresholds Collision torque thresholds in \f$[Nm]\f$.
-   * @param[in] lower_force_thresholds Contact force thresholds in \f$[N]\f$.
-   * @param[in] upper_force_thresholds Collision force thresholds in \f$[N]\f$.
+   * @param[in] lower_torque_thresholds Contact torque thresholds for each joint in \f$[Nm]\f$.
+   * @param[in] upper_torque_thresholds Collision torque thresholds for each joint in \f$[Nm]\f$.
+   * @param[in] lower_force_thresholds Contact force thresholds for \f$(x,y,z,R,P,Y)\f$
+   * in \f$[N]\f$.
+   * @param[in] upper_force_thresholds Collision force thresholds for \f$(x,y,z,R,P,Y)\f$
+   * in \f$[N]\f$.
    *
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
