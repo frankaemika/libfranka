@@ -8,6 +8,7 @@ Requires Panda system version >= 2.2.1
    flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
+ * Improved documentation for `Robot::setCollisionBehavior`.
 
 ## 0.5.0 - 2018-08-08
 
