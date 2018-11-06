@@ -2,7 +2,7 @@
 
 ## 0.6.0 - UNRELEASED
 
-Requires Panda system version >= 2.2.1
+Requires Panda system version >= 2.3.0
 
  * **BREAKING** Changed behavior of `franka::Robot::setEE`. Previously, this method would set the
    flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
