@@ -573,8 +573,9 @@ class Robot {
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
-   * //TODO(FWA): add reference to NE frames when they are added
+   * @see RobotState::NE_T_EE for end effector pose in nominal end effector frame.
    * @see RobotState::O_T_EE for end effector pose in world base frame.
+   * @see RobotState::F_T_EE for end effector pose in flange frame.
    * @see Robot for an explanation of the NE and EE frames.
    */
   void setEE(const std::array<double, 16>& NE_T_EE);  // NOLINT(readability-identifier-naming)

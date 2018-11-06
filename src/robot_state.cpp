@@ -52,6 +52,7 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
 
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
   ostream << "{\"O_T_EE\": " << robot_state.O_T_EE << ", \"O_T_EE_d\": " << robot_state.O_T_EE_d
+          << ", \"F_T_NE\": " << robot_state.F_T_NE << ", \"NE_T_EE\": " << robot_state.NE_T_EE
           << ", \"F_T_EE\": " << robot_state.F_T_EE << ", \"EE_T_K\": " << robot_state.EE_T_K
           << ", \"m_ee\": " << robot_state.m_ee << ", \"F_x_Cee\": " << robot_state.F_x_Cee
           << ", \"I_ee\": " << robot_state.I_ee << ", \"m_load\": " << robot_state.m_load

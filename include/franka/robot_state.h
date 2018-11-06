@@ -51,8 +51,35 @@ struct RobotState {
    * \f$^{F}T_{EE}\f$
    * End effector frame pose in flange frame.
    * Pose is represented as a 4x4 matrix in column-major format.
+   *
+   * @see F_T_NE
+   * @see NE_T_EE
+   * @see Robot for an explanation of the NE and EE frames.
    */
   std::array<double, 16> F_T_EE{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f$^{F}T_{NE}\f$
+   * Nominal end effector frame pose in flange frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   *
+   * @see F_T_EE
+   * @see NE_T_EE
+   * @see Robot for an explanation of the NE and EE frames.
+   */
+  std::array<double, 16> F_T_NE{};  // NOLINT(readability-identifier-naming)
+
+  /**
+   * \f$^{NE}T_{EE}\f$
+   * End effector frame pose in nominal end effector frame.
+   * Pose is represented as a 4x4 matrix in column-major format.
+   *
+   * @see Robot::setEE to change this frame.
+   * @see F_T_EE
+   * @see F_T_NE
+   * @see Robot for an explanation of the NE and EE frames.
+   */
+  std::array<double, 16> NE_T_EE{};  // NOLINT(readability-identifier-naming)
 
   /**
    * \f$^{EE}T_{K}\f$

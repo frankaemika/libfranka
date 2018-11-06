@@ -16,6 +16,12 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.O_T_EE) {
     EXPECT_EQ(0.0, element);
   }
+  for (double element : actual.F_T_NE) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.NE_T_EE) {
+    EXPECT_EQ(0.0, element);
+  }
   for (double element : actual.O_T_EE_d) {
     EXPECT_EQ(0.0, element);
   }
@@ -111,6 +117,8 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
 
 void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
+  EXPECT_EQ(expected.F_T_NE, actual.F_T_NE);
+  EXPECT_EQ(expected.NE_T_EE, actual.NE_T_EE);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.F_T_EE, actual.F_T_EE);
   EXPECT_EQ(expected.EE_T_K, actual.EE_T_K);
@@ -152,6 +160,8 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
 void testRobotStatesAreEqual(const research_interface::robot::RobotState& expected,
                              const franka::RobotState& actual) {
   EXPECT_EQ(expected.O_T_EE, actual.O_T_EE);
+  EXPECT_EQ(expected.F_T_NE, actual.F_T_NE);
+  EXPECT_EQ(expected.NE_T_EE, actual.NE_T_EE);
   EXPECT_EQ(expected.O_T_EE_d, actual.O_T_EE_d);
   EXPECT_EQ(expected.F_T_EE, actual.F_T_EE);
   EXPECT_EQ(expected.EE_T_K, actual.EE_T_K);
@@ -230,6 +240,12 @@ bool randomBool() {
 
 void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.F_T_NE) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.NE_T_EE) {
     element = randomDouble();
   }
   for (double& element : robot_state.O_T_EE_d) {
@@ -336,6 +352,12 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   // Reset to all-zeros first
   robot_state = research_interface::robot::RobotState();
   for (double& element : robot_state.O_T_EE) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.F_T_NE) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.NE_T_EE) {
     element = randomDouble();
   }
   for (double& element : robot_state.O_T_EE_d) {

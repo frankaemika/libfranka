@@ -9,6 +9,7 @@ Requires Panda system version >= 2.2.1
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
  * Improved documentation for `Robot::setCollisionBehavior`.
+ * Added `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
 
 ## 0.5.0 - 2018-08-08
 

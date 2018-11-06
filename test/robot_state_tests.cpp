@@ -25,6 +25,8 @@ TEST(RobotState, CanBeStreamed) {
   std::string output(ss.str());
 
   EXPECT_PRED2(stringContains, output, "O_T_EE");
+  EXPECT_PRED2(stringContains, output, "F_T_NE");
+  EXPECT_PRED2(stringContains, output, "NE_T_EE");
   EXPECT_PRED2(stringContains, output, "O_T_EE_d");
   EXPECT_PRED2(stringContains, output, "EE_T_K");
   EXPECT_PRED2(stringContains, output, "F_T_EE");

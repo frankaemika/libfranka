@@ -310,6 +310,8 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;
   converted.O_T_EE_d = robot_state.O_T_EE_d;
+  converted.F_T_NE = robot_state.F_T_NE;
+  converted.NE_T_EE = robot_state.NE_T_EE;
   converted.F_T_EE = robot_state.F_T_EE;
   converted.EE_T_K = robot_state.EE_T_K;
   converted.m_ee = robot_state.m_ee;
