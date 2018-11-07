@@ -273,8 +273,8 @@ void Robot::setK(const std::array<double, 16>& EE_T_K) {  // NOLINT(readability-
   impl_->executeCommand<research_interface::robot::SetEEToK>(EE_T_K);
 }
 
-void Robot::setEE(const std::array<double, 16>& F_T_EE) {  // NOLINT(readability-named-parameter)
-  impl_->executeCommand<research_interface::robot::SetNEToEE>(F_T_EE);
+void Robot::setEE(const std::array<double, 16>& NE_T_EE) {  // NOLINT(readability-named-parameter)
+  impl_->executeCommand<research_interface::robot::SetNEToEE>(NE_T_EE);
 }
 
 void Robot::setLoad(double load_mass,
