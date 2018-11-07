@@ -44,6 +44,8 @@ class Duration {
 
   /**
    * Assigns the contents of one Duration to another.
+   *
+   * @return Result of the operation.
    */
   Duration& operator=(const Duration&) = default;
 

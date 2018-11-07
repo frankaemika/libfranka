@@ -142,8 +142,11 @@ class Gripper {
    */
   ServerVersion serverVersion() const noexcept;
 
+/* DOXYGEN should skip this, otherwise it warns about missing documentation */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
   Gripper(const Gripper&) = delete;
   Gripper& operator=(const Gripper&) = delete;
+#endif
 
  private:
   std::unique_ptr<Network> network_;
