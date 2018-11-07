@@ -9,7 +9,8 @@ def get_stages(ubuntu_version) {
         checkout scm
 
         docker.build("libfranka-ci-worker:${ubuntu_version}",
-                     "-f .ci/Dockerfile.${ubuntu_version} .ci").inside {
+                     "-f .ci/Dockerfile.${ubuntu_version} .ci")
+              .inside('--cap-add SYS_PTRACE') {
           stage("${ubuntu_version}: Build (Debug)") {
             sh '.ci/debug.sh'
             junit 'build-debug/test_results/*.xml'
