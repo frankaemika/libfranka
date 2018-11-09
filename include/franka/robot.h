@@ -664,11 +664,10 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
-/* DOXYGEN should skip this, otherwise it warns about missing documentation */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/// @cond DO_NOT_DOCUMENT
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
-#endif
+/// @endcond
 
   class Impl;
 

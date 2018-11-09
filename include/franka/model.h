@@ -271,11 +271,10 @@ class Model {
                                 const std::array<double, 3>& gravity_earth = {
                                     {0., 0., -9.81}}) const noexcept;
 
-/* DOXYGEN should skip this, otherwise it warns about missing documentation */
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/// @cond DO_NOT_DOCUMENT
   Model(const Model&) = delete;
   Model& operator=(const Model&) = delete;
-#endif
+/// @endcond
 
  private:
   std::unique_ptr<ModelLibrary> library_;
