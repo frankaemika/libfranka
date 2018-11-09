@@ -18,16 +18,18 @@ def get_stages(ubuntu_version) {
 
           stage("${ubuntu_version}: Build (Release)") {
             sh '.ci/release.sh'
-            // Can't use dir() for this shell script due to JENKINS-33510
-            sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs-${ubuntu_version}.tar.gz html"
-            dir('build-release') {
-              archive '*.deb, *.tar.gz'
-              publishHTML([allowMissing: false,
-                           alwaysLinkToLastBuild: false,
-                           keepAll: true,
-                           reportDir: 'doc/html',
-                           reportFiles: 'index.html',
-                           reportName: "API Documentation (${ubuntu_version})"])
+            if (ubuntu_version == "xenial") {
+              // Can't use dir() for this shell script due to JENKINS-33510
+              sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs.tar.gz html"
+              dir('build-release') {
+                archive '*.deb, *.tar.gz'
+                publishHTML([allowMissing: false,
+                             alwaysLinkToLastBuild: false,
+                             keepAll: true,
+                             reportDir: 'doc/html',
+                             reportFiles: 'index.html',
+                             reportName: "API Documentation"])
+              }
             }
           }
 
