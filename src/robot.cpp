@@ -256,12 +256,12 @@ void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thres
 }
 
 void Robot::setJointImpedance(
-    const std::array<double, 7>& K_theta) {  // NOLINT(readability-named-parameter)
+    const std::array<double, 7>& K_theta) {  // NOLINT(readability-identifier-naming)
   impl_->executeCommand<research_interface::robot::SetJointImpedance>(K_theta);
 }
 
 void Robot::setCartesianImpedance(
-    const std::array<double, 6>& K_x) {  // NOLINT(readability-named-parameter)
+    const std::array<double, 6>& K_x) {  // NOLINT(readability-identifier-naming)
   impl_->executeCommand<research_interface::robot::SetCartesianImpedance>(K_x);
 }
 
@@ -269,17 +269,18 @@ void Robot::setGuidingMode(const std::array<bool, 6>& guiding_mode, bool elbow) 
   impl_->executeCommand<research_interface::robot::SetGuidingMode>(guiding_mode, elbow);
 }
 
-void Robot::setK(const std::array<double, 16>& EE_T_K) {  // NOLINT(readability-named-parameter)
+void Robot::setK(const std::array<double, 16>& EE_T_K) {  // NOLINT(readability-identifier-naming)
   impl_->executeCommand<research_interface::robot::SetEEToK>(EE_T_K);
 }
 
-void Robot::setEE(const std::array<double, 16>& F_T_EE) {  // NOLINT(readability-named-parameter)
+void Robot::setEE(const std::array<double, 16>& F_T_EE) {  // NOLINT(readability-identifier-naming)
   impl_->executeCommand<research_interface::robot::SetFToEE>(F_T_EE);
 }
 
-void Robot::setLoad(double load_mass,
-                    const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-named-parameter)
-                    const std::array<double, 9>& load_inertia) {
+void Robot::setLoad(
+    double load_mass,
+    const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-identifier-naming)
+    const std::array<double, 9>& load_inertia) {
   impl_->executeCommand<research_interface::robot::SetLoad>(load_mass, F_x_Cload, load_inertia);
 }
 

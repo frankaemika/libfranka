@@ -271,10 +271,10 @@ class Model {
                                 const std::array<double, 3>& gravity_earth = {
                                     {0., 0., -9.81}}) const noexcept;
 
-/// @cond DO_NOT_DOCUMENT
+  /// @cond DO_NOT_DOCUMENT
   Model(const Model&) = delete;
   Model& operator=(const Model&) = delete;
-/// @endcond
+  /// @endcond
 
  private:
   std::unique_ptr<ModelLibrary> library_;

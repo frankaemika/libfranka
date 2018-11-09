@@ -12,10 +12,9 @@ std::array<double, 3> combineCenterOfMass(
     const std::array<double, 3>& F_x_Cload) {  // NOLINT(readability-identifier-naming)
   std::array<double, 3> F_x_Ctotal{};          // NOLINT(readability-identifier-naming)
   if ((m_ee + m_load) > 0) {
-      for(size_t i = 0; i < F_x_Ctotal.size(); i++){
-        F_x_Ctotal[i] = (m_ee * F_x_Cee[i] + m_load * F_x_Cload[i]) /
-                  (m_ee + m_load);
-      }
+    for (size_t i = 0; i < F_x_Ctotal.size(); i++) {
+      F_x_Ctotal[i] = (m_ee * F_x_Cee[i] + m_load * F_x_Cload[i]) / (m_ee + m_load);
+    }
   }
 
   return F_x_Ctotal;
