@@ -212,7 +212,7 @@ if(CLANG_TIDY_PROG)
   set(TIDY_LINE_FILTER "[{\"name\":\"${TIDY_LINE_FILTER}\"}]")
 
   add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} -fix
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR}
                                -line-filter=${TIDY_LINE_FILTER} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running clang-tidy"
