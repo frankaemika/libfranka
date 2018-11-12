@@ -73,6 +73,9 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.dq_d) {
     EXPECT_EQ(0.0, element);
   }
+  for (double element : actual.ddq_d) {
+    EXPECT_EQ(0.0, element);
+  }
   for (double element : actual.joint_contact) {
     EXPECT_EQ(0.0, element);
   }
@@ -132,6 +135,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
+  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -178,6 +182,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
+  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -289,6 +294,9 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.dq_d) {
     element = randomDouble();
   }
+  for (double& element : robot_state.ddq_d) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.joint_contact) {
     element = randomDouble();
   }
@@ -383,6 +391,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.dq_d) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.ddq_d) {
     element = randomDouble();
   }
   for (double& element : robot_state.joint_contact) {
