@@ -3,6 +3,7 @@
 ## 0.5.1 - UNRELEASED
 
  * Improved documentation for `Robot::setCollisionBehavior`.
+ * Added support for building on Ubuntu 18.04.
 
 ## 0.5.0 - 2018-08-08
 

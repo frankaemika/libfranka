@@ -50,6 +50,11 @@ struct GripperState {
 
 /**
  * Streams the gripper state as JSON object: {"field_name_1": value, "field_name_2": value, ...}
+ *
+ * @param[in] ostream Ostream instance
+ * @param[in] gripper_state GripperState struct instance to stream
+ *
+ * @return Ostream instance
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::GripperState& gripper_state);
 

@@ -12,8 +12,8 @@
 #include "helpers.h"
 #include "mock_server.h"
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 using franka::Gripper;
 using franka::IncompatibleVersionException;
