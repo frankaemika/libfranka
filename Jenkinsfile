@@ -47,6 +47,7 @@ def get_stages(ubuntu_version) {
             sh '.ci/lint.sh'
           }
         }
+        currentBuild.result = 'SUCCESS'
       } catch (e) {
         currentBuild.result = 'FAILED'
       } finally {
