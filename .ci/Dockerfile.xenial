@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     doxygen \
     graphviz \
     lcov \
-    libpoco-dev \
-    valgrind \
     libeigen3-dev \
+    libpoco-dev \
+    rename \
+    valgrind \
     && rm -rf /var/lib/apt/lists/*

@@ -6,9 +6,11 @@ services:
 
 matrix:
   include:
-    - env: CI_TARGET=debug
+    - env: CI_DISTRO=xenial CI_TARGET=debug
+    - env: CI_DISTRO=bionic CI_TARGET=debug
 
-    - env: CI_TARGET=release
+    - env: CI_DISTRO=xenial CI_TARGET=release
+    - env: CI_DISTRO=bionic CI_TARGET=release
       after_success: touch build-release/doc/html/.nojekyll
       deploy:
         provider: pages
@@ -18,10 +20,11 @@ matrix:
         on:
           branch: master
 
-    - env: CI_TARGET=coverage
+    - env: CI_DISTRO=xenial CI_TARGET=coverage
       after_success: bash <(curl -s https://codecov.io/bash) -g "*/test/*"
 
-    - env: CI_TARGET=lint
+    - env: CI_DISTRO=xenial CI_TARGET=lint
+    - env: CI_DISTRO=bionic CI_TARGET=lint
 
 before_install:
   - sudo apt-get update
@@ -30,7 +33,10 @@ install:
   - sudo apt-get install -y bash curl
 
 before_script:
-  - docker build -t worker $TRAVIS_BUILD_DIR/.ci
+  - docker build
+    -t worker
+    -f $TRAVIS_BUILD_DIR/.ci/Dockerfile.$CI_DISTRO
+    $TRAVIS_BUILD_DIR/.ci
 
 script:
   - docker run
