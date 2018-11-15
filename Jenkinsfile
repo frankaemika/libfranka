@@ -1,26 +1,26 @@
 #!groovy
 
-def get_stages(ubuntu_version) {
+buildResult = 'NOT_BUILT'
+
+def getStages(ubuntuVersion) {
   return {
     node('docker') {
-      step([$class: 'StashNotifier'])
-
       try {
         checkout scm
 
-        docker.build("libfranka-ci-worker:${ubuntu_version}",
-                     "-f .ci/Dockerfile.${ubuntu_version} .ci")
+        docker.build("libfranka-ci-worker:${ubuntuVersion}",
+                     "-f .ci/Dockerfile.${ubuntuVersion} .ci")
               .inside('--cap-add SYS_PTRACE') {
-          stage("${ubuntu_version}: Build (Debug)") {
+          stage("${ubuntuVersion}: Build (Debug)") {
             sh '.ci/debug.sh'
             junit 'build-debug/test_results/*.xml'
           }
 
-          stage("${ubuntu_version}: Build (Release)") {
+          stage("${ubuntuVersion}: Build (Release)") {
             sh '.ci/release.sh'
             // Can't use dir() for these shell scripts due to JENKINS-33510
             sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs.tar.gz html"
-            sh "cd ${env.WORKSPACE}/build-release && rename -e 's/(.tar.gz|.deb)\$/-${ubuntu_version}\$1/' *.deb *.tar.gz"
+            sh "cd ${env.WORKSPACE}/build-release && rename -e 's/(.tar.gz|.deb)\$/-${ubuntuVersion}\$1/' *.deb *.tar.gz"
             dir('build-release') {
               archive '*.deb, *.tar.gz'
               publishHTML([allowMissing: false,
@@ -28,35 +28,45 @@ def get_stages(ubuntu_version) {
                            keepAll: true,
                            reportDir: 'doc/html',
                            reportFiles: 'index.html',
-                           reportName: "API Documentation (${ubuntu_version})"])
+                           reportName: "API Documentation (${ubuntuVersion})"])
             }
           }
 
-          stage("${ubuntu_version}: Build (Coverage)") {
+          stage("${ubuntuVersion}: Build (Coverage)") {
             sh '.ci/coverage.sh'
             publishHTML([allowMissing: false,
                          alwaysLinkToLastBuild: false,
                          keepAll: true,
                          reportDir: 'build-coverage/coverage',
                          reportFiles: 'index.html',
-                         reportName: "Code Coverage (${ubuntu_version})"])
+                         reportName: "Code Coverage (${ubuntuVersion})"])
           }
 
-          stage("${ubuntu_version}: Lint") {
+          stage("${ubuntuVersion}: Lint") {
             sh '.ci/lint.sh'
           }
         }
-        currentBuild.result = 'SUCCESS'
+
+        if (buildResult != 'FAILED') {
+          buildResult = 'SUCCESS'
+        }
       } catch (e) {
-        currentBuild.result = 'FAILED'
-      } finally {
-        step([$class: 'StashNotifier'])
+        buildResult = 'FAILED'
       }
     }
   }
 }
 
+node {
+  step([$class: 'StashNotifier'])
+}
+
 parallel(
-  'xenial': get_stages('xenial'),
-  'bionic': get_stages('bionic'),
+  'xenial': getStages('xenial'),
+  'bionic': getStages('bionic'),
 )
+
+node {
+  currentBuild.result = buildResult
+  step([$class: 'StashNotifier'])
+}
