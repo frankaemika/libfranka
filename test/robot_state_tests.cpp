@@ -44,6 +44,7 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "delbow_c");
   EXPECT_PRED2(stringContains, output, "ddelbow_c");
   EXPECT_PRED2(stringContains, output, "tau_J");
+  EXPECT_PRED2(stringContains, output, "tau_J_d");
   EXPECT_PRED2(stringContains, output, "dtau_J");
   EXPECT_PRED2(stringContains, output, "q");
   EXPECT_PRED2(stringContains, output, "dq");
@@ -64,6 +65,7 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "dtheta");
   EXPECT_PRED2(stringContains, output, "current_errors");
   EXPECT_PRED2(stringContains, output, "last_motion_errors");
+  EXPECT_PRED2(stringContains, output, "control_command_success_rate");
   EXPECT_PRED2(stringContains, output, "robot_mode");
   EXPECT_PRED2(stringContains, output, "time");
 }
