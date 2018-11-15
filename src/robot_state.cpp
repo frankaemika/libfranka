@@ -59,10 +59,13 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"m_total\": " << robot_state.m_total
           << ", \"F_x_Ctotal\": " << robot_state.F_x_Ctotal
           << ", \"I_total\": " << robot_state.I_total << ", \"elbow\": " << robot_state.elbow
-          << ", \"elbow_d\": " << robot_state.elbow_d << ", \"tau_J\": " << robot_state.tau_J
+          << ", \"elbow_d\": " << robot_state.elbow_d << ", \"elbow_c\": " << robot_state.elbow_c
+          << ", \"delbow_c\": " << robot_state.delbow_c
+          << ", \"ddelbow_c\": " << robot_state.ddelbow_c << ", \"tau_J\": " << robot_state.tau_J
           << ", \"tau_J_d\": " << robot_state.tau_J_d << ", \"dtau_J\": " << robot_state.dtau_J
           << ", \"q\": " << robot_state.q << ", \"dq\": " << robot_state.dq
           << ", \"q_d\": " << robot_state.q_d << ", \"dq_d\": " << robot_state.dq_d
+          << ", \"ddq_d\": " << robot_state.ddq_d
           << ", \"joint_contact\": " << robot_state.joint_contact
           << ", \"cartesian_contact\": " << robot_state.cartesian_contact
           << ", \"joint_collision\": " << robot_state.joint_collision
@@ -70,7 +73,10 @@ std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_
           << ", \"tau_ext_hat_filtered\": " << robot_state.tau_ext_hat_filtered
           << ", \"O_F_ext_hat_K\": " << robot_state.O_F_ext_hat_K
           << ", \"K_F_ext_hat_K\": " << robot_state.K_F_ext_hat_K
-          << ", \"O_dP_EE_d\": " << robot_state.O_dP_EE_d << ", \"theta\": " << robot_state.theta
+          << ", \"O_dP_EE_d\": " << robot_state.O_dP_EE_d
+          << ", \"O_T_EE_c\": " << robot_state.O_T_EE_c
+          << ", \"O_dP_EE_c\": " << robot_state.O_dP_EE_c
+          << ", \"O_ddP_EE_c\": " << robot_state.O_ddP_EE_c << ", \"theta\": " << robot_state.theta
           << ", \"dtheta\": " << robot_state.dtheta
           << ", \"current_errors\": " << robot_state.current_errors
           << ", \"last_motion_errors\": " << robot_state.last_motion_errors
