@@ -92,10 +92,7 @@ int main(int argc, char** argv) {
         orientation.coeffs() << -orientation.coeffs();
       }
       Eigen::Quaterniond error_quaternion(orientation * orientation_d.inverse());
-      // convert to axis angle
-      Eigen::AngleAxisd error_quaternion_angle_axis(error_quaternion);
-      // compute "orientation error"
-      error.tail(3) << error_quaternion_angle_axis.axis() * error_quaternion_angle_axis.angle();
+      error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
 
       // compute control
       Eigen::VectorXd tau_task(7), tau_d(7);
