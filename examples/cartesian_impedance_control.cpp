@@ -91,8 +91,11 @@ int main(int argc, char** argv) {
       if (orientation_d.coeffs().dot(orientation.coeffs()) < 0.0) {
         orientation.coeffs() << -orientation.coeffs();
       }
-      Eigen::Quaterniond error_quaternion(orientation * orientation_d.inverse());
+      // "difference" quaternion
+      Eigen::Quaterniond error_quaternion(orientation.inverse() * orientation_d);
       error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
+      // Transform to base frame
+      error.tail(3) << -transform.linear() * error.tail(3);
 
       // compute control
       Eigen::VectorXd tau_task(7), tau_d(7);
