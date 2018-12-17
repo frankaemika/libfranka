@@ -14,8 +14,8 @@
 #include "helpers.h"
 #include "mock_server.h"
 
-using ::testing::Return;
 using ::testing::_;
+using ::testing::Return;
 
 using research_interface::robot::Connect;
 using research_interface::robot::Move;

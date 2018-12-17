@@ -10,6 +10,7 @@ Requires Panda system version >= 2.3.0
    defaults to the identity transformation.
  * Improved documentation for `Robot::setCollisionBehavior`.
  * Added `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
+ * Added support for building on Ubuntu 18.04.
 
 ## 0.5.0 - 2018-08-08
 

@@ -25,6 +25,7 @@ using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
 using research_interface::robot::SetFilters;
+using research_interface::robot::SetFToEE;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;

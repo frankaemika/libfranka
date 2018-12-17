@@ -186,7 +186,7 @@ file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
 
-find_program(CLANG_FORMAT_PROG clang-format-5.0 DOC "'clang-format' executable")
+find_program(CLANG_FORMAT_PROG clang-format-6.0 DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format
     COMMAND ${CLANG_FORMAT_PROG} -i ${SOURCES} ${HEADERS} ${TEST_FILES}
@@ -201,7 +201,7 @@ if(CLANG_FORMAT_PROG)
     VERBATIM
   )
 endif()
-find_program(CLANG_TIDY_PROG clang-tidy-5.0 DOC "'clang-tidy' executable")
+find_program(CLANG_TIDY_PROG clang-tidy-6.0 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   # Build JSON string for clang-tidy's line filter
   set(TIDY_FILES ${SOURCES} ${HEADERS})
@@ -212,7 +212,7 @@ if(CLANG_TIDY_PROG)
   set(TIDY_LINE_FILTER "[{\"name\":\"${TIDY_LINE_FILTER}\"}]")
 
   add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} -fix
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR}
                                -line-filter=${TIDY_LINE_FILTER} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running clang-tidy"

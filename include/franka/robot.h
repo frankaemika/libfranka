@@ -670,8 +670,10 @@ class Robot {
    */
   ServerVersion serverVersion() const noexcept;
 
+  /// @cond DO_NOT_DOCUMENT
   Robot(const Robot&) = delete;
   Robot& operator=(const Robot&) = delete;
+  /// @endcond
 
   class Impl;
 

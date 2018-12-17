@@ -2,8 +2,6 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "load_calculations.h"
 
-#include <algorithm>
-
 namespace franka {
 
 std::array<double, 3> combineCenterOfMass(
@@ -13,13 +11,11 @@ std::array<double, 3> combineCenterOfMass(
     const std::array<double, 3>& F_x_Cload) {  // NOLINT(readability-identifier-naming)
   std::array<double, 3> F_x_Ctotal{};          // NOLINT(readability-identifier-naming)
   if ((m_ee + m_load) > 0) {
-    std::transform(
-        F_x_Cload.cbegin(), F_x_Cload.cend(), F_x_Cee.cbegin(), F_x_Ctotal.begin(),
-        [m_ee, m_load](double current_center_of_mass_load, double current_center_of_mass_ee) {
-          return ((m_ee * current_center_of_mass_ee + m_load * current_center_of_mass_load) /
-                  (m_ee + m_load));
-        });
+    for (size_t i = 0; i < F_x_Ctotal.size(); i++) {
+      F_x_Ctotal[i] = (m_ee * F_x_Cee[i] + m_load * F_x_Cload[i]) / (m_ee + m_load);
+    }
   }
+
   return F_x_Ctotal;
 }
 

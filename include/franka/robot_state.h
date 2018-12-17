@@ -372,6 +372,11 @@ struct RobotState {
 /**
  * Streams the robot state as JSON object: {"field_name_1": [0,0,0,0,0,0,0], "field_name_2":
  * [0,0,0,0,0,0], ...}
+ *
+ * @param[in] ostream Ostream instance
+ * @param[in] robot_state RobotState instance to stream
+ *
+ * @return Ostream instance
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
 
