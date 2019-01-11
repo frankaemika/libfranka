@@ -4,6 +4,7 @@
 
  * Improved documentation for `Robot::setCollisionBehavior`.
  * Added support for building on Ubuntu 18.04.
+ * Fix abort gripper command handling.
 
 ## 0.5.0 - 2018-08-08
 
