@@ -5,6 +5,7 @@
 #include <exception>
 #include <fstream>
 #include <vector>
+#include <iostream>
 
 #include <franka/exception.h>
 #include <research_interface/robot/service_types.h>
@@ -13,9 +14,36 @@ namespace franka {
 
 LibraryDownloader::LibraryDownloader(Network& network) {
   using research_interface::robot::LoadModelLibrary;
+  LoadModelLibrary::Architecture architecture;
+  LoadModelLibrary::System operation_system;
+
+  #if defined(__amd64__) || defined(_M_AMD64)
+      architecture = LoadModelLibrary::Architecture::kX64;
+      std::cout << "use x64" << std::endl;
+  #elif defined(__X86__) || defined(_M_IX86)
+      architecture = LoadModelLibrary::Architecture::kx86;
+      std::cout << "use x86" << std::endl;
+  #elif defined(__arm__) || defined(_M_ARM)
+      architecture = LoadModelLibrary::Architecture::kARM;
+      std::cout << "use ARM" << std::endl;
+  #elif defined(__aarch64__) || defined(_M_ARM64)
+      architecture = LoadModelLibrary::Architecture::kARM64;
+      std::cout << "use ARM64" << std::endl;
+  #else
+      throw ModelException("libfranka: Unsupported architecture!");
+  #endif
+
+  #if defined(_WIN32) || defined(_WIN64)
+    operation_system = LoadModelLibrary::System::kWindows;
+    std::cout << "use Windows" << std::endl;
+  #elif defined(__unix) || defined(__unix__)
+    std::cout << "use Linux" << std::endl;
+  #else
+    throw ModelException("libfranka: Unsupported operation system!");
+  #endif
 
   uint32_t command_id = network.tcpSendRequest<LoadModelLibrary>(
-      LoadModelLibrary::Architecture::kX64, LoadModelLibrary::System::kLinux);
+    architecture, operation_system);
   std::vector<uint8_t> buffer;
   LoadModelLibrary::Response response =
       network.tcpBlockingReceiveResponse<LoadModelLibrary>(command_id, &buffer);
