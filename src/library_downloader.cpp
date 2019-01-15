@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include <franka/exception.h>
+#include <franka/platform_type.h>
 #include <research_interface/robot/service_types.h>
 
 namespace franka {
@@ -17,26 +18,26 @@ LibraryDownloader::LibraryDownloader(Network& network) {
   LoadModelLibrary::Architecture architecture;
   LoadModelLibrary::System operation_system;
 
-  #if defined(__amd64__) || defined(_M_AMD64)
+  #if defined(X64)
       architecture = LoadModelLibrary::Architecture::kX64;
       std::cout << "use x64" << std::endl;
-  #elif defined(__X86__) || defined(_M_IX86)
+  #elif defined(X86)
       architecture = LoadModelLibrary::Architecture::kx86;
       std::cout << "use x86" << std::endl;
-  #elif defined(__arm__) || defined(_M_ARM)
+  #elif defined(ARM)
       architecture = LoadModelLibrary::Architecture::kARM;
       std::cout << "use ARM" << std::endl;
-  #elif defined(__aarch64__) || defined(_M_ARM64)
+  #elif defined(ARM64)
       architecture = LoadModelLibrary::Architecture::kARM64;
       std::cout << "use ARM64" << std::endl;
   #else
       throw ModelException("libfranka: Unsupported architecture!");
   #endif
 
-  #if defined(_WIN32) || defined(_WIN64)
+  #if defined(WINDOWS)
     operation_system = LoadModelLibrary::System::kWindows;
     std::cout << "use Windows" << std::endl;
-  #elif defined(__unix) || defined(__unix__)
+  #elif defined(LINUX)
     std::cout << "use Linux" << std::endl;
   #else
     throw ModelException("libfranka: Unsupported operation system!");
