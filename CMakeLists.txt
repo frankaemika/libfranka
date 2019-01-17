@@ -10,7 +10,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-Wall -Wextra)
+if(UNIX)
+  add_compile_options(-Wall -Wextra)
+elseif(WIN32)
+  add_compile_options(/Wall)
+endif()
 
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
@@ -25,7 +29,11 @@ find_package(Threads REQUIRED)
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-  add_compile_options(-Werror)
+	if(UNIX)
+		add_compile_options(-Werror)
+	elseif(WIN32)
+		add_compile_options(/WX)
+	endif()
 endif()
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
@@ -64,6 +72,7 @@ add_library(franka SHARED
 add_library(Franka::Franka ALIAS franka)
 
 set_target_properties(franka PROPERTIES
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
   VERSION ${libfranka_VERSION}
   SOVERSION ${libfranka_VERSION_MAJOR}.${libfranka_VERSION_MINOR} # Use minor version while we're at 0.x
   EXPORT_NAME Franka
