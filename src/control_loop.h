@@ -2,7 +2,12 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
-#include <cmath>
+#if _MSC_VER
+	#include <corecrt_math_defines.h>
+#else
+	#include <cmath>
+#endif
+
 #include <functional>
 
 #include <franka/control_types.h>

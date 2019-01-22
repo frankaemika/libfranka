@@ -17,6 +17,11 @@
 
 #include <franka/exception.h>
 
+
+#ifdef _MSC_VER
+#undef min
+#endif
+
 namespace franka {
 
 class Network {
@@ -186,7 +191,8 @@ uint32_t Network::tcpSendRequest(TArgs&&... args) try {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::template Message<typename T::Request> message(
-      typename T::Header(T::kCommand, command_id_++, sizeof(message)),
+      typename T::Header(T::kCommand, command_id_++,
+                         sizeof(typename T::template Message<typename T::Request>)),
       typename T::Request(std::forward<TArgs>(args)...));
 
   tcp_socket_.sendBytes(&message, sizeof(message));

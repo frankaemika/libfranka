@@ -4,9 +4,15 @@
 
 #include <memory>
 #include <sstream>
-
+#include <franka/platform_type.h>
 // Included for MSG_PEEK symbol not present in Poco
+#ifdef LINUX
 #include <sys/socket.h>
+#elif defined(WINDOWS)
+#include <winsock.h>
+#else
+throw NetworkException("libfranka: unkown operation system");
+#endif
 
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
@@ -19,21 +25,44 @@ Network::Network(const std::string& franka_address,
                  std::tuple<bool, int, int, int> tcp_keepalive) {
   try {
     Poco::Timespan poco_timeout(1000l * tcp_timeout.count());
-    tcp_socket_.connect({franka_address, franka_port}, poco_timeout);
+    Poco::Net::SocketAddress adress(franka_address, franka_port);
+
+    tcp_socket_.connect(adress, poco_timeout);
     tcp_socket_.setBlocking(true);
     tcp_socket_.setSendTimeout(poco_timeout);
     tcp_socket_.setReceiveTimeout(poco_timeout);
 
     if (std::get<0>(tcp_keepalive)) {
       tcp_socket_.setKeepAlive(true);
+#ifdef LINUX
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
-      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
-    }
+	  tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
+#elif defined(WINDOWS)
+      char keepalive_duration = std::get<3>(tcp_keepalive);
+      setsockopt(tcp_socket_.impl()->sockfd(), IPPROTO_TCP, TCP_KEEPIDLE, &keepalive_duration,
+                 sizeof keepalive_duration);
+      setsockopt(tcp_socket_.impl()->sockfd(), IPPROTO_TCP, TCP_KEEPCNT, &keepalive_duration,
+                 sizeof keepalive_duration);
+      setsockopt(tcp_socket_.impl()->sockfd(), IPPROTO_TCP, TCP_KEEPINTVL, &keepalive_duration,
+                  sizeof keepalive_duration);
+#else
+      throw NetworkException("libfranka: unkown operation system");
+#endif
+	}
 
     udp_socket_.bind({"0.0.0.0", 0});
+#ifdef LINUX
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
-    udp_port_ = udp_socket_.address().port();
+#elif defined(WINDOWS)
+    struct timeval tv;
+    tv.tv_usec = udp_timeout.count() * 1000l;
+    setsockopt(udp_socket_.impl()->sockfd(), SOL_SOCKET, SO_RCVTIMEO,
+                reinterpret_cast<char*>((struct timeval*)&tv), sizeof(struct timeval));
+#else
+	throw NetworkException("libfranka: unkown operation system");
+#endif
+	udp_port_ = udp_socket_.address().port();
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: Connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
