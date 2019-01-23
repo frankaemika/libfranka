@@ -73,10 +73,10 @@ int main(int argc, char** argv) {
           model.zeroJacobian(franka::Frame::kEndEffector, robot_state);
 
       // convert to Eigen
-      Eigen::Map<const Eigen::Matrix<double, 7, 1> > coriolis(coriolis_array.data());
-      Eigen::Map<const Eigen::Matrix<double, 6, 7> > jacobian(jacobian_array.data());
-      Eigen::Map<const Eigen::Matrix<double, 7, 1> > q(robot_state.q.data());
-      Eigen::Map<const Eigen::Matrix<double, 7, 1> > dq(robot_state.dq.data());
+      Eigen::Map<const Eigen::Matrix<double, 7, 1>> coriolis(coriolis_array.data());
+      Eigen::Map<const Eigen::Matrix<double, 6, 7>> jacobian(jacobian_array.data());
+      Eigen::Map<const Eigen::Matrix<double, 7, 1>> q(robot_state.q.data());
+      Eigen::Map<const Eigen::Matrix<double, 7, 1>> dq(robot_state.dq.data());
       Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
       Eigen::Vector3d position(transform.translation());
       Eigen::Quaterniond orientation(transform.linear());
