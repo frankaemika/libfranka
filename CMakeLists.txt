@@ -10,9 +10,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(UNIX)
+if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
   add_compile_options(-Wall -Wextra)
-elseif(WIN32)
+elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
   add_compile_options(/Wall)
 endif()
 
