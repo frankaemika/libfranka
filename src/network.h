@@ -8,9 +8,9 @@
 #include <cstring>
 #include <functional>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 #include <vector>
-#include <thread>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
