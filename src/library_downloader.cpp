@@ -10,6 +10,7 @@
 #include <franka/exception.h>
 #include <franka/platform_type.h>
 #include <research_interface/robot/service_types.h>
+#include <Poco/SharedLibrary.h>
 
 namespace franka {
 
@@ -51,6 +52,10 @@ LibraryDownloader::LibraryDownloader(Network& network) {
   if (response.status != LoadModelLibrary::Status::kSuccess) {
     throw ModelException("libfranka: Server reports error when loading model library.");
   }
+#ifdef WINDOWS
+  model_library_file_.createFile();
+  model_library_file_.renameTo(path() + Poco::SharedLibrary::suffix());
+#endif
 
   try {
     std::ofstream model_library_stream(path().c_str(), std::ios_base::out | std::ios_base::binary);
@@ -58,6 +63,10 @@ LibraryDownloader::LibraryDownloader(Network& network) {
   } catch (const std::exception& ex) {
     throw ModelException("libfranka: Cannot save model library.");
   }
+}
+
+LibraryDownloader::~LibraryDownloader(){
+  Poco::TemporaryFile::registerForDeletion(model_library_file_.path());
 }
 
 const std::string& LibraryDownloader::path() const noexcept {

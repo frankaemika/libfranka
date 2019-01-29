@@ -13,6 +13,7 @@ namespace franka {
 class LibraryDownloader {
  public:
   LibraryDownloader(Network& network);
+  ~LibraryDownloader();
 
   const std::string& path() const noexcept;
 
