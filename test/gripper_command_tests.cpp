@@ -160,3 +160,19 @@ TYPED_TEST(GripperCommand, CanSendAndReceiveUnsucessful) {
 
   EXPECT_FALSE(TestFixture::executeCommand(gripper));
 }
+
+TYPED_TEST(GripperCommand, CanSendAndReceiveAborted) {
+  GripperMockServer server;
+  Gripper gripper("127.0.0.1");
+
+  server
+      .waitForCommand<typename TestFixture::TCommand>(
+          [this](const typename TestFixture::TCommand::Request& request) ->
+          typename TestFixture::TCommand::Response {
+            EXPECT_TRUE(this->compare(request, this->getExpected()));
+            return this->createResponse(request, TestFixture::TCommand::Status::kAborted);
+          })
+      .spinOnce();
+
+  EXPECT_THROW(TestFixture::executeCommand(gripper), CommandException);
+}
