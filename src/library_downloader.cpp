@@ -5,7 +5,6 @@
 #include <exception>
 #include <fstream>
 #include <vector>
-#include <iostream>
 
 #include <franka/exception.h>
 #include <franka/platform_type.h>
@@ -21,25 +20,20 @@ LibraryDownloader::LibraryDownloader(Network& network) {
 
   #if defined(X64)
       architecture = LoadModelLibrary::Architecture::kX64;
-      std::cout << "use x64" << std::endl;
   #elif defined(X86)
-      architecture = LoadModelLibrary::Architecture::kx86;
-      std::cout << "use x86" << std::endl;
+      architecture = LoadModelLibrary::Architecture::kX86;
   #elif defined(ARM)
       architecture = LoadModelLibrary::Architecture::kARM;
-      std::cout << "use ARM" << std::endl;
   #elif defined(ARM64)
       architecture = LoadModelLibrary::Architecture::kARM64;
-      std::cout << "use ARM64" << std::endl;
   #else
       throw ModelException("libfranka: Unsupported architecture!");
   #endif
 
   #if defined(WINDOWS)
     operation_system = LoadModelLibrary::System::kWindows;
-    std::cout << "use Windows" << std::endl;
   #elif defined(LINUX)
-    std::cout << "use Linux" << std::endl;
+    operation_system = LoadModelLibrary::System::kLinux;
   #else
     throw ModelException("libfranka: Unsupported operation system!");
   #endif
