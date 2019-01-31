@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     }
 
     // Grasp the object.
-    if (!gripper.grasp(grasping_width, 0.1, 60)) {
+    if (!gripper.grasp(grasping_width, 0.1, 1)) {
       std::cout << "Failed to grasp object." << std::endl;
       return -1;
     }
