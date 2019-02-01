@@ -79,6 +79,9 @@ set_target_properties(franka PROPERTIES
   SOVERSION ${libfranka_VERSION_MAJOR}.${libfranka_VERSION_MINOR} # Use minor version while we're at 0.x
   EXPORT_NAME Franka
 )
+if(MSVC)
+  target_compile_definitions(franka PUBLIC _USE_MATH_DEFINES)
+endif()
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
