@@ -94,7 +94,14 @@ target_link_libraries(franka PRIVATE
 )
 
 ## Installation
-include(GNUInstallDirs)
+if(MSVC)
+  set(CMAKE_INSTALL_LIBDIR ${CMAKE_CURRENT_SOURCE_DIR}/install/lib)
+  set(CMAKE_INSTALL_BINDIR ${CMAKE_CURRENT_SOURCE_DIR}/install/bin)
+  set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_CURRENT_SOURCE_DIR}/install/include)
+else()
+  include(GNUInstallDirs)
+endif()
+
 set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
 
 install(TARGETS franka
