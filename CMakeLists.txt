@@ -10,9 +10,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+if(GNU)
   add_compile_options(-Wall -Wextra)
-elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+elseif(MSVC)
   add_compile_options(/Wall)
 endif()
 
@@ -23,15 +23,17 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
 
+if(GNU)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+endif()
 find_package(Threads REQUIRED)
 
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-	if(UNIX)
+	if(GNU)
 		add_compile_options(-Werror)
-	elseif(WIN32)
+	elseif(MSVC)
 		add_compile_options(/WX)
 	endif()
 endif()
@@ -130,7 +132,7 @@ install(EXPORT FrankaTargets
 
 # Ignore find_package(Franka) in subprojects.
 macro(find_package)
-  if(NOT "${ARGV0}" STREQUAL Franka)
+  if(NOT "${ARGV0}" STREQUAL Franka AND NOT DEFINED "${ARGV0}_FOUND")
     _find_package(${ARGV})
   endif()
 endmacro()
