@@ -42,11 +42,9 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
       limit_rate_(limit_rate),
       cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
-#ifdef LINUX
   if (throw_on_error  && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
   }
-#endif
   setCurrentThreadToRealtime(throw_on_error);
 }
 
@@ -309,10 +307,14 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
 }
 
 bool hasRealtimeKernel() {
+#ifdef WINDOWS
+  return true;
+#else
   std::ifstream realtime("/sys/kernel/realtime", std::ios_base::in);
   bool is_realtime;
   realtime >> is_realtime;
   return is_realtime;
+#endif
 }
 
 template class ControlLoop<JointPositions>;
