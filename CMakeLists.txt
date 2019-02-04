@@ -78,7 +78,8 @@ set_target_properties(franka PROPERTIES
   EXPORT_NAME Franka
 )
 if(MSVC)
-  target_compile_definitions(franka PUBLIC _USE_MATH_DEFINES)
+  target_compile_definitions(franka PUBLIC _USE_MATH_DEFINES
+  NOMINMAX)
 endif()
 
 target_include_directories(franka PUBLIC

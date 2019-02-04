@@ -17,11 +17,6 @@
 
 #include <franka/exception.h>
 
-
-#ifdef _MSC_VER
-#undef min
-#endif
-
 namespace franka {
 
 class Network {
