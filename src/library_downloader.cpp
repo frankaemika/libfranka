@@ -21,9 +21,9 @@ LibraryDownloader::LibraryDownloader(Network& network)
   LoadModelLibrary::Architecture architecture;
   LoadModelLibrary::System operation_system;
 
-  #if defined(X64)
+  #if defined(LIBFRANKA_X64)
       architecture = LoadModelLibrary::Architecture::kX64;
-  #elif defined(X86)
+  #elif defined(LIBFRANKA_X86)
       architecture = LoadModelLibrary::Architecture::kX86;
   #else
       throw ModelException("libfranka: Unsupported architecture!");
