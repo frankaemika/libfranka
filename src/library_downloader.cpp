@@ -61,7 +61,6 @@ LibraryDownloader::~LibraryDownloader()
       Poco::TemporaryFile::registerForDeletion(path());
     }
   } catch (const std::exception& ex) {
-    throw ModelException("libfranka: Cannot delete model library file.");
   }
 }
 
