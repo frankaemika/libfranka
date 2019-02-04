@@ -6,12 +6,10 @@
 #include <sstream>
 #include <franka/platform_type.h>
 // Included for MSG_PEEK symbol not present in Poco
-#ifdef LINUX
-#include <sys/socket.h>
-#elif defined(WINDOWS)
-#include <winsock.h>
+#ifdef WINDOWS
+	#include <winsock.h>
 #else
-throw NetworkException("libfranka: unkown operation system");
+	#include <sys/socket.h>
 #endif
 
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
