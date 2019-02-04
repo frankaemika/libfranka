@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
       if (time == 0.0) {
         initial_pose = robot_state.O_T_EE_c;
       }
-      const double kRadius = 0.3;
+      constexpr double kRadius = 0.3;
       double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
       double delta_x = kRadius * std::sin(angle);
       double delta_z = kRadius * (std::cos(angle) - 1);
