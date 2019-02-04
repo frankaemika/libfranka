@@ -267,22 +267,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {
-#ifdef LINUX
-  const int thread_priority = sched_get_priority_max(SCHED_FIFO);
-  if (thread_priority == -1) {
-    throw RealtimeException("libfranka: unable to get maximum possible thread priority: "s +
-                            std::strerror(errno));
-  }
-  sched_param thread_param{};
-  thread_param.sched_priority = thread_priority;
-
-  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
-    if (throw_on_error) {
-      throw RealtimeException("libfranka: unable to set realtime scheduling: "s +
-                              std::strerror(errno));
-    }
-  }
-#elif defined(WINDOWS)
+#ifdef WINDOWS
   auto get_last_windows_error = []() -> std::string {
     DWORD error_id = GetLastError();
     LPSTR buffer = nullptr;
@@ -302,6 +287,21 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
     throw RealtimeException("libfranka: unable to set priority for the thread: "s +
                               get_last_windows_error());
+  }
+#else
+  const int thread_priority = sched_get_priority_max(SCHED_FIFO);
+  if (thread_priority == -1) {
+    throw RealtimeException("libfranka: unable to get maximum possible thread priority: "s +
+                            std::strerror(errno));
+  }
+  sched_param thread_param{};
+  thread_param.sched_priority = thread_priority;
+
+  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
+    if (throw_on_error) {
+      throw RealtimeException("libfranka: unable to set realtime scheduling: "s +
+                              std::strerror(errno));
+    }
   }
 #endif
 }
