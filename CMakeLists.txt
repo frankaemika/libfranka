@@ -29,10 +29,10 @@ find_package(Threads REQUIRED)
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-	if(GNU)
-		add_compile_options(-Werror)
-	elseif(MSVC)
+	if(MSVC)
 		add_compile_options(/WX)
+	else()
+		add_compile_options(-Werror)
 	endif()
 endif()
 
