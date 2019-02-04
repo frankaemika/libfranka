@@ -10,10 +10,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-if(GNU)
-  add_compile_options(-Wall -Wextra)
-elseif(MSVC)
+if(MSVC)
   add_compile_options(/Wall)
+else()
+  add_compile_options(-Wall -Wextra)
 endif()
 
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
@@ -23,9 +23,7 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
 
-if(GNU)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-endif()
 find_package(Threads REQUIRED)
 
 ## Build options
