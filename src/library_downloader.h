@@ -18,7 +18,7 @@ class LibraryDownloader {
   const std::string& path() const noexcept;
 
  private:
-  Poco::TemporaryFile model_library_file_{};
+  Poco::File model_library_file_;
 };
 
 };  // namespace franka
