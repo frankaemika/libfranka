@@ -28,9 +28,9 @@ LibraryDownloader::LibraryDownloader(Network& network)
   throw ModelException("libfranka: Unsupported architecture!");
 #endif
 
-#if defined(WINDOWS)
+#if defined(LIBFRANKA_WINDOWS)
   operation_system = LoadModelLibrary::System::kWindows;
-#elif defined(LINUX)
+#elif defined(LIBFRANKA_LINUX)
   operation_system = LoadModelLibrary::System::kLinux;
 #else
   throw ModelException("libfranka: Unsupported operation system!");

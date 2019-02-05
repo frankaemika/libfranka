@@ -16,11 +16,11 @@
 #define LIBFRANKA_X86
 #endif
 
-#undef WINDOWS
-#undef LINUX
+#undef LIBFRANKA_WINDOWS
+#undef LIBFRANKA_LINUX
 
 #if defined(_WIN32) || defined(_WIN64)
-#define WINDOWS
+#define LIBFRANKA_WINDOWS
 #elif defined(__unix) || defined(__unix__)
-#define LINUX
+#define LIBFRANKA_LINUX
 #endif

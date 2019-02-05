@@ -3,7 +3,7 @@
 #include "control_loop.h"
 
 #include <franka/platform_type.h>
-#ifdef WINDOWS
+#ifdef LIBFRANKA_WINDOWS
 #include <Windows.h>
 #else
 #include <pthread.h>
@@ -267,7 +267,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {
-#ifdef WINDOWS
+#ifdef LIBFRANKA_WINDOWS
   auto get_last_windows_error = []() -> std::string {
     DWORD error_id = GetLastError();
     LPSTR buffer = nullptr;
@@ -306,7 +306,7 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
 }
 
 bool hasRealtimeKernel() {
-#ifdef WINDOWS
+#ifdef LIBFRANKA_WINDOWS
   return true;
 #else
   std::ifstream realtime("/sys/kernel/realtime", std::ios_base::in);
