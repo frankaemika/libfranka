@@ -29,10 +29,8 @@ Network::Network(const std::string& franka_address,
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
       tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
-      } catch (const Poco::Net::NetException& e) {
-      } catch (const Poco::TimeoutException& e) {
-      } catch (const Poco::Exception& e) {
-	  }
+      } catch (...) {
+      }
 	}
 
     udp_socket_.bind({"0.0.0.0", 0});

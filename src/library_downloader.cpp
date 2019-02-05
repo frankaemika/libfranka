@@ -18,7 +18,7 @@ LibraryDownloader::LibraryDownloader(Network& network)
     : model_library_file_{Poco::TemporaryFile::tempName() + Poco::SharedLibrary::suffix()} {
   using research_interface::robot::LoadModelLibrary;
   LoadModelLibrary::Architecture architecture;
-  LoadModelLibrary::System operation_system;
+  LoadModelLibrary::System operating_system;
 
 #if defined(LIBFRANKA_X64)
   architecture = LoadModelLibrary::Architecture::kX64;
@@ -29,14 +29,14 @@ LibraryDownloader::LibraryDownloader(Network& network)
 #endif
 
 #if defined(LIBFRANKA_WINDOWS)
-  operation_system = LoadModelLibrary::System::kWindows;
+  operating_system = LoadModelLibrary::System::kWindows;
 #elif defined(LIBFRANKA_LINUX)
-  operation_system = LoadModelLibrary::System::kLinux;
+  operating_system = LoadModelLibrary::System::kLinux;
 #else
-  throw ModelException("libfranka: Unsupported operation system!");
+  throw ModelException("libfranka: Unsupported operating system!");
 #endif
 
-  uint32_t command_id = network.tcpSendRequest<LoadModelLibrary>(architecture, operation_system);
+  uint32_t command_id = network.tcpSendRequest<LoadModelLibrary>(architecture, operating_system);
   std::vector<uint8_t> buffer;
   LoadModelLibrary::Response response =
       network.tcpBlockingReceiveResponse<LoadModelLibrary>(command_id, &buffer);
