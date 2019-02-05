@@ -1,4 +1,4 @@
-find_package(Poco COMPONENTS ${Poco_FIND_COMPONENTS} CONFIG)
+find_package(Poco COMPONENTS ${Poco_FIND_COMPONENTS} CONFIG QUIET)
 if(Poco_FOUND)
   return()
 endif()

@@ -29,11 +29,11 @@ find_package(Threads REQUIRED)
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-	if(MSVC)
-		add_compile_options(/WX)
-	else()
-		add_compile_options(-Werror)
-	endif()
+  if(MSVC)
+    add_compile_options(/WX)
+  else()
+    add_compile_options(-Werror)
+  endif()
 endif()
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
@@ -78,8 +78,10 @@ set_target_properties(franka PROPERTIES
   EXPORT_NAME Franka
 )
 if(MSVC)
-  target_compile_definitions(franka PUBLIC _USE_MATH_DEFINES
-  NOMINMAX)
+  target_compile_definitions(franka PUBLIC
+    _USE_MATH_DEFINES # for M_PI in cmath
+    NOMINMAX # avoid conflict with std::min
+  )
 endif()
 
 target_include_directories(franka PUBLIC
@@ -97,7 +99,6 @@ target_link_libraries(franka PRIVATE
 
 ## Installation
 include(GNUInstallDirs)
-
 set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
 
 install(TARGETS franka

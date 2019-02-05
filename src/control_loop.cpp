@@ -4,9 +4,9 @@
 
 #include <franka/platform_type.h>
 #ifdef WINDOWS
-    #include<Windows.h>
+#include <Windows.h>
 #else
-	#include <pthread.h>
+#include <pthread.h>
 #endif
 
 #include <cerrno>
@@ -42,7 +42,7 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
       limit_rate_(limit_rate),
       cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
-  if (throw_on_error  && !hasRealtimeKernel()) {
+  if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
   }
   setCurrentThreadToRealtime(throw_on_error);
@@ -273,20 +273,19 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
     LPSTR buffer = nullptr;
     size_t size = FormatMessageA(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)(&buffer),
-        0, nullptr);
+        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)(&buffer), 0, nullptr);
     return std::string(buffer, size);
   };
 
   if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
-    throw RealtimeException(
-        "libfranka: unable to set priority for the process: "s + get_last_windows_error());
+    throw RealtimeException("libfranka: unable to set priority for the process: "s +
+                            get_last_windows_error());
     return;
   }
 
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
     throw RealtimeException("libfranka: unable to set priority for the thread: "s +
-                              get_last_windows_error());
+                            get_last_windows_error());
   }
 #else
   const int thread_priority = sched_get_priority_max(SCHED_FIFO);

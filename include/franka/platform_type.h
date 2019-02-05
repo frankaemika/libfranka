@@ -11,16 +11,16 @@
 #undef LIBFRANKA_X86
 
 #if defined(__amd64__) || defined(_M_AMD64)
-	#define LIBFRANKA_X64
+#define LIBFRANKA_X64
 #elif defined(__X86__) || defined(_M_IX86)
-	#define LIBFRANKA_X86
+#define LIBFRANKA_X86
 #endif
 
 #undef WINDOWS
 #undef LINUX
 
 #if defined(_WIN32) || defined(_WIN64)
-	#define WINDOWS
+#define WINDOWS
 #elif defined(__unix) || defined(__unix__)
-	#define LINUX
+#define LINUX
 #endif
