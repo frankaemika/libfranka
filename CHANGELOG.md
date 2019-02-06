@@ -1,13 +1,13 @@
 # CHANGELOG
 
-## 0.6.0 - UNRELEASED
+## 0.6.0 - 2019-02-06
 
 Requires Panda system version >= 3.0.0
 
  * Added support for Ubuntu 18.04 (Bionic).
  * **EXPERIMENTAL** Added support for Windows.
  * Added support for using `franka::Model` on Linux and Windows x86 and x64.
- * **BREAKING** Bugfix for aborting gripper commands with `franka::Gripper::stop()`.
+ * Bugfix for aborting gripper commands with `franka::Gripper::stop()`.
  * Improved documentation for `franka::Robot::setCollisionBehavior`.
 
 ## 0.5.0 - 2018-08-08
