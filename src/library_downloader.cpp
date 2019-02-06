@@ -9,7 +9,7 @@
 #include <Poco/SharedLibrary.h>
 
 #include <franka/exception.h>
-#include "platform_type.h""
+#include "platform_type.h"
 #include <research_interface/robot/service_types.h>
 
 namespace franka {
