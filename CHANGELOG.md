@@ -2,9 +2,13 @@
 
 ## 0.6.0 - UNRELEASED
 
+Requires Panda system version >= 3.0.0
+
  * Improved documentation for `Robot::setCollisionBehavior`.
- * Added support for building on Ubuntu 18.04.
- * **BREAKING** Fix abort gripper command handling.
+ * Added support for building on Ubuntu 18.04 (Bionic).
+ * **BREAKING** Fixed abort gripper command handling.
+ * Added support for using `franka::Model` on x86.
+ * **EXPERIMENTAL** Added support for Windows.
 
 ## 0.5.0 - 2018-08-08
 
