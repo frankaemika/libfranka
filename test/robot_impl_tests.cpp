@@ -321,7 +321,7 @@ TEST(RobotImpl, CanSendControllerCommand) {
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort), 0);
 
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&message_id](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointVelocity;
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.robot_mode = RobotMode::kMove;
@@ -1031,7 +1031,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
 
   uint32_t move_id;
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&message_id](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointVelocity;
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.robot_mode = RobotMode::kMove;
@@ -1058,7 +1058,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
   MotionGeneratorCommand motion_command{};
   ControllerCommand control_command{};
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&message_id](RobotState& robot_state) {
         robot_state.controller_mode = ControllerMode::kJointImpedance;
         robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;

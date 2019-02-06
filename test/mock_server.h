@@ -130,7 +130,7 @@ MockServer<C>& MockServer<C>::sendResponse(const uint32_t& command_id,
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &command_id](Socket& tcp_socket, Socket&) {
                            typename T::template Message<typename T::Response> message(
-                               typename T::Header(T::kCommand, command_id, sizeof(message)),
+                               typename T::Header(T::kCommand, command_id, sizeof(*this)),
                                create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
@@ -147,7 +147,7 @@ MockServer<C>& MockServer<C>::queueResponse(const uint32_t& command_id,
   commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
                          [=, &command_id](Socket& tcp_socket, Socket&) {
                            typename T::template Message<typename T::Response> message(
-                               typename T::Header(T::kCommand, command_id, sizeof(message)),
+                               typename T::Header(T::kCommand, command_id, sizeof(*this)),
                                create_response());
                            tcp_socket.sendBytes(&message, sizeof(message));
                          });
