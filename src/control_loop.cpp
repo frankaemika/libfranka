@@ -280,7 +280,6 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
   if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
     throw RealtimeException("libfranka: unable to set priority for the process: "s +
                             get_last_windows_error());
-    return;
   }
 
   if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
