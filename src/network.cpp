@@ -16,9 +16,9 @@ Network::Network(const std::string& franka_address,
                  std::tuple<bool, int, int, int> tcp_keepalive) {
   try {
     Poco::Timespan poco_timeout(1000l * tcp_timeout.count());
-    Poco::Net::SocketAddress adress(franka_address, franka_port);
+    Poco::Net::SocketAddress address(franka_address, franka_port);
 
-    tcp_socket_.connect(adress, poco_timeout);
+    tcp_socket_.connect(address, poco_timeout);
     tcp_socket_.setBlocking(true);
     tcp_socket_.setSendTimeout(poco_timeout);
     tcp_socket_.setReceiveTimeout(poco_timeout);
