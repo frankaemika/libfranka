@@ -26,12 +26,12 @@ Network::Network(const std::string& franka_address,
     if (std::get<0>(tcp_keepalive)) {
       tcp_socket_.setKeepAlive(true);
       try {
-      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
-      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
-      tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
+        tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPIDLE, std::get<1>(tcp_keepalive));
+        tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPCNT, std::get<2>(tcp_keepalive));
+        tcp_socket_.setOption(IPPROTO_TCP, TCP_KEEPINTVL, std::get<3>(tcp_keepalive));
       } catch (...) {
       }
-	}
+    }
 
     udp_socket_.bind({"0.0.0.0", 0});
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
