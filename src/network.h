@@ -8,6 +8,7 @@
 #include <cstring>
 #include <functional>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -233,6 +234,7 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     tcpReadFromBuffer<T>(10ms);
     it = received_responses_.find(command_id);
     lock.unlock();
+    std::this_thread::yield();
   } while (it == received_responses_.end());
 
   auto message = *reinterpret_cast<const typename T::template Message<typename T::Response>*>(
