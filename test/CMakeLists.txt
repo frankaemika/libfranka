@@ -1,3 +1,5 @@
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+
 ## Google Test
 set(GTEST_SOURCE_DIR ${THIRDPARTY_SOURCES_DIR}/googletest)
 set(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/googletest)
@@ -26,6 +28,7 @@ add_library(fcimodels SHARED
 
 target_include_directories(fcimodels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(fcimodels PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(fcimodels PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
 list(APPEND TEST_DEPENDENCIES fcimodels)
 
