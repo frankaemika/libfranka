@@ -1,69 +1,10 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <algorithm>
-#include <cmath>
-#include <exception>
 #include <type_traits>
 
 #include <franka/control_types.h>
 
 namespace franka {
-
-namespace {
-
-inline bool isValidElbow(const std::array<double, 2>& elbow) noexcept {
-  return elbow[1] == -1.0 || elbow[1] == 1.0;
-}
-
-inline bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept {
-  constexpr double kOrthonormalThreshold = 1e-5;
-
-  if (transform[3] != 0.0 || transform[7] != 0.0 || transform[11] != 0.0 || transform[15] != 1.0) {
-    return false;
-  }
-  for (size_t j = 0; j < 3; ++j) {  // i..column
-    if (std::abs(std::sqrt(std::pow(transform[j * 4 + 0], 2) + std::pow(transform[j * 4 + 1], 2) +
-                           std::pow(transform[j * 4 + 2], 2)) -
-                 1.0) > kOrthonormalThreshold) {
-      return false;
-    }
-  }
-  for (size_t i = 0; i < 3; ++i) {  // j..row
-    if (std::abs(std::sqrt(std::pow(transform[0 * 4 + i], 2) + std::pow(transform[1 * 4 + i], 2) +
-                           std::pow(transform[2 * 4 + i], 2)) -
-                 1.0) > kOrthonormalThreshold) {
-      return false;
-    }
-  }
-  return true;
-}
-
-template <typename T, size_t N>
-inline void checkFinite(const std::array<T, N>& array) {
-  if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
-    throw std::invalid_argument("Commanding value is infinite or NaN.");
-  }
-};
-
-inline void checkMatrix(const std::array<double, 16>& transform) {
-  checkFinite(transform);
-  if (!isHomogeneousTransformation(transform)) {
-    throw std::invalid_argument(
-        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
-        "major!");
-  }
-}
-
-inline void checkElbow(const std::array<double, 2>& elbow) {
-  checkFinite(elbow);
-  if (!isValidElbow(elbow)) {
-    throw std::invalid_argument(
-        "Invalid elbow configuration given! Only +1 or -1 are allowed for the sign of the 4th "
-        "joint.");
-  }
-}
-
-}  // anonymous namespace
 
 Torques MotionFinished(const Torques& command) {  // NOLINT(readability-identifier-naming)
   std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
