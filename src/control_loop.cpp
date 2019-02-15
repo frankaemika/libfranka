@@ -17,6 +17,7 @@
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
+#include <franka/control_types.h>
 
 #include "motion_generator_traits.h"
 
@@ -144,6 +145,7 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
     control_output.tau_J = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
   }
   command->tau_J_d = control_output.tau_J;
+  checkFinite(command->tau_J_d);
   return !control_output.motion_finished;
 }
 
@@ -172,6 +174,7 @@ void ControlLoop<JointPositions>::convertMotion(
     command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, command->q_c,
                              robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
   }
+  checkFinite(command->q_c);
 }
 
 template <>
@@ -190,6 +193,7 @@ void ControlLoop<JointVelocities>::convertMotion(
     command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk,
                               command->dq_c, robot_state.dq_d, robot_state.ddq_d);
   }
+  checkFinite(command->dq_c);
 }
 
 template <>
@@ -210,6 +214,7 @@ void ControlLoop<CartesianPose>::convertMotion(
         kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, command->O_T_EE_c,
         robot_state.O_T_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
+  checkMatrix(command->O_T_EE_c);
 
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
@@ -223,6 +228,7 @@ void ControlLoop<CartesianPose>::convertMotion(
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
     }
+    checkElbow(command->elbow_c);
   } else {
     command->valid_elbow = false;
     command->elbow_c = {};
@@ -247,7 +253,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
                   kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk,
                   command->O_dP_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
-
+  checkFinite(command->O_dP_EE_c);
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
@@ -260,6 +266,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
     }
+    checkElbow(command->elbow_c);
   } else {
     command->valid_elbow = false;
     command->elbow_c = {};
