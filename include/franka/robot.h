@@ -140,6 +140,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -166,6 +167,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint-level torque or joint position commands are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -194,6 +196,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint-level torque or joint velocitiy commands are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -222,6 +225,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint-level torque or cartesian pose command elements are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -250,6 +254,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint-level torque or cartesian velocity command elements are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -277,6 +282,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint position commands are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -304,6 +310,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if joint velocity commands are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -331,6 +338,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if cartesian pose command elements are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
@@ -358,6 +366,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
+   * @throw std::invalid_argument if cartesian velocity command elements are NaN or infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */

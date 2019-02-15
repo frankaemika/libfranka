@@ -348,10 +348,22 @@ CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
 CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
     const CartesianVelocities& command);
 
+/**
+ * Helper method to check whether the elbow configuration is valid or not.
+ *
+ * @param[in] Elbow configuration.
+ * @return True if valid, otherwise false.
+ */
 inline bool isValidElbow(const std::array<double, 2>& elbow) noexcept {
   return elbow[1] == -1.0 || elbow[1] == 1.0;
 }
 
+/**
+ * Helper method to check if an array represents an homogeneous transformation matrix.
+ *
+ * @param[in] Array, which represents a 4x4 matrix.
+ * @return True if the array represents an homogeneous transformation matrix, otherwise false.
+ */
 inline bool isHomogeneousTransformation(const std::array<double, 16>& transform) noexcept {
   constexpr double kOrthonormalThreshold = 1e-5;
 
@@ -375,6 +387,12 @@ inline bool isHomogeneousTransformation(const std::array<double, 16>& transform)
   return true;
 }
 
+/**
+ * Helper template to check if an array contains NaN or infinite values.
+ *
+ * @param[in] Array to check.
+ * @throw std::invalid_argument when fields of the array contain NaN or infinite values.
+ */
 template <typename T, size_t N>
 inline void checkFinite(const std::array<T, N>& array) {
   if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
@@ -382,6 +400,12 @@ inline void checkFinite(const std::array<T, N>& array) {
   }
 };
 
+/**
+ * Helper method to check if an array represents a valid transformation matrix.
+ *
+ * @param[in] Array to check.
+ * @throw std::invalid_argument if array does not represent a valid transformation matrix.
+ */
 inline void checkMatrix(const std::array<double, 16>& transform) {
   checkFinite(transform);
   if (!isHomogeneousTransformation(transform)) {
@@ -391,6 +415,12 @@ inline void checkMatrix(const std::array<double, 16>& transform) {
   }
 }
 
+/**
+ * Helper method to check if an array represents a valid elbow configuration.
+ *
+ * @param[in] Array to check.
+ * @throw std::invalid_argument if array does not represent a valid elbow configuration.
+ */
 inline void checkElbow(const std::array<double, 2>& elbow) {
   checkFinite(elbow);
   if (!isValidElbow(elbow)) {
