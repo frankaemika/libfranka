@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka/rate_limiting.h>
 #include <franka/control_types.h>
+#include <franka/rate_limiting.h>
 
 #include <Eigen/Dense>
 
@@ -15,9 +15,9 @@ Eigen::Vector3d limitRate(double max_velocity,
                           const Eigen::Vector3d& commanded_velocity,
                           const Eigen::Vector3d& last_commanded_velocity,
                           const Eigen::Vector3d& last_commanded_acceleration) {
-  for(auto i = 0; i < commanded_velocity.size(); i++){
-    if(!std::isfinite(commanded_velocity(i))){
-    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  for (auto i = 0; i < commanded_velocity.size(); i++) {
+    if (!std::isfinite(commanded_velocity(i))) {
+      throw std::invalid_argument("Commanding value is infinite or NaN.");
     }
   }
   // Differentiate to get jerk
@@ -80,7 +80,7 @@ double limitRate(double max_velocity,
                  double commanded_velocity,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
-  if(!std::isfinite(commanded_velocity)){
+  if (!std::isfinite(commanded_velocity)) {
     throw std::invalid_argument("Commanding value is infinite or NaN.");
   }
   // Differentiate to get jerk
@@ -111,7 +111,7 @@ double limitRate(double max_velocity,
                  double last_commanded_position,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
-  if(!std::isfinite(commanded_position)){
+  if (!std::isfinite(commanded_position)) {
     throw std::invalid_argument("Commanding value is infinite or NaN.");
   }
   return last_commanded_position +

@@ -2,11 +2,11 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
-#include <array>
-#include <initializer_list>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <exception>
+#include <initializer_list>
 
 /**
  * @file control_types.h

@@ -14,10 +14,10 @@
 #include <exception>
 #include <fstream>
 
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
-#include <franka/control_types.h>
 
 #include "motion_generator_traits.h"
 

@@ -30,7 +30,7 @@ constexpr double kDefaultCutoffFrequency = 100.0;
  * @return Filtered value.
  */
 inline double lowpassFilter(double sample_time, double y, double y_last, double cutoff_frequency) {
-  if (!std::isfinite(y)){
+  if (!std::isfinite(y)) {
     throw std::invalid_argument("Commanding value is infinite or NaN.");
   }
   double gain = sample_time / (sample_time + (1.0 / (2.0 * M_PI * cutoff_frequency)));
