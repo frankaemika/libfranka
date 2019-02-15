@@ -1,6 +1,7 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/rate_limiting.h>
+#include <franka/control_types.h>
 
 #include <Eigen/Dense>
 
@@ -14,6 +15,11 @@ Eigen::Vector3d limitRate(double max_velocity,
                           const Eigen::Vector3d& commanded_velocity,
                           const Eigen::Vector3d& last_commanded_velocity,
                           const Eigen::Vector3d& last_commanded_acceleration) {
+  for(auto i = 0; i < commanded_velocity.size(); i++){
+    if(!std::isfinite(commanded_velocity(i))){
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+    }
+  }
   // Differentiate to get jerk
   Eigen::Vector3d commanded_jerk =
       (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
@@ -57,6 +63,7 @@ Eigen::Vector3d limitRate(double max_velocity,
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& commanded_values,
                                 const std::array<double, 7>& last_commanded_values) {
+  checkFinite(commanded_values);
   std::array<double, 7> limited_values{};
   for (size_t i = 0; i < 7; i++) {
     double commanded_derivative = (commanded_values[i] - last_commanded_values[i]) / kDeltaT;
@@ -73,6 +80,9 @@ double limitRate(double max_velocity,
                  double commanded_velocity,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
+  if(!std::isfinite(commanded_velocity)){
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  }
   // Differentiate to get jerk
   double commanded_jerk =
       (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
@@ -101,6 +111,9 @@ double limitRate(double max_velocity,
                  double last_commanded_position,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
+  if(!std::isfinite(commanded_position)){
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  }
   return last_commanded_position +
          limitRate(max_velocity, max_acceleration, max_jerk,
                    (commanded_position - last_commanded_position) / kDeltaT,
@@ -114,6 +127,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& commanded_velocities,
                                 const std::array<double, 7>& last_commanded_velocities,
                                 const std::array<double, 7>& last_commanded_accelerations) {
+  checkFinite(commanded_velocities);
   std::array<double, 7> limited_commanded_velocities{};
 
   for (size_t i = 0; i < 7; i++) {
@@ -131,6 +145,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& last_commanded_positions,
                                 const std::array<double, 7>& last_commanded_velocities,
                                 const std::array<double, 7>& last_commanded_accelerations) {
+  checkFinite(commanded_positions);
   std::array<double, 7> limited_commanded_positions{};
   for (size_t i = 0; i < 7; i++) {
     limited_commanded_positions[i] = limitRate(
@@ -150,6 +165,7 @@ std::array<double, 6> limitRate(
     const std::array<double, 6>& O_dP_EE_c,          // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
+  checkFinite(O_dP_EE_c);
   Eigen::Matrix<double, 6, 1> dx(O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_dx(last_O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_ddx(last_O_ddP_EE_c.data());
@@ -175,6 +191,7 @@ std::array<double, 16> limitRate(
     const std::array<double, 16>& last_O_T_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
+  checkMatrix(O_T_EE_c);
   Eigen::Matrix<double, 6, 1> dx;
   Eigen::Affine3d commanded_pose(Eigen::Matrix4d::Map(O_T_EE_c.data()));
   Eigen::Affine3d limited_commanded_pose = Eigen::Affine3d::Identity();
