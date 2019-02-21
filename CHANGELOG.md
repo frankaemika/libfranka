@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.6.1 - 2019-02-21
+
+Requires Panda system version >= 3.0.0
+
+### Error handling
+
+  * Enhanced internal invalid value detection.
+
 ## 0.6.0 - 2019-02-06
 
 Requires Panda system version >= 3.0.0
