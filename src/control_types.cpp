@@ -41,66 +41,51 @@ CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-Torques::Torques(const std::array<double, 7>& torques) : tau_J(torques) {
-  checkFinite(tau_J);
-}
+Torques::Torques(const std::array<double, 7>& torques) : tau_J(torques) {}
 
 Torques::Torques(std::initializer_list<double> torques) {
   if (torques.size() != tau_J.size()) {
     throw std::invalid_argument("Invalid number of elements in tau_J.");
   }
   std::copy(torques.begin(), torques.end(), tau_J.begin());
-  checkFinite(tau_J);
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-JointPositions::JointPositions(const std::array<double, 7>& joint_positions) : q(joint_positions) {
-  checkFinite(q);
-}
+JointPositions::JointPositions(const std::array<double, 7>& joint_positions) : q(joint_positions) {}
 
 JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   if (joint_positions.size() != q.size()) {
     throw std::invalid_argument("Invalid number of elements in joint_positions.");
   }
   std::copy(joint_positions.begin(), joint_positions.end(), q.begin());
-  checkFinite(q);
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 JointVelocities::JointVelocities(const std::array<double, 7>& joint_velocities)
-    : dq(joint_velocities) {
-  checkFinite(dq);
-}
+    : dq(joint_velocities) {}
 
 JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities) {
   if (joint_velocities.size() != dq.size()) {
     throw std::invalid_argument("Invalid number of elements in joint_velocities.");
   }
   std::copy(joint_velocities.begin(), joint_velocities.end(), dq.begin());
-  checkFinite(dq);
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose)
-    : O_T_EE(cartesian_pose) {
-  checkMatrix(O_T_EE);
-}
+    : O_T_EE(cartesian_pose) {}
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose,
                              // NOLINTNEXTLINE(modernize-pass-by-value)
                              const std::array<double, 2>& elbow)
-    : O_T_EE(cartesian_pose), elbow(elbow) {
-  checkElbow(elbow);
-  checkMatrix(O_T_EE);
-}
+    : O_T_EE(cartesian_pose), elbow(elbow) {}
 
 CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose) {
   if (cartesian_pose.size() != O_T_EE.size()) {
     throw std::invalid_argument("Invalid number of elements in cartesian_pose.");
   }
   std::copy(cartesian_pose.begin(), cartesian_pose.end(), O_T_EE.begin());
-  checkMatrix(O_T_EE);
 }
 
 CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose,
@@ -112,9 +97,7 @@ CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose,
     throw std::invalid_argument("Invalid number of elements in elbow.");
   }
   std::copy(cartesian_pose.begin(), cartesian_pose.end(), O_T_EE.begin());
-  checkMatrix(O_T_EE);
   std::copy(elbow.begin(), elbow.end(), this->elbow.begin());
-  checkElbow(this->elbow);
 }
 
 bool CartesianPose::hasValidElbow() const noexcept {
@@ -123,25 +106,19 @@ bool CartesianPose::hasValidElbow() const noexcept {
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities)
-    : O_dP_EE(cartesian_velocities) {
-  checkFinite(O_dP_EE);
-}
+    : O_dP_EE(cartesian_velocities) {}
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
                                          // NOLINTNEXTLINE(modernize-pass-by-value)
                                          const std::array<double, 2>& elbow)
-    : O_dP_EE(cartesian_velocities), elbow(elbow) {
-  checkElbow(elbow);
-  checkFinite(O_dP_EE);
-}
+    : O_dP_EE(cartesian_velocities), elbow(elbow) {}
 
 CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian_velocities) {
   if (cartesian_velocities.size() != O_dP_EE.size()) {
     throw std::invalid_argument("Invalid number of elements in cartesian_velocities.");
   }
   std::copy(cartesian_velocities.begin(), cartesian_velocities.end(), O_dP_EE.begin());
-  checkFinite(O_dP_EE);
 }
 
 CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian_velocities,
@@ -154,8 +131,6 @@ CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian
   }
   std::copy(cartesian_velocities.begin(), cartesian_velocities.end(), O_dP_EE.begin());
   std::copy(elbow.begin(), elbow.end(), this->elbow.begin());
-  checkElbow(this->elbow);
-  checkFinite(O_dP_EE);
 }
 
 bool CartesianVelocities::hasValidElbow() const noexcept {
