@@ -286,7 +286,7 @@ CartesianPose ControlLoops<CartesianPoseMotion<false, false>>::createInvalidMoti
 
 template <>
 auto ControlLoops<CartesianPoseMotion<true, true>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c,
                      Eq(std::array<double, 2>({0, 0}))),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(false)));
@@ -294,7 +294,7 @@ auto ControlLoops<CartesianPoseMotion<true, true>>::getField(const CartesianPose
 
 template <>
 auto ControlLoops<CartesianPoseMotion<false, true>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c,
                      Eq(std::array<double, 2>({0, 0}))),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(false)));
@@ -302,7 +302,7 @@ auto ControlLoops<CartesianPoseMotion<false, true>>::getField(const CartesianPos
 
 template <>
 auto ControlLoops<CartesianPoseMotion<true, false>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c,
                      Eq(std::array<double, 2>({0, 0}))),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(false)));
@@ -370,21 +370,21 @@ CartesianPose ControlLoops<CartesianPoseMotionWithElbow<false, false>>::createIn
 
 template <>
 auto ControlLoops<CartesianPoseMotionWithElbow<true, true>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c, Eq(pose.elbow)),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
 }
 
 template <>
 auto ControlLoops<CartesianPoseMotionWithElbow<false, true>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c, Eq(pose.elbow)),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
 }
 
 template <>
 auto ControlLoops<CartesianPoseMotionWithElbow<true, false>>::getField(const CartesianPose& pose) {
-  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Lt(pose.O_T_EE)),
+  return AllOf(Field(&research_interface::robot::MotionGeneratorCommand::O_T_EE_c, Eq(pose.O_T_EE)),
                Field(&research_interface::robot::MotionGeneratorCommand::elbow_c, Eq(pose.elbow)),
                Field(&research_interface::robot::MotionGeneratorCommand::valid_elbow, Eq(true)));
 }
