@@ -208,6 +208,7 @@ void ControlLoop<CartesianPose>::convertMotion(
           lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_frequency_);
     }
   }
+
   if (limit_rate_) {
     command->O_T_EE_c = limitRate(
         kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
@@ -254,6 +255,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
                   command->O_dP_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
   checkFinite(command->O_dP_EE_c);
+
   if (motion.hasValidElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;

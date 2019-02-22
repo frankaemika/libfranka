@@ -112,6 +112,7 @@ constexpr double kMaxElbowVelocity =
  * @param[in] max_derivatives Per-joint maximum allowed time derivative.
  * @param[in] commanded_values Commanded values of the current time step.
  * @param[in] last_commanded_values Commanded values of the previous time step.
+ *
  * @throw std::invalid_argument if commanded_values are infinite or NaN.
  *
  * @return Rate-limited vector of desired values.
@@ -132,6 +133,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
  * @param[in] commanded_velocity Commanded joint velocity of the current time step.
  * @param[in] last_commanded_velocity Commanded joint velocitiy of the previous time step.
  * @param[in] last_commanded_acceleration Commanded joint acceleration of the previous time step.
+ *
  * @throw std::invalid_argument if commanded_velocity is infinite or NaN.
  *
  * @return Rate-limited desired joint velocity.
@@ -156,6 +158,7 @@ double limitRate(double max_velocity,
  * @param[in] last_commanded_position Commanded joint position of the previous time step.
  * @param[in] last_commanded_velocity Commanded joint velocity of the previous time step.
  * @param[in] last_commanded_acceleration Commanded joint acceleration of the previous time step.
+ *
  * @throw std::invalid_argument if commanded_position is infinite or NaN.
  *
  * @return Rate-limited desired joint position.
@@ -180,6 +183,7 @@ double limitRate(double max_velocity,
  * @param[in] commanded_velocities Commanded joint velocity of the current time step.
  * @param[in] last_commanded_velocities Commanded joint velocities of the previous time step.
  * @param[in] last_commanded_accelerations Commanded joint accelerations of the previous time step.
+ *
  * @throw std::invalid_argument if commanded_velocities are infinite or NaN.
  *
  * @return Rate-limited vector of desired joint velocities.
@@ -204,6 +208,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
  * @param[in] last_commanded_positions Commanded joint positions of the current time step.
  * @param[in] last_commanded_velocities Commanded joint positions of the previous time step.
  * @param[in] last_commanded_accelerations Commanded joint velocities of the previous time step.
+ *
  * @throw std::invalid_argument if commanded_positions are infinite or NaN.
  *
  * @return Rate-limited vector of desired joint positions.
@@ -231,6 +236,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
  * @param[in] O_dP_EE_c Commanded end effector twist of the current time step.
  * @param[in] last_O_dP_EE_c Commanded end effector twist of the previous time step.
  * @param[in] last_O_ddP_EE_c Commanded end effector acceleration of the previous time step.
+ *
  * @throw std::invalid_argument if an element of O_dP_EE_c is infinite or NaN.
  *
  * @return Rate-limited desired end effector twist.
@@ -262,6 +268,7 @@ std::array<double, 6> limitRate(
  * @param[in] last_O_T_EE_c Commanded pose of the previous time step.
  * @param[in] last_O_dP_EE_c Commanded end effector twist of the previous time step.
  * @param[in] last_O_ddP_EE_c Commanded end effector acceleration of the previous time step.
+ *
  * @throw std::invalid_argument if an element of O_T_EE_c is infinite or NaN.
  *
  * @return Rate-limited desired pose.
