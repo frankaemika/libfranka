@@ -28,6 +28,7 @@ void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& ex
                                const research_interface::robot::RobotCommand& actual);
 void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
                                const franka::RobotCommand actual);
+franka::RobotState generateValidRobotState();
 
 namespace research_interface {
 namespace robot {

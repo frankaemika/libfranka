@@ -263,6 +263,27 @@ bool randomBool() {
   return static_cast<bool>(std::rand() % 2);
 }
 
+void create_identity(std::array<double, 16>& matrix) {
+  for (double& element : matrix) {
+    element = 0.0;
+  }
+  for (size_t j = 0; j < matrix.size(); j++) {
+    if (j % 5 == 0) {
+      matrix[j] = 1.0;
+    }
+  }
+}
+
+franka::RobotState generateValidRobotState() {
+  franka::RobotState robot_state;
+  create_identity(robot_state.O_T_EE);
+  create_identity(robot_state.O_T_EE_d);
+  create_identity(robot_state.F_T_EE);
+  create_identity(robot_state.EE_T_K);
+  create_identity(robot_state.O_T_EE_c);
+  return robot_state;
+}
+
 void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.O_T_EE) {
     element = randomDouble();

@@ -501,7 +501,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionCallbackAndControllerMode) {
 
   auto motion = this->createMotion();
 
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   Duration duration(1);
   EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(motion));
 
@@ -530,7 +530,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithMotionAndControllerCallback) {
   Torques torques_limited({0, 1, 1, 1, 1, 1, 1});
   auto motion = this->createMotion();
 
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   Duration duration(2);
   EXPECT_CALL(control_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(torques));
   EXPECT_CALL(motion_callback, invoke(Ref(robot_state), duration)).WillOnce(Return(motion));
@@ -581,7 +581,8 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
   NiceMock<MockControlCallback> control_callback;
   ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(Torques({0, 1, 2, 3, 4, 5, 6})));
 
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
+
   Duration duration(3);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
@@ -602,13 +603,11 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallback) {
 
   ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
 
-  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(robot_state));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
       .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(this->createMotion()))));
 
   loop();
-
-  testRobotStateIsZero(robot_state);
 }
 
 TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallback) {
@@ -650,7 +649,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
     EXPECT_CALL(robot, finishMotion(200, _, nullptr));
   }
 
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   Duration duration(4);
   Duration zero_duration(0);
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
@@ -666,12 +665,10 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingMotionCallbackAndControllerMode) {
   MotionGeneratorCommand motion_command{};
   ASSERT_FALSE(loop.spinMotion(robot_state, duration, &motion_command));
 
-  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(robot_state));
   EXPECT_CALL(motion_callback, invoke(_, zero_duration))
       .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(this->createMotion()))));
   loop();
-
-  testRobotStateIsZero(robot_state);
 }
 
 TYPED_TEST(ControlLoops, LoopWithThrowingMotionCallbackAndControllerMode) {
@@ -714,7 +711,7 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
   ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
 
   MockControlCallback control_callback;
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   Duration duration(5);
   Duration zero_duration(0);
   Torques zero_torques{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
@@ -735,12 +732,10 @@ TYPED_TEST(ControlLoops, SpinOnceWithFinishingControlCallback) {
 
   ASSERT_FALSE(loop.spinControl(robot_state, duration, &control_command));
 
-  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(RobotState()));
+  EXPECT_CALL(robot, update(_, _)).WillOnce(Return(robot_state));
   EXPECT_CALL(control_callback, invoke(_, zero_duration))
       .WillOnce(DoAll(SaveArg<0>(&robot_state), Return(MotionFinished(zero_torques))));
   loop();
-
-  testRobotStateIsZero(robot_state);
 }
 
 TYPED_TEST(ControlLoops, LoopWithThrowingControlCallback) {
@@ -753,6 +748,9 @@ TYPED_TEST(ControlLoops, LoopWithThrowingControlCallback) {
         .WillOnce(Return(200));
     EXPECT_CALL(robot, cancelMotion(200));
   }
+
+  RobotState robot_state = generateValidRobotState();
+  ON_CALL(robot, update(_, _)).WillByDefault(Return(robot_state));
 
   NiceMock<MockControlCallback> control_callback;
   EXPECT_CALL(control_callback, invoke(_, _)).WillOnce(Throw(std::domain_error("")));
@@ -778,7 +776,8 @@ TYPED_TEST(ControlLoops, GetsCorrectControlTimeStepWithMotionAndControlCallback)
   ON_CALL(motion_callback, invoke(_, _)).WillByDefault(Return(this->createMotion()));
 
   MockControlCallback control_callback;
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
+
   robot_state.time = Duration(10);
   Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
@@ -818,7 +817,7 @@ TYPED_TEST(ControlLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) 
   ON_CALL(control_callback, invoke(_, _)).WillByDefault(Return(zero_torques));
 
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   robot_state.time = Duration(10);
   std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
 
@@ -854,7 +853,7 @@ TYPED_TEST(ControlLoops, GetsCorrectTimeStepWithMotionCallback) {
   NiceMock<MockRobotControl> robot;
 
   MockMotionCallback<typename TestFixture::TMotion> motion_callback;
-  RobotState robot_state{};
+  RobotState robot_state = generateValidRobotState();
   robot_state.time = Duration(10);
   std::array<uint64_t, 5> ticks{{0, 2, 1, 3, 5}};
 
