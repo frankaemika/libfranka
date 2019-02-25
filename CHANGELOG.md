@@ -1,7 +1,6 @@
 # CHANGELOG
 
-## 0.6.1 - 2019-02-21
-
+## 0.7.0 - UNRELEASED
 Requires Panda system version >= 3.0.0
 
 ### Error handling
