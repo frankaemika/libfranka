@@ -737,6 +737,7 @@ using MotionTypes = ::testing::Types<JointPositionMotion<false, true>,
                                      CartesianPoseMotionWithElbow<true, false>,
                                      CartesianVelocityMotion<true, false>,
                                      CartesianVelocityMotionWithElbow<true, false>>;
+
 TYPED_TEST_CASE(ControlLoops, MotionTypes);
 
 TYPED_TEST(ControlLoops, CanNotConstructWithoutMotionCallback) {
@@ -886,7 +887,6 @@ TYPED_TEST(ControlLoops, SpinOnceWithInvalidMotionAndControllerCallback) {
     MockControlCallback control_callback;
     MockMotionCallback<typename TestFixture::TMotion> motion_callback;
     Torques torques({0, invalid_values[i], 2, 3, 4, 5, 6});
-    Torques torques_limited({0, 1, 1, 1, 1, 1, 1});
 
     RobotState robot_state = generateValidRobotState();
     Duration duration(2);
@@ -1171,6 +1171,7 @@ TYPED_TEST(ControlLoops, GetsCorrectMotionTimeStepWithMotionAndControlCallback) 
             }
             return this->createMotion();
           }));
+
   size_t robot_count = 0;
   EXPECT_CALL(robot, update(_, _))
       .Times(ticks.size())
