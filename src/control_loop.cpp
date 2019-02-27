@@ -217,7 +217,7 @@ void ControlLoop<CartesianPose>::convertMotion(
   }
   checkMatrix(command->O_T_EE_c);
 
-  if (motion.hasValidElbow()) {
+  if (motion.hasElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
     if (cutoff_frequency_ < kMaxCutoffFrequency) {
@@ -256,7 +256,7 @@ void ControlLoop<CartesianVelocities>::convertMotion(
   }
   checkFinite(command->O_dP_EE_c);
 
-  if (motion.hasValidElbow()) {
+  if (motion.hasElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
     if (cutoff_frequency_ < kMaxCutoffFrequency) {

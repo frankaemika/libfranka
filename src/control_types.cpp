@@ -104,6 +104,10 @@ bool CartesianPose::hasValidElbow() const noexcept {
   return isValidElbow(elbow);
 }
 
+bool CartesianPose::hasElbow() const noexcept {
+  return !(elbow[1] == 0.0);
+}
+
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities)
     : O_dP_EE(cartesian_velocities) {}
@@ -135,6 +139,10 @@ CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian
 
 bool CartesianVelocities::hasValidElbow() const noexcept {
   return isValidElbow(elbow);
+}
+
+bool CartesianVelocities::hasElbow() const noexcept {
+  return !(elbow[1] == 0.0);
 }
 
 }  // namespace franka

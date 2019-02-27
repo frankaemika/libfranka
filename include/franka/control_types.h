@@ -193,6 +193,14 @@ class CartesianPose : public Finishable {
    * @return True if the stored elbow configuration is valid, false otherwise.
    */
   bool hasValidElbow() const noexcept;
+
+  /**
+   * Determines whether the there is a stored elbow configuration.
+   *
+   * @return True if there is a stored elbow configuration, false otherwise.
+   */
+
+  bool hasElbow() const noexcept;
 };
 
 /**
@@ -261,6 +269,13 @@ class CartesianVelocities : public Finishable {
    * @return True if the stored elbow configuration is valid, false otherwise.
    */
   bool hasValidElbow() const noexcept;
+
+  /**
+   * Determines whether the there is a stored elbow configuration.
+   *
+   * @return True if there is a stored elbow configuration, false otherwise.
+   */
+  bool hasElbow() const noexcept;
 };
 
 /**
