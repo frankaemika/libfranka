@@ -325,7 +325,7 @@ CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
 /**
  * Helper method to check whether the elbow configuration is valid or not.
  *
- * @param[in] Elbow configuration.
+ * @param[in] elbow Elbow configuration.
  *
  * @return True if valid, otherwise false.
  */
@@ -336,7 +336,7 @@ inline bool isValidElbow(const std::array<double, 2>& elbow) noexcept {
 /**
  * Helper method to check if an array represents an homogeneous transformation matrix.
  *
- * @param[in] Array, which represents a 4x4 matrix.
+ * @param[in] transform Array, which represents a 4x4 matrix.
  *
  * @return True if the array represents an homogeneous transformation matrix, otherwise false.
  */
@@ -366,7 +366,7 @@ inline bool isHomogeneousTransformation(const std::array<double, 16>& transform)
 /**
  * Helper template to check if an array contains NaN or infinite values.
  *
- * @param[in] Array to check.
+ * @param[in] array Array to check.
  *
  * @throw std::invalid_argument when fields of the array contain NaN or infinite values.
  */
@@ -380,7 +380,7 @@ inline void checkFinite(const std::array<T, N>& array) {
 /**
  * Helper method to check if an array represents a valid transformation matrix.
  *
- * @param[in] Array to check.
+ * @param[in] transform Array to check.
  *
  * @throw std::invalid_argument if array does not represent a valid transformation matrix.
  */
@@ -396,7 +396,7 @@ inline void checkMatrix(const std::array<double, 16>& transform) {
 /**
  * Helper method to check if an array represents a valid elbow configuration.
  *
- * @param[in] Array to check.
+ * @param[in] elbow Array to check.
  *
  * @throw std::invalid_argument if array does not represent a valid elbow configuration.
  */
