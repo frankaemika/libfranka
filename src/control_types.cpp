@@ -100,10 +100,6 @@ CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose,
   std::copy(elbow.begin(), elbow.end(), this->elbow.begin());
 }
 
-bool CartesianPose::hasValidElbow() const noexcept {
-  return isValidElbow(elbow);
-}
-
 bool CartesianPose::hasElbow() const noexcept {
   return elbow != decltype(elbow)();
 }
@@ -135,10 +131,6 @@ CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian
   }
   std::copy(cartesian_velocities.begin(), cartesian_velocities.end(), O_dP_EE.begin());
   std::copy(elbow.begin(), elbow.end(), this->elbow.begin());
-}
-
-bool CartesianVelocities::hasValidElbow() const noexcept {
-  return isValidElbow(elbow);
 }
 
 bool CartesianVelocities::hasElbow() const noexcept {

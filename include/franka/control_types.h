@@ -188,14 +188,7 @@ class CartesianPose : public Finishable {
   std::array<double, 2> elbow{};
 
   /**
-   * Determines whether the stored elbow configuration is valid.
-   *
-   * @return True if the stored elbow configuration is valid, false otherwise.
-   */
-  bool hasValidElbow() const noexcept;
-
-  /**
-   * Determines whether the there is a stored elbow configuration.
+   * Determines whether there is a stored elbow configuration.
    *
    * @return True if there is a stored elbow configuration, false otherwise.
    */
@@ -264,14 +257,7 @@ class CartesianVelocities : public Finishable {
   std::array<double, 2> elbow{};
 
   /**
-   * Determines whether the stored elbow configuration is valid.
-   *
-   * @return True if the stored elbow configuration is valid, false otherwise.
-   */
-  bool hasValidElbow() const noexcept;
-
-  /**
-   * Determines whether the there is a stored elbow configuration.
+   * Determines whether there is a stored elbow configuration.
    *
    * @return True if there is a stored elbow configuration, false otherwise.
    */
