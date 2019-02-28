@@ -1,9 +1,10 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <franka/control_types.h>
 #include <franka/rate_limiting.h>
 
 #include <Eigen/Dense>
+
+#include "checker.h"
 
 namespace franka {
 

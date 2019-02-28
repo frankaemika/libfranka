@@ -1,8 +1,9 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
-
+#include "checker.h"
 #include "platform_type.h"
+
 #ifdef LIBFRANKA_WINDOWS
 #include <Windows.h>
 #else
@@ -14,7 +15,6 @@
 #include <exception>
 #include <fstream>
 
-#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
