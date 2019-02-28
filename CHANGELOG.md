@@ -1,11 +1,11 @@
 # CHANGELOG
 
-## 0.7.0 - UNRELEASED
+## 0.6.1 - UNRELEASED
 Requires Panda system version >= 3.0.0
 
 ### Error handling
 
-  * Enhanced internal invalid value detection.
+  * Check in control loop for invalid commanded values before sending them to the robot.
 
 ## 0.6.0 - 2019-02-06
 
