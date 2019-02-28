@@ -105,7 +105,7 @@ bool CartesianPose::hasValidElbow() const noexcept {
 }
 
 bool CartesianPose::hasElbow() const noexcept {
-  return !(elbow[1] == 0.0);
+  return elbow != decltype(elbow)();
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
@@ -142,7 +142,7 @@ bool CartesianVelocities::hasValidElbow() const noexcept {
 }
 
 bool CartesianVelocities::hasElbow() const noexcept {
-  return !(elbow[1] == 0.0);
+  return elbow != decltype(elbow)();
 }
 
 }  // namespace franka
