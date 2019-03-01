@@ -4,7 +4,7 @@
 
 #include <Eigen/Dense>
 
-#include "checker.h"
+#include "control_data_checker.h"
 
 namespace franka {
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
-#include "checker.h"
+#include "control_data_checker.h"
 #include "platform_type.h"
 
 #ifdef LIBFRANKA_WINDOWS
