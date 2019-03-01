@@ -101,6 +101,7 @@ CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose,
 }
 
 bool CartesianPose::hasElbow() const noexcept {
+  // NOLINTNEXTLINE(readability-container-size-empty)
   return elbow != decltype(elbow)();
 }
 
@@ -134,6 +135,7 @@ CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian
 }
 
 bool CartesianVelocities::hasElbow() const noexcept {
+  // NOLINTNEXTLINE(readability-container-size-empty)
   return elbow != decltype(elbow)();
 }
 
