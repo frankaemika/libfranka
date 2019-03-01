@@ -16,11 +16,6 @@ Eigen::Vector3d limitRate(double max_velocity,
                           const Eigen::Vector3d& commanded_velocity,
                           const Eigen::Vector3d& last_commanded_velocity,
                           const Eigen::Vector3d& last_commanded_acceleration) {
-  for (auto i = 0; i < commanded_velocity.size(); i++) {
-    if (!std::isfinite(commanded_velocity(i))) {
-      throw std::invalid_argument("Commanding value is infinite or NaN.");
-    }
-  }
   // Differentiate to get jerk
   Eigen::Vector3d commanded_jerk =
       (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
