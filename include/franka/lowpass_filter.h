@@ -33,22 +33,7 @@ constexpr double kDefaultCutoffFrequency = 100.0;
  *
  * @return Filtered value.
  */
-inline double lowpassFilter(double sample_time, double y, double y_last, double cutoff_frequency) {
-  if (sample_time < 0 || !std::isfinite(sample_time)) {
-    throw std::invalid_argument("lowpass-filter: sample_time is negative, infinite or NaN.");
-  }
-  if (cutoff_frequency <= 0 || !std::isfinite(cutoff_frequency)) {
-    throw std::invalid_argument(
-        "lowpass-filter: cutoff_frequency is zero, negative, infinite or NaN.");
-  }
-  if (!std::isfinite(y) || !std::isfinite(y_last)) {
-    throw std::invalid_argument(
-        "lowpass-filter: current or past input value of the signal to be filtered is infinite or "
-        "NaN.");
-  }
-  double gain = sample_time / (sample_time + (1.0 / (2.0 * M_PI * cutoff_frequency)));
-  return gain * y + (1 - gain) * y_last;
-}
+double lowpassFilter(double sample_time, double y, double y_last, double cutoff_frequency);
 
 /**
  * Applies a first-order low-pass filter to a Cartesian translation and applies slerp to the
