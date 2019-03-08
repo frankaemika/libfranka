@@ -99,9 +99,9 @@ inline std::array<double, 16> CartesianLowpassFilter(double sample_time,
   double gain = sample_time / (sample_time + (1.0 / (2.0 * M_PI * cutoff_frequency)));
   transform.translation() =
       gain * transform.translation() + (1.0 - gain) * transform_last.translation();
-  orientation = orientation.slerp(gain, orientation_last);
+  orientation_last = orientation_last.slerp(gain, orientation);
 
-  transform.linear() << orientation.normalized().toRotationMatrix();
+  transform.linear() << orientation_last.normalized().toRotationMatrix();
   std::array<double, 16> filtered_values{};
   Eigen::Map<Eigen::Matrix4d>(&filtered_values[0], 4, 4) = transform.matrix();
 
