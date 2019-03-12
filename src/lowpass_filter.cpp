@@ -41,8 +41,7 @@ std::array<double, 16> CartesianLowpassFilter(double sample_time,
     if (!std::isfinite(y[i]) || !std::isfinite(y_last[i])) {
       throw std::invalid_argument(
           "Cartesian lowpass-filter: current or past input value of the signal to be filtered is "
-          "infinite or "
-          "NaN.");
+          "infinite or NaN.");
     }
   }
   Eigen::Affine3d transform(Eigen::Matrix4d::Map(y.data()));
