@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
@@ -36,13 +36,12 @@ constexpr double kDefaultCutoffFrequency = 100.0;
 double lowpassFilter(double sample_time, double y, double y_last, double cutoff_frequency);
 
 /**
- * Applies a first-order low-pass filter to a Cartesian translation and applies slerp to the
- * rotation.
+ * Applies a first-order low-pass filter to the translation and spherical linear interpolation
+ * to the rotation of a transformation matrix which represents a Cartesian Motion.
  *
  * @param[in] sample_time Sample time constant
- * @param[in] y Current value of the Cartesian transformation matrix to be filtered
- * @param[in] y_last Value of the Cartesian transformation matrix to be filtered in the previous
- * time step
+ * @param[in] y Current Cartesian transformation matrix to be filtered
+ * @param[in] y_last Cartesian transformation matrix from the previous time step
  * @param[in] cutoff_frequency Cutoff frequency of the low-pass filter
  *
  * @throw std::invalid_argument if elements of y is infinite or NaN.
