@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#include<franka/lowpass_filter.h>
+#include <franka/lowpass_filter.h>
 
 namespace franka {
 
@@ -26,9 +26,9 @@ double lowpassFilter(double sample_time, double y, double y_last, double cutoff_
 }
 
 std::array<double, 16> CartesianLowpassFilter(double sample_time,
-                                                     std::array<double, 16> y,
-                                                     std::array<double, 16> y_last,
-                                                     double cutoff_frequency) {
+                                              std::array<double, 16> y,
+                                              std::array<double, 16> y_last,
+                                              double cutoff_frequency) {
   if (sample_time < 0 || !std::isfinite(sample_time)) {
     throw std::invalid_argument(
         "Cartesian lowpass-filter: sample_time is negative, infinite or NaN.");
