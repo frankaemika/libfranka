@@ -204,7 +204,7 @@ void ControlLoop<CartesianPose>::convertMotion(
   command->O_T_EE_c = motion.O_T_EE;
   if (cutoff_frequency_ < kMaxCutoffFrequency) {
     command->O_T_EE_c =
-        CartesianLowpassFilter(kDeltaT, command->O_T_EE_c, robot_state.O_T_EE_c, cutoff_frequency_);
+        cartesianLowpassFilter(kDeltaT, command->O_T_EE_c, robot_state.O_T_EE_c, cutoff_frequency_);
   }
 
   if (limit_rate_) {

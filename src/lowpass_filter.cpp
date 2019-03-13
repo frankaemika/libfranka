@@ -25,7 +25,7 @@ double lowpassFilter(double sample_time, double y, double y_last, double cutoff_
   return gain * y + (1 - gain) * y_last;
 }
 
-std::array<double, 16> CartesianLowpassFilter(double sample_time,
+std::array<double, 16> cartesianLowpassFilter(double sample_time,
                                               std::array<double, 16> y,
                                               std::array<double, 16> y_last,
                                               double cutoff_frequency) {

@@ -52,7 +52,7 @@ double lowpassFilter(double sample_time, double y, double y_last, double cutoff_
  * @return Filtered Cartesian transformation matrix.
  */
 
-std::array<double, 16> CartesianLowpassFilter(double sample_time,
+std::array<double, 16> cartesianLowpassFilter(double sample_time,
                                               std::array<double, 16> y,
                                               std::array<double, 16> y_last,
                                               double cutoff_frequency);
