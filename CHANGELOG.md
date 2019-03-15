@@ -6,8 +6,7 @@ Requires Panda system version >= 3.0.0
 
 ### Library
 
-  * **BREAKING** Added Cartesian low-pass filter and moved function definitions into
-    own source file.
+  * Added Cartesian low-pass filter and moved function definitions into own source file.
 
 ### Error handling
 
