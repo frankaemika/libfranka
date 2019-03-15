@@ -1,11 +1,13 @@
 # CHANGELOG
 
-## 0.6.1 - UNRELEASED
+## 0.7.0 - UNRELEASED
 
 Requires Panda system version >= 3.0.0
 
 ### Library
 
+  * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()` method
+    to `franka::CartesianPose::hasElbow()`.
   * Added Cartesian low-pass filter and moved function definitions into own source file.
 
 ### Error handling
