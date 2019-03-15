@@ -203,10 +203,8 @@ void ControlLoop<CartesianPose>::convertMotion(
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_c = motion.O_T_EE;
   if (cutoff_frequency_ < kMaxCutoffFrequency) {
-    for (size_t i = 0; i < 16; i++) {
-      command->O_T_EE_c[i] =
-          lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_frequency_);
-    }
+    command->O_T_EE_c =
+        cartesianLowpassFilter(kDeltaT, command->O_T_EE_c, robot_state.O_T_EE_c, cutoff_frequency_);
   }
 
   if (limit_rate_) {

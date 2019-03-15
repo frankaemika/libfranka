@@ -4,6 +4,10 @@
 
 Requires Panda system version >= 3.0.0
 
+### Library
+
+  * Added Cartesian low-pass filter and moved function definitions into own source file.
+
 ### Error handling
 
   * Check in control loop for invalid commanded values before sending them to the robot.
