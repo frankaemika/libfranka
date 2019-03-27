@@ -2,7 +2,12 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
 
+#include "platform_type.h"
+#ifdef LIBFRANKA_WINDOWS
+#include <Windows.h>
+#else
 #include <pthread.h>
+#endif
 
 #include <cerrno>
 #include <cstring>
@@ -262,6 +267,26 @@ void ControlLoop<CartesianVelocities>::convertMotion(
 }
 
 void setCurrentThreadToRealtime(bool throw_on_error) {
+#ifdef LIBFRANKA_WINDOWS
+  auto get_last_windows_error = []() -> std::string {
+    DWORD error_id = GetLastError();
+    LPSTR buffer = nullptr;
+    size_t size = FormatMessageA(
+        FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+        nullptr, error_id, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)(&buffer), 0, nullptr);
+    return std::string(buffer, size);
+  };
+
+  if (!SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS)) {
+    throw RealtimeException("libfranka: unable to set priority for the process: "s +
+                            get_last_windows_error());
+  }
+
+  if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL)) {
+    throw RealtimeException("libfranka: unable to set priority for the thread: "s +
+                            get_last_windows_error());
+  }
+#else
   const int thread_priority = sched_get_priority_max(SCHED_FIFO);
   if (thread_priority == -1) {
     throw RealtimeException("libfranka: unable to get maximum possible thread priority: "s +
@@ -269,19 +294,25 @@ void setCurrentThreadToRealtime(bool throw_on_error) {
   }
   sched_param thread_param{};
   thread_param.sched_priority = thread_priority;
+
   if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
     if (throw_on_error) {
       throw RealtimeException("libfranka: unable to set realtime scheduling: "s +
                               std::strerror(errno));
     }
   }
+#endif
 }
 
 bool hasRealtimeKernel() {
+#ifdef LIBFRANKA_WINDOWS
+  return true;
+#else
   std::ifstream realtime("/sys/kernel/realtime", std::ios_base::in);
   bool is_realtime;
   realtime >> is_realtime;
   return is_realtime;
+#endif
 }
 
 template class ControlLoop<JointPositions>;

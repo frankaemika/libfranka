@@ -1,16 +1,24 @@
 # CHANGELOG
 
-## 0.6.0 - UNRELEASED
+## 0.7.0 - UNRELEASED
 
-Requires Panda system version >= 2.3.0
+Requires Panda system version >= 4.0.0
 
  * **BREAKING** Changed behavior of `franka::Robot::setEE`. Previously, this method would set the
    flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
- * Improved documentation for `Robot::setCollisionBehavior`.
  * Added `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
- * Added support for building on Ubuntu 18.04.
+
+## 0.6.0 - 2019-02-06
+
+Requires Panda system version >= 3.0.0
+
+ * Added support for Ubuntu 18.04 (Bionic).
+ * **EXPERIMENTAL** Added support for Windows.
+ * Added support for using `franka::Model` on Linux and Windows x86 and x64.
+ * Bugfix for aborting gripper commands with `franka::Gripper::stop()`.
+ * Improved documentation for `franka::Robot::setCollisionBehavior`.
 
 ## 0.5.0 - 2018-08-08
 
