@@ -57,10 +57,10 @@ int main(int argc, char** argv) {
         [&time, &counter, &avg_success_rate, &min_success_rate, &max_success_rate, zero_torques](
             const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
           time += period.toMSec();
-          counter++;
-          if (robot_state.control_command_success_rate == 0.0) {
+          if (time == 0.0) {
             return zero_torques;
           }
+          counter++;
 
           if (counter % 100 == 0) {
             std::cout << "#" << counter
