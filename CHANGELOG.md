@@ -10,6 +10,10 @@ Requires Panda system version >= 3.0.0
     to `franka::CartesianPose::hasElbow()`.
   * Added Cartesian low-pass filter and moved function definitions into own source file.
 
+### Examples
+
+ * Bug fixes in `communication_test.cpp`.
+
 ### Error handling
 
   * Check in control loop for invalid commanded values before sending them to the robot.
