@@ -84,7 +84,8 @@ int main(int argc, char** argv) {
 
           // Sending zero torques - if EE is configured correctly, robot should not move
           return zero_torques;
-        });
+        },
+        false, 1000);
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
