@@ -1,5 +1,12 @@
 # CHANGELOG
 
+
+## 0.7.0 - UNRELEASED
+
+Requires Panda system version >= 3.1.0
+
+ * Added support for using `franka::Model` on Linux ARM and ARM64.
+
 ## 0.6.0 - 2019-02-06
 
 Requires Panda system version >= 3.0.0
