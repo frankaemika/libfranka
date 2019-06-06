@@ -48,7 +48,7 @@ class Torques : public Finishable {
    *
    * @param[in] torques Desired joint-level torques without gravity and friction in [Nm].
    */
-  Torques(const std::array<double, 7>& torques);
+  Torques(const std::array<double, 7>& torques) noexcept;
 
   /**
    * Creates a new Torques instance.
@@ -75,7 +75,7 @@ class JointPositions : public Finishable {
    *
    * @param[in] joint_positions Desired joint angles in [rad].
    */
-  JointPositions(const std::array<double, 7>& joint_positions);
+  JointPositions(const std::array<double, 7>& joint_positions) noexcept;
 
   /**
    * Creates a new JointPositions instance.
@@ -103,7 +103,7 @@ class JointVelocities : public Finishable {
    * @param[in] joint_velocities Desired joint velocities in [rad/s].
    *
    */
-  JointVelocities(const std::array<double, 7>& joint_velocities);
+  JointVelocities(const std::array<double, 7>& joint_velocities) noexcept;
 
   /**
    * Creates a new JointVelocities instance.
@@ -132,7 +132,7 @@ class CartesianPose : public Finishable {
    * {\mathbf{T}_{EE}}_{d}\f$, column major, that transforms from the end effector frame \f$EE\f$ to
    * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
    */
-  CartesianPose(const std::array<double, 16>& cartesian_pose);
+  CartesianPose(const std::array<double, 16>& cartesian_pose) noexcept;
 
   /**
    * Creates a new CartesianPose instance.
@@ -142,7 +142,7 @@ class CartesianPose : public Finishable {
    * base frame \f$O\f$. Equivalently, it is the desired end effector pose in base frame.
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    */
-  CartesianPose(const std::array<double, 16>& cartesian_pose, const std::array<double, 2>& elbow);
+  CartesianPose(const std::array<double, 16>& cartesian_pose, const std::array<double, 2>& elbow) noexcept;
 
   /**
    * Creates a new CartesianPose instance.
@@ -204,7 +204,7 @@ class CartesianVelocities : public Finishable {
    * @param[in] cartesian_velocities Desired Cartesian velocity w.r.t. O-frame {dx in [m/s], dy in
    * [m/s], dz in [m/s], omegax in [rad/s], omegay in [rad/s], omegaz in [rad/s]}.
    */
-  CartesianVelocities(const std::array<double, 6>& cartesian_velocities);
+  CartesianVelocities(const std::array<double, 6>& cartesian_velocities) noexcept;
 
   /**
    * Creates a new CartesianVelocities instance.
@@ -214,7 +214,7 @@ class CartesianVelocities : public Finishable {
    * @param[in] elbow Elbow configuration (see @ref elbow member for more details).
    */
   CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
-                      const std::array<double, 2>& elbow);
+                      const std::array<double, 2>& elbow) noexcept;
 
   /**
    * Creates a new CartesianVelocities instance.
@@ -270,7 +270,7 @@ class CartesianVelocities : public Finishable {
  *
  * @see @ref callback-docs "Documentation on callbacks"
  */
-Torques MotionFinished(const Torques& command);  // NOLINT(readability-identifier-naming)
+Torques MotionFinished(const Torques& command) noexcept;  // NOLINT(readability-identifier-naming)
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -282,7 +282,7 @@ Torques MotionFinished(const Torques& command);  // NOLINT(readability-identifie
  * @see @ref callback-docs "Documentation on callbacks"
  */
 JointPositions MotionFinished(  // NOLINT(readability-identifier-naming)
-    const JointPositions& command);
+    const JointPositions& command) noexcept;
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -294,7 +294,7 @@ JointPositions MotionFinished(  // NOLINT(readability-identifier-naming)
  * @see @ref callback-docs "Documentation on callbacks"
  */
 JointVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
-    const JointVelocities& command);
+    const JointVelocities& command) noexcept;
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -306,7 +306,7 @@ JointVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
  * @see @ref callback-docs "Documentation on callbacks"
  */
 CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
-    const CartesianPose& command);
+    const CartesianPose& command) noexcept;
 
 /**
  * Helper method to indicate that a motion should stop after processing the given command.
@@ -318,6 +318,6 @@ CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
  * @see @ref callback-docs "Documentation on callbacks"
  */
 CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
-    const CartesianVelocities& command);
+    const CartesianVelocities& command) noexcept;
 
 }  // namespace franka
