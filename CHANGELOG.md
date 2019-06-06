@@ -9,6 +9,8 @@ Requires Panda system version >= 3.0.0
   * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()` method
     to `franka::CartesianPose::hasElbow()`.
   * Added Cartesian low-pass filter and moved function definitions into own source file.
+  * Added support for using `franka::Model` on Linux ARM and ARM64
+    (requires Panda system version >= 3.1.0).
 
 ### Examples
 
