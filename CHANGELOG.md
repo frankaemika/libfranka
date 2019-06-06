@@ -16,6 +16,8 @@ Requires Panda system version >= 3.0.0
 
  * **BREAKING** Throw `std::invalid_argument` in `franka::Robot::control` if
    NaN or infinity values are returned from a control callback.
+ * **BREAKING** Throw `std::invalid_argument` in low-pass filter and rate limiting
+   functions if invalid values are given as function parameters.
  * **BREAKING** Do not throw exceptions in constructors of control types anymore.
 
 ### Examples
