@@ -6,42 +6,8 @@
 
 namespace franka {
 
-Torques MotionFinished(const Torques& command) {  // NOLINT(readability-identifier-naming)
-  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.motion_finished = true;
-  return new_command;
-}
-
-JointPositions MotionFinished(  // NOLINT(readability-identifier-naming)
-    const JointPositions& command) {
-  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.motion_finished = true;
-  return new_command;
-}
-
-JointVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
-    const JointVelocities& command) {
-  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.motion_finished = true;
-  return new_command;
-}
-
-CartesianPose MotionFinished(  // NOLINT(readability-identifier-naming)
-    const CartesianPose& command) {
-  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.motion_finished = true;
-  return new_command;
-}
-
-CartesianVelocities MotionFinished(  // NOLINT(readability-identifier-naming)
-    const CartesianVelocities& command) {
-  std::remove_const_t<std::remove_reference_t<decltype(command)>> new_command(command);
-  new_command.motion_finished = true;
-  return new_command;
-}
-
 // NOLINTNEXTLINE(modernize-pass-by-value)
-Torques::Torques(const std::array<double, 7>& torques) : tau_J(torques) {}
+Torques::Torques(const std::array<double, 7>& torques) noexcept : tau_J(torques) {}
 
 Torques::Torques(std::initializer_list<double> torques) {
   if (torques.size() != tau_J.size()) {
@@ -51,7 +17,8 @@ Torques::Torques(std::initializer_list<double> torques) {
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-JointPositions::JointPositions(const std::array<double, 7>& joint_positions) : q(joint_positions) {}
+JointPositions::JointPositions(const std::array<double, 7>& joint_positions) noexcept
+    : q(joint_positions) {}
 
 JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
   if (joint_positions.size() != q.size()) {
@@ -61,7 +28,7 @@ JointPositions::JointPositions(std::initializer_list<double> joint_positions) {
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-JointVelocities::JointVelocities(const std::array<double, 7>& joint_velocities)
+JointVelocities::JointVelocities(const std::array<double, 7>& joint_velocities) noexcept
     : dq(joint_velocities) {}
 
 JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities) {
@@ -72,13 +39,13 @@ JointVelocities::JointVelocities(std::initializer_list<double> joint_velocities)
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose)
+CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose) noexcept
     : O_T_EE(cartesian_pose) {}
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianPose::CartesianPose(const std::array<double, 16>& cartesian_pose,
                              // NOLINTNEXTLINE(modernize-pass-by-value)
-                             const std::array<double, 2>& elbow)
+                             const std::array<double, 2>& elbow) noexcept
     : O_T_EE(cartesian_pose), elbow(elbow) {}
 
 CartesianPose::CartesianPose(std::initializer_list<double> cartesian_pose) {
@@ -106,13 +73,13 @@ bool CartesianPose::hasElbow() const noexcept {
 }
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
-CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities)
+CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities) noexcept
     : O_dP_EE(cartesian_velocities) {}
 
 // NOLINTNEXTLINE(modernize-pass-by-value)
 CartesianVelocities::CartesianVelocities(const std::array<double, 6>& cartesian_velocities,
                                          // NOLINTNEXTLINE(modernize-pass-by-value)
-                                         const std::array<double, 2>& elbow)
+                                         const std::array<double, 2>& elbow) noexcept
     : O_dP_EE(cartesian_velocities), elbow(elbow) {}
 
 CartesianVelocities::CartesianVelocities(std::initializer_list<double> cartesian_velocities) {

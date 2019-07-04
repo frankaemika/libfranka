@@ -4,24 +4,23 @@
 
 Requires Panda system version >= 3.0.0
 
-### Library
+### Added
 
- * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()` method
-   to `franka::CartesianPose::hasElbow()`.
- * Added Cartesian low-pass filter and moved function definitions into own source file.
- * Added support for using `franka::Model` on Linux ARM and ARM64
+ * Add support for using `franka::Model` on Linux ARM and ARM64
    (requires Panda system version >= 3.1.0).
+ * Add Cartesian low-pass filter in `lowpass_filter.h`.
+ * Add `control_tools.h` with helper functions for writing control loops.
 
-### Error handling
+### Changed
 
+ * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()`
+   to `franka::CartesianPose::hasElbow()`.
  * **BREAKING** Throw `std::invalid_argument` in `franka::Robot::control` if
    NaN or infinity values are returned from a control callback.
  * **BREAKING** Throw `std::invalid_argument` in low-pass filter and rate limiting
    functions if invalid values are given as function parameters.
  * **BREAKING** Do not throw exceptions in constructors of control types anymore.
-
-### Examples
-
+ * Take arguments by value in `franka::MotionFinished`.
  * Bug fixes in `communication_test.cpp`.
 
 ## 0.6.0 - 2019-02-06
