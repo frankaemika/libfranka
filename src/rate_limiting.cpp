@@ -203,8 +203,7 @@ std::array<double, 16> limitRate(
   }
   if (!isHomogeneousTransformation(O_T_EE_c)) {
     throw std::invalid_argument(
-        "O_T_EE_c is invalid transformation matrix. Has to be column "
-        "major!");
+        "O_T_EE_c is invalid transformation matrix. Has to be column major!");
   }
   Eigen::Matrix<double, 6, 1> dx;
   Eigen::Affine3d commanded_pose(Eigen::Matrix4d::Map(O_T_EE_c.data()));
