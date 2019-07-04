@@ -79,6 +79,15 @@ set_target_properties(franka PROPERTIES
   SOVERSION ${libfranka_VERSION_MAJOR}.${libfranka_VERSION_MINOR} # Use minor version while we're at 0.x
   EXPORT_NAME Franka
 )
+target_compile_features(franka INTERFACE
+  cxx_attribute_deprecated
+  cxx_constexpr
+  cxx_defaulted_functions
+  cxx_deleted_functions
+  cxx_generalized_initializers
+  cxx_noexcept
+  cxx_uniform_initialization
+)
 if(MSVC)
   target_compile_definitions(franka PUBLIC
     _USE_MATH_DEFINES # for M_PI in cmath

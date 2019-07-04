@@ -22,6 +22,7 @@ Requires Panda system version >= 3.0.0
  * **BREAKING** Do not throw exceptions in constructors of control types anymore.
  * Take arguments by value in `franka::MotionFinished`.
  * Bug fixes in `communication_test.cpp`.
+ * Export requirements for C++ features as CMake target compile features.
 
 ## 0.6.0 - 2019-02-06
 
