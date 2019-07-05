@@ -224,3 +224,4 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
 
 template class MockServer<RobotTypes>;
 template class MockServer<GripperTypes>;
+template class MockServer<VacuumGripperTypes>;

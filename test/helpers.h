@@ -8,9 +8,11 @@
 #include <franka/gripper_state.h>
 #include <franka/log.h>
 #include <franka/robot_state.h>
+#include <franka/vacuum_gripper_state.h>
 #include <research_interface/gripper/types.h>
 #include <research_interface/robot/rbk_types.h>
 #include <research_interface/robot/service_types.h>
+#include <research_interface/vacuum_gripper/types.h>
 
 bool stringContains(const std::string& actual, const std::string& expected);
 
