@@ -28,7 +28,8 @@ bool executeCommand(Network& network, TArgs&&... args) {
     case T::Status::kAborted:
       throw CommandException("libfranka vacuum gripper: Command aborted!");
     default:
-      throw ProtocolException("libfranka vacuum gripper: Unexpected response while handling command!");
+      throw ProtocolException(
+          "libfranka vacuum gripper: Unexpected response while handling command!");
   }
 }
 
@@ -61,10 +62,10 @@ VacuumGripperState convertVacuumGripperState(
 }  // anonymous namespace
 
 VacuumGripper::VacuumGripper(const std::string& franka_address)
-    : network_{
-          std::make_unique<Network>(franka_address, research_interface::vacuum_gripper::kCommandPort)} {
-  connect<research_interface::vacuum_gripper::Connect, research_interface::vacuum_gripper::kVersion>(
-      *network_, &ri_version_);
+    : network_{std::make_unique<Network>(franka_address,
+                                         research_interface::vacuum_gripper::kCommandPort)} {
+  connect<research_interface::vacuum_gripper::Connect,
+          research_interface::vacuum_gripper::kVersion>(*network_, &ri_version_);
 }
 
 VacuumGripper::~VacuumGripper() noexcept = default;
@@ -96,7 +97,8 @@ bool VacuumGripper::vacuum(uint8_t vacuum,
       throw CommandException("Vacuum Gripper: Vacuum profile not defined!");
       break;
   }
-  return executeCommand<research_interface::vacuum_gripper::Vacuum>(*network_, vacuum, converted_profile, timeout);
+  return executeCommand<research_interface::vacuum_gripper::Vacuum>(*network_, vacuum,
+                                                                    converted_profile, timeout);
 }
 
 bool VacuumGripper::dropOff(std::chrono::milliseconds timeout) const {

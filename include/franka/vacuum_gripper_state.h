@@ -64,6 +64,7 @@ struct VacuumGripperState {
  *
  * @return Ostream instance
  */
-std::ostream& operator<<(std::ostream& ostream, const franka::VacuumGripperState& vacuum_gripper_state);
+std::ostream& operator<<(std::ostream& ostream,
+                         const franka::VacuumGripperState& vacuum_gripper_state);
 
 }  // namespace franka

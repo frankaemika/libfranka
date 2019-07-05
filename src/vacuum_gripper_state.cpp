@@ -14,8 +14,7 @@ std::ostream& operator<<(std::ostream& ostream,
           << ", \"device_status\": " << vacuum_gripper_state.device_status
           << ", \"actual_power\": " << vacuum_gripper_state.actual_power
           << ", \"vacuum\": " << vacuum_gripper_state.vacuum
-          << ", \"time\": " << vacuum_gripper_state.time.toSec()
-          << "}";
+          << ", \"time\": " << vacuum_gripper_state.time.toSec() << "}";
   return ostream;
 }
 

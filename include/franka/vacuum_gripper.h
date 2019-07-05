@@ -75,9 +75,7 @@ class VacuumGripper {
    * @throw CommandException if an error occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  bool vacuum(uint8_t vacuum,
-              uint8_t profile,
-              std::chrono::milliseconds timeout) const;
+  bool vacuum(uint8_t vacuum, uint8_t profile, std::chrono::milliseconds timeout) const;
 
   /**
    * Drops the grasped object off.
