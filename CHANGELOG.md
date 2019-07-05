@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.0 - UNRELEASED
+## 0.8.0 - UNRELEASED
 
 Requires Panda system version >= 4.0.0
 
@@ -9,6 +9,30 @@ Requires Panda system version >= 4.0.0
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
  * Added `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
+
+## 0.7.0 - UNRELEASED
+
+Requires Panda system version >= 3.0.0
+
+### Added
+
+ * Add support for using `franka::Model` on Linux ARM and ARM64
+   (requires Panda system version >= 3.1.0).
+ * Add Cartesian low-pass filter in `lowpass_filter.h`.
+ * Add `control_tools.h` with helper functions for writing control loops.
+
+### Changed
+
+ * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()`
+   to `franka::CartesianPose::hasElbow()`.
+ * **BREAKING** Throw `std::invalid_argument` in `franka::Robot::control` if
+   NaN or infinity values are returned from a control callback.
+ * **BREAKING** Throw `std::invalid_argument` in low-pass filter and rate limiting
+   functions if invalid values are given as function parameters.
+ * **BREAKING** Do not throw exceptions in constructors of control types anymore.
+ * Take arguments by value in `franka::MotionFinished`.
+ * Bug fixes in `communication_test.cpp`.
+ * Export requirements for C++ features as CMake target compile features.
 
 ## 0.6.0 - 2019-02-06
 

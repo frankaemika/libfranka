@@ -10,7 +10,7 @@ def getStages(ubuntuVersion) {
 
         docker.build("libfranka-ci-worker:${ubuntuVersion}",
                      "-f .ci/Dockerfile.${ubuntuVersion} .ci")
-              .inside('--cap-add SYS_PTRACE') {
+              .inside('--cap-add SYS_PTRACE -e MAKEFLAGS') {
           stage("${ubuntuVersion}: Build (Debug)") {
             sh '.ci/debug.sh'
             junit 'build-debug/test_results/*.xml'

@@ -2,7 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
-#include <platform_type.h>
+#include <platform.h>
 
 #undef LIBFRANKA_IMPORT
 #ifdef LIBFRANKA_WINDOWS
