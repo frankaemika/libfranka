@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.0 - UNRELEASED
+## 0.7.0 - 2019-06-05
 
 Requires Panda system version >= 3.0.0
 
