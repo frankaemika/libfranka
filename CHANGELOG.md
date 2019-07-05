@@ -8,7 +8,8 @@ Requires Panda system version >= 4.0.0
    flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
- * Added `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
+ * Add `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
+ * Add support for the cobot pump with `franka::VacuumGripper`.
 
 ## 0.7.0 - UNRELEASED
 

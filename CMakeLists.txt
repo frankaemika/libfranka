@@ -70,6 +70,8 @@ add_library(franka SHARED
   src/robot.cpp
   src/robot_impl.cpp
   src/robot_state.cpp
+  src/vacuum_gripper.cpp
+  src/vacuum_gripper_state.cpp
 )
 add_library(Franka::Franka ALIAS franka)
 

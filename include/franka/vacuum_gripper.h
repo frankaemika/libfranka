@@ -1,0 +1,132 @@
+// Copyright (c) 2019 Franka Emika GmbH
+// Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#pragma once
+
+#include <chrono>
+#include <cstdint>
+#include <memory>
+#include <string>
+
+#include <franka/vacuum_gripper_state.h>
+
+/**
+ * @file vacuum_gripper.h
+ * Contains the franka::VacuumGripper type.
+ */
+
+namespace franka {
+
+class Network;
+
+/**
+ * Maintains a network connection to the vacuum gripper, provides the current vacuum gripper state,
+ * and allows the execution of commands.
+ *
+ * @note
+ * The members of this class are threadsafe.
+ */
+class VacuumGripper {
+ public:
+  /**
+   * Version of the vacuum gripper server.
+   */
+  using ServerVersion = uint16_t;
+
+  /**
+   * Establishes a connection with a vacuum gripper connected to a robot.
+   *
+   * @param[in] franka_address IP/hostname of the robot the vacuum gripper is connected to.
+   *
+   * @throw NetworkException if the connection is unsuccessful.
+   * @throw IncompatibleVersionException if this version of `libfranka` is not supported.
+   */
+  explicit VacuumGripper(const std::string& franka_address);
+
+  /**
+   * Move-constructs a new VacuumGripper instance.
+   *
+   * @param[in] vacuum_gripper Other VacuumGripper instance.
+   */
+  VacuumGripper(VacuumGripper&& vacuum_gripper) noexcept;
+
+  /**
+   * Move-assigns this VacuumGripper from another VacuumGripper instance.
+   *
+   * @param[in] vacuum_gripper Other VacuumGripper instance.
+   *
+   * @return Model instance.
+   */
+  VacuumGripper& operator=(VacuumGripper&& vacuum_gripper) noexcept;
+
+  /**
+   * Closes the connection.
+   */
+  ~VacuumGripper() noexcept;
+
+  /**
+   * Grasps an object.
+   *
+   * @param[in] vacuum
+   * @param[in] profile
+   * @param[in] timeout
+   *
+   * @return True if the vacuum has been established, false otherwise.
+   *
+   * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  bool vacuum(uint8_t vacuum,
+              uint8_t profile,
+              std::chrono::milliseconds timeout) const;
+
+  /**
+   * Drops the grasped object off.
+   *
+   * @param[in] timeout
+   *
+   * @return True if command was successful, false otherwise.
+   *
+   * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  bool dropOff(std::chrono::milliseconds timeout) const;
+
+  /**
+   * Stops a currently running vacuum gripper vacuum or drop off operation.
+   *
+   * @return True if command was successful, false otherwise.
+   *
+   * @throw CommandException if an error occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  bool stop() const;
+
+  /**
+   * Waits for a vacuum gripper state update and returns it.
+   *
+   * @return Current vacuum gripper state.
+   *
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw InvalidOperationException if another readOnce is already running.
+   */
+  VacuumGripperState readOnce() const;
+
+  /**
+   * Returns the software version reported by the connected server.
+   *
+   * @return Software version of the connected server.
+   */
+  ServerVersion serverVersion() const noexcept;
+
+  /// @cond DO_NOT_DOCUMENT
+  VacuumGripper(const VacuumGripper&) = delete;
+  VacuumGripper& operator=(const VacuumGripper&) = delete;
+  /// @endcond
+
+ private:
+  std::unique_ptr<Network> network_;
+
+  uint16_t ri_version_;
+};
+
+}  // namespace franka
