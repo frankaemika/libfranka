@@ -2,11 +2,6 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
-/**
- * @file platform_type.h
- * Defines supported target platform types.
- */
-
 #undef LIBFRANKA_X64
 #undef LIBFRANKA_X86
 #undef LIBFRANKA_ARM64

@@ -11,7 +11,7 @@
 #include <franka/exception.h>
 #include <research_interface/robot/service_types.h>
 
-#include "platform_type.h"
+#include "platform.h"
 
 namespace franka {
 
