@@ -16,21 +16,21 @@
 namespace franka {
 
 /**
- * Describes the vacuum gripper state.
+ * Describes the vacuum gripper state. For more information check the cobot-pump manual.
  */
 struct VacuumGripperState {
   /**
-   *
+   * Vacuum value wthin in setpoint area.
    */
   bool in_control_range{};
 
   /**
-   *
+   * The part has been detached after a suction cycle
    */
   bool part_detached{};
 
   /**
-   *
+   * Vacuum is over H2 and not yet under H2-h2. For more information check the cobot-pump manual.
    */
   bool part_present{};
 
