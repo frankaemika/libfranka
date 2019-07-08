@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
 
     vacuum_gripper_state = vacuum_gripper.readOnce();
-    if (!vacuum_gripper_state.vacuum) {
+    if (!vacuum_gripper_state.in_control_range) {
       std::cout << "Object lost." << std::endl;
       return -1;
     }
