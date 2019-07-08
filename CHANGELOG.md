@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.7.1 - 2019-06-08
+
+Requires Panda system version >= 3.0.0
+
+### Changed
+
+ * Fix compilation error on ARM.
+
 ## 0.7.0 - 2019-06-05
 
 Requires Panda system version >= 3.0.0
