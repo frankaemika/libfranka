@@ -26,6 +26,7 @@ TEST(RobotState, CanBeStreamed) {
 
   EXPECT_PRED2(stringContains, output, "O_T_EE");
   EXPECT_PRED2(stringContains, output, "O_T_EE_d");
+  EXPECT_PRED2(stringContains, output, "O_T_EE_c");
   EXPECT_PRED2(stringContains, output, "EE_T_K");
   EXPECT_PRED2(stringContains, output, "F_T_EE");
   EXPECT_PRED2(stringContains, output, "m_ee");
@@ -39,12 +40,17 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "I_total");
   EXPECT_PRED2(stringContains, output, "elbow");
   EXPECT_PRED2(stringContains, output, "elbow_d");
+  EXPECT_PRED2(stringContains, output, "elbow_c");
+  EXPECT_PRED2(stringContains, output, "delbow_c");
+  EXPECT_PRED2(stringContains, output, "ddelbow_c");
   EXPECT_PRED2(stringContains, output, "tau_J");
+  EXPECT_PRED2(stringContains, output, "tau_J_d");
   EXPECT_PRED2(stringContains, output, "dtau_J");
   EXPECT_PRED2(stringContains, output, "q");
   EXPECT_PRED2(stringContains, output, "dq");
   EXPECT_PRED2(stringContains, output, "q_d");
   EXPECT_PRED2(stringContains, output, "dq_d");
+  EXPECT_PRED2(stringContains, output, "ddq_d");
   EXPECT_PRED2(stringContains, output, "joint_contact");
   EXPECT_PRED2(stringContains, output, "cartesian_contact");
   EXPECT_PRED2(stringContains, output, "joint_collision");
@@ -53,10 +59,13 @@ TEST(RobotState, CanBeStreamed) {
   EXPECT_PRED2(stringContains, output, "O_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "K_F_ext_hat_K");
   EXPECT_PRED2(stringContains, output, "O_dP_EE_d");
+  EXPECT_PRED2(stringContains, output, "O_dP_EE_c");
+  EXPECT_PRED2(stringContains, output, "O_ddP_EE_c");
   EXPECT_PRED2(stringContains, output, "theta");
   EXPECT_PRED2(stringContains, output, "dtheta");
   EXPECT_PRED2(stringContains, output, "current_errors");
   EXPECT_PRED2(stringContains, output, "last_motion_errors");
+  EXPECT_PRED2(stringContains, output, "control_command_success_rate");
   EXPECT_PRED2(stringContains, output, "robot_mode");
   EXPECT_PRED2(stringContains, output, "time");
 }

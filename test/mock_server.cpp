@@ -195,7 +195,7 @@ MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback) {
 
 template <typename C>
 MockServer<C>& MockServer<C>::doForever(std::function<bool()> callback,
-                                        typename decltype(MockServer<C>::commands_)::iterator it) {
+                                        typename decltype(MockServer::commands_)::iterator it) {
   auto callback_wrapper = [=](Socket&, Socket&) {
     std::unique_lock<std::timed_mutex> lock(command_mutex_);
     if (shutdown_) {

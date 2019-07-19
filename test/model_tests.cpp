@@ -15,9 +15,9 @@
 #include "mock_server.h"
 #include "model_library_interface.h"
 
+using ::testing::_;
 using ::testing::Invoke;
 using ::testing::WithArgs;
-using ::testing::_;
 using namespace research_interface::robot;
 
 struct MockModel : public ModelLibraryInterface {

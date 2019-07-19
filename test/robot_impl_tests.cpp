@@ -20,8 +20,8 @@ using franka::NetworkException;
 
 struct Robot : public ::franka::Robot {
   struct Impl : public ::franka::Robot::Impl {
-    using ::franka::Robot::Impl::Impl;
     using ::franka::Robot::Impl::controllerRunning;
+    using ::franka::Robot::Impl::Impl;
     using ::franka::Robot::Impl::motionGeneratorRunning;
   };
 };
@@ -321,7 +321,7 @@ TEST(RobotImpl, CanSendControllerCommand) {
   Robot::Impl robot(std::make_unique<franka::Network>("127.0.0.1", kCommandPort), 0);
 
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([=](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointVelocity;
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.robot_mode = RobotMode::kMove;
@@ -786,7 +786,7 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
 
   uint32_t move_id;
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([=, &states](RobotState& robot_state) {
         randomRobotState(robot_state);
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
@@ -807,7 +807,7 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
 
   for (size_t i = 0; i < commands_sent_in_loop; i++) {
     server
-        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        .onSendUDP<RobotState>([&](RobotState& robot_state) {
           randomRobotState(robot_state);
           robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
           robot_state.controller_mode = ControllerMode::kExternalController;
@@ -828,7 +828,7 @@ TEST(RobotImpl, LogMadeIfErrorReceived) {
   }
 
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&](RobotState& robot_state) {
         randomRobotState(robot_state);
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
@@ -884,7 +884,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
 
   uint32_t move_id;
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&](RobotState& robot_state) {
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
         robot_state.robot_mode = RobotMode::kMove;
@@ -902,7 +902,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
   ASSERT_TRUE(robot.motionGeneratorRunning());
   for (size_t i = 0; i < commands_sent_first_loop; i++) {
     server
-        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        .onSendUDP<RobotState>([&](RobotState& robot_state) {
           robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
           robot_state.controller_mode = ControllerMode::kExternalController;
           robot_state.robot_mode = RobotMode::kMove;
@@ -918,7 +918,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
   }
 
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
         robot_state.reflex_reason[8] = true;
@@ -937,7 +937,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
   EXPECT_THROW(robot.throwOnMotionError(robot_state, id), ControlException);
 
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&](RobotState& robot_state) {
         randomRobotState(robot_state);
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
@@ -958,7 +958,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
 
   for (size_t i = 0; i < commands_sent_second_loop; i++) {
     server
-        .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+        .onSendUDP<RobotState>([&](RobotState& robot_state) {
           randomRobotState(robot_state);
           robot_state.motion_generator_mode = MotionGeneratorMode::kJointPosition;
           robot_state.controller_mode = ControllerMode::kExternalController;
@@ -979,7 +979,7 @@ TEST(RobotImpl, LogShowsOnlyTheLastMotion) {
   }
 
   server
-      .onSendUDP<RobotState>([&states, &message_id](RobotState& robot_state) {
+      .onSendUDP<RobotState>([&](RobotState& robot_state) {
         randomRobotState(robot_state);
         robot_state.motion_generator_mode = MotionGeneratorMode::kIdle;
         robot_state.controller_mode = ControllerMode::kJointImpedance;
@@ -1031,7 +1031,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
 
   uint32_t move_id;
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([=](RobotState& robot_state) {
         robot_state.motion_generator_mode = MotionGeneratorMode::kJointVelocity;
         robot_state.controller_mode = ControllerMode::kExternalController;
         robot_state.robot_mode = RobotMode::kMove;
@@ -1058,7 +1058,7 @@ TEST(RobotImpl, ThrowsDuringControlIfErrorReceived) {
   MotionGeneratorCommand motion_command{};
   ControllerCommand control_command{};
   server
-      .onSendUDP<RobotState>([](RobotState& robot_state) {
+      .onSendUDP<RobotState>([=](RobotState& robot_state) {
         robot_state.controller_mode = ControllerMode::kJointImpedance;
         robot_state.reflex_reason[0] = true;
         robot_state.robot_mode = RobotMode::kReflex;

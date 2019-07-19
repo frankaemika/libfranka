@@ -19,37 +19,46 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.O_T_EE_d) {
     EXPECT_EQ(0.0, element);
   }
-  for (double element : actual.EE_T_K) {
-    EXPECT_EQ(0.0, element);
-  }
   for (double element : actual.F_T_EE) {
     EXPECT_EQ(0.0, element);
   }
-  EXPECT_EQ(0.0, actual.m_ee);
-  for (double element : actual.F_x_Cee) {
+  for (double element : actual.EE_T_K) {
     EXPECT_EQ(0.0, element);
   }
+  EXPECT_EQ(0.0, actual.m_ee);
   for (double element : actual.I_ee) {
     EXPECT_EQ(0.0, element);
   }
-  EXPECT_EQ(0.0, actual.m_load);
-  for (double element : actual.F_x_Cload) {
+  for (double element : actual.F_x_Cee) {
     EXPECT_EQ(0.0, element);
   }
+  EXPECT_EQ(0.0, actual.m_load);
   for (double element : actual.I_load) {
     EXPECT_EQ(0.0, element);
   }
-  EXPECT_EQ(0.0, actual.m_total);
-  for (double element : actual.F_x_Ctotal) {
+  for (double element : actual.F_x_Cload) {
     EXPECT_EQ(0.0, element);
   }
+  EXPECT_EQ(0.0, actual.m_total);
   for (double element : actual.I_total) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.F_x_Ctotal) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.elbow) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.elbow_d) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.elbow_c) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.delbow_c) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.ddelbow_c) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.tau_J) {
@@ -64,13 +73,16 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
   for (double element : actual.q) {
     EXPECT_EQ(0.0, element);
   }
-  for (double element : actual.dq) {
-    EXPECT_EQ(0.0, element);
-  }
   for (double element : actual.q_d) {
     EXPECT_EQ(0.0, element);
   }
+  for (double element : actual.dq) {
+    EXPECT_EQ(0.0, element);
+  }
   for (double element : actual.dq_d) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.ddq_d) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.joint_contact) {
@@ -95,6 +107,15 @@ void testRobotStateIsZero(const franka::RobotState& actual) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.O_dP_EE_d) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.O_T_EE_c) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.O_dP_EE_c) {
+    EXPECT_EQ(0.0, element);
+  }
+  for (double element : actual.O_ddP_EE_c) {
     EXPECT_EQ(0.0, element);
   }
   for (double element : actual.theta) {
@@ -125,6 +146,9 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.I_total, actual.I_total);
   EXPECT_EQ(expected.elbow, actual.elbow);
   EXPECT_EQ(expected.elbow_d, actual.elbow_d);
+  EXPECT_EQ(expected.elbow_c, actual.elbow_c);
+  EXPECT_EQ(expected.delbow_c, actual.delbow_c);
+  EXPECT_EQ(expected.ddelbow_c, actual.ddelbow_c);
   EXPECT_EQ(expected.tau_J, actual.tau_J);
   EXPECT_EQ(expected.tau_J_d, actual.tau_J_d);
   EXPECT_EQ(expected.dtau_J, actual.dtau_J);
@@ -132,6 +156,7 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
+  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -140,6 +165,9 @@ void testRobotStatesAreEqual(const franka::RobotState& expected, const franka::R
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
+  EXPECT_EQ(expected.O_T_EE_c, actual.O_T_EE_c);
+  EXPECT_EQ(expected.O_dP_EE_c, actual.O_dP_EE_c);
+  EXPECT_EQ(expected.O_ddP_EE_c, actual.O_ddP_EE_c);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(expected.current_errors, actual.current_errors);
@@ -178,6 +206,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.dq, actual.dq);
   EXPECT_EQ(expected.q_d, actual.q_d);
   EXPECT_EQ(expected.dq_d, actual.dq_d);
+  EXPECT_EQ(expected.ddq_d, actual.ddq_d);
   EXPECT_EQ(expected.joint_contact, actual.joint_contact);
   EXPECT_EQ(expected.cartesian_contact, actual.cartesian_contact);
   EXPECT_EQ(expected.joint_collision, actual.joint_collision);
@@ -186,6 +215,12 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.O_F_ext_hat_K, actual.O_F_ext_hat_K);
   EXPECT_EQ(expected.K_F_ext_hat_K, actual.K_F_ext_hat_K);
   EXPECT_EQ(expected.O_dP_EE_d, actual.O_dP_EE_d);
+  EXPECT_EQ(expected.elbow_c, actual.elbow_c);
+  EXPECT_EQ(expected.delbow_c, actual.delbow_c);
+  EXPECT_EQ(expected.ddelbow_c, actual.ddelbow_c);
+  EXPECT_EQ(expected.O_T_EE_c, actual.O_T_EE_c);
+  EXPECT_EQ(expected.O_dP_EE_c, actual.O_dP_EE_c);
+  EXPECT_EQ(expected.O_ddP_EE_c, actual.O_ddP_EE_c);
   EXPECT_EQ(expected.theta, actual.theta);
   EXPECT_EQ(expected.dtheta, actual.dtheta);
   EXPECT_EQ(franka::Errors(expected.errors), actual.current_errors);
@@ -228,6 +263,26 @@ bool randomBool() {
   return static_cast<bool>(std::rand() % 2);
 }
 
+std::array<double, 16> identityMatrix() {
+  std::array<double, 16> matrix{};
+  for (size_t j = 0; j < matrix.size(); j++) {
+    if (j % 5 == 0) {
+      matrix[j] = 1.0;
+    }
+  }
+  return matrix;
+}
+
+franka::RobotState generateValidRobotState() {
+  franka::RobotState robot_state{};
+  robot_state.O_T_EE = identityMatrix();
+  robot_state.O_T_EE_d = identityMatrix();
+  robot_state.F_T_EE = identityMatrix();
+  robot_state.EE_T_K = identityMatrix();
+  robot_state.O_T_EE_c = identityMatrix();
+  return robot_state;
+}
+
 void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.O_T_EE) {
     element = randomDouble();
@@ -235,37 +290,46 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.O_T_EE_d) {
     element = randomDouble();
   }
-  for (double& element : robot_state.EE_T_K) {
-    element = randomDouble();
-  }
   for (double& element : robot_state.F_T_EE) {
     element = randomDouble();
   }
-  robot_state.m_ee = randomDouble();
-  for (double& element : robot_state.F_x_Cee) {
+  for (double& element : robot_state.EE_T_K) {
     element = randomDouble();
   }
+  robot_state.m_ee = randomDouble();
   for (double& element : robot_state.I_ee) {
     element = randomDouble();
   }
-  robot_state.m_load = randomDouble();
-  for (double& element : robot_state.F_x_Cload) {
+  for (double& element : robot_state.F_x_Cee) {
     element = randomDouble();
   }
+  robot_state.m_load = randomDouble();
   for (double& element : robot_state.I_load) {
     element = randomDouble();
   }
-  robot_state.m_total = randomDouble();
-  for (double& element : robot_state.F_x_Ctotal) {
+  for (double& element : robot_state.F_x_Cload) {
     element = randomDouble();
   }
+  robot_state.m_total = randomDouble();
   for (double& element : robot_state.I_total) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.F_x_Ctotal) {
     element = randomDouble();
   }
   for (double& element : robot_state.elbow) {
     element = randomDouble();
   }
   for (double& element : robot_state.elbow_d) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.elbow_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.delbow_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.ddelbow_c) {
     element = randomDouble();
   }
   for (double& element : robot_state.tau_J) {
@@ -280,13 +344,16 @@ void randomRobotState(franka::RobotState& robot_state) {
   for (double& element : robot_state.q) {
     element = randomDouble();
   }
-  for (double& element : robot_state.dq) {
-    element = randomDouble();
-  }
   for (double& element : robot_state.q_d) {
     element = randomDouble();
   }
+  for (double& element : robot_state.dq) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.dq_d) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.ddq_d) {
     element = randomDouble();
   }
   for (double& element : robot_state.joint_contact) {
@@ -311,6 +378,15 @@ void randomRobotState(franka::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.O_dP_EE_d) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_T_EE_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_dP_EE_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_ddP_EE_c) {
     element = randomDouble();
   }
   for (double& element : robot_state.theta) {
@@ -385,6 +461,9 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
   for (double& element : robot_state.dq_d) {
     element = randomDouble();
   }
+  for (double& element : robot_state.ddq_d) {
+    element = randomDouble();
+  }
   for (double& element : robot_state.joint_contact) {
     element = randomDouble();
   }
@@ -407,6 +486,24 @@ void randomRobotState(research_interface::robot::RobotState& robot_state) {
     element = randomDouble();
   }
   for (double& element : robot_state.O_dP_EE_d) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.elbow_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.delbow_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.ddelbow_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_T_EE_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_dP_EE_c) {
+    element = randomDouble();
+  }
+  for (double& element : robot_state.O_ddP_EE_c) {
     element = randomDouble();
   }
   for (double& element : robot_state.theta) {

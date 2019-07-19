@@ -4,6 +4,8 @@
 
 #include <Eigen/Dense>
 
+#include <franka/control_tools.h>
+
 namespace franka {
 
 namespace {
@@ -57,6 +59,10 @@ Eigen::Vector3d limitRate(double max_velocity,
 std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
                                 const std::array<double, 7>& commanded_values,
                                 const std::array<double, 7>& last_commanded_values) {
+  if (!std::all_of(commanded_values.begin(), commanded_values.end(),
+                   [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  }
   std::array<double, 7> limited_values{};
   for (size_t i = 0; i < 7; i++) {
     double commanded_derivative = (commanded_values[i] - last_commanded_values[i]) / kDeltaT;
@@ -73,6 +79,9 @@ double limitRate(double max_velocity,
                  double commanded_velocity,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
+  if (!std::isfinite(commanded_velocity)) {
+    throw std::invalid_argument("commanded_velocity is infinite or NaN.");
+  }
   // Differentiate to get jerk
   double commanded_jerk =
       (((commanded_velocity - last_commanded_velocity) / kDeltaT) - last_commanded_acceleration) /
@@ -101,6 +110,9 @@ double limitRate(double max_velocity,
                  double last_commanded_position,
                  double last_commanded_velocity,
                  double last_commanded_acceleration) {
+  if (!std::isfinite(commanded_position)) {
+    throw std::invalid_argument("commanded_position is infinite or NaN.");
+  }
   return last_commanded_position +
          limitRate(max_velocity, max_acceleration, max_jerk,
                    (commanded_position - last_commanded_position) / kDeltaT,
@@ -114,6 +126,10 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& commanded_velocities,
                                 const std::array<double, 7>& last_commanded_velocities,
                                 const std::array<double, 7>& last_commanded_accelerations) {
+  if (!std::all_of(commanded_velocities.begin(), commanded_velocities.end(),
+                   [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("commanded_velocities is infinite or NaN.");
+  }
   std::array<double, 7> limited_commanded_velocities{};
 
   for (size_t i = 0; i < 7; i++) {
@@ -131,6 +147,10 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
                                 const std::array<double, 7>& last_commanded_positions,
                                 const std::array<double, 7>& last_commanded_velocities,
                                 const std::array<double, 7>& last_commanded_accelerations) {
+  if (!std::all_of(commanded_positions.begin(), commanded_positions.end(),
+                   [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("commanded_positions is infinite or NaN.");
+  }
   std::array<double, 7> limited_commanded_positions{};
   for (size_t i = 0; i < 7; i++) {
     limited_commanded_positions[i] = limitRate(
@@ -150,6 +170,9 @@ std::array<double, 6> limitRate(
     const std::array<double, 6>& O_dP_EE_c,          // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
+  if (!std::all_of(O_dP_EE_c.begin(), O_dP_EE_c.end(), [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("O_dP_EE_c is infinite or NaN.");
+  }
   Eigen::Matrix<double, 6, 1> dx(O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_dx(last_O_dP_EE_c.data());
   Eigen::Matrix<double, 6, 1> last_ddx(last_O_ddP_EE_c.data());
@@ -175,6 +198,13 @@ std::array<double, 16> limitRate(
     const std::array<double, 16>& last_O_T_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_dP_EE_c,     // NOLINT(readability-identifier-naming)
     const std::array<double, 6>& last_O_ddP_EE_c) {  // NOLINT(readability-identifier-naming)
+  if (!std::all_of(O_T_EE_c.begin(), O_T_EE_c.end(), [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("O_T_EE_c is infinite or NaN.");
+  }
+  if (!isHomogeneousTransformation(O_T_EE_c)) {
+    throw std::invalid_argument(
+        "O_T_EE_c is invalid transformation matrix. Has to be column major!");
+  }
   Eigen::Matrix<double, 6, 1> dx;
   Eigen::Affine3d commanded_pose(Eigen::Matrix4d::Map(O_T_EE_c.data()));
   Eigen::Affine3d limited_commanded_pose = Eigen::Affine3d::Identity();

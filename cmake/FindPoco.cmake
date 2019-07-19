@@ -1,3 +1,8 @@
+find_package(Poco COMPONENTS ${Poco_FIND_COMPONENTS} CONFIG QUIET)
+if(Poco_FOUND)
+  return()
+endif()
+
 find_path(Poco_INCLUDE_DIR Poco/Poco.h)
 mark_as_advanced(FORCE Poco_INCLUDE_DIR)
 

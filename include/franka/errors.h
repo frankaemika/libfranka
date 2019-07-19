@@ -231,6 +231,11 @@ struct Errors {
 
 /**
  * Streams the errors as JSON array.
+ *
+ * @param[in] ostream Ostream instance
+ * @param[in] errors Errors struct instance to stream
+ *
+ * @return Ostream instance
  */
 std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
 

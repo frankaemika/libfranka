@@ -2,6 +2,15 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
+#include <platform.h>
+
+#undef LIBFRANKA_IMPORT
+#ifdef LIBFRANKA_WINDOWS
+#define LIBFRANKA_IMPORT __declspec(dllimport)
+#else
+#define LIBFRANKA_IMPORT extern
+#endif
+
 struct ModelLibraryInterface {
   virtual ~ModelLibraryInterface() {}
 
@@ -55,4 +64,4 @@ struct ModelLibraryInterface {
                     double g_NE[7]) = 0;
 };
 
-extern ModelLibraryInterface* model_library_interface;
+LIBFRANKA_IMPORT ModelLibraryInterface* model_library_interface;

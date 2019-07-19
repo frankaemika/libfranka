@@ -142,8 +142,10 @@ class Gripper {
    */
   ServerVersion serverVersion() const noexcept;
 
+  /// @cond DO_NOT_DOCUMENT
   Gripper(const Gripper&) = delete;
   Gripper& operator=(const Gripper&) = delete;
+  /// @endcond
 
  private:
   std::unique_ptr<Network> network_;

@@ -1,3 +1,5 @@
 build*/
 cmake-build-*/
 /3rdparty/*
+.vs*/
+install*/

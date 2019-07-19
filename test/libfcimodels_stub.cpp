@@ -4,7 +4,14 @@
 
 #include "model_library_interface.h"
 
-ModelLibraryInterface* model_library_interface;
+#undef LIBFRANKA_EXPORT
+#ifdef LIBFRANKA_WINDOWS
+#define LIBFRANKA_EXPORT __declspec(dllexport)
+#else
+#define LIBFRANKA_EXPORT
+#endif
+
+LIBFRANKA_EXPORT ModelLibraryInterface* model_library_interface;
 
 void Ji_J_J1(double b_Ji_J_J1[42]) {
   if (model_library_interface) {

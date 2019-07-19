@@ -2,13 +2,14 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
 
-#include <pthread.h>
-
+#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <exception>
 #include <fstream>
 
+#include <franka/control_tools.h>
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
 #include <franka/rate_limiting.h>
@@ -21,6 +22,35 @@
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
+
+namespace {
+
+template <typename T, size_t N>
+inline void checkFinite(const std::array<T, N>& array) {
+  if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  }
+}
+
+inline void checkElbow(const std::array<double, 2>& elbow) {
+  checkFinite(elbow);
+  if (!isValidElbow(elbow)) {
+    throw std::invalid_argument(
+        "Invalid elbow configuration given! Only +1 or -1 are allowed for the sign of the 4th "
+        "joint.");
+  }
+}
+
+inline void checkMatrix(const std::array<double, 16>& transform) {
+  checkFinite(transform);
+  if (!isHomogeneousTransformation(transform)) {
+    throw std::invalid_argument(
+        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
+        "major!");
+  }
+}
+
+}  // anonymous namespace
 
 template <typename T>
 constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDeviation;
@@ -37,10 +67,13 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
       limit_rate_(limit_rate),
       cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
+  std::string error_message;
+  if (!setCurrentThreadToHighestSchedulerPriority(&error_message) && throw_on_error) {
+    throw RealtimeException(error_message);
+  }
   if (throw_on_error && !hasRealtimeKernel()) {
     throw RealtimeException("libfranka: Running kernel does not have realtime capabilities.");
   }
-  setCurrentThreadToRealtime(throw_on_error);
 }
 
 template <typename T>
@@ -139,6 +172,7 @@ bool ControlLoop<T>::spinControl(const RobotState& robot_state,
     control_output.tau_J = limitRate(kMaxTorqueRate, control_output.tau_J, robot_state.tau_J_d);
   }
   command->tau_J_d = control_output.tau_J;
+  checkFinite(command->tau_J_d);
   return !control_output.motion_finished;
 }
 
@@ -167,6 +201,7 @@ void ControlLoop<JointPositions>::convertMotion(
     command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, command->q_c,
                              robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
   }
+  checkFinite(command->q_c);
 }
 
 template <>
@@ -185,6 +220,7 @@ void ControlLoop<JointVelocities>::convertMotion(
     command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk,
                               command->dq_c, robot_state.dq_d, robot_state.ddq_d);
   }
+  checkFinite(command->dq_c);
 }
 
 template <>
@@ -194,19 +230,19 @@ void ControlLoop<CartesianPose>::convertMotion(
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_c = motion.O_T_EE;
   if (cutoff_frequency_ < kMaxCutoffFrequency) {
-    for (size_t i = 0; i < 16; i++) {
-      command->O_T_EE_c[i] =
-          lowpassFilter(kDeltaT, command->O_T_EE_c[i], robot_state.O_T_EE_c[i], cutoff_frequency_);
-    }
+    command->O_T_EE_c =
+        cartesianLowpassFilter(kDeltaT, command->O_T_EE_c, robot_state.O_T_EE_c, cutoff_frequency_);
   }
+
   if (limit_rate_) {
     command->O_T_EE_c = limitRate(
         kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
         kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk, command->O_T_EE_c,
         robot_state.O_T_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
+  checkMatrix(command->O_T_EE_c);
 
-  if (motion.hasValidElbow()) {
+  if (motion.hasElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
     if (cutoff_frequency_ < kMaxCutoffFrequency) {
@@ -218,6 +254,7 @@ void ControlLoop<CartesianPose>::convertMotion(
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
     }
+    checkElbow(command->elbow_c);
   } else {
     command->valid_elbow = false;
     command->elbow_c = {};
@@ -242,8 +279,9 @@ void ControlLoop<CartesianVelocities>::convertMotion(
                   kMaxRotationalVelocity, kMaxRotationalAcceleration, kMaxRotationalJerk,
                   command->O_dP_EE_c, robot_state.O_dP_EE_c, robot_state.O_ddP_EE_c);
   }
+  checkFinite(command->O_dP_EE_c);
 
-  if (motion.hasValidElbow()) {
+  if (motion.hasElbow()) {
     command->valid_elbow = true;
     command->elbow_c = motion.elbow;
     if (cutoff_frequency_ < kMaxCutoffFrequency) {
@@ -255,33 +293,11 @@ void ControlLoop<CartesianVelocities>::convertMotion(
           limitRate(kMaxElbowVelocity, kMaxElbowAcceleration, kMaxElbowJerk, command->elbow_c[0],
                     robot_state.elbow_c[0], robot_state.delbow_c[0], robot_state.ddelbow_c[0]);
     }
+    checkElbow(command->elbow_c);
   } else {
     command->valid_elbow = false;
     command->elbow_c = {};
   }
-}
-
-void setCurrentThreadToRealtime(bool throw_on_error) {
-  const int thread_priority = sched_get_priority_max(SCHED_FIFO);
-  if (thread_priority == -1) {
-    throw RealtimeException("libfranka: unable to get maximum possible thread priority: "s +
-                            std::strerror(errno));
-  }
-  sched_param thread_param{};
-  thread_param.sched_priority = thread_priority;
-  if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &thread_param) != 0) {
-    if (throw_on_error) {
-      throw RealtimeException("libfranka: unable to set realtime scheduling: "s +
-                              std::strerror(errno));
-    }
-  }
-}
-
-bool hasRealtimeKernel() {
-  std::ifstream realtime("/sys/kernel/realtime", std::ios_base::in);
-  bool is_realtime;
-  realtime >> is_realtime;
-  return is_realtime;
 }
 
 template class ControlLoop<JointPositions>;

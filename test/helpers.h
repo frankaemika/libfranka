@@ -2,6 +2,9 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
+#include <array>
+#include <string>
+
 #include <franka/gripper_state.h>
 #include <franka/log.h>
 #include <franka/robot_state.h>
@@ -28,6 +31,8 @@ void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& ex
                                const research_interface::robot::RobotCommand& actual);
 void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& expected,
                                const franka::RobotCommand actual);
+std::array<double, 16> identityMatrix();
+franka::RobotState generateValidRobotState();
 
 namespace research_interface {
 namespace robot {

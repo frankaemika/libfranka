@@ -127,13 +127,15 @@ MockServer<C>& MockServer<C>::sendResponse(const uint32_t& command_id,
 
   std::lock_guard<std::timed_mutex> _(command_mutex_);
   block_ = true;
-  commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
-                         [=, &command_id](Socket& tcp_socket, Socket&) {
-                           typename T::template Message<typename T::Response> message(
-                               typename T::Header(T::kCommand, command_id, sizeof(message)),
-                               create_response());
-                           tcp_socket.sendBytes(&message, sizeof(message));
-                         });
+  commands_.emplace_back(
+      "sendResponse<"s + typeid(typename T::Response).name() + ">",
+      [=, &command_id](Socket& tcp_socket, Socket&) {
+        typename T::template Message<typename T::Response> message(
+            typename T::Header(T::kCommand, command_id,
+                               sizeof(typename T::template Message<typename T::Response>)),
+            create_response());
+        tcp_socket.sendBytes(&message, sizeof(message));
+      });
   return *this;
 }
 
@@ -144,13 +146,15 @@ MockServer<C>& MockServer<C>::queueResponse(const uint32_t& command_id,
   using namespace std::string_literals;
 
   std::lock_guard<std::timed_mutex> _(command_mutex_);
-  commands_.emplace_back("sendResponse<"s + typeid(typename T::Response).name() + ">",
-                         [=, &command_id](Socket& tcp_socket, Socket&) {
-                           typename T::template Message<typename T::Response> message(
-                               typename T::Header(T::kCommand, command_id, sizeof(message)),
-                               create_response());
-                           tcp_socket.sendBytes(&message, sizeof(message));
-                         });
+  commands_.emplace_back(
+      "sendResponse<"s + typeid(typename T::Response).name() + ">",
+      [=, &command_id](Socket& tcp_socket, Socket&) {
+        typename T::template Message<typename T::Response> message(
+            typename T::Header(T::kCommand, command_id,
+                               sizeof(typename T::template Message<typename T::Response>)),
+            create_response());
+        tcp_socket.sendBytes(&message, sizeof(message));
+      });
   return *this;
 }
 

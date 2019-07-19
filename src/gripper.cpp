@@ -25,6 +25,8 @@ bool executeCommand(Network& network, TArgs&&... args) {
       throw CommandException("libfranka gripper: Command failed!");
     case T::Status::kUnsuccessful:
       return false;
+    case T::Status::kAborted:
+      throw CommandException("libfranka gripper: Command aborted!");
     default:
       throw ProtocolException("libfranka gripper: Unexpected response while handling command!");
   }

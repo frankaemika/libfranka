@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.5.0
+  VERSION 0.7.1
   LANGUAGES CXX
 )
 
@@ -10,7 +10,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-Wall -Wextra)
+if(MSVC)
+  add_compile_options(/W0)
+else()
+  add_compile_options(-Wall -Wextra)
+endif()
 
 set(THIRDPARTY_SOURCES_DIR "${CMAKE_SOURCE_DIR}/3rdparty" CACHE PATH
   "Directory for third-party sources")
@@ -25,7 +29,11 @@ find_package(Threads REQUIRED)
 ## Build options
 option(STRICT "Treat warnings as errors" OFF)
 if(STRICT)
-  add_compile_options(-Werror)
+  if(MSVC)
+    add_compile_options(/WX)
+  else()
+    add_compile_options(-Werror)
+  endif()
 endif()
 
 option(BUILD_COVERAGE "Build with code coverage" OFF)
@@ -42,6 +50,7 @@ add_subdirectory(common)
 ## Library
 add_library(franka SHARED
   src/control_loop.cpp
+  src/control_tools.cpp
   src/control_types.cpp
   src/duration.cpp
   src/errors.cpp
@@ -53,6 +62,7 @@ add_library(franka SHARED
   src/load_calculations.cpp
   src/log.cpp
   src/logger.cpp
+  src/lowpass_filter.cpp
   src/model.cpp
   src/model_library.cpp
   src/network.cpp
@@ -64,10 +74,26 @@ add_library(franka SHARED
 add_library(Franka::Franka ALIAS franka)
 
 set_target_properties(franka PROPERTIES
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
   VERSION ${libfranka_VERSION}
   SOVERSION ${libfranka_VERSION_MAJOR}.${libfranka_VERSION_MINOR} # Use minor version while we're at 0.x
   EXPORT_NAME Franka
 )
+target_compile_features(franka INTERFACE
+  cxx_attribute_deprecated
+  cxx_constexpr
+  cxx_defaulted_functions
+  cxx_deleted_functions
+  cxx_generalized_initializers
+  cxx_noexcept
+  cxx_uniform_initialization
+)
+if(MSVC)
+  target_compile_definitions(franka PUBLIC
+    _USE_MATH_DEFINES # for M_PI in cmath
+    NOMINMAX # avoid conflict with std::min
+  )
+endif()
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -121,7 +147,7 @@ install(EXPORT FrankaTargets
 
 # Ignore find_package(Franka) in subprojects.
 macro(find_package)
-  if(NOT "${ARGV0}" STREQUAL Franka)
+  if(NOT "${ARGV0}" STREQUAL Franka AND NOT DEFINED "${ARGV0}_FOUND")
     _find_package(${ARGV})
   endif()
 endmacro()
@@ -186,7 +212,7 @@ file(GLOB_RECURSE TIDY_IGNORED_FILES
   src/libfcimodels.h
 )
 
-find_program(CLANG_FORMAT_PROG clang-format-5.0 DOC "'clang-format' executable")
+find_program(CLANG_FORMAT_PROG clang-format-6.0 DOC "'clang-format' executable")
 if(CLANG_FORMAT_PROG)
   add_custom_target(format
     COMMAND ${CLANG_FORMAT_PROG} -i ${SOURCES} ${HEADERS} ${TEST_FILES}
@@ -201,7 +227,7 @@ if(CLANG_FORMAT_PROG)
     VERBATIM
   )
 endif()
-find_program(CLANG_TIDY_PROG clang-tidy-5.0 DOC "'clang-tidy' executable")
+find_program(CLANG_TIDY_PROG clang-tidy-6.0 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   # Build JSON string for clang-tidy's line filter
   set(TIDY_FILES ${SOURCES} ${HEADERS})
@@ -212,7 +238,7 @@ if(CLANG_TIDY_PROG)
   set(TIDY_LINE_FILTER "[{\"name\":\"${TIDY_LINE_FILTER}\"}]")
 
   add_custom_target(tidy
-    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR} -fix
+    COMMAND ${CLANG_TIDY_PROG} -p=${CMAKE_BINARY_DIR}
                                -line-filter=${TIDY_LINE_FILTER} ${SOURCES}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Running clang-tidy"

@@ -62,10 +62,40 @@ class Robot::Impl : public RobotControl {
 
   template <typename T>
   std::enable_if_t<IsBaseOfGetterSetter<T>::value> handleCommandResponse(
-      const typename T::Response& response) const;
+      const typename T::Response& response) const {
+    using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
+
+    switch (response.status) {
+      case T::Status::kSuccess:
+        break;
+      case T::Status::kCommandNotPossibleRejected:
+        throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
+                               " command rejected: command not possible in the current mode!");
+      case T::Status::kInvalidArgumentRejected:
+        throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
+                               " command rejected: invalid argument!");
+      default:
+        throw ProtocolException("libfranka: Unexpected response while handling "s +
+                                research_interface::robot::CommandTraits<T>::kName + " command!");
+    }
+  }
+
   template <typename T>
   std::enable_if_t<!IsBaseOfGetterSetter<T>::value> handleCommandResponse(
-      const typename T::Response& response) const;
+      const typename T::Response& response) const {
+    using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
+
+    switch (response.status) {
+      case T::Status::kSuccess:
+        break;
+      case T::Status::kCommandNotPossibleRejected:
+        throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
+                               " command rejected: command not possible in the current mode!");
+      default:
+        throw ProtocolException("libfranka: Unexpected response while handling "s +
+                                research_interface::robot::CommandTraits<T>::kName + " command!");
+    }
+  }
 
   research_interface::robot::RobotCommand sendRobotCommand(
       const research_interface::robot::MotionGeneratorCommand* motion_command,
@@ -88,43 +118,6 @@ class Robot::Impl : public RobotControl {
   research_interface::robot::ControllerMode current_move_controller_mode_;
   uint64_t message_id_;
 };
-
-template <typename T>
-std::enable_if_t<Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
-    const typename T::Response& response) const {
-  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
-
-  switch (response.status) {
-    case T::Status::kSuccess:
-      break;
-    case T::Status::kCommandNotPossibleRejected:
-      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected: command not possible in the current mode!");
-    case T::Status::kInvalidArgumentRejected:
-      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected: invalid argument!");
-    default:
-      throw ProtocolException("libfranka: Unexpected response while handling "s +
-                              research_interface::robot::CommandTraits<T>::kName + " command!");
-  }
-}
-
-template <typename T>
-std::enable_if_t<!Robot::Impl::IsBaseOfGetterSetter<T>::value> Robot::Impl::handleCommandResponse(
-    const typename T::Response& response) const {
-  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
-
-  switch (response.status) {
-    case T::Status::kSuccess:
-      break;
-    case T::Status::kCommandNotPossibleRejected:
-      throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                             " command rejected: command not possible in the current mode!");
-    default:
-      throw ProtocolException("libfranka: Unexpected response while handling "s +
-                              research_interface::robot::CommandTraits<T>::kName + " command!");
-  }
-}
 
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(

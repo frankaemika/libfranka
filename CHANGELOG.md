@@ -1,5 +1,47 @@
 # CHANGELOG
 
+## 0.7.1 - 2019-06-08
+
+Requires Panda system version >= 3.0.0
+
+### Changed
+
+ * Fix compilation error on ARM.
+
+## 0.7.0 - 2019-06-05
+
+Requires Panda system version >= 3.0.0
+
+### Added
+
+ * Add support for using `franka::Model` on Linux ARM and ARM64
+   (requires Panda system version >= 3.1.0).
+ * Add Cartesian low-pass filter in `lowpass_filter.h`.
+ * Add `control_tools.h` with helper functions for writing control loops.
+
+### Changed
+
+ * **BREAKING** Rename `franka::CartesianPose::hasValidElbow()`
+   to `franka::CartesianPose::hasElbow()`.
+ * **BREAKING** Throw `std::invalid_argument` in `franka::Robot::control` if
+   NaN or infinity values are returned from a control callback.
+ * **BREAKING** Throw `std::invalid_argument` in low-pass filter and rate limiting
+   functions if invalid values are given as function parameters.
+ * **BREAKING** Do not throw exceptions in constructors of control types anymore.
+ * Take arguments by value in `franka::MotionFinished`.
+ * Bug fixes in `communication_test.cpp`.
+ * Export requirements for C++ features as CMake target compile features.
+
+## 0.6.0 - 2019-02-06
+
+Requires Panda system version >= 3.0.0
+
+ * Added support for Ubuntu 18.04 (Bionic).
+ * **EXPERIMENTAL** Added support for Windows.
+ * Added support for using `franka::Model` on Linux and Windows x86 and x64.
+ * Bugfix for aborting gripper commands with `franka::Gripper::stop()`.
+ * Improved documentation for `franka::Robot::setCollisionBehavior`.
+
 ## 0.5.0 - 2018-08-08
 
 ### Motion and control interfaces

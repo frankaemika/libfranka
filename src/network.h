@@ -8,6 +8,7 @@
 #include <cstring>
 #include <functional>
 #include <mutex>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 
@@ -186,7 +187,8 @@ uint32_t Network::tcpSendRequest(TArgs&&... args) try {
   std::lock_guard<std::mutex> _(tcp_mutex_);
 
   typename T::template Message<typename T::Request> message(
-      typename T::Header(T::kCommand, command_id_++, sizeof(message)),
+      typename T::Header(T::kCommand, command_id_++,
+                         sizeof(typename T::template Message<typename T::Request>)),
       typename T::Request(std::forward<TArgs>(args)...));
 
   tcp_socket_.sendBytes(&message, sizeof(message));
@@ -232,6 +234,7 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     tcpReadFromBuffer<T>(10ms);
     it = received_responses_.find(command_id);
     lock.unlock();
+    std::this_thread::yield();
   } while (it == received_responses_.end());
 
   auto message = *reinterpret_cast<const typename T::template Message<typename T::Response>*>(

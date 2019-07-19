@@ -221,8 +221,8 @@ struct RobotState {
   std::array<double, 7> joint_contact{};
 
   /**
-   * Indicates which contact level is activated in which Cartesian dimension (x, y, z, roll, pitch,
-   * yaw). After contact disappears, value turns to zero.
+   * Indicates which contact level is activated in which Cartesian dimension \f$(x,y,z,R,P,Y)\f$.
+   * After contact disappears, the value turns to zero.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
    */
@@ -238,8 +238,8 @@ struct RobotState {
   std::array<double, 7> joint_collision{};
 
   /**
-   * Indicates which contact level is activated in which Cartesian dimension (x, y, z, roll, pitch,
-   * yaw). After contact disappears, the value stays the same until a reset command is sent.
+   * Indicates which contact level is activated in which Cartesian dimension \f$(x,y,z,R,P,Y)\f$.
+   * After contact disappears, the value stays the same until a reset command is sent.
    *
    * @see Robot::setCollisionBehavior for setting sensitivity values.
    * @see Robot::automaticErrorRecovery for performing a reset after a collision.
@@ -345,6 +345,11 @@ struct RobotState {
 /**
  * Streams the robot state as JSON object: {"field_name_1": [0,0,0,0,0,0,0], "field_name_2":
  * [0,0,0,0,0,0], ...}
+ *
+ * @param[in] ostream Ostream instance
+ * @param[in] robot_state RobotState instance to stream
+ *
+ * @return Ostream instance
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
 
