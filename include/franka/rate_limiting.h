@@ -74,7 +74,7 @@ constexpr double kMaxTranslationalAcceleration = 13.0000 - kLimitEps;
  * Maximum translational velocity
  */
 constexpr double kMaxTranslationalVelocity =
-    1.7000 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxTranslationalAcceleration;
+    2.0000 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxTranslationalAcceleration;
 /**
  * Maximum rotational jerk
  */
