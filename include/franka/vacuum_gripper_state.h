@@ -16,11 +16,21 @@
 namespace franka {
 
 /**
+ * Vacuum gripper device status.
+ */
+enum class VacuumGripperDeviceStatus : uint8_t {
+  kGreen,  /**< Device is working optimally */
+  kYellow, /**< Device is working but there are warnings */
+  kOrange, /**< Device is working but there are severe warnings */
+  kRed     /**< Device is not working properly */
+};
+
+/**
  * Describes the vacuum gripper state. For more information check the cobot-pump manual.
  */
 struct VacuumGripperState {
   /**
-   * Vacuum value wthin in setpoint area.
+   * Vacuum value within in setpoint area.
    */
   bool in_control_range{};
 
@@ -35,9 +45,9 @@ struct VacuumGripperState {
   bool part_present{};
 
   /**
-   * Current vacuum gripper device status. Can be green, yellow, orange or red.
+   * Current vacuum gripper device status.
    */
-  std::string device_status{};
+  VacuumGripperDeviceStatus device_status{};
 
   /**
    * Current vacuum gripper actual power. Unit: \f$[%]\f$.
@@ -45,7 +55,7 @@ struct VacuumGripperState {
   uint16_t actual_power{};
 
   /**
-   * Current vacuum. Unit: \f$[mbar]\f$.
+   * Current system vacuum. Unit: \f$[mbar]\f$.
    */
   uint16_t vacuum{};
 

@@ -64,11 +64,11 @@ class VacuumGripper {
   ~VacuumGripper() noexcept;
 
   /**
-   * Grasps an object.
+   * Vacuums an object.
    *
-   * @param[in] vacuum
-   * @param[in] profile
-   * @param[in] timeout
+   * @param[in] vacuum Setpoint for control mode. Unit: \f$[10*mbar]\f$.
+   * @param[in] profile Production profile P0 to P3.
+   * @param[in] timeout Vacuum timeout. Unit: \f$[ms]\f$.
    *
    * @return True if the vacuum has been established, false otherwise.
    *
@@ -80,7 +80,7 @@ class VacuumGripper {
   /**
    * Drops the grasped object off.
    *
-   * @param[in] timeout
+   * @param[in] timeout Dropoff timeout. Unit: \f$[ms]\f$.
    *
    * @return True if command was successful, false otherwise.
    *

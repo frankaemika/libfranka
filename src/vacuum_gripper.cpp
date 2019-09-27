@@ -41,16 +41,16 @@ VacuumGripperState convertVacuumGripperState(
   converted.part_present = vacuum_gripper_state.part_present;
   switch (vacuum_gripper_state.device_status) {
     case research_interface::vacuum_gripper::DeviceStatus::kGreen:
-      converted.device_status = "Green";
+      converted.device_status = VacuumGripperDeviceStatus::kGreen;
       break;
     case research_interface::vacuum_gripper::DeviceStatus::kYellow:
-      converted.device_status = "Yellow";
+      converted.device_status = VacuumGripperDeviceStatus::kYellow;
       break;
     case research_interface::vacuum_gripper::DeviceStatus::kOrange:
-      converted.device_status = "Orange";
+      converted.device_status = VacuumGripperDeviceStatus::kOrange;
       break;
     case research_interface::vacuum_gripper::DeviceStatus::kRed:
-      converted.device_status = "Red";
+      converted.device_status = VacuumGripperDeviceStatus::kRed;
       break;
   }
   converted.actual_power = vacuum_gripper_state.actual_power;
