@@ -24,13 +24,17 @@ int main(int argc, char** argv) {
 
     // Print a vacuum gripper state.
     franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
-    std::cout << "Vacuum gripper state: " << vacuum_gripper_state << std::endl;
+    std::cout << "Initial vacuum gripper state: " << vacuum_gripper_state << std::endl;
 
     // Vacuum the object.
     if (!vacuum_gripper.vacuum(100, 0, std::chrono::milliseconds(1000))) {
       std::cout << "Failed to vacuum the object." << std::endl;
       return -1;
     }
+
+    vacuum_gripper_state = vacuum_gripper.readOnce();
+    std::cout << "Vacuum gripper state after applying vacuum: " << vacuum_gripper_state
+              << std::endl;
 
     // Wait 3s and check afterwards, if the object is still grasped.
     std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(3000));
