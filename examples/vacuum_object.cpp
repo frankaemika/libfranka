@@ -1,8 +1,6 @@
 // Copyright (c) 2019 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <iostream>
-#include <sstream>
-#include <string>
 #include <thread>
 
 #include <franka/exception.h>

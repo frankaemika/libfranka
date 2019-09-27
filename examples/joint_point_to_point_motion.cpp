@@ -1,9 +1,7 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
-#include <algorithm>
 #include <cmath>
 #include <iostream>
-#include <vector>
 
 #include <franka/exception.h>
 #include <franka/robot.h>
