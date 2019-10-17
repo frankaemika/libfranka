@@ -26,8 +26,8 @@ std::ostream& operator<<(std::ostream& ostream,
 
   ostream << "{\"in_control_range\": " << vacuum_gripper_state.in_control_range
           << ", \"part_detached\": " << vacuum_gripper_state.part_detached
-          << ", \"part_present\": " << vacuum_gripper_state.part_present
-          << ", \"device_status\": " << device_status
+          << ", \"part_present\": " << vacuum_gripper_state.part_present << ", \"device_status\": "
+          << "\"" << device_status << "\""
           << ", \"actual_power\": " << vacuum_gripper_state.actual_power
           << ", \"vacuum\": " << vacuum_gripper_state.vacuum
           << ", \"time\": " << vacuum_gripper_state.time.toSec() << "}";
