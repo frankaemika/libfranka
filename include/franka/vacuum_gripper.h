@@ -33,6 +33,11 @@ class VacuumGripper {
   using ServerVersion = uint16_t;
 
   /**
+   * Vacuum production setup profile.
+   */
+  enum class ProductionSetupProfile { kP0, kP1, kP2, kP3 };
+
+  /**
    * Establishes a connection with a vacuum gripper connected to a robot.
    *
    * @param[in] franka_address IP/hostname of the robot the vacuum gripper is connected to.
@@ -67,15 +72,17 @@ class VacuumGripper {
    * Vacuums an object.
    *
    * @param[in] vacuum Setpoint for control mode. Unit: \f$[10*mbar]\f$.
-   * @param[in] profile Production profile P0 to P3.
    * @param[in] timeout Vacuum timeout. Unit: \f$[ms]\f$.
+   * @param[in] profile Production setup profile P0 to P3. Default: P0.
    *
    * @return True if the vacuum has been established, false otherwise.
    *
    * @throw CommandException if an error occurred.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  bool vacuum(uint8_t vacuum, uint8_t profile, std::chrono::milliseconds timeout) const;
+  bool vacuum(uint8_t vacuum,
+              std::chrono::milliseconds timeout,
+              ProductionSetupProfile profile = ProductionSetupProfile::kP0) const;
 
   /**
    * Drops the grasped object off.

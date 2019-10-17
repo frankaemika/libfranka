@@ -77,21 +77,21 @@ VacuumGripper::ServerVersion VacuumGripper::serverVersion() const noexcept {
 }
 
 bool VacuumGripper::vacuum(uint8_t vacuum,
-                           uint8_t profile,
-                           std::chrono::milliseconds timeout) const {
+                           std::chrono::milliseconds timeout,
+                           ProductionSetupProfile profile) const {
   research_interface::vacuum_gripper::Profile converted_profile;
   switch (profile) {
-    case static_cast<uint8_t>(research_interface::vacuum_gripper::Profile::kP1):
+    case ProductionSetupProfile::kP0:
+      converted_profile = research_interface::vacuum_gripper::Profile::kP0;
+      break;
+    case ProductionSetupProfile::kP1:
       converted_profile = research_interface::vacuum_gripper::Profile::kP1;
       break;
-    case static_cast<uint8_t>(research_interface::vacuum_gripper::Profile::kP2):
+    case ProductionSetupProfile::kP2:
       converted_profile = research_interface::vacuum_gripper::Profile::kP2;
       break;
-    case static_cast<uint8_t>(research_interface::vacuum_gripper::Profile::kP3):
+    case ProductionSetupProfile::kP3:
       converted_profile = research_interface::vacuum_gripper::Profile::kP3;
-      break;
-    case static_cast<uint8_t>(research_interface::vacuum_gripper::Profile::kP4):
-      converted_profile = research_interface::vacuum_gripper::Profile::kP4;
       break;
     default:
       throw CommandException("Vacuum Gripper: Vacuum profile not defined!");

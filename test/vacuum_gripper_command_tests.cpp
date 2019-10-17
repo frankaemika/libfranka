@@ -62,7 +62,7 @@ typename T::Request VacuumGripperCommand<T>::getExpected() {
 template <>
 Vacuum::Request VacuumGripperCommand<Vacuum>::getExpected() {
   uint8_t vacuum = 100;
-  Profile profile = Profile::kP1;
+  Profile profile = Profile::kP0;
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
   return Vacuum::Request(vacuum, profile, timeout);
 }
@@ -76,9 +76,10 @@ DropOff::Request VacuumGripperCommand<DropOff>::getExpected() {
 template <>
 bool VacuumGripperCommand<Vacuum>::executeCommand(VacuumGripper& vacuum_gripper) {
   uint8_t vacuum = 100;
-  uint8_t profile = static_cast<uint8_t>(Profile::kP1);
+  franka::VacuumGripper::ProductionSetupProfile profile =
+      franka::VacuumGripper::ProductionSetupProfile::kP0;
   std::chrono::milliseconds timeout = std::chrono::milliseconds(1000);
-  return vacuum_gripper.vacuum(vacuum, profile, timeout);
+  return vacuum_gripper.vacuum(vacuum, timeout, profile);
 }
 
 template <>

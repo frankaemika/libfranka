@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
     std::cout << "Initial vacuum gripper state: " << vacuum_gripper_state << std::endl;
 
     // Vacuum the object.
-    if (!vacuum_gripper.vacuum(100, 0, std::chrono::milliseconds(1000))) {
+    if (!vacuum_gripper.vacuum(100, std::chrono::milliseconds(1000))) {
       std::cout << "Failed to vacuum the object." << std::endl;
       return -1;
     }
