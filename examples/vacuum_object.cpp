@@ -17,9 +17,8 @@ int main(int argc, char** argv) {
     return -1;
   }
 
+  franka::VacuumGripper vacuum_gripper(argv[1]);
   try {
-    franka::VacuumGripper vacuum_gripper(argv[1]);
-
     // Print a vacuum gripper state.
     franka::VacuumGripperState vacuum_gripper_state = vacuum_gripper.readOnce();
     std::cout << "Initial vacuum gripper state: " << vacuum_gripper_state << std::endl;
@@ -46,6 +45,7 @@ int main(int argc, char** argv) {
     std::cout << "Vacuumed object, will release it now." << std::endl;
     vacuum_gripper.dropOff(std::chrono::milliseconds(1000));
   } catch (franka::Exception const& e) {
+    vacuum_gripper.stop();
     std::cout << e.what() << std::endl;
     return -1;
   }
