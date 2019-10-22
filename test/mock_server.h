@@ -13,6 +13,7 @@
 #include <research_interface/gripper/types.h>
 #include <research_interface/robot/rbk_types.h>
 #include <research_interface/robot/service_types.h>
+#include <research_interface/vacuum_gripper/types.h>
 
 struct RobotTypes {
   using Connect = research_interface::robot::Connect;
@@ -24,6 +25,12 @@ struct GripperTypes {
   using Connect = research_interface::gripper::Connect;
   using State = research_interface::gripper::GripperState;
   static constexpr uint16_t kCommandPort = research_interface::gripper::kCommandPort;
+};
+
+struct VacuumGripperTypes {
+  using Connect = research_interface::vacuum_gripper::Connect;
+  using State = research_interface::vacuum_gripper::VacuumGripperState;
+  static constexpr uint16_t kCommandPort = research_interface::vacuum_gripper::kCommandPort;
 };
 
 template <typename C>
@@ -258,3 +265,4 @@ MockServer<C>& MockServer<C>::waitForCommand(
 
 using RobotMockServer = MockServer<RobotTypes>;
 using GripperMockServer = MockServer<GripperTypes>;
+using VacuumGripperMockServer = MockServer<VacuumGripperTypes>;

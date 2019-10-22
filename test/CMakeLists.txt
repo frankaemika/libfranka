@@ -50,6 +50,8 @@ add_executable(run_all_tests
   robot_impl_tests.cpp
   robot_state_tests.cpp
   robot_tests.cpp
+  vacuum_gripper_tests.cpp
+  vacuum_gripper_command_tests.cpp
 )
 
 set(TEST_COMPILE_DEFINITIONS FRANKA_TEST_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")

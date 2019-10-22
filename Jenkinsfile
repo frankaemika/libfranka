@@ -51,6 +51,7 @@ def getStages(ubuntuVersion) {
           buildResult = 'SUCCESS'
         }
       } catch (e) {
+        println(e)
         buildResult = 'FAILED'
       }
     }

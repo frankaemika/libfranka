@@ -36,6 +36,7 @@ set(EXAMPLES
   joint_point_to_point_motion
   motion_with_control
   print_joint_poses
+  vacuum_object
 )
 
 foreach(example ${EXAMPLES})
