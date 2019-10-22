@@ -4,7 +4,7 @@
 
 Requires Panda system version >= 4.0.0
 
- * **BREAKING** Changed behavior of `franka::Robot::setEE`. Previously, this method would set the
+ * **BREAKING** Change behavior of `franka::Robot::setEE`. Previously, this method would set the
    flange-to-end-effector transformation `F_T_EE`. This has been split up into two transformations:
    `F_T_NE`, only settable in Desk, and `NE_T_EE`, which can be set in `libfranka` with `setEE` and
    defaults to the identity transformation.
