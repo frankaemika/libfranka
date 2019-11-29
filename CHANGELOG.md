@@ -7,6 +7,7 @@ Requires Panda system version >= 3.0.0
 ### Changed
 
  * CPack: Add conflict with `ros-melodic-libfranka`.
+ * Fix missing include for Windows (#55).
 
 ## 0.7.1 - 2019-07-08
 
