@@ -8,6 +8,12 @@
 
 #include "platform.h"
 
+#ifdef LIBFRANKA_WINDOWS
+#include <Windows.h>
+#else
+#include <pthread.h>
+#endif
+
 // `using std::string_literals::operator""s` produces a GCC warning that cannot be disabled, so we
 // have to use `using namespace ...`.
 // See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65923#c0
