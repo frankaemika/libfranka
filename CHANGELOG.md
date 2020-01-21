@@ -11,7 +11,23 @@ Requires Panda system version >= 4.0.0
  * Add `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
  * Add support for the cobot pump with `franka::VacuumGripper`.
 
-## 0.7.0 - UNRELEASED
+## 0.7.2 - UNRELEASED
+
+Requires Panda system version >= 3.0.0
+
+### Changed
+
+ * CPack: Add conflict with `ros-melodic-libfranka`.
+
+## 0.7.1 - 2019-07-08
+
+Requires Panda system version >= 3.0.0
+
+### Changed
+
+ * Fix compilation error on ARM.
+
+## 0.7.0 - 2019-07-05
 
 Requires Panda system version >= 3.0.0
 

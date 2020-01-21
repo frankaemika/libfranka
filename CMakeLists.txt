@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.7.0
+  VERSION 0.7.2
   LANGUAGES CXX
 )
 
@@ -190,7 +190,7 @@ endif()
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Emika GmbH")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
-set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka")
+set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka, ros-melodic-libfranka")
 
 include(CPack)
 
