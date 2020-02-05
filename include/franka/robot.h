@@ -538,8 +538,9 @@ class Robot {
    *
    * User-provided torques are not affected by this setting.
    *
-   * @param[in] K_x Cartesian impedance values \f$K_x=(x, y, z, R, P, Y)\f$.
-   *
+   * @param[in] K_x Cartesian impedance values \f$K_x=(x \in [10,3000] \frac{N}{m}, y \in [10,3000]
+   * \frac{N}{m}, z \in [10,3000] \frac{N}{m}, R \in [1,300] \frac{Nm}{rad}, P \in [1,300]
+   * \frac{Nm}{rad}, Y \in [1,300]  \frac{Nm}{rad})\f$
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
