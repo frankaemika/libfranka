@@ -10,6 +10,7 @@ Requires Panda system version >= 4.0.0
    defaults to the identity transformation.
  * Add `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
  * Add support for the cobot pump with `franka::VacuumGripper`.
+ * Add hint about Single Point of Control when network timeout occurs.
 
 ## 0.7.2 - UNRELEASED
 

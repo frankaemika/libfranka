@@ -39,7 +39,7 @@ Network::Network(const std::string& franka_address,
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: Connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
-    throw NetworkException("libfranka: Connection timeout"s);
+    throw NetworkException("libfranka: Connection timeout. Please install FCI feature or enable FCI mode in Desk"s);
   } catch (const Poco::Exception& e) {
     throw NetworkException("libfranka: "s + e.what());
   }
