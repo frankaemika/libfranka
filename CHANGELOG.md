@@ -10,7 +10,10 @@ Requires Panda system version >= 4.0.0
    defaults to the identity transformation.
  * Add `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
  * Add support for the cobot pump with `franka::VacuumGripper`.
- * Add hint about Single Point of Control when network timeout occurs.
+ * Adjust network error messages. Distinguish between problems resulting from:
+    - a wrong network configuration. A message is shown after a timeout of 60 seconds.
+    - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
+      response is shown.
 
 ## 0.7.2 - UNRELEASED
 
