@@ -3,6 +3,7 @@
 #include <type_traits>
 
 #include <franka/control_types.h>
+#include <stdexcept>
 
 namespace franka {
 
