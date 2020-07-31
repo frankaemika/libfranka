@@ -1,0 +1,7 @@
+<map id="include/franka/exception.h" name="include/franka/exception.h">
+<area shape="rect" id="node4" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states. " alt="" coords="200,80,300,107"/>
+<area shape="rect" id="node6" href="$control__types_8h.html" title="Contains helper types for returning motion generation and joint&#45;level torque commands. " alt="" coords="166,155,334,181"/>
+<area shape="rect" id="node10" href="$robot__state_8h.html" title="Contains the franka::RobotState types. " alt="" coords="419,155,574,181"/>
+<area shape="rect" id="node12" href="$duration_8h.html" title="Contains the franka::Duration type. " alt="" coords="632,229,767,256"/>
+<area shape="rect" id="node16" href="$errors_8h.html" title="Contains the franka::Errors type. " alt="" coords="437,229,556,256"/>
+</map>

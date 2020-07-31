@@ -1,0 +1,8 @@
+<map id="franka::RobotCommand" name="franka::RobotCommand">
+<area shape="rect" id="node2" href="$classfranka_1_1Torques.html" title="Stores joint&#45;level torque commands without gravity and friction. " alt="" coords="229,5,352,32"/>
+<area shape="rect" id="node3" href="$structfranka_1_1Finishable.html" title="Helper type for control and motion generation loops. " alt="" coords="5,107,143,133"/>
+<area shape="rect" id="node4" href="$classfranka_1_1JointPositions.html" title="Stores values for joint position motion generation. " alt="" coords="211,56,371,83"/>
+<area shape="rect" id="node5" href="$classfranka_1_1JointVelocities.html" title="Stores values for joint velocity motion generation. " alt="" coords="209,107,373,133"/>
+<area shape="rect" id="node6" href="$classfranka_1_1CartesianPose.html" title="Stores values for Cartesian pose motion generation. " alt="" coords="208,157,373,184"/>
+<area shape="rect" id="node7" href="$classfranka_1_1CartesianVelocities.html" title="Stores values for Cartesian velocity motion generation. " alt="" coords="192,208,389,235"/>
+</map>

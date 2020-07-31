@@ -1,0 +1,6 @@
+<map id="include/franka/log.h" name="include/franka/log.h">
+<area shape="rect" id="node3" href="$control__types_8h.html" title="Contains helper types for returning motion generation and joint&#45;level torque commands. " alt="" coords="93,80,261,107"/>
+<area shape="rect" id="node7" href="$robot__state_8h.html" title="Contains the franka::RobotState types. " alt="" coords="346,80,501,107"/>
+<area shape="rect" id="node9" href="$duration_8h.html" title="Contains the franka::Duration type. " alt="" coords="559,155,693,181"/>
+<area shape="rect" id="node13" href="$errors_8h.html" title="Contains the franka::Errors type. " alt="" coords="364,155,483,181"/>
+</map>

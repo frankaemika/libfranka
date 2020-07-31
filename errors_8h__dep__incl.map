@@ -1,0 +1,8 @@
+<map id="include/franka/errors.h" name="include/franka/errors.h">
+<area shape="rect" id="node2" href="$robot__state_8h.html" title="Contains the franka::RobotState types. " alt="" coords="279,80,433,121"/>
+<area shape="rect" id="node3" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states. " alt="" coords="67,169,218,196"/>
+<area shape="rect" id="node5" href="$model_8h.html" title="Contains model library types. " alt="" coords="225,244,397,271"/>
+<area shape="rect" id="node6" href="$robot_8h.html" title="Contains the franka::Robot type. " alt="" coords="333,169,499,196"/>
+<area shape="rect" id="node7" href="$examples__common_8h.html" title="Contains common types and functions for the examples. " alt="" coords="421,244,651,271"/>
+<area shape="rect" id="node4" href="$exception_8h.html" title="Contains exception definitions. " alt="" coords="5,244,200,271"/>
+</map>
