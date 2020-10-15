@@ -9,6 +9,10 @@ set(GTEST_LIBRARIES gtest gmock gmock_main)
 
 include(SetupGoogleTest)
 
+foreach(lib ${GTEST_LIBRARIES})
+  target_compile_options(${lib} PUBLIC -Wno-deprecated-copy)
+endforeach()
+
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES
   ${GTEST_LIBRARIES}

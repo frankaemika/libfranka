@@ -144,6 +144,8 @@ class Robot {
    *   return output;
    * }
    * @endcode
+   *
+   * @{
    */
 
   /**

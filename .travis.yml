@@ -8,6 +8,7 @@ matrix:
   include:
     - env: CI_DISTRO=xenial CI_TARGET=debug
     - env: CI_DISTRO=bionic CI_TARGET=debug
+    - env: CI_DISTRO=focal CI_TARGET=debug
 
     - env: CI_DISTRO=xenial CI_TARGET=release
     - env: CI_DISTRO=bionic CI_TARGET=release
@@ -19,12 +20,14 @@ matrix:
         local_dir: build-release/doc/html
         on:
           branch: master
+    - env: CI_DISTRO=focal CI_TARGET=release
 
-    - env: CI_DISTRO=xenial CI_TARGET=coverage
+    - env: CI_DISTRO=focal CI_TARGET=coverage
       after_success: bash <(curl -s https://codecov.io/bash) -g "*/test/*"
 
     - env: CI_DISTRO=xenial CI_TARGET=lint
     - env: CI_DISTRO=bionic CI_TARGET=lint
+    - env: CI_DISTRO=focal CI_TARGET=lint
 
 before_install:
   - sudo apt-get update
