@@ -65,6 +65,7 @@ node {
 parallel(
   'xenial': getStages('xenial'),
   'bionic': getStages('bionic'),
+  'focal': getStages('focal'),
 )
 
 node {
