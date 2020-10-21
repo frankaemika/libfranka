@@ -118,6 +118,7 @@ install(TARGETS franka
   EXPORT FrankaTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
@@ -148,11 +149,7 @@ install(EXPORT FrankaTargets
 ## Subprojects
 
 # Ignore find_package(Franka) in subprojects.
-macro(find_package)
-  if(NOT "${ARGV0}" STREQUAL Franka AND NOT DEFINED "${ARGV0}_FOUND")
-    _find_package(${ARGV})
-  endif()
-endmacro()
+set(FRANKA_IS_FOUND TRUE)
 
 option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)

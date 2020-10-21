@@ -60,6 +60,9 @@ add_executable(run_all_tests
 
 set(TEST_COMPILE_DEFINITIONS FRANKA_TEST_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")
 target_compile_definitions(run_all_tests PRIVATE ${TEST_COMPILE_DEFINITIONS})
+if(WIN32)
+    target_compile_options(run_all_tests PRIVATE /bigobj)
+endif(WIN32)
 
 target_include_directories(run_all_tests PRIVATE ${TEST_INCLUDE_DIRECTORIES})
 target_link_libraries(run_all_tests PUBLIC ${TEST_DEPENDENCIES})
