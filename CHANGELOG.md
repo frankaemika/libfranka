@@ -1,6 +1,15 @@
 # CHANGELOG
 
-## 0.8.0 - UNRELEASED
+## 0.8.1 - UNRELEASED
+
+Requires Panda system version >= 4.0.0
+
+ * Adjust network error messages. Distinguish between problems resulting from:
+    - a wrong network configuration. A message is shown after a timeout of 60 seconds.
+    - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
+      response is shown.
+
+## 0.8.0 - 2020-04-29
 
 Requires Panda system version >= 4.0.0
 
@@ -10,17 +19,6 @@ Requires Panda system version >= 4.0.0
    defaults to the identity transformation.
  * Add `F_T_NE` and `NE_T_EE` to `franka::RobotState`.
  * Add support for the cobot pump with `franka::VacuumGripper`.
- * Adjust network error messages. Distinguish between problems resulting from:
-    - a wrong network configuration. A message is shown after a timeout of 60 seconds.
-    - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
-      response is shown.
-
-## 0.7.2 - UNRELEASED
-
-Requires Panda system version >= 3.0.0
-
-### Changed
-
  * CPack: Add conflict with `ros-melodic-libfranka`.
  * Fix missing include for Windows (#55).
 

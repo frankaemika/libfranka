@@ -9,6 +9,10 @@ set(GTEST_LIBRARIES gtest gmock gmock_main)
 
 include(SetupGoogleTest)
 
+foreach(lib ${GTEST_LIBRARIES})
+  target_compile_options(${lib} PUBLIC -Wno-deprecated-copy)
+endforeach()
+
 set(TEST_OUTPUT_DIR ${PROJECT_BINARY_DIR}/test_results)
 set(TEST_DEPENDENCIES
   ${GTEST_LIBRARIES}
@@ -19,7 +23,7 @@ set(TEST_DEPENDENCIES
   franka
   libfranka-common
 )
-set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/src)
+set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 ## Test libraries
 add_library(fcimodels SHARED
@@ -27,7 +31,7 @@ add_library(fcimodels SHARED
 )
 
 target_include_directories(fcimodels PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(fcimodels PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(fcimodels PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 list(APPEND TEST_DEPENDENCIES fcimodels)
 
