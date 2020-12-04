@@ -11,5 +11,6 @@ RUN apt-get update && apt-get install -y \
     libeigen3-dev \
     libpoco-dev \
     rename \
+    rpm \
     valgrind \
     && rm -rf /var/lib/apt/lists/*
