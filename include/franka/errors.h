@@ -17,9 +17,12 @@ namespace franka {
  */
 struct Errors {
  private:
-  std::array<bool, 37> errors_{};
+  static constexpr int kMaxNumErrors = 37;
+  std::array<bool, kMaxNumErrors> errors_{};
 
  public:
+  const std::array<bool, kMaxNumErrors>& errors() const { return errors_; }
+
   /**
    * Creates an empty Errors instance.
    */
