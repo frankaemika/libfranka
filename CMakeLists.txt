@@ -207,7 +207,7 @@ if(DPKG_PROG)
   # Change system name to use the correct architecture in file name
   set(CPACK_SYSTEM_NAME ${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
 endif()
-# Debian versions require a dash
+
 set(CPACK_DEBIAN_PACKAGE_RELEASE ${PACKAGE_RELEASE})
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${PACKAGE_MAINTAINER})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
