@@ -198,16 +198,6 @@ set(CPACK_RPM_PACKAGE_DEPENDS "poco-devel")
 set(CPACK_RPM_PACKAGE_CONFLICTS "ros-libfranka-devel")
 
 # Debian
-find_program(DPKG_PROG dpkg DOC "'dpkg' executable")
-if(DPKG_PROG)
-  execute_process(COMMAND ${DPKG_PROG} --print-architecture
-    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  # Change system name to use the correct architecture in file name
-  set(CPACK_SYSTEM_NAME ${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
-endif()
-
 set(CPACK_DEBIAN_PACKAGE_RELEASE ${PACKAGE_RELEASE})
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${PACKAGE_MAINTAINER})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
