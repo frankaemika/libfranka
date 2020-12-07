@@ -120,7 +120,9 @@ install(TARGETS franka
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  USE_SOURCE_PERMISSIONS
+)
 
 export(EXPORT FrankaTargets
   NAMESPACE Franka::
@@ -169,23 +171,35 @@ endif()
 
 ## Packaging
 set(CPACK_PACKAGE_VENDOR "Franka Emika GmbH")
-set(CPACK_GENERATOR "DEB;TGZ")
+set(CPACK_GENERATOR "DEB;TGZ;RPM")
 set(CPACK_PACKAGE_VERSION ${libfranka_VERSION})
 set(CPACK_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
+# Default permissions for directories created implicitly during installation of files by install() and file(INSTALL).
+set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
+  OWNER_READ
+  OWNER_WRITE
+  OWNER_EXECUTE
+  GROUP_READ
+  GROUP_EXECUTE
+  WORLD_READ
+  WORLD_EXECUTE
+)
+
+# shared package info
+set(PACKAGE_RELEASE 1) # adds build info MAJOR.MINOR.PATCH-RELEASE
+set(PACKAGE_MAINTAINER "Franka Emika GmbH")
+
+# RPM package info
+set(CPACK_RPM_PACKAGE_RELEASE_DIST "%{dist}")
+set(CPACK_RPM_PACKAGE_RELEASE ${PACKAGE_RELEASE})
+set(CPACK_RPM_PACKAGE_MAINTAINER ${PACKAGE_MAINTAINER})
+set(CPACK_RPM_PACKAGE_DEPENDS "poco-devel")
+set(CPACK_RPM_PACKAGE_CONFLICTS "ros-libfranka-devel")
+
 # Debian
-find_program(DPKG_PROG dpkg DOC "'dpkg' executable")
-if(DPKG_PROG)
-  execute_process(COMMAND ${DPKG_PROG} --print-architecture
-    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  # Change system name to use the correct architecture in file name
-  set(CPACK_SYSTEM_NAME ${CPACK_DEBIAN_PACKAGE_ARCHITECTURE})
-endif()
-# Debian versions require a dash
-set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Emika GmbH")
+set(CPACK_DEBIAN_PACKAGE_RELEASE ${PACKAGE_RELEASE})
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER ${PACKAGE_MAINTAINER})
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
 set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka, ros-melodic-libfranka")
 
