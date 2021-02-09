@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.8.1 - UNRELEASED
+
+Requires Panda system version >= 4.0.0
+
+### Changed
+
+ * Bug fixes in `rate_limitng_tests.cpp`.
+
 ## 0.8.0 - 2020-04-29
 
 Requires Panda system version >= 4.0.0
