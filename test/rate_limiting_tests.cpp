@@ -58,8 +58,8 @@ std::array<double, 6> differentiateOneSample(std::array<double, 16> value,
   Eigen::Matrix<double, 6, 1> dx;
 
   dx.head(3) << (pose.translation() - last_pose.translation()) / delta_t;
-  auto delta_rotation = (pose.linear() - pose.linear()) / delta_t;
-  Eigen::Matrix3d rotational_twist = delta_rotation * last_pose.linear();
+  auto delta_rotation = (pose.linear() - last_pose.linear()) / delta_t;
+  Eigen::Matrix3d rotational_twist = delta_rotation * last_pose.linear().transpose();
   dx.tail(3) << rotational_twist(2, 1), rotational_twist(0, 2), rotational_twist(1, 0);
 
   std::array<double, 6> twist{};
@@ -517,4 +517,17 @@ TEST(RateLimiting, CartesianPose) {
       kNoLimit, max_translational_acceleration, kNoLimit, kNoLimit, max_rotational_acceleration,
       kNoLimit, differentiateOneSample(limited_cartesian_pose, last_cmd_pose, kDeltaT),
       last_cmd_velocity, last_cmd_acceleration, kDeltaT));
+}
+
+TEST(RateLimiting, CartesianPoseIntegrationAndDifferentation) {
+  std::array<double, 16> last_cmd_pose{
+      {0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}};
+  std::array<double, 6> last_cmd_velocity{{1.0, 2.0, 3.0, 0.4, 0.5, 0.3}};
+
+  std::array<double, 16> cartesian_pose =
+      integrateOneSample(last_cmd_pose, last_cmd_velocity, kDeltaT);
+  auto twist = differentiateOneSample(cartesian_pose, last_cmd_pose, kDeltaT);
+  for (int i = 0; i < 6; ++i) {
+    ASSERT_NEAR(twist[i], last_cmd_velocity[i], 1e-6);
+  }
 }
