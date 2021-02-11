@@ -15,7 +15,7 @@ Requires Panda system version >= 4.0.0
 
 ## 0.7.1 - 2019-07-08
 
-Requires Panda system version >= 3.0.0
+Requires Panda system version 3.X
 
 ### Changed
 
@@ -23,7 +23,7 @@ Requires Panda system version >= 3.0.0
 
 ## 0.7.0 - 2019-07-05
 
-Requires Panda system version >= 3.0.0
+Requires Panda system version 3.X
 
 ### Added
 
@@ -47,7 +47,7 @@ Requires Panda system version >= 3.0.0
 
 ## 0.6.0 - 2019-02-06
 
-Requires Panda system version >= 3.0.0
+Requires Panda system version 3.X
 
  * Added support for Ubuntu 18.04 (Bionic).
  * **EXPERIMENTAL** Added support for Windows.
@@ -57,7 +57,7 @@ Requires Panda system version >= 3.0.0
 
 ## 0.5.0 - 2018-08-08
 
-Requires Panda system version >= 1.3.0
+Requires Panda system version 1.3.X or 2.1.X
 
 ### Motion and control interfaces
 
@@ -76,7 +76,7 @@ Requires Panda system version >= 1.3.0
 
 ## 0.4.0 - 2018-06-21
 
-Requires Panda system version >= 1.3.0
+Requires Panda system version 1.3.X or 2.1.X
 
 ### Motion and control interfaces
 
