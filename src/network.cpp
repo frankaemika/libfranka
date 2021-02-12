@@ -36,10 +36,14 @@ Network::Network(const std::string& franka_address,
     udp_socket_.bind({"0.0.0.0", 0});
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_port_ = udp_socket_.address().port();
+  } catch (const Poco::Net::ConnectionRefusedException& e) {
+    throw NetworkException(
+        "libfranka: Connection to FCI refused. Please install FCI feature or enable FCI mode in Desk."s);
   } catch (const Poco::Net::NetException& e) {
     throw NetworkException("libfranka: Connection error: "s + e.what());
   } catch (const Poco::TimeoutException& e) {
-    throw NetworkException("libfranka: Connection timeout"s);
+    throw NetworkException(
+        "libfranka: Connection timeout. Please check your network connection or settings."s);
   } catch (const Poco::Exception& e) {
     throw NetworkException("libfranka: "s + e.what());
   }

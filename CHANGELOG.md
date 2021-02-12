@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.8.1 - UNRELEASED
+
+Requires Panda system version >= 4.0.0
+
+ * Adjust network error messages. Distinguish between problems resulting from:
+    - a wrong network configuration. A message is shown after a timeout of 60 seconds.
+    - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
+      response is shown.
+
 ## 0.8.0 - 2020-04-29
 
 Requires Panda system version >= 4.0.0

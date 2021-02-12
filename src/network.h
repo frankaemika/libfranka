@@ -148,6 +148,10 @@ void Network::udpSend(const T& data) try {
 
 template <typename T>
 void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
+  if (tcp_socket_.poll(0, Poco::Net::Socket::SELECT_ERROR)) {
+    throw NetworkException("libfranka: TCP connection got interrupted.");
+  }
+
   if (!tcp_socket_.poll(timeout.count(), Poco::Net::Socket::SELECT_READ)) {
     return;
   }
