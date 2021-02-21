@@ -6,6 +6,7 @@ Requires Panda system version >= 4.0.0
 
 ### Changed
 
+ * Minor documentation fixes.
  * Bug fixes in `rate_limitng_tests.cpp`.
 
 ## 0.8.0 - 2020-04-29

@@ -203,7 +203,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
-   * @throw std::invalid_argument if joint-level torque or joint velocitiy commands are NaN or
+   * @throw std::invalid_argument if joint-level torque or joint velocity commands are NaN or
    * infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.

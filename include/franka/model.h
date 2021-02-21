@@ -180,7 +180,7 @@ class Model {
   /**
    * Calculates the 7x7 mass matrix. Unit: \f$[kg \times m^2]\f$.
    *
-   * @param[in] robot_state State from which the pose should be calculated.
+   * @param[in] robot_state State from which the mass matrix should be calculated.
    *
    * @return Vectorized 7x7 mass matrix, column-major.
    */

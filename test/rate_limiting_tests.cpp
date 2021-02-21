@@ -519,7 +519,7 @@ TEST(RateLimiting, CartesianPose) {
       last_cmd_velocity, last_cmd_acceleration, kDeltaT));
 }
 
-TEST(RateLimiting, CartesianPoseIntegrationAndDifferentation) {
+TEST(RateLimiting, CartesianPoseIntegrationAndDifferentiation) {
   std::array<double, 16> last_cmd_pose{
       {0.0, 1.0, 0.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0}};
   std::array<double, 6> last_cmd_velocity{{1.0, 2.0, 3.0, 0.4, 0.5, 0.3}};

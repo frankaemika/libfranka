@@ -25,7 +25,7 @@ constexpr double kLimitEps = 1e-3;
  */
 constexpr double kNormEps = std::numeric_limits<double>::epsilon();
 /**
- * Number of packets losts considered for the definition of velocity limits.
+ * Number of packets lost considered for the definition of velocity limits.
  * When a packet is lost, FCI assumes a constant acceleration model
  */
 constexpr double kTolNumberPacketsLost = 3.0;
@@ -131,7 +131,7 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
  * @param[in] max_acceleration Maximum allowed acceleration.
  * @param[in] max_jerk Maximum allowed jerk.
  * @param[in] commanded_velocity Commanded joint velocity of the current time step.
- * @param[in] last_commanded_velocity Commanded joint velocitiy of the previous time step.
+ * @param[in] last_commanded_velocity Commanded joint velocity of the previous time step.
  * @param[in] last_commanded_acceleration Commanded joint acceleration of the previous time step.
  *
  * @throw std::invalid_argument if commanded_velocity is infinite or NaN.
@@ -202,12 +202,12 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
  * FCI filters must be deactivated to work properly.
  *
  * @param[in] max_velocity Per-joint maximum allowed velocity.
- * @param[in] max_acceleration Per-joint maximum allowed velocity.
- * @param[in] max_jerk Per-joint maximum allowed velocity.
- * @param[in] commanded_positions Per-joint maximum allowed acceleration.
- * @param[in] last_commanded_positions Commanded joint positions of the current time step.
- * @param[in] last_commanded_velocities Commanded joint positions of the previous time step.
- * @param[in] last_commanded_accelerations Commanded joint velocities of the previous time step.
+ * @param[in] max_acceleration Per-joint maximum allowed acceleration.
+ * @param[in] max_jerk Per-joint maximum allowed jerk.
+ * @param[in] commanded_positions Commanded joint positions of the current time step.
+ * @param[in] last_commanded_positions Commanded joint positions of the previous time step.
+ * @param[in] last_commanded_velocities Commanded joint velocities of the previous time step.
+ * @param[in] last_commanded_accelerations Commanded joint accelerations of the previous time step.
  *
  * @throw std::invalid_argument if commanded_positions are infinite or NaN.
  *

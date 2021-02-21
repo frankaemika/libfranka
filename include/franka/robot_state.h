@@ -234,7 +234,7 @@ struct RobotState {
   std::array<double, 7> dq_d{};
 
   /**
-   * \f$\dot{q}_d\f$
+   * \f$\ddot{q}_d\f$
    * Desired joint acceleration. Unit: \f$[\frac{rad}{s^2}]\f$
    */
   std::array<double, 7> ddq_d{};
@@ -332,7 +332,7 @@ struct RobotState {
 
   /**
    * \f$\dot{\theta}\f$
-   * Motor velocity. Unit: \f$[rad]\f$
+   * Motor velocity. Unit: \f$[\frac{rad}{s}]\f$
    */
   std::array<double, 7> dtheta{};
 
