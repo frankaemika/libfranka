@@ -83,9 +83,9 @@ class Gripper {
    * An object is considered grasped if the distance \f$d\f$ between the gripper fingers satisfies
    * \f$(\text{width} - \text{epsilon_inner}) < d < (\text{width} + \text{epsilon_outer})\f$.
    *
-   * @param[in] width Size of the object to grasp. [m]
-   * @param[in] speed Closing speed. [m/s]
-   * @param[in] force Grasping force. [N]
+   * @param[in] width Size of the object to grasp in \f$[m]\f$.
+   * @param[in] speed Closing speed in \f$[\frac{m}{s}]\f$.
+   * @param[in] force Grasping force in \f$[N]\f$.
    * @param[in] epsilon_inner Maximum tolerated deviation when the actual grasped width is smaller
    * than the commanded grasp width.
    * @param[in] epsilon_outer Maximum tolerated deviation when the actual grasped width is larger
@@ -105,8 +105,8 @@ class Gripper {
   /**
    * Moves the gripper fingers to a specified width.
    *
-   * @param[in] width Intended opening width. [m]
-   * @param[in] speed Closing speed. [m/s]
+   * @param[in] width Intended opening width in \f$[m]\f$.
+   * @param[in] speed Closing speed in \f$[\frac{m}{s}]\f$.
    *
    * @return True if command was successful, false otherwise.
    *

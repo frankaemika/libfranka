@@ -80,7 +80,7 @@ struct ControlException : public Exception {
   explicit ControlException(const std::string& what, std::vector<franka::Record> log = {}) noexcept;
 
   /**
-   * Vector of states and commands logged just before the exception occured.
+   * Vector of states and commands logged just before the exception occurred.
    */
   const std::vector<franka::Record> log;
 };
