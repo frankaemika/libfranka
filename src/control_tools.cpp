@@ -3,6 +3,7 @@
 #include <franka/control_tools.h>
 
 #include <cstring>
+#include <exception>
 #include <fstream>
 #include <string>
 
