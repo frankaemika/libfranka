@@ -29,19 +29,38 @@ class Model;
  * @note
  * The members of this class are threadsafe.
  *
- * @par Nominal end effector frame NE
- * The nominal end effector frame is configured outside of libfranka and cannot be changed here.
+ * @anchor o-frame
+ * @par Base frame O
+ * The base frame is located at the center of the robot's base. Its z-axis is identical with the
+ * axis of rotation of the first joint.
  *
- * @par End effector frame EE
+ * @anchor f-frame
+ * @par Flange frame F
+ * The flange frame is located at the center of the flange surface. Its z-axis is identical with the
+ * axis of rotation of the last joint. This frame is fixed and cannot be changed.
+ *
+ * @anchor ne-frame
+ * @par Nominal end effector frame NE
+ * The nominal end effector frame is configured outside of libfranka (in DESK) and cannot be changed
+ * here. It may be used to set end effector frames which are rarely changed.
+ *
+ * @anchor ee-frame
+ * @par end effector frame EE
  * By default, the end effector frame EE is the same as the nominal end effector frame NE
- * (i.e. the transformation between NE and EE is the identity transformation).
- * With Robot::setEE, a custom transformation matrix can be set.
+ * (i.e. the transformation between NE and EE is the identity transformation). It may be used to set
+ * end effector frames which are changed more frequently (such as a tool that is grasped with the
+ * end effector). With Robot::setEE, a custom transformation matrix can be set.
  *
  * @anchor k-frame
  * @par Stiffness frame K
+ * This frame describes the transformation from the end effector frame EE to the stiffness frame K.
  * The stiffness frame is used for Cartesian impedance control, and for measuring and applying
- * forces.
- * It can be set with Robot::setK.
+ * forces. The values set using Robot::setCartesianImpedance are used in the direction of the
+ * stiffness frame. It can be set with Robot::setK.
+ * This frame allows to modify the compliance behavior of the robot (e.g. to have a low
+ * stiffness around a specific point which is not the end effector). The stiffness frame does not
+ * affect where the robot will move to. The user should always command the desired end effector
+ * frame (and not the desired stiffness frame).
  */
 class Robot {
  public:
@@ -203,7 +222,7 @@ class Robot {
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw RealtimeException if realtime priority cannot be set for the current thread.
-   * @throw std::invalid_argument if joint-level torque or joint velocitiy commands are NaN or
+   * @throw std::invalid_argument if joint-level torque or joint velocity commands are NaN or
    * infinity.
    *
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
@@ -527,7 +546,8 @@ class Robot {
    *
    * User-provided torques are not affected by this setting.
    *
-   * @param[in] K_theta Joint impedance values \f$K_{\theta}\f$.
+   * @param[in] K_theta Joint impedance values \f$K_{\theta_{1-7}} = \in [0,14250]
+   * \frac{Nm}{rad}\f$
    *
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
@@ -536,13 +556,16 @@ class Robot {
       const std::array<double, 7>& K_theta);  // NOLINT(readability-identifier-naming)
 
   /**
-   * Sets the Cartesian impedance for (x, y, z, roll, pitch, yaw) in the internal controller.
+   * Sets the Cartesian stiffness/compliance (for x, y, z, roll, pitch, yaw) in the internal
+   * controller.
    *
-   * User-provided torques are not affected by this setting.
+   * The values set using Robot::setCartesianImpedance are used in the direction of the
+   * stiffness frame, which can be set with Robot::setK.
    *
-   * @param[in] K_x Cartesian impedance values \f$K_x=(x \in [10,3000] \frac{N}{m}, y \in [10,3000]
-   * \frac{N}{m}, z \in [10,3000] \frac{N}{m}, R \in [1,300] \frac{Nm}{rad}, P \in [1,300]
-   * \frac{Nm}{rad}, Y \in [1,300]  \frac{Nm}{rad})\f$
+   * Inputs received by the torque controller are not affected by this setting.
+   *
+   * @param[in] K_x Cartesian impedance values \f$K_x=(K_{x_{x,y,z}} \in [10,3000] \frac{N}{m},
+   * K_{x_{R,P,Y}} \in [1,300] \frac{Nm}{rad})\f$
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
@@ -589,10 +612,10 @@ class Robot {
    * @throw CommandException if the Control reports an error.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    *
-   * @see RobotState::NE_T_EE for end effector pose in nominal end effector frame.
-   * @see RobotState::O_T_EE for end effector pose in world base frame.
-   * @see RobotState::F_T_EE for end effector pose in flange frame.
-   * @see Robot for an explanation of the NE and EE frames.
+   * @see RobotState::NE_T_EE for end effector pose in @ref ne-frame "nominal end effector frame
+   * NE".
+   * @see RobotState::O_T_EE for end effector pose in @ref o-frame "world base frame O".
+   * @see RobotState::F_T_EE for end effector pose in @ref f-frame "flange frame F".
    */
   void setEE(const std::array<double, 16>& NE_T_EE);  // NOLINT(readability-identifier-naming)
 

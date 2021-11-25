@@ -17,7 +17,7 @@
  */
 
 /**
- * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
+ * Sets a default collision behavior, joint impedance and Cartesian impedance.
  *
  * @param[in] robot Robot instance to set behavior on.
  */
