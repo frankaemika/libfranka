@@ -17,7 +17,7 @@ namespace franka {
  */
 struct Errors {
  private:
-  std::array<bool, 37> errors_{};
+  std::array<bool, 41> errors_{};
 
  public:
   /**
@@ -46,7 +46,7 @@ struct Errors {
    *
    * @param errors Array of error flags.
    */
-  Errors(const std::array<bool, 37>& errors);
+  Errors(const std::array<bool, 41>& errors);
 
   /**
    * Check if any error flag is set to true.
@@ -227,6 +227,22 @@ struct Errors {
    * further towards the limit.
    */
   const bool& joint_move_in_wrong_direction;
+  /**
+   * True if the generated motion violates a joint limit.
+   */
+  const bool& cartesian_spline_motion_generator_violation;
+  /**
+   * True if the generated motion violates a joint limit.
+   */
+  const bool& joint_via_motion_generator_planning_joint_limit_violation;
+  /**
+   * True if the gravity vector could not be initialized.
+   */
+  const bool& gravity_vector_initialization_timeout;
+  /**
+   * True if the base acceleration O_ddP_O cannot be determined.
+   */
+  const bool& gravity_vector_invalid_reading;
 };
 
 /**
@@ -237,6 +253,6 @@ struct Errors {
  *
  * @return Ostream instance
  */
-std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
+  std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
 
 }  // namespace franka

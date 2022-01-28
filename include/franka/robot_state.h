@@ -327,6 +327,12 @@ struct RobotState {
   std::array<double, 6> O_dP_EE_d{};  // NOLINT(readability-identifier-naming)
 
   /**
+   * \f$^OddP_O\f$
+   * Linear component of the acceleration of the robot's base, expressed in the base frame.
+   */
+  std::array<double, 3> O_ddP_O{};  // NOLINT(readability-identifier-naming)
+
+  /**
    * \f${^OT_{EE}}_{c}\f$
    * Last commanded end effector pose of motion generation in @ref o-frame "base frame".
    * Pose is represented as a 4x4 matrix in column-major format.
