@@ -327,8 +327,10 @@ struct RobotState {
   std::array<double, 6> O_dP_EE_d{};  // NOLINT(readability-identifier-naming)
 
   /**
-   * \f$^OddP_O\f$
-   * Linear component of the acceleration of the robot's base, expressed in the base frame.
+   * \f${^OddP}_O\f$
+   * Linear component of the acceleration of the robot's base, expressed in frame parallel to the
+   * @ref o-frame "base frame", i.e. the base's translational acceleration. If the base is resting
+   * this shows the direction of the gravity vector.
    */
   std::array<double, 3> O_ddP_O{};  // NOLINT(readability-identifier-naming)
 
