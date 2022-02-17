@@ -236,13 +236,13 @@ struct Errors {
    */
   const bool& joint_via_motion_generator_planning_joint_limit_violation;
   /**
-   * True if the gravity vector could not be initialized.
+   * True if the gravity vector could not be initialized by measureing the base acceleration.
    */
-  const bool& gravity_vector_initialization_timeout;
+  const bool& base_acceleration_initialization_timeout;
   /**
    * True if the base acceleration O_ddP_O cannot be determined.
    */
-  const bool& gravity_vector_invalid_reading;
+  const bool& base_acceleration_invalid_reading;
 };
 
 /**

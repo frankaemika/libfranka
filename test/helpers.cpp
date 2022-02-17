@@ -717,8 +717,8 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
              rhs.cartesian_spline_motion_generator_violation &&
          lhs.joint_via_motion_generator_planning_joint_limit_violation ==
              rhs.joint_via_motion_generator_planning_joint_limit_violation &&
-         lhs.gravity_vector_initialization_timeout ==
-             rhs.gravity_vector_initialization_timeout && lhs.gravity_vector_invalid_reading ==
-             rhs.gravity_vector_invalid_reading;
+         lhs.base_acceleration_initialization_timeout ==
+             rhs.base_acceleration_initialization_timeout && lhs.base_acceleration_invalid_reading ==
+             rhs.base_acceleration_invalid_reading;
 }
 }  // namespace franka
