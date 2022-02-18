@@ -96,9 +96,9 @@ Errors::Errors(const std::array<bool, 41>& errors)  // NOLINT(modernize-pass-by-
       joint_via_motion_generator_planning_joint_limit_violation(
           errors_[static_cast<size_t>(Error::kJointViaPlanLimitViolation)]),
       base_acceleration_initialization_timeout(
-          errors_[static_cast<size_t>(Error::kGravityVectorInitializationTimeout)]),
+          errors_[static_cast<size_t>(Error::kBaseAccelerationInitializationTimeout)]),
       base_acceleration_invalid_reading(
-          errors_[static_cast<size_t>(Error::kGravityVectorInvalidReading)]) {}
+          errors_[static_cast<size_t>(Error::kBaseAccelerationInvalidReading)]) {}
 
 Errors::operator bool() const noexcept {
   return std::any_of(errors_.cbegin(), errors_.cend(), [](bool x) { return x; });
