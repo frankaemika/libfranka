@@ -718,7 +718,7 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
          lhs.joint_via_motion_generator_planning_joint_limit_violation ==
              rhs.joint_via_motion_generator_planning_joint_limit_violation &&
          lhs.base_acceleration_initialization_timeout ==
-             rhs.base_acceleration_initialization_timeout && lhs.base_acceleration_invalid_reading ==
-             rhs.base_acceleration_invalid_reading;
+             rhs.base_acceleration_initialization_timeout &&
+         lhs.base_acceleration_invalid_reading == rhs.base_acceleration_invalid_reading;
 }
 }  // namespace franka

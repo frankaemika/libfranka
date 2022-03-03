@@ -253,6 +253,6 @@ struct Errors {
  *
  * @return Ostream instance
  */
-  std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
+std::ostream& operator<<(std::ostream& ostream, const Errors& errors);
 
 }  // namespace franka
