@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.9.0 - UNRELEASED
+
+Requires Panda system version >= 4.2.1
+
+  * **BREAKING** Add `O_ddP_O` base acceleration to robot state
+  * **BREAKING** New `base_acceleration_initialization_timeout` & `base_acceleration_invalid_reading` reflexes
+
 ## 0.8.1 - UNRELEASED
 
 Requires Panda system version >= 4.0.0

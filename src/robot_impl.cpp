@@ -347,6 +347,7 @@ RobotState convertRobotState(const research_interface::robot::RobotState& robot_
   converted.O_F_ext_hat_K = robot_state.O_F_ext_hat_K;
   converted.K_F_ext_hat_K = robot_state.K_F_ext_hat_K;
   converted.O_dP_EE_d = robot_state.O_dP_EE_d;
+  converted.O_ddP_O = robot_state.O_ddP_O;
   converted.O_T_EE_c = robot_state.O_T_EE_c;
   converted.O_dP_EE_c = robot_state.O_dP_EE_c;
   converted.O_ddP_EE_c = robot_state.O_ddP_EE_c;

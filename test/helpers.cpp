@@ -712,6 +712,13 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
              rhs.joint_p2p_insufficient_torque_for_planning &&
          lhs.tau_j_range_violation == rhs.tau_j_range_violation &&
          lhs.instability_detected == rhs.instability_detected &&
-         lhs.joint_move_in_wrong_direction == rhs.joint_move_in_wrong_direction;
+         lhs.joint_move_in_wrong_direction == rhs.joint_move_in_wrong_direction &&
+         lhs.cartesian_spline_motion_generator_violation ==
+             rhs.cartesian_spline_motion_generator_violation &&
+         lhs.joint_via_motion_generator_planning_joint_limit_violation ==
+             rhs.joint_via_motion_generator_planning_joint_limit_violation &&
+         lhs.base_acceleration_initialization_timeout ==
+             rhs.base_acceleration_initialization_timeout &&
+         lhs.base_acceleration_invalid_reading == rhs.base_acceleration_invalid_reading;
 }
 }  // namespace franka
