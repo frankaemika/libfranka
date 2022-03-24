@@ -228,6 +228,10 @@ std::array<double, 7> franka::Model::gravity(const franka::RobotState& robot_sta
   return gravity(robot_state.q, robot_state.m_total, robot_state.F_x_Ctotal, gravity_earth);
 };
 
+std::array<double, 7> franka::Model::gravity(const franka::RobotState& robot_state) const noexcept {
+  return gravity(robot_state, robot_state.O_ddP_O);
+};
+
 std::array<double, 7> franka::Model::gravity(
     const std::array<double, 7>& q,
     double m_total,
