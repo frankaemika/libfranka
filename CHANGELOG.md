@@ -1,16 +1,11 @@
 # CHANGELOG
 
-## 0.9.0 - UNRELEASED
+## 0.9.0 - 2022-04-24
 
 Requires Panda system version >= 4.2.1
 
-  * **BREAKING** Add `O_ddP_O` base acceleration to robot state
-  * **BREAKING** New `base_acceleration_initialization_timeout` & `base_acceleration_invalid_reading` reflexes
-
-## 0.8.1 - UNRELEASED
-
-Requires Panda system version >= 4.0.0
-
+ * **BREAKING** Add `O_ddP_O` base acceleration to robot state
+ * **BREAKING** New `base_acceleration_initialization_timeout` & `base_acceleration_invalid_reading` reflexes 
  * Adjust network error messages. Distinguish between problems resulting from:
     - a wrong network configuration. A message is shown after a timeout of 60 seconds.
     - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
