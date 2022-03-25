@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.4)
 project(libfranka
-  VERSION 0.8.1
+  VERSION 0.9.0
   LANGUAGES CXX
 )
 

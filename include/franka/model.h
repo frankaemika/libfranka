@@ -263,13 +263,20 @@ class Model {
    *
    * @param[in] robot_state State from which the gravity vector should be calculated.
    * @param[in] gravity_earth Earth's gravity vector. Unit: \f$\frac{m}{s^2}\f$.
-   * Default to {0.0, 0.0, -9.81}.
    *
    * @return Gravity vector.
    */
   std::array<double, 7> gravity(const franka::RobotState& robot_state,
-                                const std::array<double, 3>& gravity_earth = {
-                                    {0., 0., -9.81}}) const noexcept;
+                                const std::array<double, 3>& gravity_earth) const noexcept;
+
+  /**
+   * Calculates the gravity vector using the robot state. Unit: \f$[Nm]\f$.
+   *
+   * @param[in] robot_state State from which the gravity vector should be calculated.
+   *
+   * @return Gravity vector.
+   */
+  std::array<double, 7> gravity(const franka::RobotState& robot_state) const noexcept;
 
   /// @cond DO_NOT_DOCUMENT
   Model(const Model&) = delete;

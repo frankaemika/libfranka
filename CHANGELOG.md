@@ -1,20 +1,18 @@
 # CHANGELOG
 
-## 0.9.0 - UNRELEASED
+## 0.9.0 - 2022-03-25
 
 Requires Panda system version >= 4.2.1
 
-  * **BREAKING** Add `O_ddP_O` base acceleration to robot state
-  * **BREAKING** New `base_acceleration_initialization_timeout` & `base_acceleration_invalid_reading` reflexes
-
-## 0.8.1 - UNRELEASED
-
-Requires Panda system version >= 4.0.0
-
+ * **BREAKING** Add `O_ddP_O` base acceleration to robot state, harcoded to `{0, 0, -9.81}`.
+ * **BREAKING** New `base_acceleration_initialization_timeout`, `base_acceleration_invalid_reading`
+                `cartesian_spline_motion_generator_violation` and 
+                `joint_via_motion_generator_planning_joint_limit_violation` reflexes.
  * Adjust network error messages. Distinguish between problems resulting from:
     - a wrong network configuration. A message is shown after a timeout of 60 seconds.
     - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
       response is shown.
+ * Changed signature of `franka::Model::gravity` to use `O_ddP_O` in the robot state.
 
 ## 0.8.0 - 2020-04-29
 

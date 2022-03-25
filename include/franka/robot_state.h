@@ -331,6 +331,7 @@ struct RobotState {
    * Linear component of the acceleration of the robot's base, expressed in frame parallel to the
    * @ref o-frame "base frame", i.e. the base's translational acceleration. If the base is resting
    * this shows the direction of the gravity vector.
+   * It is harcoded for now to `{0, 0, -9.81}`.
    */
   std::array<double, 3> O_ddP_O{};  // NOLINT(readability-identifier-naming)
 
