@@ -12,4 +12,7 @@ RUN apt-get update && apt-get install -y \
     libpoco-dev \
     rename \
     valgrind \
+    lsb-release \
+    dpkg \
+    git \
     && rm -rf /var/lib/apt/lists/*

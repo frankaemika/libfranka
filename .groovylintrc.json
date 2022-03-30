@@ -1,0 +1,11 @@
+{
+    "extends": "recommended",
+    "rules": {
+        "CompileStatic": {
+            "enabled": false
+        },
+        "NestedBlockDepth": {
+            "enabled": false
+        }
+    }
+}
