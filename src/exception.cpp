@@ -22,7 +22,9 @@ IncompatibleVersionException::IncompatibleVersionException(uint16_t server_versi
                 std::to_string(server_version) + ", library version: "s +
                 std::to_string(library_version) +
                 "). Please check https://frankaemika.github.io for Panda system updates "
-                "or use a different version of libfranka."s),
+                "or choose a libfranka version that uses the server version " +
+                std::to_string(server_version) +
+                " from the table at https://frankaemika.github.io/docs/compatibility.html ."s),
       server_version(server_version),
       library_version(library_version) {}
 
