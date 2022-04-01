@@ -6,12 +6,11 @@ services:
 
 matrix:
   include:
-    - env: CI_DISTRO=xenial CI_TARGET=debug
     - env: CI_DISTRO=bionic CI_TARGET=debug
     - env: CI_DISTRO=focal CI_TARGET=debug
 
-    - env: CI_DISTRO=xenial CI_TARGET=release
     - env: CI_DISTRO=bionic CI_TARGET=release
+    - env: CI_DISTRO=focal CI_TARGET=release
       after_success: touch build-release/doc/html/.nojekyll
       deploy:
         provider: pages
@@ -25,7 +24,6 @@ matrix:
     - env: CI_DISTRO=focal CI_TARGET=coverage
       after_success: bash <(curl -s https://codecov.io/bash) -g "*/test/*"
 
-    - env: CI_DISTRO=xenial CI_TARGET=lint
     - env: CI_DISTRO=bionic CI_TARGET=lint
     - env: CI_DISTRO=focal CI_TARGET=lint
 

@@ -1,74 +1,201 @@
-#!groovy
-
-buildResult = 'NOT_BUILT'
-
-def getStages(ubuntuVersion) {
-  return {
-    node('docker') {
-      try {
-        checkout scm
-
-        docker.build("libfranka-ci-worker:${ubuntuVersion}",
-                     "-f .ci/Dockerfile.${ubuntuVersion} .ci")
-              .inside('--cap-add SYS_PTRACE -e MAKEFLAGS') {
-          stage("${ubuntuVersion}: Build (Debug)") {
-            sh '.ci/debug.sh'
-            junit 'build-debug/test_results/*.xml'
+pipeline {
+  libraries {
+    lib('fe-pipeline-steps@1.0.0')
+  }
+  agent {
+      node {
+        label 'docker'
+      }
+  }
+  triggers {
+    pollSCM('H/5 * * * *')
+  }
+  options {
+    parallelsAlwaysFailFast()
+  }
+  environment {
+    VERSION = feDetermineVersionFromGit()
+    UNSTABLE = 'UNSTABLE'
+  }
+  stages {
+    stage('Matrix') {
+      matrix {
+        agent {
+          dockerfile {
+            filename ".ci/Dockerfile.${env.DISTRO}"
+            reuseNode true
           }
-
-          stage("${ubuntuVersion}: Build (Release)") {
-            sh '.ci/release.sh'
-            // Can't use dir() for these shell scripts due to JENKINS-33510
-            sh "cd ${env.WORKSPACE}/build-release/doc && tar cfz ../libfranka-docs.tar.gz html"
-            sh "cd ${env.WORKSPACE}/build-release && rename -e 's/(.tar.gz|.deb)\$/-${ubuntuVersion}\$1/' *.deb *.tar.gz"
-            dir('build-release') {
-              archive '*.deb, *.tar.gz'
-              publishHTML([allowMissing: false,
-                           alwaysLinkToLastBuild: false,
-                           keepAll: true,
-                           reportDir: 'doc/html',
-                           reportFiles: 'index.html',
-                           reportName: "API Documentation (${ubuntuVersion})"])
+        }
+        axes {
+          axis {
+            name 'DISTRO'
+            values 'bionic', 'focal'
+          }
+        }
+        stages {
+          stage('Setup') {
+            stages {
+              stage('Notify Stash') {
+                steps {
+                  script {
+                    notifyBitbucket()
+                  }
+                }
+              }
+              stage('Clean Workspace') {
+                steps {
+                  sh "rm -rf build-*${DISTRO}"
+                }
+              }
             }
           }
-
-          stage("${ubuntuVersion}: Build (Coverage)") {
-            sh '.ci/coverage.sh'
-            publishHTML([allowMissing: false,
-                         alwaysLinkToLastBuild: false,
-                         keepAll: true,
-                         reportDir: 'build-coverage/coverage',
-                         reportFiles: 'index.html',
-                         reportName: "Code Coverage (${ubuntuVersion})"])
+          stage('Build') {
+            stages {
+              stage('Build debug') {
+                steps {
+                  dir("build-debug.${env.DISTRO}") {
+                    sh '''
+                      cmake -DCMAKE_BUILD_TYPE=Debug -DSTRICT=ON -DBUILD_COVERAGE=OFF \
+                            -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+                      make -j$(nproc)
+                    '''
+                  }
+                }
+              }
+              stage('Build release') {
+                steps {
+                  dir("build-release.${env.DISTRO}") {
+                    sh '''
+                      cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT=ON -DBUILD_COVERAGE=OFF \
+                            -DBUILD_DOCUMENTATION=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+                      make -j$(nproc)
+                    '''
+                  }
+                }
+              }
+              stage('Build examples (debug)') {
+                steps {
+                  dir("build-debug-examples.${env.DISTRO}") {
+                    sh "cmake -DFranka_DIR:PATH=../build-debug.${DISTRO} ../examples"
+                    sh 'make -j$(nproc)'
+                  }
+                }
+              }
+              stage('Build examples (release)') {
+                steps {
+                  dir("build-release-examples.${env.DISTRO}") {
+                    sh "cmake -DFranka_DIR:PATH=../build-release.${DISTRO} ../examples"
+                    sh 'make -j$(nproc)'
+                  }
+                }
+              }
+              stage('Build coverage') {
+                steps {
+                  dir("build-coverage.${env.DISTRO}") {
+                    sh '''
+                      cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_COVERAGE=ON \
+                            -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON ..
+                      make -j$(nproc)
+                    '''
+                  }
+                }
+              }
+            }
           }
-
-          stage("${ubuntuVersion}: Lint") {
-            sh '.ci/lint.sh'
+          stage('Lint') {
+            steps {
+              dir("build-lint.${env.DISTRO}") {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  sh '''
+                    cmake -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+                    make check-tidy -j$(nproc)
+                  '''
+                }
+              }
+            }
+          }
+          stage('Format') {
+            steps {
+              dir("build-format.${env.DISTRO}") {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  sh '''
+                    cmake -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+                    make check-format -j$(nproc)
+                  '''
+                }
+              }
+            }
+          }
+          stage('Coverage') {
+            steps {
+              dir("build-coverage.${env.DISTRO}") {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  sh '''
+                    cmake -DBUILD_COVERAGE=ON -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON ..
+                    make coverage -j$(nproc)
+                  '''
+                  publishHTML([allowMissing: false,
+                              alwaysLinkToLastBuild: false,
+                              keepAll: true,
+                              reportDir: 'coverage',
+                              reportFiles: 'index.html',
+                              reportName: "Code Coverage (${env.DISTRO})"])
+                }
+              } 
+            }
+          }
+          stage('Test') {
+            steps {
+              catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                dir("build-debug.${env.DISTRO}") {
+                  sh 'ctest -V'
+                }
+                dir("build-release.${env.DISTRO}") {
+                  sh 'ctest -V'
+                }
+              }
+            }
+            post {
+              always {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  junit "build-release.${env.DISTRO}/test_results/*.xml"
+                  junit "build-debug.${env.DISTRO}/test_results/*.xml"
+                }
+              }
+            }
+          }
+          stage('Publish') {
+            steps {
+              dir("build-release.${env.DISTRO}") {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  sh 'cpack'
+                  fePublishDebian('*.deb', 'futuretech-common', "deb.distribution=${env.DISTRO};deb.component=main;deb.architecture=amd64")
+                  dir('doc') {
+                    sh 'tar cfz ../libfranka-docs.tar.gz html'
+                  }
+                  sh "rename -e 's/(.tar.gz|.deb)\$/-${env.DISTRO}\$1/' *.deb *.tar.gz"
+                  publishHTML([allowMissing: false,
+                            alwaysLinkToLastBuild: false,
+                            keepAll: true,
+                            reportDir: 'doc/html',
+                            reportFiles: 'index.html',
+                            reportName: "API Documentation (${env.DISTRO})"])
+                }
+              }
+            }
           }
         }
-
-        if (buildResult != 'FAILED') {
-          buildResult = 'SUCCESS'
-        }
-      } catch (e) {
-        println(e)
-        buildResult = 'FAILED'
       }
     }
   }
-}
-
-node {
-  step([$class: 'StashNotifier'])
-}
-
-parallel(
-  'xenial': getStages('xenial'),
-  'bionic': getStages('bionic'),
-  'focal': getStages('focal'),
-)
-
-node {
-  currentBuild.result = buildResult
-  step([$class: 'StashNotifier'])
+  post {
+    success {
+      fePublishBuildInfo()
+    }
+    always {
+      script {
+        notifyBitbucket()
+      }
+    }
+  }
 }
