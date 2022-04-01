@@ -1,4 +1,7 @@
 pipeline {
+  libraries {
+    lib('fe-pipeline-steps@1.0.0')
+  }
   agent {
       node {
         label 'docker'
@@ -9,9 +12,6 @@ pipeline {
   }
   options {
     parallelsAlwaysFailFast()
-  }
-  libraries {
-      lib('fe-pipeline-steps@1.0.0')
   }
   environment {
     VERSION = feDetermineVersionFromGit()
@@ -44,7 +44,7 @@ pipeline {
               }
               stage('Clean Workspace') {
                 steps {
-                  sh 'rm -rf build-*${DISTRO}'
+                  sh "rm -rf build-*${DISTRO}"
                 }
               }
             }
@@ -102,20 +102,38 @@ pipeline {
               }
             }
           }
-          stage('Analyze') {
+          stage('Lint') {
             steps {
               dir("build-lint.${env.DISTRO}") {
                 catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
                   sh '''
-                    cmake -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=OFF ..
-                    make check-format -j$(nproc)
+                    cmake -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
                     make check-tidy -j$(nproc)
                   '''
                 }
               }
+            }
+          }
+          stage('Format') {
+            steps {
+              dir("build-format.${env.DISTRO}") {
+                catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
+                  sh '''
+                    cmake -DBUILD_COVERAGE=OFF -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+                    make check-format -j$(nproc)
+                  '''
+                }
+              }
+            }
+          }
+          stage('Coverage') {
+            steps {
               dir("build-coverage.${env.DISTRO}") {
                 catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
-                  sh 'make coverage -j$(nproc)'
+                  sh '''
+                    cmake -DBUILD_COVERAGE=ON -DBUILD_DOCUMENTATION=OFF -DBUILD_EXAMPLES=OFF -DBUILD_TESTS=ON ..
+                    make coverage -j$(nproc)
+                  '''
                   publishHTML([allowMissing: false,
                               alwaysLinkToLastBuild: false,
                               keepAll: true,
@@ -123,7 +141,7 @@ pipeline {
                               reportFiles: 'index.html',
                               reportName: "Code Coverage (${env.DISTRO})"])
                 }
-              }
+              } 
             }
           }
           stage('Test') {
@@ -151,7 +169,7 @@ pipeline {
               dir("build-release.${env.DISTRO}") {
                 catchError(buildResult: env.UNSTABLE, stageResult: env.UNSTABLE) {
                   sh 'cpack'
-                  fePublishDebian('*.deb', 'futuretech-common', 'deb.distribution=bionic;deb.component=main;deb.architecture=amd64')
+                  fePublishDebian('*.deb', 'futuretech-common', "deb.distribution=${env.DISTRO};deb.component=main;deb.architecture=amd64")
                   dir('doc') {
                     sh 'tar cfz ../libfranka-docs.tar.gz html'
                   }

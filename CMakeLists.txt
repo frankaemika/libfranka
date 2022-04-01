@@ -181,10 +181,6 @@ set(CPACK_GENERATOR "DEB;TGZ")
 set(CPACK_PACKAGE_VERSION ${libfranka_TAG})
 set(CPACK_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
-if(DISTRO_ARCH)
-  set(CPACK_SYSTEM_NAME ${DISTRO_ARCH})
-endif()
-
 include(SetDebianPackageName)
 set_debian_package_name(CPACK_PACKAGE_FILE_NAME)
 
