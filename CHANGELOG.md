@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.x.y - unreleased
+
+Requires Panda system version >= 4.2.1
+
+ * support building libfranka from outside the library, so the debian package name can be set externally.
+ 
 ## 0.9.0 - 2022-03-25
 
 Requires Panda system version >= 4.2.1

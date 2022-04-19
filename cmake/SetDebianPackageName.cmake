@@ -29,6 +29,7 @@ function(set_debian_package_name PACKAGE_FILE_NAME)
         set(${PACKAGE_FILE_NAME} "${PROJECT_NAME}_${PACKAGE_TAG}-1_${DISTRO_CODENAME}_${DISTRO_ARCH}" PARENT_SCOPE)
     else()
         # this is a special case just if a tag in the commit history never existed
+        set(ENV{GIT_DIR} ${CMAKE_SOURCE_DIR}/.git)
         execute_process(COMMAND git describe --tags --always
             OUTPUT_VARIABLE SHORT_HASH
             ERROR_QUIET)
