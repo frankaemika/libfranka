@@ -281,23 +281,4 @@ uint32_t Robot::Impl::executeCommand(TArgs... args) {
   return command_id;
 }
 
-template <>
-inline uint32_t Robot::Impl::
-    executeCommand<research_interface::robot::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
-        int32_t id,
-        VirtualWallCuboid* virtual_wall_cuboid) {
-  using research_interface::robot::GetCartesianLimit;
-  uint32_t command_id = network_->tcpSendRequest<GetCartesianLimit>(id);
-  GetCartesianLimit::Response response =
-      network_->tcpBlockingReceiveResponse<GetCartesianLimit>(command_id);
-
-  virtual_wall_cuboid->p_frame = response.object_frame;
-  virtual_wall_cuboid->object_world_size = response.object_world_size;
-  virtual_wall_cuboid->active = response.object_activation;
-  virtual_wall_cuboid->id = id;
-
-  handleCommandResponse<GetCartesianLimit>(response);
-  return command_id;
-}
-
 }  // namespace franka

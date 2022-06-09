@@ -224,12 +224,6 @@ RobotState Robot::readOnce() {
   return impl_->readOnce();
 }
 
-VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
-  VirtualWallCuboid virtual_wall;
-  impl_->executeCommand<research_interface::robot::GetCartesianLimit>(id, &virtual_wall);
-  return virtual_wall;
-}
-
 void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
                                  const std::array<double, 7>& upper_torque_thresholds_acceleration,
                                  const std::array<double, 7>& lower_torque_thresholds_nominal,

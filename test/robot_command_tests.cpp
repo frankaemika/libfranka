@@ -18,7 +18,6 @@ using franka::Torques;
 
 using research_interface::robot::AutomaticErrorRecovery;
 using research_interface::robot::Connect;
-using research_interface::robot::GetCartesianLimit;
 using research_interface::robot::LoadModelLibrary;
 using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
@@ -76,12 +75,6 @@ bool Command<Move>::compare(const Move::Request& request_one, const Move::Reques
          request_one.motion_generator_mode == request_two.motion_generator_mode &&
          request_one.maximum_path_deviation == request_two.maximum_path_deviation &&
          request_one.maximum_goal_pose_deviation == request_two.maximum_goal_pose_deviation;
-}
-
-template <>
-bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
-                                         const GetCartesianLimit::Request& request_two) {
-  return request_one.id == request_two.id;
 }
 
 template <>
@@ -172,12 +165,6 @@ Move::Request Command<Move>::getExpected() {
 }
 
 template <>
-GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
-  int32_t limit_id = 3;
-  return GetCartesianLimit::Request(limit_id);
-}
-
-template <>
 SetCollisionBehavior::Request Command<SetCollisionBehavior>::getExpected() {
   std::array<double, 7> lower_torque_thresholds_acceleration{1, 2, 3, 4, 5, 6, 7};
   std::array<double, 7> lower_torque_thresholds_nominal{7, 6, 5, 4, 3, 2, 1};
@@ -259,17 +246,7 @@ typename T::Response Command<T>::createResponse(const typename T::Request&,
   return typename T::Response(status);
 }
 
-template <>
-GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
-    const GetCartesianLimit::Request&,
-    GetCartesianLimit::Status status) {
-  std::array<double, 3> object_world_size{2, 2, 2};
-  std::array<double, 16> object_frame{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  return GetCartesianLimit::Response(status, object_world_size, object_frame, true);
-}
-
-using CommandTypes = ::testing::Types<GetCartesianLimit,
-                                      SetCollisionBehavior,
+using CommandTypes = ::testing::Types<SetCollisionBehavior,
                                       SetJointImpedance,
                                       SetCartesianImpedance,
                                       SetGuidingMode,
@@ -365,8 +342,7 @@ using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                                   SetEEToK,
                                                   SetNEToEE,
                                                   SetLoad,
-                                                  SetFilters,
-                                                  GetCartesianLimit>;
+                                                  SetFilters>;
 
 TYPED_TEST_CASE(GetterSetterCommand, GetterSetterCommandTypes);
 

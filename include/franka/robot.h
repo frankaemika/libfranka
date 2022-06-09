@@ -7,7 +7,6 @@
 #include <mutex>
 #include <string>
 
-#include <franka/command_types.h>
 #include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/lowpass_filter.h>
@@ -452,18 +451,6 @@ class Robot {
    * These functions should therefore not be called from within control or motion generator loops.
    * @{
    */
-
-  /**
-   * Returns the parameters of a virtual wall.
-   *
-   * @param[in] id ID of the virtual wall.
-   *
-   * @return Parameters of virtual wall.
-   *
-   * @throw CommandException if the Control reports an error.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  VirtualWallCuboid getVirtualWall(int32_t id);
 
   /**
    * Changes the collision behavior.
