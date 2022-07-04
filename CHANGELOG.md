@@ -1,6 +1,15 @@
 # CHANGELOG
 
+## 0.x.y - unreleased
+
+Requires Franka Research 3 system version >= 5.2.0
+
+* Remove getVirtualWall command
+* Remove setFilters command
+
 ## 0.9.2 - 2022-08-31
+
+Requires Panda system version >= 4.2.1
 
  * Revert usage of `set_version_from_git` in CMakeLists.txt, using hardcoded values instead
 
