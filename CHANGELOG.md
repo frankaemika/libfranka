@@ -5,14 +5,16 @@
 Requires Panda system version >= 4.2.1
 
  * support building libfranka from outside the library, so the debian package name can be set externally.
- 
+ * check if Github remote is always in sync
+ * bug fixes in `rate_limitng_tests.cpp`
+
 ## 0.9.0 - 2022-03-25
 
 Requires Panda system version >= 4.2.1
 
  * **BREAKING** Add `O_ddP_O` base acceleration to robot state, harcoded to `{0, 0, -9.81}`.
  * **BREAKING** New `base_acceleration_initialization_timeout`, `base_acceleration_invalid_reading`
-                `cartesian_spline_motion_generator_violation` and 
+                `cartesian_spline_motion_generator_violation` and
                 `joint_via_motion_generator_planning_joint_limit_violation` reflexes.
  * Adjust network error messages. Distinguish between problems resulting from:
     - a wrong network configuration. A message is shown after a timeout of 60 seconds.
@@ -185,4 +187,3 @@ Requires Panda system version >= 1.1.0
 ## 0.1.0 - 2017-09-15
 
   * Initial release
-

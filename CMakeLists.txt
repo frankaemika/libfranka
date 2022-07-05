@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(SetVersionFromGit)
 set_version_from_git(libfranka_VERSION libfranka_TAG)
- 
+
 project(libfranka
   VERSION ${libfranka_VERSION}
   LANGUAGES CXX
@@ -123,8 +123,11 @@ install(TARGETS franka
   EXPORT FrankaTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  USE_SOURCE_PERMISSIONS
+)
 
 export(EXPORT FrankaTargets
   NAMESPACE Franka::
@@ -153,11 +156,7 @@ install(EXPORT FrankaTargets
 ## Subprojects
 
 # Ignore find_package(Franka) in subprojects.
-macro(find_package)
-  if(NOT "${ARGV0}" STREQUAL Franka AND NOT DEFINED "${ARGV0}_FOUND")
-    _find_package(${ARGV})
-  endif()
-endmacro()
+set(FRANKA_IS_FOUND TRUE)
 
 option(BUILD_TESTS "Build tests" ON)
 if(BUILD_TESTS)

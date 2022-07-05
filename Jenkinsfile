@@ -164,6 +164,12 @@ pipeline {
               }
             }
           }
+          // TODO(goll_th): Enable after Github + Stash devel branches are in sync again
+          // stage('Check Github Sync') {
+          //   steps {
+          //     sh '.ci/checkgithistory.sh https://github.com/frankaemika/libfranka.git develop'
+          //   }
+          // }
           stage('Publish') {
             steps {
               dir("build-release.${env.DISTRO}") {
