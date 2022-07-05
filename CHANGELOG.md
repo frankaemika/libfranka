@@ -6,6 +6,7 @@ Requires Panda system version >= 4.2.1
 
  * support building libfranka from outside the library, so the debian package name can be set externally.
  * check if Github remote is always in sync
+ * bug fixes in `rate_limitng_tests.cpp`
 
 ## 0.9.0 - 2022-03-25
 
@@ -20,14 +21,6 @@ Requires Panda system version >= 4.2.1
     - a missing FCI feature or a blocked port due to Single Point of Control. An immediate error
       response is shown.
  * Changed signature of `franka::Model::gravity` to use `O_ddP_O` in the robot state.
-
-## 0.8.1 - UNRELEASED
-
-Requires Panda system version >= 4.0.0
-
-### Changed
-
- * Bug fixes in `rate_limitng_tests.cpp`.
 
 ## 0.8.0 - 2020-04-29
 
