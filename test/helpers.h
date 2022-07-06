@@ -3,7 +3,9 @@
 #pragma once
 
 #include <array>
+#include <map>
 #include <string>
+#include <vector>
 
 #include <franka/gripper_state.h>
 #include <franka/log.h>
@@ -14,6 +16,27 @@
 #include <research_interface/robot/service_types.h>
 
 bool stringContains(const std::string& actual, const std::string& expected);
+
+std::vector<std::string> splitAt(const std::string& s, char delimiter);
+
+template <typename T>
+std::vector<T> findDuplicates(const std::vector<T>& xs) {
+  // Create a histogram of the elements
+  std::map<T, int> counts;
+  for (auto& x : xs) {
+    // Insert 0 if first occurrence, otherwise return current pair, then increment by 1
+    counts.insert(std::make_pair(x, 0)).first->second++;
+  }
+
+  // Fold histogram into a list where f(x) > 1
+  std::vector<T> dups;
+  for (auto pair : counts) {
+    if (pair.second > 1) {
+      dups.push_back(pair.first);
+    }
+  }
+  return dups;
+}
 
 void randomRobotState(franka::RobotState& robot_state);
 void randomRobotState(research_interface::robot::RobotState& robot_state);

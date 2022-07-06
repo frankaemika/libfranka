@@ -3,6 +3,7 @@
 #include "helpers.h"
 
 #include <cstdlib>
+#include <sstream>
 
 #include <gtest/gtest.h>
 
@@ -10,6 +11,16 @@
 
 bool stringContains(const std::string& actual, const std::string& expected) {
   return actual.find(expected) != std::string::npos;
+}
+
+std::vector<std::string> splitAt(const std::string& s, char delimiter) {
+  std::string token;
+  std::vector<std::string> tokens;
+  std::stringstream ss(s);
+  while (std::getline(ss, token, delimiter)) {
+    tokens.push_back(token);
+  }
+  return tokens;
 }
 
 void testRobotStateIsZero(const franka::RobotState& actual) {

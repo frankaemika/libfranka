@@ -7,6 +7,7 @@ Requires Panda system version >= 4.2.1
  * support building libfranka from outside the library, so the debian package name can be set externally.
  * check if Github remote is always in sync
  * bug fixes in `rate_limitng_tests.cpp`
+ * make columns names in `logToCSV` unique, separated them by state & cmd
 
 ## 0.9.0 - 2022-03-25
 
