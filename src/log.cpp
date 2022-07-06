@@ -15,7 +15,7 @@ template <typename T, size_t N>
 std::string csvName(const std::array<T, N>& /*unused*/, const std::string& name) {
   std::ostringstream os;
   for (size_t i = 0; i < N - 1; i++) {
-    os << name << "[" << i << "], ";
+    os << name << "[" << i << "],";
   }
   os << name << "[" << N - 1 << "]";
   return os.str();
@@ -31,7 +31,7 @@ std::ostream& operator<<(std::ostream& ostream /*unused*/, const std::array<T, N
 std::string csvRobotStateHeader() {
   RobotState robot_state;
   std::ostringstream os;
-  os << "time, success_rate, " << csvName(robot_state.q, "state.q") << ","
+  os << "time,success_rate," << csvName(robot_state.q, "state.q") << ","
      << csvName(robot_state.q_d, "state.q_d") << "," << csvName(robot_state.dq, "state.dq") << ","
      << csvName(robot_state.dq_d, "state.dq_d") << "," << csvName(robot_state.tau_J, "state.tau_J")
      << "," << csvName(robot_state.tau_ext_hat_filtered, "state.tau_ext_hat_filtered");
