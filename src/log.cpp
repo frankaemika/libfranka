@@ -15,7 +15,7 @@ template <typename T, size_t N>
 std::string csvName(const std::array<T, N>& /*unused*/, const std::string& name) {
   std::ostringstream os;
   for (size_t i = 0; i < N - 1; i++) {
-    os << name << "[" << i << "], ";
+    os << name << "[" << i << "],";
   }
   os << name << "[" << N - 1 << "]";
   return os.str();
@@ -31,21 +31,21 @@ std::ostream& operator<<(std::ostream& ostream /*unused*/, const std::array<T, N
 std::string csvRobotStateHeader() {
   RobotState robot_state;
   std::ostringstream os;
-  os << "duration, success rate, " << csvName(robot_state.q, "q") << ","
-     << csvName(robot_state.q_d, "q_d") << "," << csvName(robot_state.dq, "dq") << ","
-     << csvName(robot_state.dq_d, "dq_d") << "," << csvName(robot_state.tau_J, "tau_J") << ","
-     << csvName(robot_state.tau_ext_hat_filtered, "tau_ext_hat_filtered");
+  os << "time,success_rate," << csvName(robot_state.q, "state.q") << ","
+     << csvName(robot_state.q_d, "state.q_d") << "," << csvName(robot_state.dq, "state.dq") << ","
+     << csvName(robot_state.dq_d, "state.dq_d") << "," << csvName(robot_state.tau_J, "state.tau_J")
+     << "," << csvName(robot_state.tau_ext_hat_filtered, "state.tau_ext_hat_filtered");
   return os.str();
 }
 
 std::string csvRobotCommandHeader() {
   franka::RobotCommand command;
   std::ostringstream os;
-  os << "sent commands," << csvName(command.joint_positions.q, "q_d") << ","
-     << csvName(command.joint_velocities.dq, "dq_d") << ","
-     << csvName(command.cartesian_pose.O_T_EE, "O_T_EE_d") << ","
-     << csvName(command.cartesian_velocities.O_dP_EE, "O_dP_EE_d") << ","
-     << csvName(command.torques.tau_J, "tau_J_d");
+  os << csvName(command.joint_positions.q, "cmd.q_d") << ","
+     << csvName(command.joint_velocities.dq, "cmd.dq_d") << ","
+     << csvName(command.cartesian_pose.O_T_EE, "cmd.O_T_EE_d") << ","
+     << csvName(command.cartesian_velocities.O_dP_EE, "cmd.O_dP_EE_d") << ","
+     << csvName(command.torques.tau_J, "cmd.tau_J_d");
   return os.str();
 }
 
@@ -75,7 +75,7 @@ std::string logToCSV(const std::vector<Record>& log) {
 
   os << csvRobotStateHeader() << "," << csvRobotCommandHeader() << std::endl;
   for (const Record& r : log) {
-    os << csvLine(r.state) << ",," << csvLine(r.command) << std::endl;
+    os << csvLine(r.state) << "," << csvLine(r.command) << std::endl;
   }
 
   return os.str();

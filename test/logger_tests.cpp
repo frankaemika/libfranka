@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <string>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <franka/log.h>
@@ -11,6 +12,7 @@
 #include "logger.h"
 
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
+using namespace ::testing;
 
 TEST(Logger, LogIsFIFO) {
   size_t log_count = 5;
@@ -105,23 +107,33 @@ TEST(Logger, WellFormattedString) {
 
   std::string log = franka::logToCSV(logger.flush());
 
-  EXPECT_PRED2(stringContains, log, "duration");
-  EXPECT_PRED2(stringContains, log, "success rate");
-  EXPECT_PRED2(stringContains, log, "q");
-  EXPECT_PRED2(stringContains, log, "q_d");
-  EXPECT_PRED2(stringContains, log, "dq");
-  EXPECT_PRED2(stringContains, log, "dq_d");
-  EXPECT_PRED2(stringContains, log, "tau_J");
-  EXPECT_PRED2(stringContains, log, "tau_ext_hat_filtered");
-  EXPECT_PRED2(stringContains, log, "sent commands");
-  EXPECT_PRED2(stringContains, log, "q_d");
-  EXPECT_PRED2(stringContains, log, "dq_d");
-  EXPECT_PRED2(stringContains, log, "O_T_EE_d");
-  EXPECT_PRED2(stringContains, log, "O_dP_EE_d");
-  EXPECT_PRED2(stringContains, log, "tau_J_d");
+  EXPECT_PRED2(stringContains, log, "time");
+  EXPECT_PRED2(stringContains, log, "success_rate");
+  EXPECT_PRED2(stringContains, log, "state.q");
+  EXPECT_PRED2(stringContains, log, "state.q_d");
+  EXPECT_PRED2(stringContains, log, "state.dq");
+  EXPECT_PRED2(stringContains, log, "state.dq_d");
+  EXPECT_PRED2(stringContains, log, "state.tau_J");
+  EXPECT_PRED2(stringContains, log, "state.tau_ext_hat_filtered");
+  EXPECT_PRED2(stringContains, log, "cmd.q_d");
+  EXPECT_PRED2(stringContains, log, "cmd.dq_d");
+  EXPECT_PRED2(stringContains, log, "cmd.O_T_EE_d");
+  EXPECT_PRED2(stringContains, log, "cmd.O_dP_EE_d");
+  EXPECT_PRED2(stringContains, log, "cmd.tau_J_d");
 
   size_t newlines_count = std::count(log.begin(), log.end(), '\n');
   EXPECT_EQ(log_count + 1, newlines_count);
+}
+
+TEST(Logger, NoDuplicateColumns) {
+  franka::Logger logger(1);
+  logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
+
+  std::string log = franka::logToCSV(logger.flush());
+
+  std::string header = splitAt(log, '\n').at(0);
+  std::vector<std::string> titles = splitAt(header, ',');
+  EXPECT_THAT(findDuplicates(titles), ElementsAre());
 }
 
 TEST(Logger, EmptyLogEmptyString) {
