@@ -42,7 +42,7 @@ std::array<double, 16> integrateOneSample(std::array<double, 16> last_pose,
   Eigen::Map<Eigen::Matrix<double, 6, 1>> dx(twist.data());
   Eigen::Matrix3d omega_skew;
   omega_skew << 0, -dx[5], dx[4], dx[5], 0, -dx[3], -dx[4], dx[3], 0;
-  pose.linear() << pose.linear() + omega_skew * pose.linear() * delta_t;
+  pose.linear() << pose.rotation() + omega_skew * pose.rotation() * delta_t;
   pose.translation() << pose.translation() + dx.head(3) * delta_t;
 
   std::array<double, 16> pose_after_integration{};

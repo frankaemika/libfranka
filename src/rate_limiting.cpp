@@ -214,8 +214,8 @@ std::array<double, 16> limitRate(
   dx.head(3) << (commanded_pose.translation() - last_commanded_pose.translation()) / kDeltaT;
 
   // Compute rotational velocity
-  Eigen::AngleAxisd rot_difference(commanded_pose.linear() *
-                                   last_commanded_pose.linear().transpose());
+  Eigen::AngleAxisd rot_difference(commanded_pose.rotation() *
+                                   last_commanded_pose.rotation().transpose());
   dx.tail(3) << rot_difference.axis() * rot_difference.angle() / kDeltaT;
 
   // Limit the rate of the twist
@@ -231,7 +231,7 @@ std::array<double, 16> limitRate(
 
   // Integrate limited twist
   limited_commanded_pose.translation() << last_commanded_pose.translation() + dx.head(3) * kDeltaT;
-  limited_commanded_pose.linear() << last_commanded_pose.linear();
+  limited_commanded_pose.linear() << last_commanded_pose.rotation();
   if (dx.tail(3).norm() > kNormEps) {
     Eigen::Matrix3d omega_skew;
     Eigen::Vector3d w_norm(dx.tail(3) / dx.tail(3).norm());
@@ -240,7 +240,7 @@ std::array<double, 16> limitRate(
     // NOLINTNEXTLINE(readability-identifier-naming)
     Eigen::Matrix3d R = Eigen::Matrix3d::Identity() + sin(theta) * omega_skew +
                         (1.0 - cos(theta)) * (omega_skew * omega_skew);
-    limited_commanded_pose.linear() << R * last_commanded_pose.linear();
+    limited_commanded_pose.linear() << R * last_commanded_pose.rotation();
   }
 
   std::array<double, 16> limited_values{};
