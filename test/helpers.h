@@ -57,6 +57,9 @@ void testRobotCommandsAreEqual(const research_interface::robot::RobotCommand& ex
                                const franka::RobotCommand actual);
 std::array<double, 16> identityMatrix();
 franka::RobotState generateValidRobotState();
+std::array<double, 6> differentiateOneSample(std::array<double, 16> value,
+                                             std::array<double, 16> last_value,
+                                             double delta_t);
 
 namespace research_interface {
 namespace robot {
