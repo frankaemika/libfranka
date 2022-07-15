@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include <gtest/gtest.h>
+#include <Eigen/Dense>
 
 #include "load_calculations.h"
 
@@ -652,6 +653,23 @@ void testGripperStatesAreEqual(const research_interface::gripper::GripperState& 
   EXPECT_EQ(expected.max_width, actual.max_width);
   EXPECT_EQ(expected.is_grasped, actual.is_grasped);
   EXPECT_EQ(expected.temperature, actual.temperature);
+}
+
+std::array<double, 6> differentiateOneSample(std::array<double, 16> value,
+                                             std::array<double, 16> last_value,
+                                             double delta_t) {
+  Eigen::Affine3d pose(Eigen::Matrix4d::Map(value.data()));
+  Eigen::Affine3d last_pose(Eigen::Matrix4d::Map(last_value.data()));
+  Eigen::Matrix<double, 6, 1> dx;
+
+  dx.head(3) << (pose.translation() - last_pose.translation()) / delta_t;
+  auto delta_rotation = (pose.linear() - last_pose.linear()) / delta_t;
+  Eigen::Matrix3d rotational_twist = delta_rotation * last_pose.linear().transpose();
+  dx.tail(3) << rotational_twist(2, 1), rotational_twist(0, 2), rotational_twist(1, 0);
+
+  std::array<double, 6> twist{};
+  Eigen::Map<Eigen::Matrix<double, 6, 1>>(&twist[0], 6, 1) = dx;
+  return twist;
 }
 
 namespace research_interface {

@@ -4,6 +4,7 @@
 
 Requires Panda system version >= 4.2.1
 
+ * Use orthonormalized rotations in `cartesianLowpassFilter`, `limitRate` and `cartesian_impedance_control` example
  * support building libfranka from outside the library, so the debian package name can be set externally.
  * check if Github remote is always in sync
  * bug fixes in `rate_limitng_tests.cpp`

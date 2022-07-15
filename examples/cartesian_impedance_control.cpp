@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
     // equilibrium point is the initial position
     Eigen::Affine3d initial_transform(Eigen::Matrix4d::Map(initial_state.O_T_EE.data()));
     Eigen::Vector3d position_d(initial_transform.translation());
-    Eigen::Quaterniond orientation_d(initial_transform.linear());
+    Eigen::Quaterniond orientation_d(initial_transform.rotation());
 
     // set collision behavior
     robot.setCollisionBehavior({{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
       Eigen::Map<const Eigen::Matrix<double, 7, 1>> dq(robot_state.dq.data());
       Eigen::Affine3d transform(Eigen::Matrix4d::Map(robot_state.O_T_EE.data()));
       Eigen::Vector3d position(transform.translation());
-      Eigen::Quaterniond orientation(transform.linear());
+      Eigen::Quaterniond orientation(transform.rotation());
 
       // compute error to desired equilibrium pose
       // position error
@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
       Eigen::Quaterniond error_quaternion(orientation.inverse() * orientation_d);
       error.tail(3) << error_quaternion.x(), error_quaternion.y(), error_quaternion.z();
       // Transform to base frame
-      error.tail(3) << -transform.linear() * error.tail(3);
+      error.tail(3) << -transform.rotation() * error.tail(3);
 
       // compute control
       Eigen::VectorXd tau_task(7), tau_d(7);
