@@ -23,7 +23,6 @@ using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
-using research_interface::robot::SetFilters;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
@@ -126,20 +125,6 @@ bool Command<SetNEToEE>::compare(const SetNEToEE::Request& request_one,
 }
 
 template <>
-bool Command<SetFilters>::compare(const SetFilters::Request& request_one,
-                                  const SetFilters::Request& request_two) {
-  return request_one.joint_position_filter_frequency ==
-             request_two.joint_position_filter_frequency &&
-         request_one.joint_velocity_filter_frequency ==
-             request_two.joint_velocity_filter_frequency &&
-         request_one.cartesian_position_filter_frequency ==
-             request_two.cartesian_position_filter_frequency &&
-         request_one.cartesian_velocity_filter_frequency ==
-             request_two.cartesian_velocity_filter_frequency &&
-         request_one.controller_filter_frequency == request_two.controller_filter_frequency;
-}
-
-template <>
 bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
                                const SetLoad::Request& request_two) {
   return request_one.F_x_Cload == request_two.F_x_Cload &&
@@ -213,11 +198,6 @@ SetNEToEE::Request Command<SetNEToEE>::getExpected() {
 }
 
 template <>
-SetFilters::Request Command<SetFilters>::getExpected() {
-  return SetFilters::Request(1, 10, 100, 100, 1000);
-}
-
-template <>
 SetLoad::Request Command<SetLoad>::getExpected() {
   double m_load = 1.5;
   std::array<double, 3> F_x_Cload{0.01, 0.01, 0.1};
@@ -253,7 +233,6 @@ using CommandTypes = ::testing::Types<SetCollisionBehavior,
                                       SetEEToK,
                                       SetNEToEE,
                                       SetLoad,
-                                      SetFilters,
                                       Move,
                                       StopMove,
                                       AutomaticErrorRecovery>;
@@ -341,8 +320,7 @@ using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                                   SetCartesianImpedance,
                                                   SetEEToK,
                                                   SetNEToEE,
-                                                  SetLoad,
-                                                  SetFilters>;
+                                                  SetLoad>;
 
 TYPED_TEST_CASE(GetterSetterCommand, GetterSetterCommandTypes);
 

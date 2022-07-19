@@ -4,8 +4,7 @@
 
 Requires Franka Research 3 system version >= 5.2.0
 
-* Remove getVirtualWall command
-* Remove setFilters command
+* **BREAKING** remove getVirtualWall and setFilters commands
 
 ## 0.9.2 - 2022-08-31
 
