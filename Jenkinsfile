@@ -198,6 +198,7 @@ pipeline {
       fePublishBuildInfo()
     }
     always {
+      cleanWs()
       script {
         notifyBitbucket()
       }
