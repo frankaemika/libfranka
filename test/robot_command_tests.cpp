@@ -292,12 +292,14 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
   EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
 }
 
-INSTANTIATE_TEST_CASE_P(StopMoveCommandTests,
-                        StopMoveCommand,
-                        ::testing::Values(StopMove::Status::kCommandNotPossibleRejected,
-                                          StopMove::Status::kReflexAborted,
-                                          StopMove::Status::kEmergencyAborted,
-                                          StopMove::Status::kAborted));
+INSTANTIATE_TEST_CASE_P(
+    StopMoveCommandTests,
+    StopMoveCommand,
+    ::testing::Values(StopMove::Status::kCommandNotPossibleRejected,
+                      StopMove::Status::kReflexAborted,
+                      StopMove::Status::kEmergencyAborted,
+                      StopMove::Status::kAborted,
+                      StopMove::Status::kCommandRejectedDueToActivatedSafetyFunctions));
 
 TEST_P(StopMoveCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
@@ -385,11 +387,13 @@ TEST_P(MoveCommand, CanReceiveErrorResponses) {
 INSTANTIATE_TEST_CASE_P(
     AutomaticErrorRecoveryCommandTests,
     AutomaticErrorRecoveryCommand,
-    ::testing::Values(AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
-                      AutomaticErrorRecovery::Status::kReflexAborted,
-                      AutomaticErrorRecovery::Status::kEmergencyAborted,
-                      AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
-                      AutomaticErrorRecovery::Status::kAborted));
+    ::testing::Values(
+        AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
+        AutomaticErrorRecovery::Status::kReflexAborted,
+        AutomaticErrorRecovery::Status::kEmergencyAborted,
+        AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
+        AutomaticErrorRecovery::Status::kAborted,
+        AutomaticErrorRecovery::Status::kCommandRejectedDueToActivatedSafetyFunctions));
 
 TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
@@ -409,12 +413,15 @@ TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
   EXPECT_THROW(robot.executeCommand<AutomaticErrorRecovery>(request), CommandException);
 }
 
-INSTANTIATE_TEST_CASE_P(MoveCommandTests,
-                        MoveCommand,
-                        ::testing::Values(Move::Status::kPreempted,
-                                          Move::Status::kStartAtSingularPoseRejected,
-                                          Move::Status::kInvalidArgumentRejected,
-                                          Move::Status::kReflexAborted,
-                                          Move::Status::kEmergencyAborted,
-                                          Move::Status::kInputErrorAborted,
-                                          Move::Status::kAborted));
+INSTANTIATE_TEST_CASE_P(
+    MoveCommandTests,
+    MoveCommand,
+    ::testing::Values(Move::Status::kPreempted,
+                      Move::Status::kStartAtSingularPoseRejected,
+                      Move::Status::kInvalidArgumentRejected,
+                      Move::Status::kReflexAborted,
+                      Move::Status::kEmergencyAborted,
+                      Move::Status::kInputErrorAborted,
+                      Move::Status::kAborted,
+                      Move::Status::kCommandRejectedDueToActivatedSafetyFunctions,
+                      Move::Status::kPreemptedDueToActivatedSafetyFunctions));
