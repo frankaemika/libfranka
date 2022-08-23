@@ -56,6 +56,10 @@ class Robot::Impl : public RobotControl {
   bool controllerRunning() const noexcept;
 
  private:
+  std::string commandNotPossibleMsg() const {
+    return " command rejected: command not possible in the current mode!";
+  }
+
   template <typename T>
   using IsBaseOfGetterSetter =
       std::is_base_of<research_interface::robot::GetterSetterCommandBase<T, T::kCommand>, T>;
@@ -70,7 +74,7 @@ class Robot::Impl : public RobotControl {
         break;
       case T::Status::kCommandNotPossibleRejected:
         throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                               " command rejected: command not possible in the current mode!");
+                               commandNotPossibleMsg());
       case T::Status::kInvalidArgumentRejected:
         throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                                " command rejected: invalid argument!");
@@ -90,7 +94,7 @@ class Robot::Impl : public RobotControl {
         break;
       case T::Status::kCommandNotPossibleRejected:
         throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
-                               " command rejected: command not possible in the current mode!");
+                               commandNotPossibleMsg());
       default:
         throw ProtocolException("libfranka: Unexpected response while handling "s +
                                 research_interface::robot::CommandTraits<T>::kName + " command!");
@@ -154,7 +158,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
-          " command rejected: command not possible in the current mode!");
+          commandNotPossibleMsg());
     case research_interface::robot::Move::Status::kStartAtSingularPoseRejected:
       throw CommandException(
           "libfranka: "s +
@@ -195,12 +199,12 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMo
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
-          " command rejected: command not possible in the current mode!");
+          commandNotPossibleMsg());
     case research_interface::robot::StopMove::Status::kAborted:
       throw CommandException(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
-          " command rejected: command not possible in the current mode!");
+          commandNotPossibleMsg());
     case research_interface::robot::StopMove::Status::kEmergencyAborted:
       throw CommandException(
           "libfranka: "s +
@@ -241,7 +245,7 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Automa
       throw CommandException("libfranka: "s +
                              research_interface::robot::CommandTraits<
                                  research_interface::robot::AutomaticErrorRecovery>::kName +
-                             " command rejected: command not possible in the current mode!");
+                             commandNotPossibleMsg());
     case research_interface::robot::AutomaticErrorRecovery::Status::
         kManualErrorRecoveryRequiredRejected:
       throw CommandException("libfranka: "s +
