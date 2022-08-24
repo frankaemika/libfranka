@@ -238,7 +238,7 @@ void testRobotStatesAreEqual(const research_interface::robot::RobotState& expect
   EXPECT_EQ(expected.message_id, actual.time.toMSec());
   EXPECT_EQ(expected.control_command_success_rate, actual.control_command_success_rate);
 
-  franka::RobotMode expected_robot_mode;
+  franka::RobotMode expected_robot_mode = franka::RobotMode::kOther;
   switch (expected.robot_mode) {
     case research_interface::robot::RobotMode::kOther:
       expected_robot_mode = franka::RobotMode::kOther;
