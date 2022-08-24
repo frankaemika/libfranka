@@ -19,6 +19,8 @@ std::ostream& operator<<(std::ostream& ostream, const std::array<T, N>& array) {
   return ostream;
 }
 
+}  // anonymous namespace
+
 std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
   ostream << "\"";
   switch (robot_mode) {
@@ -47,8 +49,6 @@ std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode) {
   ostream << "\"";
   return ostream;
 }
-
-}  // anonymous namespace
 
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state) {
   ostream << "{\"O_T_EE\": " << robot_state.O_T_EE << ", \"O_T_EE_d\": " << robot_state.O_T_EE_d
