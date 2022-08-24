@@ -413,7 +413,14 @@ struct RobotState {
  */
 std::ostream& operator<<(std::ostream& ostream, const franka::RobotState& robot_state);
 
-/** Streams RobotMode in human-readable form */
-std::ostream& operator<<(std::ostream& ostream, const RobotMode robot_mode);
+/**
+ * Streams RobotMode in human-readable form
+
+ * @param[in] ostream Ostream instance
+ * @param[in] robot_mode RobotMode to stream
+ *
+ * @return Ostream instance
+ */
+std::ostream& operator<<(std::ostream& ostream, RobotMode robot_mode);
 
 }  // namespace franka
