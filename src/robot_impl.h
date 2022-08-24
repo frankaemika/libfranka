@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <memory>
+#include <sstream>
 #include <type_traits>
 
 #include <franka/model.h>
@@ -57,7 +58,10 @@ class Robot::Impl : public RobotControl {
 
  private:
   std::string commandNotPossibleMsg() const {
-    return " command rejected: command not possible in the current mode!";
+    std::stringstream ss;
+    ss << " command rejected: command not possible in the current mode ("
+       << static_cast<franka::RobotMode>(robot_mode_) << ")!";
+    return ss.str();
   }
 
   template <typename T>
@@ -114,6 +118,7 @@ class Robot::Impl : public RobotControl {
   const RealtimeConfig realtime_config_;  // NOLINT(readability-identifier-naming)
   uint16_t ri_version_;
 
+  research_interface::robot::RobotMode robot_mode_ = research_interface::robot::RobotMode::kOther;
   research_interface::robot::MotionGeneratorMode motion_generator_mode_;
   research_interface::robot::MotionGeneratorMode current_move_motion_generator_mode_ =
       research_interface::robot::MotionGeneratorMode::kIdle;
