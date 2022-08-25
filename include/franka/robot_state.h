@@ -18,7 +18,6 @@ namespace franka {
 /**
  * Describes the robot's current mode.
  */
-
 enum class RobotMode {
   kOther,
   kIdle,

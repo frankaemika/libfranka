@@ -61,6 +61,9 @@ class Robot::Impl : public RobotControl {
     std::stringstream ss;
     ss << " command rejected: command not possible in the current mode ("
        << static_cast<franka::RobotMode>(robot_mode_) << ")!";
+    if (robot_mode_ == research_interface::robot::RobotMode::kOther) {
+      ss << " Did you open the brakes?";
+    }
     return ss.str();
   }
 
