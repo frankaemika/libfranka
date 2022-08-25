@@ -154,6 +154,7 @@ research_interface::robot::RobotState Robot::Impl::receiveRobotState() {
 }
 
 void Robot::Impl::updateState(const research_interface::robot::RobotState& robot_state) {
+  robot_mode_ = robot_state.robot_mode;
   motion_generator_mode_ = robot_state.motion_generator_mode;
   controller_mode_ = robot_state.controller_mode;
   message_id_ = robot_state.message_id;
