@@ -1,14 +1,15 @@
 # CHANGELOG
 
-## 0.9.1 - unreleased
+## 0.9.1 - 2022-08-26
 
 Requires Panda system version >= 4.2.1
 
  * Use orthonormalized rotations in `cartesianLowpassFilter`, `limitRate` and `cartesian_impedance_control` example
- * support building libfranka from outside the library, so the debian package name can be set externally.
- * check if Github remote is always in sync
- * bug fixes in `rate_limitng_tests.cpp`
- * make columns names in `logToCSV` unique, separated them by state & cmd
+ * Support building libfranka from outside the library, so the debian package name can be set externally.
+ * Check if Github remote is always in sync
+ * Bug fixes in `rate_limiting_tests.cpp`
+ * Make column names in `logToCSV` unique, separated them by state & cmd
+ * Improve error messages including current `RobotMode` information
 
 ## 0.9.0 - 2022-03-25
 
