@@ -155,7 +155,7 @@ class Robot {
    *
    * @param[in] control_callback Callback function providing joint-level torque commands.
    * See @ref callback-docs "here" for more details.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -169,7 +169,7 @@ class Robot {
    * @see Robot::Robot to change behavior if realtime priority cannot be set.
    */
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
-               bool limit_rate = true,
+               bool limit_rate = false,
                double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -182,7 +182,7 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -199,7 +199,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -212,7 +212,7 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -229,7 +229,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -242,7 +242,7 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -259,7 +259,7 @@ class Robot {
   void control(
       std::function<Torques(const RobotState&, franka::Duration)> control_callback,
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -272,7 +272,7 @@ class Robot {
    * See @ref callback-docs "here" for more details.
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -289,7 +289,7 @@ class Robot {
   void control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
-               bool limit_rate = true,
+               bool limit_rate = false,
                double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -301,7 +301,7 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -317,7 +317,7 @@ class Robot {
   void control(
       std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -329,7 +329,7 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -345,7 +345,7 @@ class Robot {
   void control(
       std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -357,7 +357,7 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -373,7 +373,7 @@ class Robot {
   void control(
       std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
       ControllerMode controller_mode = ControllerMode::kJointImpedance,
-      bool limit_rate = true,
+      bool limit_rate = false,
       double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
@@ -385,7 +385,7 @@ class Robot {
    * @param[in] motion_generator_callback Callback function for motion generation. See @ref
    * callback-docs "here" for more details.
    * @param[in] controller_mode Controller to use to execute the motion.
-   * @param[in] limit_rate True if rate limiting should be activated. True by default.
+   * @param[in] limit_rate True if rate limiting should be activated. False by default.
    * This could distort your motion!
    * @param[in] cutoff_frequency Cutoff frequency for a first order low-pass filter applied on
    * the user commanded signal. Set to franka::kMaxCutoffFrequency to disable.
@@ -401,7 +401,7 @@ class Robot {
   void control(std::function<CartesianVelocities(const RobotState&, franka::Duration)>
                    motion_generator_callback,
                ControllerMode controller_mode = ControllerMode::kJointImpedance,
-               bool limit_rate = true,
+               bool limit_rate = false,
                double cutoff_frequency = kDefaultCutoffFrequency);
 
   /**
