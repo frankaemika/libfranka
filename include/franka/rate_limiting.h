@@ -43,46 +43,46 @@ constexpr std::array<double, 7> kMaxTorqueRate{
  * Maximum joint jerk
  */
 constexpr std::array<double, 7> kMaxJointJerk{
-    {7500.0 - kLimitEps, 3750.0 - kLimitEps, 5000.0 - kLimitEps, 6250.0 - kLimitEps,
-     7500.0 - kLimitEps, 10000.0 - kLimitEps, 10000.0 - kLimitEps}};
+    {5000.0 - kLimitEps, 5000.0 - kLimitEps, 5000.0 - kLimitEps, 5000.0 - kLimitEps,
+     5000.0 - kLimitEps, 5000.0 - kLimitEps, 5000.0 - kLimitEps}};
 /**
  * Maximum joint acceleration
  */
 constexpr std::array<double, 7> kMaxJointAcceleration{
-    {15.0000 - kLimitEps, 7.500 - kLimitEps, 10.0000 - kLimitEps, 12.5000 - kLimitEps,
-     15.0000 - kLimitEps, 20.0000 - kLimitEps, 20.0000 - kLimitEps}};
+    {10.0000 - kLimitEps, 10.0000 - kLimitEps, 10.0000 - kLimitEps, 10.0000 - kLimitEps,
+     10.0000 - kLimitEps, 10.0000 - kLimitEps, 10.0000 - kLimitEps}};
 /**
  * Maximum joint velocity
  */
 constexpr std::array<double, 7> kMaxJointVelocity{
-    {2.1750 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxJointAcceleration[0],
-     2.1750 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[1],
-     2.1750 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[2],
-     2.1750 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[3],
-     2.6100 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[4],
-     2.6100 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[5],
-     2.6100 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[6]}};
+    {2.00 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxJointAcceleration[0],
+     1.00 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[1],
+     1.50 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[2],
+     1.25 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[3],
+     3.00 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[4],
+     1.50 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[5],
+     3.00 - kLimitEps - kTolNumberPacketsLost* kDeltaT* kMaxJointAcceleration[6]}};
 /**
  * Maximum translational jerk
  */
-constexpr double kMaxTranslationalJerk = 6500.0 - kLimitEps;
+constexpr double kMaxTranslationalJerk = 4500.0 - kLimitEps;
 /**
  * Maximum translational acceleration
  */
-constexpr double kMaxTranslationalAcceleration = 13.0000 - kLimitEps;
+constexpr double kMaxTranslationalAcceleration = 9.0000 - kLimitEps;
 /**
  * Maximum translational velocity
  */
 constexpr double kMaxTranslationalVelocity =
-    2.0000 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxTranslationalAcceleration;
+    3.0000 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxTranslationalAcceleration;
 /**
  * Maximum rotational jerk
  */
-constexpr double kMaxRotationalJerk = 12500.0 - kLimitEps;
+constexpr double kMaxRotationalJerk = 8500.0 - kLimitEps;
 /**
  * Maximum rotational acceleration
  */
-constexpr double kMaxRotationalAcceleration = 25.0000 - kLimitEps;
+constexpr double kMaxRotationalAcceleration = 17.0000 - kLimitEps;
 /**
  * Maximum rotational velocity
  */
@@ -100,7 +100,7 @@ constexpr double kMaxElbowAcceleration = 10.0000 - kLimitEps;
  * Maximum elbow velocity
  */
 constexpr double kMaxElbowVelocity =
-    2.1750 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxElbowAcceleration;
+    1.5000 - kLimitEps - kTolNumberPacketsLost * kDeltaT * kMaxElbowAcceleration;
 
 /**
  * Limits the rate of an input vector of per-joint commands considering the maximum allowed
