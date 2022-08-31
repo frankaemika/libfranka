@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.4)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-include(SetVersionFromGit)
-set_version_from_git(libfranka_VERSION libfranka_TAG)
+
+set(libfranka_VERSION 0.9.2)
 
 project(libfranka
   VERSION ${libfranka_VERSION}
@@ -177,11 +177,8 @@ endif()
 ## Packaging
 set(CPACK_PACKAGE_VENDOR "Franka Emika GmbH")
 set(CPACK_GENERATOR "DEB;TGZ")
-set(CPACK_PACKAGE_VERSION ${libfranka_TAG})
+set(CPACK_PACKAGE_VERSION ${libfranka_VERSION})
 set(CPACK_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_PROCESSOR})
-
-include(SetDebianPackageName)
-set_debian_package_name(CPACK_PACKAGE_FILE_NAME)
 
 # Debian versions require a dash
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.9.2 - 2022-08-31
+
+ * Revert usage of `set_version_from_git` in CMakeLists.txt, using hardcoded values instead
+
 ## 0.9.1 - 2022-08-26
 
 Requires Panda system version >= 4.2.1
