@@ -26,9 +26,11 @@ constexpr double kLimitEps = 1e-3;
 constexpr double kNormEps = std::numeric_limits<double>::epsilon();
 /**
  * Number of packets lost considered for the definition of velocity limits.
- * When a packet is lost, FCI assumes a constant acceleration model
+ * When a packet is lost, FCI assumes a constant acceleration model.
+ * For FR3 there are no expected package loses. Therefore this number is set to 0. If you
+ * encounter package loses with your setup you can increase this number
  */
-constexpr double kTolNumberPacketsLost = 3.0;
+constexpr double kTolNumberPacketsLost = 0.0;
 /**
  * Factor for the definition of rotational limits using the Cartesian Pose interface
  */
