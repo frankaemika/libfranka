@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.x.y - unreleased
+## 0.10.0 - 2022-09-02
 
 Requires Franka Research 3 system version >= 5.2.0
 
