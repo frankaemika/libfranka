@@ -6,6 +6,7 @@ Requires Franka Research 3 system version >= 5.2.0
 
  * **BREAKING** Remove getVirtualWall and setFilters commands
  * **BREAKING** Disable rate-limiter by default
+ * **BREAKING** Adapt rate limiting values in `rate_limiting.h` for FR3 robot
 
 ## 0.9.2 - 2022-08-31
 
