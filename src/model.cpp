@@ -22,6 +22,7 @@ Frame operator++(Frame& frame, int /* dummy */) noexcept {
 }
 
 Model::Model(Network& network) : library_{new ModelLibrary(network)} {}
+Model::Model(const std::string& pathToLib) : library_{new ModelLibrary(pathToLib)} {}
 
 // Has to be declared here, as the ModelLibrary type is incomplete in the header
 Model::~Model() noexcept = default;

@@ -3,10 +3,12 @@
 #include <franka/robot.h>
 
 #include <utility>
+#include <fstream> 
 
 #include "control_loop.h"
 #include "network.h"
 #include "robot_impl.h"
+#include "library_downloader.h"
 
 namespace franka {
 
@@ -305,6 +307,13 @@ void Robot::stop() {
 
 Model Robot::loadModel() {
   return impl_->loadModel();
+}
+
+void Robot::downloadModelLibrary(const std::string& toFile) {
+    std::ofstream dst(toFile, std::ios::binary);
+    LibraryDownloader downloaderObj(*(impl_->network_));
+    std::ifstream  src(downloaderObj.path(), std::ios::binary);
+    dst << src.rdbuf(); 
 }
 
 }  // namespace franka

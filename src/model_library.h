@@ -13,6 +13,7 @@ namespace franka {
 class ModelLibrary {
  public:
   ModelLibrary(Network& network);
+  ModelLibrary(const std::string& cachepath);
 
  private:
   LibraryLoader loader_;

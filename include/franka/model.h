@@ -64,6 +64,20 @@ class Model {
   explicit Model(franka::Network& network);
 
   /**
+   * Creates a new Model instance.
+   *
+   * This constructor is for internal use only.
+   *
+   * @see Robot::loadModel
+   *
+   * @param[in] pathToLib file path to load model library from (instead of downloading from the robot)
+   *
+   * @throw ModelException if the model library cannot be loaded.
+   */
+  explicit Model(const std::string& pathToLib);
+
+
+  /**
    * Move-constructs a new Model instance.
    *
    * @param[in] model Other Model instance.
