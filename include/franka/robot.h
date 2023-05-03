@@ -637,6 +637,49 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
+   * Updates the joint-level based torque commands of an active joint effort control
+   *
+   * @param control_input the new joint-level based torques
+   * @param robot_state showing the current robot state.
+   * @param motion_uuid referring to the active control
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  void writeOnce(const Torques& control_input,
+                 const RobotState& robot_state,
+                 const std::string& motion_uuid);
+
+  /**
+   * Starts a new motion generator and controller
+   *
+   * @tparam T the franka control type
+   * @return std::string the uuid of the started process
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  template <typename T>
+  std::string startMotion();
+
+  /**
+   * Finishes a running controller process
+   *
+   * @param motion_uuid the id of the process to finish
+   * @param control_input the final joint-level based torque command to apply
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  void finishMotion(const std::string& motion_uuid, const Torques& control_input);
+
+  /**
    * Stops all currently running motions.
    *
    * If a control or motion generator loop is running in another thread, it will be preempted

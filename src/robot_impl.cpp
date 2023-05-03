@@ -4,11 +4,15 @@
 
 #include <sstream>
 
+#include <franka/control_tools.h>
+
 #include "load_calculations.h"
 
 namespace franka {
 
 namespace {
+
+const JointVelocities kNoMotionJointVelocities{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 inline ControlException createControlException(const char* message,
                                                research_interface::robot::Move::Status move_status,
@@ -90,6 +94,17 @@ RobotState Robot::Impl::readOnce() {
   }
 
   return convertRobotState(receiveRobotState());
+}
+
+void Robot::Impl::writeOnce(const Torques& control_input) {
+  research_interface::robot::ControllerCommand control_command =
+      createControllerCommand(control_input);
+  research_interface::robot::MotionGeneratorCommand motion_command =
+      createMotionGeneratorCommand(kNoMotionJointVelocities);
+
+  network_->tcpThrowIfConnectionClosed();
+
+  sendRobotCommand(&motion_command, &control_command);
 }
 
 research_interface::robot::RobotCommand Robot::Impl::sendRobotCommand(
@@ -282,6 +297,36 @@ void Robot::Impl::finishMotion(
   }
   current_move_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
   current_move_controller_mode_ = research_interface::robot::ControllerMode::kOther;
+}
+
+void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input) {
+  research_interface::robot::MotionGeneratorCommand motion_command =
+      createMotionGeneratorCommand(kNoMotionJointVelocities);
+
+  research_interface::robot::ControllerCommand controller_command =
+      createControllerCommand(control_input);
+
+  finishMotion(motion_id, &motion_command, &controller_command);
+}
+
+research_interface::robot::ControllerCommand Robot::Impl::createControllerCommand(
+    const Torques& control_input) {
+  checkFinite(control_input.tau_J);
+
+  research_interface::robot::ControllerCommand control_command{};
+  control_command.tau_J_d = control_input.tau_J;
+
+  return control_command;
+}
+
+research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionGeneratorCommand(
+    JointVelocities motion_output) {
+  checkFinite(motion_output.dq);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.q_c = motion_output.dq;
+
+  return motion_command;
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {

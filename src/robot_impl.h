@@ -34,6 +34,17 @@ class Robot::Impl : public RobotControl {
 
   RobotState readOnce();
 
+  /**
+   * Updates the joint-level based torque commands of an active joint effort control
+   *
+   * @param control_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  void writeOnce(const Torques& control_input);
+
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
@@ -46,6 +57,7 @@ class Robot::Impl : public RobotControl {
   void finishMotion(uint32_t motion_id,
                     const research_interface::robot::MotionGeneratorCommand* motion_command,
                     const research_interface::robot::ControllerCommand* control_command) override;
+  void finishMotion(uint32_t motion_id, const Torques& control_input);
 
   template <typename T, typename... TArgs>
   uint32_t executeCommand(TArgs... /* args */);
@@ -66,6 +78,12 @@ class Robot::Impl : public RobotControl {
     }
     return ss.str();
   }
+
+  research_interface::robot::ControllerCommand createControllerCommand(
+      const Torques& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionGeneratorCommand(
+      JointVelocities motion_output);
 
   template <typename T>
   using IsBaseOfGetterSetter =

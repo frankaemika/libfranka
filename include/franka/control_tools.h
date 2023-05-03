@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <string>
@@ -73,5 +74,18 @@ bool hasRealtimeKernel();
  * @return True if successful, false otherwise.
  */
 bool setCurrentThreadToHighestSchedulerPriority(std::string* error_message);
+
+/**
+ * Checks if all elements of an array of the size N have a finite value
+ *
+ * @tparam N the size of the array
+ * @param array the array to be checked
+ */
+template <size_t N>
+inline void checkFinite(const std::array<double, N>& array) {
+  if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
+    throw std::invalid_argument("Commanding value is infinite or NaN.");
+  }
+}
 
 }  // namespace franka

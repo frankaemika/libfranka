@@ -2,7 +2,6 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "control_loop.h"
 
-#include <algorithm>
 #include <cerrno>
 #include <cstring>
 #include <exception>
@@ -24,13 +23,6 @@ using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 namespace franka {
 
 namespace {
-
-template <typename T, size_t N>
-inline void checkFinite(const std::array<T, N>& array) {
-  if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
-    throw std::invalid_argument("Commanding value is infinite or NaN.");
-  }
-}
 
 inline void checkElbow(const std::array<double, 2>& elbow) {
   checkFinite(elbow);
