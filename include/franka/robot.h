@@ -21,6 +21,8 @@ namespace franka {
 
 class Model;
 
+class ActiveControl;
+
 /**
  * Maintains a network connection to the robot, provides the current robot state, gives access to
  * the model library and allows to control the robot.
@@ -637,26 +639,10 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
-   * Updates the joint-level based torque commands of an active joint effort control
-   *
-   * @param control_input the new joint-level based torques
-   * @param robot_state showing the current robot state.
-   * @param motion_uuid referring to the active control
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
-   */
-  void writeOnce(const Torques& control_input,
-                 const RobotState& robot_state,
-                 const std::string& motion_uuid);
-
-  /**
    * Starts a new motion generator and controller
    *
    * @tparam T the franka control type
-   * @return std::string the uuid of the started process
+   * @return ActiveControl object for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -664,20 +650,7 @@ class Robot {
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
   template <typename T>
-  std::string startMotion();
-
-  /**
-   * Finishes a running controller process
-   *
-   * @param motion_uuid the id of the process to finish
-   * @param control_input the final joint-level based torque command to apply
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
-   * @throw InvalidOperationException if a conflicting operation is already running.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
-   */
-  void finishMotion(const std::string& motion_uuid, const Torques& control_input);
+  ActiveControl startControl();
 
   /**
    * Stops all currently running motions.
@@ -719,7 +692,7 @@ class Robot {
   class Impl;
 
  private:
-  std::unique_ptr<Impl> impl_;
+  std::shared_ptr<Impl> impl_;
   std::mutex control_mutex_;
 };
 

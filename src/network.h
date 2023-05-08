@@ -213,7 +213,7 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   }
 
   tcpReadFromBuffer<T>(0us);
-  decltype(received_responses_)::const_iterator it = received_responses_.find(command_id);
+  auto it = received_responses_.find(command_id);
   if (it != received_responses_.end()) {
     auto message = reinterpret_cast<const typename T::template Message<typename T::Response>*>(
         it->second.data());

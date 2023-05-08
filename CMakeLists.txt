@@ -11,7 +11,7 @@ project(libfranka
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -54,6 +54,7 @@ add_subdirectory(common)
 
 ## Library
 add_library(franka SHARED
+  src/active_control.cpp
   src/control_loop.cpp
   src/control_tools.cpp
   src/control_types.cpp

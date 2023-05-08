@@ -12,8 +12,6 @@ namespace franka {
 
 namespace {
 
-const JointVelocities kNoMotionJointVelocities{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
 inline ControlException createControlException(const char* message,
                                                research_interface::robot::Move::Status move_status,
                                                const Errors& reflex_errors,
@@ -99,8 +97,9 @@ RobotState Robot::Impl::readOnce() {
 void Robot::Impl::writeOnce(const Torques& control_input) {
   research_interface::robot::ControllerCommand control_command =
       createControllerCommand(control_input);
-  research_interface::robot::MotionGeneratorCommand motion_command =
-      createMotionGeneratorCommand(kNoMotionJointVelocities);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
 
   network_->tcpThrowIfConnectionClosed();
 
@@ -300,8 +299,8 @@ void Robot::Impl::finishMotion(
 }
 
 void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input) {
-  research_interface::robot::MotionGeneratorCommand motion_command =
-      createMotionGeneratorCommand(kNoMotionJointVelocities);
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
 
   research_interface::robot::ControllerCommand controller_command =
       createControllerCommand(control_input);
@@ -317,16 +316,6 @@ research_interface::robot::ControllerCommand Robot::Impl::createControllerComman
   control_command.tau_J_d = control_input.tau_J;
 
   return control_command;
-}
-
-research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionGeneratorCommand(
-    JointVelocities motion_output) {
-  checkFinite(motion_output.dq);
-
-  research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.q_c = motion_output.dq;
-
-  return motion_command;
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {

@@ -57,6 +57,13 @@ class Robot::Impl : public RobotControl {
   void finishMotion(uint32_t motion_id,
                     const research_interface::robot::MotionGeneratorCommand* motion_command,
                     const research_interface::robot::ControllerCommand* control_command) override;
+
+  /**
+   * Finishes a running torque-control
+   *
+   * @param motion_id the id of the running control process
+   * @param control_input the final control-input
+   */
   void finishMotion(uint32_t motion_id, const Torques& control_input);
 
   template <typename T, typename... TArgs>
@@ -81,9 +88,6 @@ class Robot::Impl : public RobotControl {
 
   research_interface::robot::ControllerCommand createControllerCommand(
       const Torques& control_input);
-
-  research_interface::robot::MotionGeneratorCommand createMotionGeneratorCommand(
-      JointVelocities motion_output);
 
   template <typename T>
   using IsBaseOfGetterSetter =

@@ -45,9 +45,6 @@ inline void checkMatrix(const std::array<double, 16>& transform) {
 }  // anonymous namespace
 
 template <typename T>
-constexpr research_interface::robot::Move::Deviation ControlLoop<T>::kDefaultDeviation;
-
-template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,
                             ControlCallback control_callback,

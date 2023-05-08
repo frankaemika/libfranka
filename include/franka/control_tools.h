@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <stdexcept>
 #include <string>
 
 /**
@@ -83,7 +84,8 @@ bool setCurrentThreadToHighestSchedulerPriority(std::string* error_message);
  */
 template <size_t N>
 inline void checkFinite(const std::array<double, N>& array) {
-  if (!std::all_of(array.begin(), array.end(), [](double d) { return std::isfinite(d); })) {
+  if (!std::all_of(array.begin(), array.end(),
+                   [](double array_element) { return std::isfinite(array_element); })) {
     throw std::invalid_argument("Commanding value is infinite or NaN.");
   }
 }

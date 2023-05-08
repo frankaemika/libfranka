@@ -7,6 +7,7 @@
 
 #include <Eigen/Dense>
 
+#include <franka/active_control.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/model.h>
@@ -15,7 +16,7 @@
 #include "examples_common.h"
 
 /**
- * @example cartesian_impedance_control.cpp
+ * @example cartesian_impedance_control_external_control_loop.cpp
  * An example showing a simple cartesian impedance controller without inertia shaping
  * that renders a spring damper system where the equilibrium is the initial configuration.
  * After starting the controller try to push the robot around and try different stiffness levels.
@@ -45,12 +46,12 @@ int main(int argc, char** argv) {
 
   try {
     // connect to robot
-    franka::Robot robot(argv[1]);
-    setDefaultBehavior(robot);
+    auto robot = std::make_shared<franka::Robot>(argv[1]);
+    setDefaultBehavior(*robot);
     // load the kinematics and dynamics model
-    franka::Model model = robot.loadModel();
+    franka::Model model = robot->loadModel();
 
-    franka::RobotState initial_state = robot.readOnce();
+    franka::RobotState initial_state = robot->readOnce();
 
     // equilibrium point is the initial position
     Eigen::Affine3d initial_transform(Eigen::Matrix4d::Map(initial_state.O_T_EE.data()));
@@ -58,10 +59,10 @@ int main(int argc, char** argv) {
     Eigen::Quaterniond orientation_d(initial_transform.rotation());
 
     // set collision behavior
-    robot.setCollisionBehavior({{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-                               {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-                               {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
-                               {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}});
+    robot->setCollisionBehavior({{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
+                                {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
+                                {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}},
+                                {{100.0, 100.0, 100.0, 100.0, 100.0, 100.0}});
 
     // define callback for the torque control loop
     std::function<franka::Torques(const franka::RobotState&, franka::Duration)>
@@ -112,37 +113,29 @@ int main(int argc, char** argv) {
     // start real-time control loop
     std::cout << "WARNING: Collision thresholds are set to high values. "
               << "Make sure you have the user stop at hand!" << std::endl
+              << "INFO: you can terminate with Ctrl+C" << std::endl
               << "After starting try to push the robot and see how it reacts." << std::endl
               << "Press Enter to continue..." << std::endl;
     std::cin.ignore();
 
     // start the external real-time control loop
-    std::string motion_id = robot.startMotion<franka::JointVelocities>();
-
-    franka::RobotState robot_state = robot.readOnce();
-    franka::Duration previous_time = robot_state.time;
+    franka::ActiveControl active_control = robot->startControl<franka::Torques>();
+    auto [robot_state, passed_time] = active_control.readOnce();
     franka::Torques control_output{{0, 0, 0, 0, 0, 0, 0}};
 
     bool finished = false;
     while (!finished) {
       // calculate new torques
-      control_output = impedance_control_callback(robot_state, robot_state.time - previous_time);
-
-      // store the previous robot-state time
-      previous_time = robot_state.time;
+      control_output = impedance_control_callback(robot_state, passed_time);
 
       // send the new torques to the robot
-      robot.writeOnce(control_output, robot_state, motion_id);
+      active_control.writeOnce(control_output);
 
       // read the new robot state
-      robot_state = robot.readOnce();
+      std::tie(robot_state, passed_time) = active_control.readOnce();
 
       finished = control_output.motion_finished;
     }
-
-    control_output = impedance_control_callback(robot_state, robot_state.time - previous_time);
-
-    robot.finishMotion(motion_id, control_output);
 
   } catch (const franka::Exception& ex) {
     // print exception
