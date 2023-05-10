@@ -2,6 +2,7 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <functional>
@@ -113,7 +114,7 @@ class MockServer {
   std::mutex udp_mutex_;
   std::thread server_thread_;
   bool block_;
-  bool shutdown_;
+  std::atomic<bool> shutdown_;
   bool continue_;
   bool initialized_;
   uint32_t sequence_number_;
