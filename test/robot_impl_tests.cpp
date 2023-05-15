@@ -444,6 +444,8 @@ TEST(RobotImpl, CanReceiveMotionRejected) {
               robot_state.controller_mode = ControllerMode::kCartesianImpedance;
               robot_state.robot_mode = RobotMode::kIdle;
             });
+            std::this_thread::yield();
+            std::this_thread::sleep_for(1ms);
           }
           return continue_sending;
         })

@@ -23,6 +23,7 @@ using research_interface::robot::StopMove;
 using namespace research_interface;
 
 using namespace franka;
+using namespace std::chrono_literals;
 
 TEST(Robot, CannotConnectIfNoServerRunning) {
   EXPECT_THROW(Robot robot("127.0.0.1"), NetworkException)
@@ -115,6 +116,7 @@ TEST(Robot, CanControlRobot) {
                       robot_state.robot_mode = robot::RobotMode::kMove;
                     });
                     std::this_thread::yield();
+                    std::this_thread::sleep_for(1ms);
                   }
                   return continue_sending;
                 })
@@ -206,6 +208,7 @@ TEST(Robot, StopAfterControllerChange) {
                       robot_state.robot_mode = robot::RobotMode::kMove;
                     });
                     std::this_thread::yield();
+                    std::this_thread::sleep_for(1ms);
                   }
                   return continue_sending;
                 })
@@ -280,6 +283,7 @@ TEST(Robot, StopAfterMotionAndControllerChange) {
                       robot_state.robot_mode = robot::RobotMode::kMove;
                     });
                     std::this_thread::yield();
+                    std::this_thread::sleep_for(1ms);
                   }
                   return continue_sending;
                 })
@@ -354,6 +358,7 @@ TEST(Robot, StopAfterMotionGeneratorChange) {
                       robot_state.robot_mode = robot::RobotMode::kMove;
                     });
                     std::this_thread::yield();
+                    std::this_thread::sleep_for(1ms);
                   }
                   return continue_sending;
                 })

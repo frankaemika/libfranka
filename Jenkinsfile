@@ -12,6 +12,7 @@ pipeline {
   }
   options {
     parallelsAlwaysFailFast()
+    timeout(time: 1, unit: 'HOURS')
   }
   environment {
     VERSION = feDetermineVersionFromGit()
@@ -141,7 +142,7 @@ pipeline {
                               reportFiles: 'index.html',
                               reportName: "Code Coverage (${env.DISTRO})"])
                 }
-              } 
+              }
             }
           }
           stage('Test') {
