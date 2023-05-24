@@ -4,6 +4,8 @@
 
 #include <sstream>
 
+#include <franka/control_tools.h>
+
 #include "load_calculations.h"
 
 namespace franka {
@@ -90,6 +92,18 @@ RobotState Robot::Impl::readOnce() {
   }
 
   return convertRobotState(receiveRobotState());
+}
+
+void Robot::Impl::writeOnce(const Torques& control_input) {
+  research_interface::robot::ControllerCommand control_command =
+      createControllerCommand(control_input);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
+
+  network_->tcpThrowIfConnectionClosed();
+
+  sendRobotCommand(&motion_command, &control_command);
 }
 
 research_interface::robot::RobotCommand Robot::Impl::sendRobotCommand(
@@ -282,6 +296,26 @@ void Robot::Impl::finishMotion(
   }
   current_move_motion_generator_mode_ = research_interface::robot::MotionGeneratorMode::kIdle;
   current_move_controller_mode_ = research_interface::robot::ControllerMode::kOther;
+}
+
+void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input) {
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
+
+  research_interface::robot::ControllerCommand controller_command =
+      createControllerCommand(control_input);
+
+  finishMotion(motion_id, &motion_command, &controller_command);
+}
+
+research_interface::robot::ControllerCommand Robot::Impl::createControllerCommand(
+    const Torques& control_input) {
+  checkFinite(control_input.tau_J);
+
+  research_interface::robot::ControllerCommand control_command{};
+  control_command.tau_J_d = control_input.tau_J;
+
+  return control_command;
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {

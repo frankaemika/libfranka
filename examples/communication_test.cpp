@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 
+#include <franka/active_control.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
@@ -53,39 +54,43 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     franka::Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-    robot.control(
-        [&time, &counter, &avg_success_rate, &min_success_rate, &max_success_rate, zero_torques](
-            const franka::RobotState& robot_state, franka::Duration period) -> franka::Torques {
-          time += period.toMSec();
-          if (time == 0.0) {
-            return zero_torques;
-          }
-          counter++;
+    auto rw_interface = robot.startControl<franka::Torques>();
 
-          if (counter % 100 == 0) {
-            std::cout << "#" << counter
-                      << " Current success rate: " << robot_state.control_command_success_rate
-                      << std::endl;
-          }
-          std::this_thread::sleep_for(std::chrono::microseconds(100));
+    franka::RobotState robot_state;
+    franka::Duration period;
 
-          avg_success_rate += robot_state.control_command_success_rate;
-          if (robot_state.control_command_success_rate > max_success_rate) {
-            max_success_rate = robot_state.control_command_success_rate;
-          }
-          if (robot_state.control_command_success_rate < min_success_rate) {
-            min_success_rate = robot_state.control_command_success_rate;
-          }
+    while (!zero_torques.motion_finished) {
+      std::tie(robot_state, period) = rw_interface.readOnce();
 
-          if (time >= 10000) {
-            std::cout << std::endl << "Finished test, shutting down example" << std::endl;
-            return franka::MotionFinished(zero_torques);
-          }
+      time += period.toMSec();
+      if (time == 0.0) {
+        rw_interface.writeOnce(zero_torques);
+        continue;
+      }
+      counter++;
 
-          // Sending zero torques - if EE is configured correctly, robot should not move
-          return zero_torques;
-        },
-        false, 1000);
+      if (counter % 100 == 0) {
+        std::cout << "#" << counter
+                  << " Current success rate: " << robot_state.control_command_success_rate
+                  << std::endl;
+      }
+      std::this_thread::sleep_for(std::chrono::microseconds(100));
+
+      avg_success_rate += robot_state.control_command_success_rate;
+      if (robot_state.control_command_success_rate > max_success_rate) {
+        max_success_rate = robot_state.control_command_success_rate;
+      }
+      if (robot_state.control_command_success_rate < min_success_rate) {
+        min_success_rate = robot_state.control_command_success_rate;
+      }
+
+      if (time >= 10000) {
+        std::cout << std::endl << "Finished test, shutting down example" << std::endl;
+        zero_torques.motion_finished = true;
+      }
+      // Sending zero torques - if EE is configured correctly, robot should not move
+      rw_interface.writeOnce(zero_torques);
+    }
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

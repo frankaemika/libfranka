@@ -1,14 +1,24 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
+#include <franka/active_control.h>
 #include <franka/robot.h>
 
 #include <utility>
 
 #include "control_loop.h"
+#include "motion_generator_traits.h"
 #include "network.h"
 #include "robot_impl.h"
 
 namespace franka {
+
+void assertOwningLock(const std::unique_lock<std::mutex>& lock) {
+  if (!lock.owns_lock()) {
+    throw InvalidOperationException(
+        "libfranka robot: Cannot perform this operation while another control or read operation "
+        "is running.");
+  }
+}
 
 Robot::Robot(const std::string& franka_address, RealtimeConfig realtime_config, size_t log_size)
     : impl_{new Robot::Impl(
@@ -41,12 +51,8 @@ Robot::ServerVersion Robot::serverVersion() const noexcept {
 void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> control_callback,
                     bool limit_rate,
                     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
                                     [](const RobotState&, Duration) -> JointVelocities {
@@ -61,12 +67,8 @@ void Robot::control(
     std::function<JointPositions(const RobotState&, franka::Duration)> motion_generator_callback,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<JointPositions> loop(*impl_, std::move(control_callback),
                                    std::move(motion_generator_callback), limit_rate,
@@ -79,12 +81,8 @@ void Robot::control(
     std::function<JointVelocities(const RobotState&, franka::Duration)> motion_generator_callback,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
                                     std::move(motion_generator_callback), limit_rate,
@@ -97,12 +95,8 @@ void Robot::control(
     std::function<CartesianPose(const RobotState&, franka::Duration)> motion_generator_callback,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<CartesianPose> loop(*impl_, std::move(control_callback),
                                   std::move(motion_generator_callback), limit_rate,
@@ -115,12 +109,8 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
                         motion_generator_callback,
                     bool limit_rate,
                     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<CartesianVelocities> loop(*impl_, std::move(control_callback),
                                         std::move(motion_generator_callback), limit_rate,
@@ -133,12 +123,8 @@ void Robot::control(
     ControllerMode controller_mode,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<JointPositions> loop(*impl_, controller_mode, std::move(motion_generator_callback),
                                    limit_rate, cutoff_frequency);
@@ -150,12 +136,8 @@ void Robot::control(
     ControllerMode controller_mode,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, controller_mode, std::move(motion_generator_callback),
                                     limit_rate, cutoff_frequency);
@@ -167,12 +149,8 @@ void Robot::control(
     ControllerMode controller_mode,
     bool limit_rate,
     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<CartesianPose> loop(*impl_, controller_mode, std::move(motion_generator_callback),
                                   limit_rate, cutoff_frequency);
@@ -184,12 +162,8 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&, franka:
                     ControllerMode controller_mode,
                     bool limit_rate,
                     double cutoff_frequency) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   ControlLoop<CartesianVelocities> loop(
       *impl_, controller_mode, std::move(motion_generator_callback), limit_rate, cutoff_frequency);
@@ -198,12 +172,8 @@ void Robot::control(std::function<CartesianVelocities(const RobotState&, franka:
 
 // NOLINTNEXTLINE(performance-unnecessary-value-param)
 void Robot::read(std::function<bool(const RobotState&)> read_callback) {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   while (true) {
     RobotState robot_state = impl_->update(nullptr, nullptr);
@@ -214,12 +184,8 @@ void Robot::read(std::function<bool(const RobotState&)> read_callback) {
 }
 
 RobotState Robot::readOnce() {
-  std::unique_lock<std::mutex> l(control_mutex_, std::try_to_lock);
-  if (!l.owns_lock()) {
-    throw InvalidOperationException(
-        "libfranka robot: Cannot perform this operation while another control or read operation "
-        "is running.");
-  }
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
 
   return impl_->readOnce();
 }
@@ -280,6 +246,26 @@ void Robot::setLoad(
 
 void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
+}
+
+template <typename T>
+ActiveControl Robot::startControl() {
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
+
+  uint32_t motion_id =
+      impl_->startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
+                         MotionGeneratorTraits<T>::kMotionGeneratorMode,
+                         ControlLoop<T>::kDefaultDeviation, ControlLoop<T>::kDefaultDeviation);
+
+  return ActiveControl(impl_, motion_id, std::move(control_lock));
+}
+
+template ActiveControl Robot::startControl<JointVelocities>();
+
+template <>
+ActiveControl Robot::startControl<Torques>() {
+  return startControl<JointVelocities>();
 }
 
 void Robot::stop() {

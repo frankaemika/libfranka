@@ -21,6 +21,8 @@ namespace franka {
 
 class Model;
 
+class ActiveControl;
+
 /**
  * Maintains a network connection to the robot, provides the current robot state, gives access to
  * the model library and allows to control the robot.
@@ -637,6 +639,20 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
+   * Starts a new motion generator and controller
+   *
+   * @tparam T the franka control type
+   * @return ActiveControl object for the started motion
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  template <typename T>
+  ActiveControl startControl();
+
+  /**
    * Stops all currently running motions.
    *
    * If a control or motion generator loop is running in another thread, it will be preempted
@@ -676,7 +692,7 @@ class Robot {
   class Impl;
 
  private:
-  std::unique_ptr<Impl> impl_;
+  std::shared_ptr<Impl> impl_;
   std::mutex control_mutex_;
 };
 
