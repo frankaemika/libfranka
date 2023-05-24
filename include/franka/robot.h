@@ -691,6 +691,14 @@ class Robot {
 
   class Impl;
 
+ protected:
+  /// @cond DO_NOT_DOCUMENT
+  /**
+   * Enables unittests with Robot::Impl-Mocks
+   */
+  Robot(std::shared_ptr<Impl> robot_impl);
+  /// @endcond
+
  private:
   std::shared_ptr<Impl> impl_;
   std::mutex control_mutex_;

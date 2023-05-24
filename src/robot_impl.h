@@ -32,7 +32,7 @@ class Robot::Impl : public RobotControl {
 
   void throwOnMotionError(const RobotState& robot_state, uint32_t motion_id) override;
 
-  RobotState readOnce();
+  virtual RobotState readOnce();
 
   /**
    * Updates the joint-level based torque commands of an active joint effort control
@@ -43,7 +43,7 @@ class Robot::Impl : public RobotControl {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  void writeOnce(const Torques& control_input);
+  virtual void writeOnce(const Torques& control_input);
 
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
