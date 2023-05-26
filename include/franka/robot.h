@@ -692,12 +692,10 @@ class Robot {
   class Impl;
 
  protected:
-  /// @cond DO_NOT_DOCUMENT
   /**
-   * Enables unittests with Robot::Impl-Mocks
+   * Constructs a new Robot given a Robot::Impl. This enables unittests with Robot::Impl-Mocks.
    */
   Robot(std::shared_ptr<Impl> robot_impl);
-  /// @endcond
 
  private:
   std::shared_ptr<Impl> impl_;
