@@ -27,28 +27,9 @@ MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
 
 template <typename C>
 MockServer<C>::~MockServer() {
-  std::unique_lock<std::mutex> l(command_mutex_, std::defer_lock);
-  // If we can't get the lock, the thread will still be terminated
-  // by its destructor.
-  // Not using std::timed_mutex here because ThreadSanitizer always throws false positive warnings
-  // after calling try_lock_for and unlock.
-  // Github Issue: https://github.com/google/sanitizers/issues/1620
-  auto start = std::chrono::steady_clock::now();
-  while (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() -
-                                                               start)
-             .count() < 1000) {
-    if (l.try_lock()) {
-      shutdown_ = true;
-      l.unlock();
-      cv_.notify_one();
-      server_thread_.join();
-      break;
-    }
-  }
-
-  if (!shutdown_) {
-    std::cerr << "MockServer: Couldn't terminate the server thread properly." << std::endl;
-  }
+  shutdown_ = true;
+  cv_.notify_one();
+  server_thread_.join();
 
   if (!commands_.empty()) {
     std::stringstream ss;
