@@ -750,4 +750,30 @@ bool operator==(const Errors& lhs, const Errors& rhs) {
              rhs.base_acceleration_initialization_timeout &&
          lhs.base_acceleration_invalid_reading == rhs.base_acceleration_invalid_reading;
 }
+
+bool operator==(const RobotState& lhs, const RobotState& rhs) {
+  return lhs.O_T_EE == rhs.O_T_EE && lhs.O_T_EE_d == rhs.O_T_EE_d && lhs.F_T_EE == rhs.F_T_EE &&
+         lhs.F_T_NE == rhs.F_T_NE && lhs.NE_T_EE == rhs.NE_T_EE && lhs.EE_T_K == rhs.EE_T_K &&
+         lhs.m_ee == rhs.m_ee && lhs.I_ee == rhs.I_ee && lhs.F_x_Cee == rhs.F_x_Cee &&
+         lhs.m_load == rhs.m_load && lhs.I_load == rhs.I_load && lhs.F_x_Cload == rhs.F_x_Cload &&
+         lhs.m_total == rhs.m_total && lhs.I_total == rhs.I_total &&
+         lhs.F_x_Ctotal == rhs.F_x_Ctotal && lhs.elbow == rhs.elbow && lhs.elbow_d == rhs.elbow_d &&
+         lhs.elbow_c == rhs.elbow_c && lhs.delbow_c == rhs.delbow_c &&
+         lhs.ddelbow_c == rhs.ddelbow_c && lhs.tau_J == rhs.tau_J && lhs.tau_J_d == rhs.tau_J_d &&
+         lhs.dtau_J == rhs.dtau_J && lhs.q == rhs.q && lhs.q_d == rhs.q_d && lhs.dq == rhs.dq &&
+         lhs.dq_d == rhs.dq_d && lhs.ddq_d == rhs.ddq_d && lhs.joint_contact == rhs.joint_contact &&
+         lhs.cartesian_contact == rhs.cartesian_contact &&
+         lhs.joint_collision == rhs.joint_collision &&
+         lhs.cartesian_collision == rhs.cartesian_collision &&
+         lhs.tau_ext_hat_filtered == rhs.tau_ext_hat_filtered &&
+         lhs.O_F_ext_hat_K == rhs.O_F_ext_hat_K && lhs.K_F_ext_hat_K == rhs.K_F_ext_hat_K &&
+         lhs.O_dP_EE_d == rhs.O_dP_EE_d && lhs.O_ddP_O == rhs.O_ddP_O &&
+         lhs.O_T_EE_c == rhs.O_T_EE_c && lhs.O_dP_EE_c == rhs.O_dP_EE_c &&
+         lhs.O_ddP_EE_c == rhs.O_ddP_EE_c && lhs.theta == rhs.theta && lhs.dtheta == rhs.dtheta &&
+         lhs.current_errors == rhs.current_errors &&
+         lhs.last_motion_errors == rhs.last_motion_errors &&
+         lhs.control_command_success_rate == rhs.control_command_success_rate &&
+         lhs.robot_mode == rhs.robot_mode && lhs.time == rhs.time;
+}
+
 }  // namespace franka

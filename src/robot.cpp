@@ -276,4 +276,6 @@ Model Robot::loadModel() {
   return impl_->loadModel();
 }
 
+Robot::Robot(std::shared_ptr<Impl> robot_impl) : impl_(std::move(robot_impl)){};
+
 }  // namespace franka

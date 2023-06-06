@@ -82,6 +82,7 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
   }
 
   EXPECT_THROW(robot->update(nullptr, nullptr), NetworkException);
+  EXPECT_THROW(robot->writeOnce(franka::Torques{{1, 2, 3, 4, 5, 6, 7}}), NetworkException);
 }
 
 TEST(RobotImpl, CanStartMotion) {
@@ -138,6 +139,14 @@ TEST(RobotImpl, CanStartMotion) {
       .onReceiveRobotCommand([](const RobotCommand&) {})
       .spinOnce();
   EXPECT_NO_THROW(robot.update(&motion_command, nullptr));
+
+  // Test exceptions if wrong writeOnce is called
+  const franka::Torques control_output{{1, 2, 3, 4, 5, 6, 7}};
+  EXPECT_THROW(robot.writeOnce(control_output), ControlException);
+
+  // Test exceptions if wrong finishMotion is called
+  const uint32_t kDummyMotionID = 1;
+  EXPECT_THROW(robot.finishMotion(kDummyMotionID, control_output), ControlException);
 }
 
 TEST(RobotImpl, CanStartMotionWithController) {
@@ -229,6 +238,31 @@ TEST(RobotImpl, CanStartExternalControllerMotion) {
   EXPECT_THROW(robot.update(&motion_command, nullptr), ControlException);
   // This should also throw, as we're running external joint velocity generator
   EXPECT_THROW(robot.update(nullptr, &control_command), ControlException);
+
+  // Test no exception if writeOnce is called
+  franka::Torques control_output{{1, 2, 3, 4, 5, 6, 7}};
+  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
+  control_command.tau_J_d = control_output.tau_J;
+  const uint64_t kMessageID = 3;
+
+  RobotCommand sent_command{
+      .message_id = kMessageID, .motion = motion_command, .control = control_command};
+
+  server
+      .onReceiveRobotCommand([=](const RobotCommand& command) {
+        EXPECT_EQ(kMessageID, command.message_id);
+        testMotionGeneratorCommandsAreEqual(sent_command.motion, command.motion);
+        testControllerCommandsAreEqual(sent_command.control, command.control);
+      })
+      .spinOnce();
+
+  EXPECT_NO_THROW(robot.writeOnce(control_output));
+
+  // Test exception if writeOnce with invalid input is called
+  EXPECT_THROW(robot.writeOnce(franka::Torques{}), std::invalid_argument);
+
+  // Test exception if finishMotion with invalid input is called
+  EXPECT_THROW(robot.finishMotion(kMessageID, franka::Torques{}), std::invalid_argument);
 }
 
 TEST(RobotImpl, CanNotStartMultipleMotions) {

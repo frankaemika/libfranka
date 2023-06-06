@@ -7,11 +7,17 @@
 #include <thread>
 #include <utility>
 
+#include <franka/active_control.h>
+#include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
 #include <franka/robot.h>
+#include <research_interface/robot/service_types.h>
+#include <robot_impl.h>
 
 #include "helpers.h"
+#include "mock_robot.h"
+#include "mock_robot_impl.h"
 #include "mock_server.h"
 
 using ::testing::_;
@@ -451,6 +457,8 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
                InvalidOperationException);
   EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
   EXPECT_THROW(robot.readOnce(), InvalidOperationException);
+  EXPECT_THROW(robot.startControl<Torques>(), InvalidOperationException);
+  EXPECT_THROW(robot.startControl<JointVelocities>(), InvalidOperationException);
 
   server.ignoreUdpBuffer();
 
@@ -460,4 +468,31 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
   if (thread.joinable()) {
     thread.join();
   }
+}
+
+TEST(RobotMock, CanStartOnlyOneControl) {
+  RobotMockServer server;
+  auto network = std::make_unique<Network>("127.0.0.1", robot::kCommandPort);
+
+  auto robot_impl_mock =
+      std::make_shared<RobotImplMock>(std::move(network), 0, RealtimeConfig::kIgnore);
+  RobotMock robot(robot_impl_mock);
+
+  server.sendEmptyState<robot::RobotState>().spinOnce();
+
+  const robot::Move::Deviation kDefaultDeviation{10.0, 3.12, 2 * M_PI};
+  auto motion_generator_mode = Move::MotionGeneratorMode::kJointVelocity;
+  auto controller_mode = Move::ControllerMode::kExternalController;
+
+  EXPECT_CALL(*robot_impl_mock, startMotion(controller_mode, motion_generator_mode,
+                                            kDefaultDeviation, kDefaultDeviation))
+      .Times(2)
+      .WillRepeatedly(::testing::Return(100));
+
+  EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(2);
+
+  EXPECT_NO_THROW(ActiveControl control = robot.startControl<Torques>());
+
+  ActiveControl control = robot.startControl<Torques>();
+  EXPECT_THROW(robot.startControl<Torques>(), InvalidOperationException);
 }

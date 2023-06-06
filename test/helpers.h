@@ -72,5 +72,6 @@ bool operator==(const Move::Deviation& left, const Move::Deviation& right);
 namespace franka {
 
 bool operator==(const Errors& lhs, const Errors& rhs);
+bool operator==(const RobotState& lhs, const RobotState& rhs);
 
 }  // namespace franka

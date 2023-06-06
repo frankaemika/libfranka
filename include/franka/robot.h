@@ -691,6 +691,14 @@ class Robot {
 
   class Impl;
 
+ protected:
+  /**
+   * Constructs a new Robot given a Robot::Impl. This enables unittests with Robot::Impl-Mocks.
+   *
+   * @param robot_impl Robot::Impl to use
+   */
+  Robot(std::shared_ptr<Impl> robot_impl);
+
  private:
   std::shared_ptr<Impl> impl_;
   std::mutex control_mutex_;
