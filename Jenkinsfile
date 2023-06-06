@@ -30,7 +30,7 @@ pipeline {
         axes {
           axis {
             name 'DISTRO'
-            values 'bionic', 'focal'
+            values 'focal'
           }
         }
         stages {
