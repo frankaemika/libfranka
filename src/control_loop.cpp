@@ -3,6 +3,7 @@
 #include "control_loop.h"
 
 #include <cerrno>
+#include <cmath>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -187,8 +188,10 @@ void ControlLoop<JointPositions>::convertMotion(
     }
   }
   if (limit_rate_) {
-    command->q_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk, command->q_c,
-                             robot_state.q_d, robot_state.dq_d, robot_state.ddq_d);
+    command->q_c = limitRate(computeUpperLimitsJointVelocity(robot_state.q_d),
+                             computeLowerLimitsJointVelocity(robot_state.q_d),
+                             kMaxJointAcceleration, kMaxJointJerk, command->q_c, robot_state.q_d,
+                             robot_state.dq_d, robot_state.ddq_d);
   }
   checkFinite(command->q_c);
 }
@@ -206,8 +209,10 @@ void ControlLoop<JointVelocities>::convertMotion(
     }
   }
   if (limit_rate_) {
-    command->dq_c = limitRate(kMaxJointVelocity, kMaxJointAcceleration, kMaxJointJerk,
-                              command->dq_c, robot_state.dq_d, robot_state.ddq_d);
+    command->dq_c =
+        limitRate(computeUpperLimitsJointVelocity(robot_state.q_d),
+                  computeLowerLimitsJointVelocity(robot_state.q_d), kMaxJointAcceleration,
+                  kMaxJointJerk, command->dq_c, robot_state.dq_d, robot_state.ddq_d);
   }
   checkFinite(command->dq_c);
 }

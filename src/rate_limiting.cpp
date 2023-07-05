@@ -73,7 +73,8 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_derivatives,
   return limited_values;
 }
 
-double limitRate(double max_velocity,
+double limitRate(double upper_limits_velocity,
+                 double lower_limits_velocity,
                  double max_acceleration,
                  double max_jerk,
                  double commanded_velocity,
@@ -92,10 +93,12 @@ double limitRate(double max_velocity,
                                   std::max(std::min(commanded_jerk, max_jerk), -max_jerk) * kDeltaT;
 
   // Compute acceleration limits
-  double safe_max_acceleration = std::min(
-      (max_jerk / max_acceleration) * (max_velocity - last_commanded_velocity), max_acceleration);
-  double safe_min_acceleration = std::max(
-      (max_jerk / max_acceleration) * (-max_velocity - last_commanded_velocity), -max_acceleration);
+  double safe_max_acceleration =
+      std::min((max_jerk / max_acceleration) * (upper_limits_velocity - last_commanded_velocity),
+               max_acceleration);
+  double safe_min_acceleration =
+      std::max((max_jerk / max_acceleration) * (lower_limits_velocity - last_commanded_velocity),
+               -max_acceleration);
 
   // Limit acceleration and integrate to get desired velocities
   return last_commanded_velocity +
@@ -103,7 +106,8 @@ double limitRate(double max_velocity,
              kDeltaT;
 }
 
-double limitRate(double max_velocity,
+double limitRate(double upper_limits_velocity,
+                 double lower_limits_velocity,
                  double max_acceleration,
                  double max_jerk,
                  double commanded_position,
@@ -114,13 +118,14 @@ double limitRate(double max_velocity,
     throw std::invalid_argument("commanded_position is infinite or NaN.");
   }
   return last_commanded_position +
-         limitRate(max_velocity, max_acceleration, max_jerk,
+         limitRate(upper_limits_velocity, lower_limits_velocity, max_acceleration, max_jerk,
                    (commanded_position - last_commanded_position) / kDeltaT,
                    last_commanded_velocity, last_commanded_acceleration) *
              kDeltaT;
 }
 
-std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
+std::array<double, 7> limitRate(const std::array<double, 7>& upper_limits_velocity,
+                                const std::array<double, 7>& lower_limits_velocity,
                                 const std::array<double, 7>& max_acceleration,
                                 const std::array<double, 7>& max_jerk,
                                 const std::array<double, 7>& commanded_velocities,
@@ -133,14 +138,15 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
   std::array<double, 7> limited_commanded_velocities{};
 
   for (size_t i = 0; i < 7; i++) {
-    limited_commanded_velocities[i] =
-        limitRate(max_velocity[i], max_acceleration[i], max_jerk[i], commanded_velocities[i],
-                  last_commanded_velocities[i], last_commanded_accelerations[i]);
+    limited_commanded_velocities[i] = limitRate(
+        upper_limits_velocity[i], lower_limits_velocity[i], max_acceleration[i], max_jerk[i],
+        commanded_velocities[i], last_commanded_velocities[i], last_commanded_accelerations[i]);
   }
   return limited_commanded_velocities;
 }
 
-std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
+std::array<double, 7> limitRate(const std::array<double, 7>& upper_limits_velocity,
+                                const std::array<double, 7>& lower_limits_velocity,
                                 const std::array<double, 7>& max_acceleration,
                                 const std::array<double, 7>& max_jerk,
                                 const std::array<double, 7>& commanded_positions,
@@ -153,9 +159,10 @@ std::array<double, 7> limitRate(const std::array<double, 7>& max_velocity,
   }
   std::array<double, 7> limited_commanded_positions{};
   for (size_t i = 0; i < 7; i++) {
-    limited_commanded_positions[i] = limitRate(
-        max_velocity[i], max_acceleration[i], max_jerk[i], commanded_positions[i],
-        last_commanded_positions[i], last_commanded_velocities[i], last_commanded_accelerations[i]);
+    limited_commanded_positions[i] =
+        limitRate(upper_limits_velocity[i], lower_limits_velocity[i], max_acceleration[i],
+                  max_jerk[i], commanded_positions[i], last_commanded_positions[i],
+                  last_commanded_velocities[i], last_commanded_accelerations[i]);
   }
   return limited_commanded_positions;
 }
