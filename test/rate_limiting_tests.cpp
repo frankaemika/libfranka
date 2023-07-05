@@ -11,9 +11,14 @@
 using namespace franka;
 
 const double kNoLimit{std::numeric_limits<double>::max()};
+const double kNoLowerLimit{std::numeric_limits<double>::lowest()};
 
 std::array<double, 7> kJointsNoLimit{
     {kNoLimit, kNoLimit, kNoLimit, kNoLimit, kNoLimit, kNoLimit, kNoLimit}};
+
+std::array<double, 7> kJointsNoLowerLimit{{kNoLowerLimit, kNoLowerLimit, kNoLowerLimit,
+                                           kNoLowerLimit, kNoLowerLimit, kNoLowerLimit,
+                                           kNoLowerLimit}};
 
 template <int size>
 std::array<double, size> integrateOneSample(std::array<double, size> last_value,
@@ -219,8 +224,8 @@ TEST(RateLimiting, JointVelocity) {
                                   joint_velocity_into_limits, last_cmd_velocity,
                                   last_cmd_acceleration, kDeltaT));
   EXPECT_EQ(joint_velocity_into_limits,
-            limitRate(kJointsNoLimit, kJointsNoLimit, max_jerk, joint_velocity_into_limits,
-                      last_cmd_velocity, last_cmd_acceleration));
+            limitRate(kJointsNoLimit, kJointsNoLowerLimit, kJointsNoLimit, max_jerk,
+                      joint_velocity_into_limits, last_cmd_velocity, last_cmd_acceleration));
 
   // Desired values are into limits and unchanged after limitRate (acceleration)
   joint_velocity_into_limits =
@@ -229,16 +234,16 @@ TEST(RateLimiting, JointVelocity) {
                                   joint_velocity_into_limits, last_cmd_velocity,
                                   last_cmd_acceleration, kDeltaT));
   EXPECT_EQ(joint_velocity_into_limits,
-            limitRate(kJointsNoLimit, max_acceleration, kJointsNoLimit, joint_velocity_into_limits,
-                      last_cmd_velocity, last_cmd_acceleration));
+            limitRate(kJointsNoLimit, kJointsNoLowerLimit, max_acceleration, kJointsNoLimit,
+                      joint_velocity_into_limits, last_cmd_velocity, last_cmd_acceleration));
 
   // Desired values are outside limits (jerk violation) and limited after limitRate
   std::array<double, 7> joint_velocity_outside_limits = integrateOneSample<7>(
       last_cmd_velocity, generateValuesOutsideLimits(last_cmd_acceleration, max_jerk, eps, kDeltaT),
       kDeltaT);
   std::array<double, 7> limited_joint_velocity =
-      limitRate(kJointsNoLimit, kJointsNoLimit, max_jerk, joint_velocity_outside_limits,
-                last_cmd_velocity, last_cmd_acceleration);
+      limitRate(kJointsNoLimit, kJointsNoLowerLimit, kJointsNoLimit, max_jerk,
+                joint_velocity_outside_limits, last_cmd_velocity, last_cmd_acceleration);
   ASSERT_TRUE(violatesRateLimits(kJointsNoLimit, kJointsNoLimit, max_jerk,
                                  joint_velocity_outside_limits, last_cmd_velocity,
                                  last_cmd_acceleration, kDeltaT));
@@ -250,8 +255,8 @@ TEST(RateLimiting, JointVelocity) {
   joint_velocity_outside_limits =
       generateValuesOutsideLimits(last_cmd_velocity, max_acceleration, eps, kDeltaT);
   limited_joint_velocity =
-      limitRate(kJointsNoLimit, max_acceleration, kJointsNoLimit, joint_velocity_outside_limits,
-                last_cmd_velocity, last_cmd_acceleration);
+      limitRate(kJointsNoLimit, kJointsNoLowerLimit, max_acceleration, kJointsNoLimit,
+                joint_velocity_outside_limits, last_cmd_velocity, last_cmd_acceleration);
   ASSERT_TRUE(violatesRateLimits(kJointsNoLimit, max_acceleration, kJointsNoLimit,
                                  joint_velocity_outside_limits, last_cmd_velocity,
                                  last_cmd_acceleration, kDeltaT));
@@ -281,8 +286,9 @@ TEST(RateLimiting, JointPosition) {
       differentiateOneSample<7>(joint_position_into_limits, last_cmd_position, kDeltaT),
       last_cmd_velocity, last_cmd_acceleration, kDeltaT));
   EXPECT_EQ(joint_position_into_limits,
-            limitRate(kJointsNoLimit, kJointsNoLimit, max_jerk, joint_position_into_limits,
-                      last_cmd_position, last_cmd_velocity, last_cmd_acceleration));
+            limitRate(kJointsNoLimit, kJointsNoLowerLimit, kJointsNoLimit, max_jerk,
+                      joint_position_into_limits, last_cmd_position, last_cmd_velocity,
+                      last_cmd_acceleration));
 
   // Desired values are into limits and unchanged after limitRate (acceleration)
   joint_position_into_limits = integrateOneSample<7>(
@@ -293,8 +299,9 @@ TEST(RateLimiting, JointPosition) {
       differentiateOneSample<7>(joint_position_into_limits, last_cmd_position, kDeltaT),
       last_cmd_velocity, last_cmd_acceleration, kDeltaT));
   EXPECT_EQ(joint_position_into_limits,
-            limitRate(kJointsNoLimit, max_acceleration, kJointsNoLimit, joint_position_into_limits,
-                      last_cmd_position, last_cmd_velocity, last_cmd_acceleration));
+            limitRate(kJointsNoLimit, kJointsNoLowerLimit, max_acceleration, kJointsNoLimit,
+                      joint_position_into_limits, last_cmd_position, last_cmd_velocity,
+                      last_cmd_acceleration));
 
   // Desired values are outside limits (jerk violation) and limited after limitRate
   std::array<double, 7> joint_position_outside_limits = integrateOneSample<7>(
@@ -303,9 +310,9 @@ TEST(RateLimiting, JointPosition) {
           last_cmd_velocity,
           generateValuesOutsideLimits(last_cmd_acceleration, max_jerk, eps, kDeltaT), kDeltaT),
       kDeltaT);
-  std::array<double, 7> limited_joint_position =
-      limitRate(kJointsNoLimit, kJointsNoLimit, max_jerk, joint_position_outside_limits,
-                last_cmd_position, last_cmd_velocity, last_cmd_acceleration);
+  std::array<double, 7> limited_joint_position = limitRate(
+      kJointsNoLimit, kJointsNoLowerLimit, kJointsNoLimit, max_jerk, joint_position_outside_limits,
+      last_cmd_position, last_cmd_velocity, last_cmd_acceleration);
   ASSERT_TRUE(violatesRateLimits(
       kJointsNoLimit, kJointsNoLimit, max_jerk,
       differentiateOneSample<7>(joint_position_outside_limits, last_cmd_position, kDeltaT),
@@ -320,9 +327,9 @@ TEST(RateLimiting, JointPosition) {
   joint_position_outside_limits = integrateOneSample<7>(
       last_cmd_position,
       generateValuesOutsideLimits(last_cmd_velocity, max_acceleration, eps, kDeltaT), kDeltaT);
-  limited_joint_position =
-      limitRate(kJointsNoLimit, max_acceleration, kJointsNoLimit, joint_position_outside_limits,
-                last_cmd_position, last_cmd_velocity, last_cmd_acceleration);
+  limited_joint_position = limitRate(kJointsNoLimit, kJointsNoLowerLimit, max_acceleration,
+                                     kJointsNoLimit, joint_position_outside_limits,
+                                     last_cmd_position, last_cmd_velocity, last_cmd_acceleration);
   ASSERT_TRUE(violatesRateLimits(
       kJointsNoLimit, max_acceleration, kJointsNoLimit,
       differentiateOneSample<7>(joint_position_outside_limits, last_cmd_position, kDeltaT),
@@ -514,5 +521,36 @@ TEST(RateLimiting, CartesianPoseIntegrationAndDifferentation) {
   auto twist = differentiateOneSample(cartesian_pose, last_cmd_pose, kDeltaT);
   for (int i = 0; i < 6; ++i) {
     ASSERT_NEAR(twist[i], last_cmd_velocity[i], 1e-6);
+  }
+}
+
+TEST(RateLimiting, PositionBasedVelocityLimitBoundaryCheck) {
+  {
+    const std::array<double, 7> q_lower_limits = {-2.9007, -1.8361, -2.9007, -3.0770,
+                                                  -2.8763, 0.4398,  -3.0508};
+    const std::array<double, 7> dq_upper_limits = {2.62, 2.62, 2.62, 2.62, 5.26, 4.18, 5.26};
+    const std::array<double, 7> dq_lower_limits = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+    auto dq_max = computeUpperLimitsJointVelocity(q_lower_limits);
+    EXPECT_LT(dq_max, dq_upper_limits);
+
+    auto dq_min = computeLowerLimitsJointVelocity(q_lower_limits);
+    EXPECT_GT(dq_min, dq_lower_limits);
+
+    EXPECT_GT(dq_max, dq_min);
+  }
+
+  {
+    const std::array<double, 7> q_upper_limits = {2.9007, 1.8361, 2.9007, -0.1169,
+                                                  2.8763, 4.6216, 3.0508};
+    const std::array<double, 7> dq_upper_limits = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    const std::array<double, 7> dq_lower_limits = {-2.62, -2.62, -2.62, -2.62, -5.26, -4.18, -5.26};
+    auto dq_max = computeUpperLimitsJointVelocity(q_upper_limits);
+    EXPECT_LT(dq_max, dq_upper_limits);
+
+    auto dq_min = computeLowerLimitsJointVelocity(q_upper_limits);
+    EXPECT_GT(dq_min, dq_lower_limits);
+
+    EXPECT_GT(dq_max, dq_min);
   }
 }
