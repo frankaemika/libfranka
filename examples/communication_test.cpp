@@ -60,11 +60,11 @@ int main(int argc, char** argv) {
     franka::Duration period;
 
     while (!zero_torques.motion_finished) {
-      std::tie(robot_state, period) = rw_interface.readOnce();
+      std::tie(robot_state, period) = rw_interface->readOnce();
 
       time += period.toMSec();
       if (time == 0.0) {
-        rw_interface.writeOnce(zero_torques);
+        rw_interface->writeOnce(zero_torques);
         continue;
       }
       counter++;
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
         zero_torques.motion_finished = true;
       }
       // Sending zero torques - if EE is configured correctly, robot should not move
-      rw_interface.writeOnce(zero_torques);
+      rw_interface->writeOnce(zero_torques);
     }
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;

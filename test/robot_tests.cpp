@@ -491,8 +491,8 @@ TEST(RobotMock, CanStartOnlyOneControl) {
 
   EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(2);
 
-  EXPECT_NO_THROW(ActiveControl control = robot.startControl<Torques>());
+  EXPECT_NO_THROW(std::unique_ptr<ActiveControl> control = robot.startControl<Torques>());
 
-  ActiveControl control = robot.startControl<Torques>();
+  std::unique_ptr<ActiveControl> control = robot.startControl<Torques>();
   EXPECT_THROW(robot.startControl<Torques>(), InvalidOperationException);
 }

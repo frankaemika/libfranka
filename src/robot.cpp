@@ -55,10 +55,10 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                    [](const RobotState&, Duration) -> JointVelocities {
-                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-                                    },
-                                    limit_rate, cutoff_frequency);
+      [](const RobotState&, Duration) -> JointVelocities {
+        return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+      },
+      limit_rate, cutoff_frequency);
   loop();
 }
 
@@ -249,7 +249,7 @@ void Robot::automaticErrorRecovery() {
 }
 
 template <typename T>
-ActiveControl Robot::startControl() {
+std::unique_ptr<ActiveControl> Robot::startControl() {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
@@ -258,13 +258,14 @@ ActiveControl Robot::startControl() {
                          MotionGeneratorTraits<T>::kMotionGeneratorMode,
                          ControlLoop<T>::kDefaultDeviation, ControlLoop<T>::kDefaultDeviation);
 
-  return ActiveControl(impl_, motion_id, std::move(control_lock));
+  return std::unique_ptr<ActiveControl>(
+      new ActiveControl(impl_, motion_id, std::move(control_lock)));
 }
 
-template ActiveControl Robot::startControl<JointVelocities>();
+template std::unique_ptr<ActiveControl> Robot::startControl<JointVelocities>();
 
 template <>
-ActiveControl Robot::startControl<Torques>() {
+std::unique_ptr<ActiveControl> Robot::startControl<Torques>() {
   return startControl<JointVelocities>();
 }
 

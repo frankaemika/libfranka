@@ -642,7 +642,7 @@ class Robot {
    * Starts a new motion generator and controller
    *
    * @tparam T the franka control type
-   * @return ActiveControl object for the started motion
+   * @return unique_ptr of ActiveControl for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -650,7 +650,7 @@ class Robot {
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
   template <typename T>
-  ActiveControl startControl();
+  std::unique_ptr<ActiveControl> startControl();
 
   /**
    * Stops all currently running motions.
