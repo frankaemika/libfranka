@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.x.y - unreleased
+
+Requires Franka Research 3 system version >= 5.2.0
+
+ * **BREAKING** Instead of using constants, velocity limits in rate-limiter are computed based on the current desired joint position.
+
 ## 0.10.0 - 2022-09-02
 
 Requires Franka Research 3 system version >= 5.2.0
