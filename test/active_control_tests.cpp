@@ -32,7 +32,7 @@ class ActiveControlTest : public ::testing::Test {
         .Times(1)
         .WillOnce(::testing::Return(100));
 
-    return robot_.startControl<Torques>();
+    return robot_.startTorqueControl();
   }
 
  protected:

@@ -105,7 +105,7 @@ class Robot {
   /**
    * Closes the connection.
    */
-  ~Robot() noexcept;
+  virtual ~Robot() noexcept;
 
   /**
    * @name Motion generation and joint-level torque commands
@@ -639,18 +639,17 @@ class Robot {
   void automaticErrorRecovery();
 
   /**
-   * Starts a new motion generator and controller
+   * Starts a new torque controller
    *
-   * @tparam T the franka control type
    * @return unique_ptr of ActiveControl for the started motion
    *
-   * @throw ControlException if an error related to torque control or motion generation occurred.
+   * @throw ControlException if an error related to torque control or motion generation
+   * occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  template <typename T>
-  std::unique_ptr<ActiveControl> startControl();
+  std::unique_ptr<ActiveControl> startTorqueControl();
 
   /**
    * Stops all currently running motions.

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
     franka::Torques zero_torques{{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-    auto rw_interface = robot.startControl<franka::Torques>();
+    auto rw_interface = robot.startTorqueControl();
 
     franka::RobotState robot_state;
     franka::Duration period;

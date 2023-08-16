@@ -457,8 +457,7 @@ TEST(Robot, ThrowsIfConflictingOperationIsRunning) {
                InvalidOperationException);
   EXPECT_THROW(robot.read(std::function<bool(const RobotState&)>()), InvalidOperationException);
   EXPECT_THROW(robot.readOnce(), InvalidOperationException);
-  EXPECT_THROW(robot.startControl<Torques>(), InvalidOperationException);
-  EXPECT_THROW(robot.startControl<JointVelocities>(), InvalidOperationException);
+  EXPECT_THROW(robot.startTorqueControl(), InvalidOperationException);
 
   server.ignoreUdpBuffer();
 
@@ -491,8 +490,8 @@ TEST(RobotMock, CanStartOnlyOneControl) {
 
   EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(2);
 
-  EXPECT_NO_THROW(std::unique_ptr<ActiveControl> control = robot.startControl<Torques>());
+  EXPECT_NO_THROW(std::unique_ptr<ActiveControl> control = robot.startTorqueControl());
 
-  std::unique_ptr<ActiveControl> control = robot.startControl<Torques>();
-  EXPECT_THROW(robot.startControl<Torques>(), InvalidOperationException);
+  std::unique_ptr<ActiveControl> control = robot.startTorqueControl();
+  EXPECT_THROW(robot.startTorqueControl(), InvalidOperationException);
 }
