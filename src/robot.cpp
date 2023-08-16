@@ -248,24 +248,19 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
 
-template <typename T>
-ActiveControl Robot::startControl() {
+std::unique_ptr<ActiveControl> Robot::startTorqueControl() {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
+  // hint: there is no startMotion implementation for Torques, so JointVelocities is used instead
   uint32_t motion_id =
       impl_->startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
-                         MotionGeneratorTraits<T>::kMotionGeneratorMode,
-                         ControlLoop<T>::kDefaultDeviation, ControlLoop<T>::kDefaultDeviation);
+                         MotionGeneratorTraits<JointVelocities>::kMotionGeneratorMode,
+                         ControlLoop<JointVelocities>::kDefaultDeviation,
+                         ControlLoop<JointVelocities>::kDefaultDeviation);
 
-  return ActiveControl(impl_, motion_id, std::move(control_lock));
-}
-
-template ActiveControl Robot::startControl<JointVelocities>();
-
-template <>
-ActiveControl Robot::startControl<Torques>() {
-  return startControl<JointVelocities>();
+  return std::unique_ptr<ActiveControl>(
+      new ActiveControl(impl_, motion_id, std::move(control_lock)));
 }
 
 void Robot::stop() {

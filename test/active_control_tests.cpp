@@ -27,12 +27,12 @@ class ActiveControlTest : public ::testing::Test {
     server_.sendEmptyState<robot::RobotState>().spinOnce();
   };
 
-  ActiveControl startControl() {
+  std::unique_ptr<ActiveControl> startControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
 
-    return robot_.startControl<Torques>();
+    return robot_.startTorqueControl();
   }
 
  protected:
@@ -42,46 +42,46 @@ class ActiveControlTest : public ::testing::Test {
 };
 
 TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
-  ActiveControl active_control = startControl();
+  std::unique_ptr<ActiveControl> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
 
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
   EXPECT_CALL(*robot_impl_mock_, writeOnce(testing::_)).Times(1);
-  EXPECT_NO_THROW(active_control.writeOnce(default_control_output));
+  EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
 }
 
 TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
-  ActiveControl active_control = startControl();
+  std::unique_ptr<ActiveControl> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
   EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
-  EXPECT_NO_THROW(active_control.writeOnce(default_control_output));
+  EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
 }
 
 TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
-  ActiveControl active_control = startControl();
+  std::unique_ptr<ActiveControl> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
   EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
-  EXPECT_NO_THROW(active_control.writeOnce(default_control_output));
-  EXPECT_THROW(active_control.writeOnce(default_control_output), ControlException);
+  EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
+  EXPECT_THROW(active_control->writeOnce(default_control_output), ControlException);
 }
 
 TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
-  ActiveControl active_control = startControl();
+  std::unique_ptr<ActiveControl> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
   EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
-  EXPECT_NO_THROW(active_control.writeOnce(default_control_output));
+  EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
   EXPECT_NO_THROW(startControl());
 }
 
 TEST_F(ActiveControlTest, CanReadOnce) {
-  ActiveControl active_control = startControl();
+  std::unique_ptr<ActiveControl> active_control = startControl();
   const Duration time_first_read(1);
   const Duration time_second_read(5);
   const RobotState kFirstExpectedRobotState{.time = time_first_read};
@@ -98,11 +98,11 @@ TEST_F(ActiveControlTest, CanReadOnce) {
       .Times(1)
       .After(first_throw_motion_error_call);
 
-  auto [received_robot_state, received_period] = active_control.readOnce();
+  auto [received_robot_state, received_period] = active_control->readOnce();
   EXPECT_EQ(received_robot_state, kFirstExpectedRobotState);
   EXPECT_EQ(received_period, Duration(0));
 
-  std::tie(received_robot_state, received_period) = active_control.readOnce();
+  std::tie(received_robot_state, received_period) = active_control->readOnce();
   EXPECT_EQ(received_robot_state, kSecondExpectedRobotState);
   EXPECT_EQ(received_period, time_second_read - time_first_read);
 }
