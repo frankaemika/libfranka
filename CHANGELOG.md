@@ -5,6 +5,8 @@
 Requires Franka Research 3 system version >= 5.2.0
 
  * **BREAKING** Instead of using constants, velocity limits in rate-limiter are computed based on the current desired joint position.
+ * Allow external control loops by the introduction of the ActiveControl read-write-interface for torque-control
+
 
 ## 0.10.0 - 2022-09-02
 
