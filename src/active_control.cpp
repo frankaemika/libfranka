@@ -11,12 +11,16 @@ namespace franka {
 
 ActiveControl::ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
                              uint32_t motion_id,
-                             std::unique_lock<std::mutex> control_lock)
+                             std::unique_lock<std::mutex> control_lock,
+                             ActiveControlControllerOptions controller_type,
+                             ActiveControlMotionGeneratorOptions motion_generator_type)
     : robot_impl_(std::move(robot_impl)),
       motion_id_(motion_id),
       control_lock_(std::move(control_lock)),
       control_finished_(false),
-      first_read_attempt_(true) {}
+      first_read_attempt_(true),
+      controller_type_(controller_type),
+      motion_generator_type_(motion_generator_type) {}
 
 ActiveControl::~ActiveControl() {
   if (!control_finished_) {
@@ -25,6 +29,10 @@ ActiveControl::~ActiveControl() {
 }
 
 void ActiveControl::writeOnce(const Torques& control_input) {
+  if (controller_type_ != ActiveControlControllerOptions::kExternalController) {
+    throw franka::ControlException("writeOnce called for wrong control mode.");
+  }
+
   if (control_finished_) {
     throw franka::ControlException("writeOnce must not be called after the motion has finished.");
   }
@@ -37,6 +45,110 @@ void ActiveControl::writeOnce(const Torques& control_input) {
   }
 
   robot_impl_->writeOnce(control_input);
+}
+
+void ActiveControl::writeOnce(const JointPositions& motion_generator_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kJointPosition) &&
+      (controller_type_ == ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const JointVelocities& motion_generator_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kJointVelocity) &&
+      (controller_type_ == ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const CartesianPose& motion_generator_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kCartesianPosition) &&
+      (controller_type_ == ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const CartesianVelocities& motion_generator_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kCartesianVelocity) &&
+      (controller_type_ == ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const JointPositions& motion_generator_input,
+                              const Torques& control_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kJointPosition) &&
+      (controller_type_ != ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const JointVelocities& motion_generator_input,
+                              const Torques& control_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kJointVelocity) &&
+      (controller_type_ != ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const CartesianPose& motion_generator_input,
+                              const Torques& control_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kCartesianPosition) &&
+      (controller_type_ != ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
+}
+
+void ActiveControl::writeOnce(const CartesianVelocities& motion_generator_input,
+                              const Torques& control_input) {
+  if ((motion_generator_type_ == ActiveControlMotionGeneratorOptions::kCartesianVelocity) &&
+      (controller_type_ != ActiveControlControllerOptions::kExternalController)) {
+    throw franka::ControlException("writeOnce called for wrong motion generator or control mode.");
+  }
+
+  if (control_finished_) {
+    throw franka::ControlException("writeOnce must not be called after the motion has finished.");
+  }
+
+  throw franka::ControlException("Not yet implemented!");
 }
 
 std::pair<RobotState, Duration> ActiveControl::readOnce() {

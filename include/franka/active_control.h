@@ -40,6 +40,100 @@ class ActiveControl {
   void writeOnce(const Torques& control_input);
 
   /**
+   * Updates the joint-level based joint position commands of an active joint position control
+   *
+   * @param motion_generator_input the new joint-level based positions
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred, or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const JointPositions& motion_generator_input);
+
+  /**
+   * Updates the joint-level based joint velocity commands of an active joint velocity control
+   *
+   * @param motion_generator_input the new joint-level based velocities
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const JointVelocities& motion_generator_input);
+
+  /**
+   * TODO: update
+   *
+   * @param motion_generator_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const CartesianPose& motion_generator_input);
+
+  /**
+   * TODO: update
+   *
+   * @param motion_generator_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const CartesianVelocities& motion_generator_input);
+
+  /**
+   * Updates the joint-level based joint position commands of an active joint position control
+   *
+   * @param motion_generator_input the new joint-level based positions
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred, or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const JointPositions& motion_generator_input, const Torques& control_input);
+
+  /**
+   * Updates the joint-level based joint velocity commands of an active joint velocity control
+   *
+   * @param motion_generator_input the new joint-level based velocities
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const JointVelocities& motion_generator_input, const Torques& control_input);
+
+  /**
+   * TODO: update
+   *
+   * @param motion_generator_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const CartesianPose& motion_generator_input, const Torques& control_input);
+
+  /**
+   * TODO: update
+   *
+   * @param motion_generator_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const CartesianVelocities& motion_generator_input, const Torques& control_input);
+
+  /**
    * Waits for a robot state update and returns it.
    *
    * @return Current robot state & time since last read operation
@@ -68,7 +162,9 @@ class ActiveControl {
    */
   ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
                 uint32_t motion_id,
-                std::unique_lock<std::mutex> control_lock);
+                std::unique_lock<std::mutex> control_lock,
+                ActiveControlControllerOptions controller_type,
+                ActiveControlMotionGeneratorOptions motion_generator_type);
 
   std::shared_ptr<Robot::Impl> robot_impl_;
   uint32_t motion_id_;
@@ -76,6 +172,8 @@ class ActiveControl {
   bool control_finished_;
   bool first_read_attempt_;
   Duration last_read_access_;
+  ActiveControlControllerOptions controller_type_;
+  ActiveControlMotionGeneratorOptions motion_generator_type_;
 };
 
 }  // namespace franka

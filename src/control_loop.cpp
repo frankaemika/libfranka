@@ -23,28 +23,6 @@ using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 
-namespace {
-
-inline void checkElbow(const std::array<double, 2>& elbow) {
-  checkFinite(elbow);
-  if (!isValidElbow(elbow)) {
-    throw std::invalid_argument(
-        "Invalid elbow configuration given! Only +1 or -1 are allowed for the sign of the 4th "
-        "joint.");
-  }
-}
-
-inline void checkMatrix(const std::array<double, 16>& transform) {
-  checkFinite(transform);
-  if (!isHomogeneousTransformation(transform)) {
-    throw std::invalid_argument(
-        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
-        "major!");
-  }
-}
-
-}  // anonymous namespace
-
 template <typename T>
 ControlLoop<T>::ControlLoop(RobotControl& robot,
                             MotionGeneratorCallback motion_callback,

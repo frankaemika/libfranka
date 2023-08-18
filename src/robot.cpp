@@ -55,10 +55,10 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                    [](const RobotState&, Duration) -> JointVelocities {
-                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-                                    },
-                                    limit_rate, cutoff_frequency);
+      [](const RobotState&, Duration) -> JointVelocities {
+        return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+      },
+      limit_rate, cutoff_frequency);
   loop();
 }
 
@@ -248,19 +248,84 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
 
-std::unique_ptr<ActiveControl> Robot::startTorqueControl() {
+template <typename T>
+std::unique_ptr<ActiveControl> Robot::startControl(
+    const ActiveControlControllerOptions& controller_type) {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
-  // hint: there is no startMotion implementation for Torques, so JointVelocities is used instead
-  uint32_t motion_id =
-      impl_->startMotion(research_interface::robot::Move::ControllerMode::kExternalController,
-                         MotionGeneratorTraits<JointVelocities>::kMotionGeneratorMode,
-                         ControlLoop<JointVelocities>::kDefaultDeviation,
-                         ControlLoop<JointVelocities>::kDefaultDeviation);
+  research_interface::robot::Move::ControllerMode controller_mode_rbk;
+  switch (controller_type) {
+    case ActiveControlControllerOptions::kExternalController:
+      controller_mode_rbk = research_interface::robot::Move::ControllerMode::kExternalController;
+      break;
+    case ActiveControlControllerOptions::kJointImpedance:
+      controller_mode_rbk = research_interface::robot::Move::ControllerMode::kJointImpedance;
+      break;
+    case ActiveControlControllerOptions::kCartesianImpedance:
+      controller_mode_rbk = research_interface::robot::Move::ControllerMode::kCartesianImpedance;
+      break;
+  }
 
-  return std::unique_ptr<ActiveControl>(
-      new ActiveControl(impl_, motion_id, std::move(control_lock)));
+  research_interface::robot::Move::MotionGeneratorMode motion_generator_mode_rbk =
+      MotionGeneratorTraits<T>::kMotionGeneratorMode;
+  ActiveControlMotionGeneratorOptions motion_generator_type;
+  switch (motion_generator_mode_rbk) {
+    case research_interface::robot::Move::MotionGeneratorMode::kCartesianPosition:
+      motion_generator_type = ActiveControlMotionGeneratorOptions::kCartesianPosition;
+      break;
+    case research_interface::robot::Move::MotionGeneratorMode::kCartesianVelocity:
+      motion_generator_type = ActiveControlMotionGeneratorOptions::kCartesianVelocity;
+      break;
+    case research_interface::robot::Move::MotionGeneratorMode::kJointPosition:
+      motion_generator_type = ActiveControlMotionGeneratorOptions::kJointPosition;
+      break;
+    case research_interface::robot::Move::MotionGeneratorMode::kJointVelocity:
+      motion_generator_type = ActiveControlMotionGeneratorOptions::kJointVelocity;
+      break;
+  }
+
+  uint32_t motion_id =
+      impl_->startMotion(controller_mode_rbk, motion_generator_mode_rbk,
+                         ControlLoop<T>::kDefaultDeviation, ControlLoop<T>::kDefaultDeviation);
+
+  return std::unique_ptr<ActiveControl>(new ActiveControl(impl_, motion_id, std::move(control_lock),
+                                                          controller_type, motion_generator_type));
+}
+
+template std::unique_ptr<ActiveControl> Robot::startControl<JointVelocities>(
+
+    const ActiveControlControllerOptions& controller_type);
+template std::unique_ptr<ActiveControl> Robot::startControl<JointPositions>(
+    const ActiveControlControllerOptions& controller_type);
+template std::unique_ptr<ActiveControl> Robot::startControl<CartesianPose>(
+    const ActiveControlControllerOptions& controller_type);
+template std::unique_ptr<ActiveControl> Robot::startControl<CartesianVelocities>(
+    const ActiveControlControllerOptions& controller_type);
+
+std::unique_ptr<ActiveControl> Robot::startTorqueControl() {
+  // hint: there is no startMotion implementation for Torques, so JointVelocities is used instead
+  return startControl<JointVelocities>(ActiveControlControllerOptions::kExternalController);
+}
+
+std::unique_ptr<ActiveControl> Robot::startJointPositionControl(
+    const ActiveControlControllerOptions control_type) {
+  return startControl<JointPositions>(control_type);
+}
+
+std::unique_ptr<ActiveControl> Robot::startJointVelocityControl(
+    const ActiveControlControllerOptions control_type) {
+  return startControl<JointVelocities>(control_type);
+}
+
+std::unique_ptr<ActiveControl> Robot::startCartesianPositionControl(
+    const ActiveControlControllerOptions control_type) {
+  return startControl<CartesianPose>(control_type);
+}
+
+std::unique_ptr<ActiveControl> Robot::startCartesianVelocityControl(
+    const ActiveControlControllerOptions control_type) {
+  return startControl<CartesianVelocities>(control_type);
 }
 
 void Robot::stop() {
