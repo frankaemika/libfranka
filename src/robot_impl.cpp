@@ -106,6 +106,66 @@ void Robot::Impl::writeOnce(const Torques& control_input) {
   sendRobotCommand(&motion_command, &control_command);
 }
 
+void Robot::Impl::writeOnce(const JointPositions& motion_generator_input,
+                            const Torques& control_input,
+                            bool use_control_input) {
+  auto motion_command = createMotionCommand(motion_generator_input);
+
+  if (use_control_input) {
+    auto control_command = createControllerCommand(control_input);
+    network_->tcpThrowIfConnectionClosed();
+    sendRobotCommand(&motion_command, &control_command);
+  }
+
+  network_->tcpThrowIfConnectionClosed();
+  sendRobotCommand(&motion_command, nullptr);
+}
+
+void Robot::Impl::writeOnce(const JointVelocities& motion_generator_input,
+                            const Torques& control_input,
+                            bool use_control_input) {
+  auto motion_command = createMotionCommand(motion_generator_input);
+
+  if (use_control_input) {
+    auto control_command = createControllerCommand(control_input);
+    network_->tcpThrowIfConnectionClosed();
+    sendRobotCommand(&motion_command, &control_command);
+  }
+
+  network_->tcpThrowIfConnectionClosed();
+  sendRobotCommand(&motion_command, nullptr);
+}
+
+void Robot::Impl::writeOnce(const CartesianPose& motion_generator_input,
+                            const Torques& control_input,
+                            bool use_control_input) {
+  auto motion_command = createMotionCommand(motion_generator_input);
+
+  if (use_control_input) {
+    auto control_command = createControllerCommand(control_input);
+    network_->tcpThrowIfConnectionClosed();
+    sendRobotCommand(&motion_command, &control_command);
+  }
+
+  network_->tcpThrowIfConnectionClosed();
+  sendRobotCommand(&motion_command, nullptr);
+}
+
+void Robot::Impl::writeOnce(const CartesianVelocities& motion_generator_input,
+                            const Torques& control_input,
+                            bool use_control_input) {
+  auto motion_command = createMotionCommand(motion_generator_input);
+
+  if (use_control_input) {
+    auto control_command = createControllerCommand(control_input);
+    network_->tcpThrowIfConnectionClosed();
+    sendRobotCommand(&motion_command, &control_command);
+  }
+
+  network_->tcpThrowIfConnectionClosed();
+  sendRobotCommand(&motion_command, nullptr);
+}
+
 research_interface::robot::RobotCommand Robot::Impl::sendRobotCommand(
     const research_interface::robot::MotionGeneratorCommand* motion_command,
     const research_interface::robot::ControllerCommand* control_command) const {
@@ -306,6 +366,64 @@ void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input)
       createControllerCommand(control_input);
 
   finishMotion(motion_id, &motion_command, &controller_command);
+}
+
+research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
+    const JointPositions& control_input) {
+  checkFinite(control_input.q);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.q_c = control_input.q;
+
+  return motion_command;
+}
+
+research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
+    const JointVelocities& control_input) {
+  checkFinite(control_input.dq);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.dq_c = control_input.dq;
+
+  return motion_command;
+}
+
+research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
+    const CartesianPose& control_input) {
+  checkMatrix(control_input.O_T_EE);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.O_T_EE_c = control_input.O_T_EE;
+
+  if (control_input.hasElbow()) {
+    motion_command.valid_elbow = true;
+    motion_command.elbow_c = control_input.elbow;
+    checkElbow(motion_command.elbow_c);
+  } else {
+    motion_command.valid_elbow = false;
+    motion_command.elbow_c = {};
+  }
+
+  return motion_command;
+}
+
+research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
+    const CartesianVelocities& control_input) {
+  checkFinite(control_input.O_dP_EE);
+
+  research_interface::robot::MotionGeneratorCommand motion_command{};
+  motion_command.O_dP_EE_c = control_input.O_dP_EE;
+
+  if (control_input.hasElbow()) {
+    motion_command.valid_elbow = true;
+    motion_command.elbow_c = control_input.elbow;
+    checkElbow(motion_command.elbow_c);
+  } else {
+    motion_command.valid_elbow = false;
+    motion_command.elbow_c = {};
+  }
+
+  return motion_command;
 }
 
 research_interface::robot::ControllerCommand Robot::Impl::createControllerCommand(

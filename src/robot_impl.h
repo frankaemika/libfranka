@@ -45,6 +45,19 @@ class Robot::Impl : public RobotControl {
    */
   virtual void writeOnce(const Torques& control_input);
 
+  virtual void writeOnce(const JointPositions& motion_generator_input,
+                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                         bool use_control_input = false);
+  virtual void writeOnce(const JointVelocities& motion_generator_input,
+                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                         bool use_control_input = false);
+  virtual void writeOnce(const CartesianPose& motion_generator_input,
+                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                         bool use_control_input = false);
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input,
+                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+                         bool use_control_input = false);
+
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
@@ -88,6 +101,18 @@ class Robot::Impl : public RobotControl {
 
   research_interface::robot::ControllerCommand createControllerCommand(
       const Torques& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointPositions& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointVelocities& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianPose& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianVelocities& control_input);
 
   template <typename T>
   using IsBaseOfGetterSetter =
