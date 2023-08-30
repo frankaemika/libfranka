@@ -63,17 +63,17 @@ pipeline {
                   }
                 }
               }
-              stage('Build release') {
-                steps {
-                  dir("build-release.${env.DISTRO}") {
-                    sh '''
-                      cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT=ON -DBUILD_COVERAGE=OFF \
-                            -DBUILD_DOCUMENTATION=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
-                      make -j$(nproc)
-                    '''
-                  }
-                }
-              }
+              // stage('Build release') {
+              //   steps {
+              //     dir("build-release.${env.DISTRO}") {
+              //       sh '''
+              //         cmake -DCMAKE_BUILD_TYPE=Release -DSTRICT=ON -DBUILD_COVERAGE=OFF \
+              //               -DBUILD_DOCUMENTATION=ON -DBUILD_EXAMPLES=ON -DBUILD_TESTS=ON ..
+              //         make -j$(nproc)
+              //       '''
+              //     }
+              //   }
+              // }
               stage('Build examples (debug)') {
                 steps {
                   dir("build-debug-examples.${env.DISTRO}") {
@@ -82,14 +82,14 @@ pipeline {
                   }
                 }
               }
-              stage('Build examples (release)') {
-                steps {
-                  dir("build-release-examples.${env.DISTRO}") {
-                    sh "cmake -DFranka_DIR:PATH=../build-release.${DISTRO} ../examples"
-                    sh 'make -j$(nproc)'
-                  }
-                }
-              }
+              // stage('Build examples (release)') {
+              //   steps {
+              //     dir("build-release-examples.${env.DISTRO}") {
+              //       sh "cmake -DFranka_DIR:PATH=../build-release.${DISTRO} ../examples"
+              //       sh 'make -j$(nproc)'
+              //     }
+              //   }
+              // }
               stage('Build coverage') {
                 steps {
                   dir("build-coverage.${env.DISTRO}") {

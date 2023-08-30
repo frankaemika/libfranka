@@ -12,6 +12,8 @@
 #include "mock_robot_impl.h"
 #include "mock_server.h"
 
+using ::testing::Matcher;
+
 using namespace research_interface;
 
 using namespace franka;
@@ -27,13 +29,43 @@ class ActiveControlTest : public ::testing::Test {
     server_.sendEmptyState<robot::RobotState>().spinOnce();
   };
 
-  std::unique_ptr<ActiveControl> startControl() {
+  std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
 
     return robot_.startTorqueControl();
   }
+
+  std::unique_ptr<ActiveControl<JointPositions>> startJointPositionsControl() {
+    EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+        .Times(1)
+        .WillOnce(::testing::Return(100));
+
+    return robot_.startJointPositionControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+  }
+  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
+  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+  //       .Times(1)
+  //       .WillOnce(::testing::Return(100));
+
+  //   return robot_.startTorqueControl();
+  // }
+  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
+  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+  //       .Times(1)
+  //       .WillOnce(::testing::Return(100));
+
+  //   return robot_.startTorqueControl();
+  // }
+  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
+  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+  //       .Times(1)
+  //       .WillOnce(::testing::Return(100));
+
+  //   return robot_.startTorqueControl();
+  // }
 
  protected:
   RobotMockServer server_;
@@ -42,16 +74,25 @@ class ActiveControlTest : public ::testing::Test {
 };
 
 TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
 
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
-  EXPECT_CALL(*robot_impl_mock_, writeOnce(testing::_)).Times(1);
+  EXPECT_CALL(*robot_impl_mock_, writeOnce(Matcher<const Torques&>(testing::_))).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
 }
 
+TEST_F(ActiveControlTest, jointPositionControl) {
+  std::unique_ptr<ActiveControl<JointPositions>> active_control = startJointPositionsControl();
+  JointPositions default_joint_positions{{1, 1, 1, 1, 1, 1, 1}};
+
+  EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
+  EXPECT_CALL(*robot_impl_mock_, writeOnce(Matcher<const JointPositions&>(testing::_))).Times(1);
+  EXPECT_NO_THROW(active_control->writeOnce(default_joint_positions));
+}
+
 TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -60,7 +101,7 @@ TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
 }
 
 TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -70,7 +111,7 @@ TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
 }
 
 TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -81,7 +122,7 @@ TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
 }
 
 TEST_F(ActiveControlTest, CanReadOnce) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
   const Duration time_first_read(1);
   const Duration time_second_read(5);
   const RobotState kFirstExpectedRobotState{.time = time_first_read};

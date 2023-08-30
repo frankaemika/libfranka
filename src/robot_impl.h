@@ -45,18 +45,11 @@ class Robot::Impl : public RobotControl {
    */
   virtual void writeOnce(const Torques& control_input);
 
-  virtual void writeOnce(const JointPositions& motion_generator_input,
-                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                         bool use_control_input = false);
-  virtual void writeOnce(const JointVelocities& motion_generator_input,
-                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                         bool use_control_input = false);
-  virtual void writeOnce(const CartesianPose& motion_generator_input,
-                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                         bool use_control_input = false);
-  virtual void writeOnce(const CartesianVelocities& motion_generator_input,
-                         const Torques& control_input = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
-                         bool use_control_input = false);
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input);
+
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
 
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
@@ -79,10 +72,49 @@ class Robot::Impl : public RobotControl {
    */
   void finishMotion(uint32_t motion_id, const Torques& control_input);
 
+  // /**
+  //  * Finishes a control
+  //  *
+  //  * @param motion_id the id of the running control process
+  //  * @param motion_generator_type motion generator could JointPosition, JointVelocities,
+  //  * CartesianPose, CartesianVelocities
+  //  * @param control_input the final control-input
+  //  */
+  // template <typename MotionGeneratorType>
+  // void finishMotion(uint32_t motion_id,
+  //                   const MotionGeneratorType& motion_generator,
+  //                   const Torques* control_input = nullptr);
+
+  // /**
+  //  * Finishes a control with motion and control input
+  //  *
+  //  * @param motion_id the id of the running control process
+  //  * @param motion_generator_type motion generator could JointPosition, JointVelocities,
+  //  * CartesianPose, CartesianVelocities
+  //  * @param control_input the final control-input
+  //  */
+  // template <typename MotionGeneratorType>
+  // void finishMotion(uint32_t motion_id, const MotionGeneratorType& motion_generator);
+
   template <typename T, typename... TArgs>
   uint32_t executeCommand(TArgs... /* args */);
 
   Model loadModel() const;
+
+  research_interface::robot::ControllerCommand createControllerCommand(
+      const Torques& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointPositions& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointVelocities& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianPose& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianVelocities& motion_input);
 
  protected:
   bool motionGeneratorRunning() const noexcept;
@@ -98,21 +130,6 @@ class Robot::Impl : public RobotControl {
     }
     return ss.str();
   }
-
-  research_interface::robot::ControllerCommand createControllerCommand(
-      const Torques& control_input);
-
-  research_interface::robot::MotionGeneratorCommand createMotionCommand(
-      const JointPositions& control_input);
-
-  research_interface::robot::MotionGeneratorCommand createMotionCommand(
-      const JointVelocities& control_input);
-
-  research_interface::robot::MotionGeneratorCommand createMotionCommand(
-      const CartesianPose& control_input);
-
-  research_interface::robot::MotionGeneratorCommand createMotionCommand(
-      const CartesianVelocities& control_input);
 
   template <typename T>
   using IsBaseOfGetterSetter =

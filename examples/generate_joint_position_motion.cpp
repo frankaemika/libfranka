@@ -3,11 +3,10 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/active_control.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
-
 #include "examples_common.h"
-
 /**
  * @example generate_joint_position_motion.cpp
  * An example showing how to generate a joint position motion.
@@ -44,8 +43,9 @@ int main(int argc, char** argv) {
 
     std::array<double, 7> initial_position;
     double time = 0.0;
-    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-                                             franka::Duration period) -> franka::JointPositions {
+    auto control_callback = [&initial_position, &time](
+                                const franka::RobotState& robot_state,
+                                franka::Duration period) -> franka::JointPositions {
       time += period.toSec();
 
       if (time == 0.0) {
@@ -64,7 +64,40 @@ int main(int argc, char** argv) {
         return franka::MotionFinished(output);
       }
       return output;
-    });
+    };
+
+    bool motion_finished = false;
+    auto active_control = robot.startJointPositionControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+    while (!motion_finished) {
+      auto [robot_state, duration] = active_control->readOnce();
+      auto joint_positions = control_callback(robot_state, duration);
+      motion_finished = joint_positions.motion_finished;
+      std::cout << "is motion finished: " << motion_finished << std::endl;
+      active_control->writeOnce(joint_positions);
+    }
+
+    // robot.control([&initial_position, &time](const franka::RobotState& robot_state,
+    //                                          franka::Duration period) -> franka::JointPositions {
+    //   time += period.toSec();
+
+    //   if (time == 0.0) {
+    //     initial_position = robot_state.q_d;
+    //   }
+
+    //   double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
+
+    //   franka::JointPositions output = {{initial_position[0], initial_position[1],
+    //                                     initial_position[2], initial_position[3] + delta_angle,
+    //                                     initial_position[4] + delta_angle, initial_position[5],
+    //                                     initial_position[6] + delta_angle}};
+
+    //   if (time >= 5.0) {
+    //     std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+    //     return franka::MotionFinished(output);
+    //   }
+    //   return output;
+    // });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

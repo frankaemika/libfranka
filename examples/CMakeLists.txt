@@ -20,8 +20,11 @@ add_library(examples_common STATIC
   examples_common.cpp
 )
 
-target_link_libraries(examples_common PUBLIC Franka::Franka Eigen3::Eigen3)
-
+target_link_libraries(examples_common PRIVATE Franka::Franka Eigen3::Eigen3 libfranka-common)
+target_include_directories(examples_common PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 set(EXAMPLES
   cartesian_impedance_control
   communication_test
@@ -43,7 +46,11 @@ set(EXAMPLES
 
 foreach(example ${EXAMPLES})
   add_executable(${example} ${example}.cpp)
-  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3)
+  target_include_directories(${example} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
+  )
+  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3 libfranka-common)
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)

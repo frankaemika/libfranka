@@ -6,7 +6,9 @@
 #include <utility>
 
 #include <franka/control_types.h>
+#include <franka/exception.h>
 #include <franka/robot_state.h>
+#include <research_interface/robot/service_types.h>
 
 #include "robot.h"
 
@@ -24,6 +26,7 @@ namespace franka {
  * hint: To create an ActiveControl, see Robot::startControl
  *
  */
+template <typename MotionGeneratorType>
 class ActiveControl {
  public:
   virtual ~ActiveControl();
@@ -40,98 +43,27 @@ class ActiveControl {
   void writeOnce(const Torques& control_input);
 
   /**
-   * Updates the joint-level based joint position commands of an active joint position control
+   *  External control with Motion generator
    *
-   * @param motion_generator_input the new joint-level based positions
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred, or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const JointPositions& motion_generator_input);
-
-  /**
-   * Updates the joint-level based joint velocity commands of an active joint velocity control
-   *
-   * @param motion_generator_input the new joint-level based velocities
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const JointVelocities& motion_generator_input);
-
-  /**
-   * TODO: update
-   *
-   * @param motion_generator_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const CartesianPose& motion_generator_input);
-
-  /**
-   * TODO: update
-   *
-   * @param motion_generator_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const CartesianVelocities& motion_generator_input);
-
-  /**
-   * Updates the joint-level based joint position commands of an active joint position control
-   *
-   * @param motion_generator_input the new joint-level based positions
+   * @param motion_generator_input motion generator
+   * @param control_input external control input for each joint
    *
    * @throw ControlException if an error related to torque control or motion generation occurred, or
    * the motion was already finished.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  void writeOnce(const JointPositions& motion_generator_input, const Torques& control_input);
+  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
 
   /**
-   * Updates the joint-level based joint velocity commands of an active joint velocity control
+   * Motion generator and
    *
-   * @param motion_generator_input the new joint-level based velocities
+   * @param motion_generator_input motion generator
    *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
+   * @throw ControlException if an error related to torque control or motion generation occurred, or
    * the motion was already finished.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  void writeOnce(const JointVelocities& motion_generator_input, const Torques& control_input);
-
-  /**
-   * TODO: update
-   *
-   * @param motion_generator_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const CartesianPose& motion_generator_input, const Torques& control_input);
-
-  /**
-   * TODO: update
-   *
-   * @param motion_generator_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred,
-   or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const CartesianVelocities& motion_generator_input, const Torques& control_input);
+  void writeOnce(const MotionGeneratorType& motion_generator_input);
 
   /**
    * Waits for a robot state update and returns it.
@@ -145,8 +77,8 @@ class ActiveControl {
   std::pair<RobotState, Duration> readOnce();
 
   /**
-   * @note ActiveControl objects can only be created during the Robot::startMotion. To allow access
-   * to the private constructor Robot is defined as friend
+   * @note ActiveControl objects can only be created during the Robot::startMotion. To allow
+   * access to the private constructor Robot is defined as friend
    *
    */
   friend class Robot;
@@ -163,8 +95,7 @@ class ActiveControl {
   ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
                 uint32_t motion_id,
                 std::unique_lock<std::mutex> control_lock,
-                ActiveControlControllerOptions controller_type,
-                ActiveControlMotionGeneratorOptions motion_generator_type);
+                research_interface::robot::Move::ControllerMode controller_type);
 
   std::shared_ptr<Robot::Impl> robot_impl_;
   uint32_t motion_id_;
@@ -172,8 +103,7 @@ class ActiveControl {
   bool control_finished_;
   bool first_read_attempt_;
   Duration last_read_access_;
-  ActiveControlControllerOptions controller_type_;
-  ActiveControlMotionGeneratorOptions motion_generator_type_;
+  research_interface::robot::Move::ControllerMode controller_type_;
 };
 
 }  // namespace franka
