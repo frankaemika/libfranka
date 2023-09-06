@@ -539,4 +539,40 @@ template void Robot::Impl::writeOnce<CartesianVelocities>(
     const CartesianVelocities& motion_generator_input,
     const Torques& control_input);
 
+void Robot::Impl::writeOnce(const JointPositions& motion_generator_input) {
+  writeOnce<JointPositions>(motion_generator_input);
+}
+
+void Robot::Impl::writeOnce(const JointVelocities& motion_generator_input) {
+  writeOnce<JointVelocities>(motion_generator_input);
+}
+
+void Robot::Impl::writeOnce(const CartesianPose& motion_generator_input) {
+  writeOnce<CartesianPose>(motion_generator_input);
+}
+
+void Robot::Impl::writeOnce(const CartesianVelocities& motion_generator_input) {
+  writeOnce<CartesianVelocities>(motion_generator_input);
+}
+
+void Robot::Impl::writeOnce(const JointPositions& motion_generator_input,
+                            const Torques& control_input) {
+  writeOnce<JointPositions>(motion_generator_input, control_input);
+}
+
+void Robot::Impl::writeOnce(const JointVelocities& motion_generator_input,
+                            const Torques& control_input) {
+  writeOnce<JointVelocities>(motion_generator_input, control_input);
+}
+
+void Robot::Impl::writeOnce(const CartesianPose& motion_generator_input,
+                            const Torques& control_input) {
+  writeOnce<CartesianPose>(motion_generator_input, control_input);
+}
+
+void Robot::Impl::writeOnce(const CartesianVelocities& motion_generator_input,
+                            const Torques& control_input) {
+  writeOnce<CartesianVelocities>(motion_generator_input, control_input);
+}
+
 }  // namespace franka

@@ -25,11 +25,11 @@ class ActiveControlTest : public ::testing::Test {
             std::move(std::make_unique<Network>("127.0.0.1", robot::kCommandPort)),
             0,
             RealtimeConfig::kIgnore)),
-        robot_(RobotMock(robot_impl_mock_)) {
-    server_.sendEmptyState<robot::RobotState>().spinOnce();
-  };
+        robot_(RobotMock(robot_impl_mock_)){
+            // server_.sendEmptyState<robot::RobotState>().spinOnce();
+        };
 
-  std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
+  std::unique_ptr<ActiveControl<JointVelocities>> startTorqueControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -45,27 +45,33 @@ class ActiveControlTest : public ::testing::Test {
     return robot_.startJointPositionControl(
         research_interface::robot::Move::ControllerMode::kJointImpedance);
   }
-  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
-  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
-  //       .Times(1)
-  //       .WillOnce(::testing::Return(100));
 
-  //   return robot_.startTorqueControl();
-  // }
-  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
-  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
-  //       .Times(1)
-  //       .WillOnce(::testing::Return(100));
+  std::unique_ptr<ActiveControl<JointVelocities>> startJointVelocityControl() {
+    EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+        .Times(1)
+        .WillOnce(::testing::Return(100));
 
-  //   return robot_.startTorqueControl();
-  // }
-  //   std::unique_ptr<ActiveControl<JointVelocities>> startControl() {
-  //   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
-  //       .Times(1)
-  //       .WillOnce(::testing::Return(100));
+    return robot_.startJointVelocityControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+  }
 
-  //   return robot_.startTorqueControl();
-  // }
+  std::unique_ptr<ActiveControl<CartesianPose>> startCartesianPositionControl() {
+    EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+        .Times(1)
+        .WillOnce(::testing::Return(100));
+
+    return robot_.startCartesianPositionControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+  }
+
+  std::unique_ptr<ActiveControl<CartesianVelocities>> startCartesianVelocityControl() {
+    EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+        .Times(1)
+        .WillOnce(::testing::Return(100));
+
+    return robot_.startCartesianVelocityControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+  }
 
  protected:
   RobotMockServer server_;
@@ -74,7 +80,7 @@ class ActiveControlTest : public ::testing::Test {
 };
 
 TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
 
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
@@ -92,7 +98,7 @@ TEST_F(ActiveControlTest, jointPositionControl) {
 }
 
 TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -101,7 +107,7 @@ TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
 }
 
 TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -111,18 +117,18 @@ TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
 }
 
 TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
   EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
-  EXPECT_NO_THROW(startControl());
+  EXPECT_NO_THROW(startTorqueControl());
 }
 
 TEST_F(ActiveControlTest, CanReadOnce) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startControl();
+  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
   const Duration time_first_read(1);
   const Duration time_second_read(5);
   const RobotState kFirstExpectedRobotState{.time = time_first_read};

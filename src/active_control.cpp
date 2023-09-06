@@ -67,7 +67,7 @@ void ActiveControl<MotionGeneratorType>::writeOnce(
     return;
   }
 
-  robot_impl_->writeOnce<MotionGeneratorType>(motion_generator_input);
+  robot_impl_->writeOnce(motion_generator_input);
 }
 
 template <typename MotionGeneratorType>
@@ -91,7 +91,7 @@ void ActiveControl<MotionGeneratorType>::writeOnce(
     return;
   }
 
-  robot_impl_->writeOnce<MotionGeneratorType>(motion_generator_input, control_input);
+  robot_impl_->writeOnce(motion_generator_input, control_input);
 }
 
 template <typename MotionGeneratorType>

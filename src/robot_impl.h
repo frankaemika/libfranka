@@ -45,11 +45,21 @@ class Robot::Impl : public RobotControl {
    */
   virtual void writeOnce(const Torques& control_input);
 
-  template <typename MotionGeneratorType>
-  void writeOnce(const MotionGeneratorType& motion_generator_input);
+  virtual void writeOnce(const JointPositions& motion_generator_input);
+  virtual void writeOnce(const JointVelocities& motion_generator_input);
+  virtual void writeOnce(const CartesianPose& motion_generator_input);
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input);
 
-  template <typename MotionGeneratorType>
-  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
+  virtual void writeOnce(const JointPositions& motion_generator_input,
+                         const Torques& control_input);
+
+  virtual void writeOnce(const JointVelocities& motion_generator_input,
+                         const Torques& control_input);
+
+  virtual void writeOnce(const CartesianPose& motion_generator_input, const Torques& control_input);
+
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input,
+                         const Torques& control_input);
 
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
@@ -121,6 +131,12 @@ class Robot::Impl : public RobotControl {
   bool controllerRunning() const noexcept;
 
  private:
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input);
+
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
+
   std::string commandNotPossibleMsg() const {
     std::stringstream ss;
     ss << " command rejected: command not possible in the current mode ("
