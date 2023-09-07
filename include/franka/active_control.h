@@ -8,13 +8,13 @@
 #include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/robot_state.h>
-#include <research_interface/robot/service_types.h>
 
 #include "robot.h"
 
 /**
  * @file active_control.h
- * Contains the `franka::ActiveControl` type.
+ * Contains the `franka::ActiveControl`, `franka::ActiveTorqueControl` and
+ * `franka::ActiveMotionGenerator` type.
  */
 
 namespace franka {
@@ -23,47 +23,13 @@ namespace franka {
  * Allows the user to read the state of a Robot and to send new control commands after starting a
  * control process of an Robot.
  *
- * hint: To create an ActiveControl, see Robot::startControl
+ * hint: To create an ActiveControl, see franka::ActiveTorqueControl or
+ * franka::ActiveMotionGenerator
  *
  */
-template <typename MotionGeneratorType>
 class ActiveControl {
  public:
   virtual ~ActiveControl();
-
-  /**
-   * Updates the joint-level based torque commands of an active joint effort control
-   *
-   * @param control_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred, or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const Torques& control_input);
-
-  /**
-   *  External control with Motion generator
-   *
-   * @param motion_generator_input motion generator
-   * @param control_input external control input for each joint
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred, or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
-
-  /**
-   * Motion generator and
-   *
-   * @param motion_generator_input motion generator
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred, or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const MotionGeneratorType& motion_generator_input);
 
   /**
    * Waits for a robot state update and returns it.
@@ -76,14 +42,37 @@ class ActiveControl {
    */
   std::pair<RobotState, Duration> readOnce();
 
-  /**
-   * @note ActiveControl objects can only be created during the Robot::startMotion. To allow
-   * access to the private constructor Robot is defined as friend
-   *
-   */
-  friend class Robot;
+  virtual void writeOnce(const JointPositions& /* motion_generator_input */,
+                         const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const JointVelocities& /* motion_generator_input */,
+                         const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const JointPositions& /* motion_generator_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const JointVelocities& /* motion_generator_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
 
- private:
+  virtual void writeOnce(const CartesianPose& /* motion_generator_input */,
+                         const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */,
+                         const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const CartesianPose& /* motion_generator_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+  virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */) {
+    throw franka::ControlException(wrong_write_once_method_called_);
+  };
+
+ protected:
   /**
    * Construct a new ActiveControl object
    *
@@ -94,15 +83,112 @@ class ActiveControl {
    */
   ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
                 uint32_t motion_id,
-                std::unique_lock<std::mutex> control_lock,
-                research_interface::robot::Move::ControllerMode controller_type);
+                std::unique_lock<std::mutex> control_lock);
 
-  std::shared_ptr<Robot::Impl> robot_impl_;
-  uint32_t motion_id_;
-  std::unique_lock<std::mutex> control_lock_;
-  bool control_finished_;
-  bool first_read_attempt_;
-  Duration last_read_access_;
+  std::shared_ptr<Robot::Impl> robot_impl;
+  uint32_t motion_id;
+  std::unique_lock<std::mutex> control_lock;
+  bool control_finished;
+  bool first_read_attempt;
+  Duration last_read_access;
+
+ private:
+  const std::string wrong_write_once_method_called_{
+      "Wrong writeOnce method called for currently active control!"};
+};
+
+/**
+ * Allows the user to read the state of a Robot and to send new torque control commands after
+ * starting a control process of an Robot.
+ *
+ * hint: To create an ActiveTorqueControl, see franka::Robot
+ *
+ */
+class ActiveTorqueControl : public ActiveControl {
+ public:
+  /**
+   * Updates the joint-level based torque commands of an active joint effort control
+   *
+   * @param control_input the new joint-level based torques
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const Torques& control_input);
+
+  friend class Robot;
+
+ private:
+  /**
+   * Construct a new ActiveTorqueControl object
+   *
+   * @param robot shared_ptr to the Robot::Impl in the Robot
+   * @param motion_id id of the managed motion
+   * @param control_lock of the Robot, preventing other read and write accesses during the active
+   * control
+   */
+  ActiveTorqueControl(std::shared_ptr<Robot::Impl> robot_impl,
+                      uint32_t motion_id,
+                      std::unique_lock<std::mutex> control_lock)
+      : ActiveControl(robot_impl, motion_id, std::move(control_lock)){};
+};
+
+/**
+ * Allows the user to read the state of a Robot and to send new motion generator commands after
+ * starting a control process of an Robot.
+ *
+ * hint: To create an ActiveMotionGenerator, see franka::Robot
+ *
+ */
+template <typename MotionGeneratorType>
+class ActiveMotionGenerator : public ActiveControl {
+ public:
+  /**
+   * Updates the motion generator commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const MotionGeneratorType& motion_generator_input);
+
+  /**
+   * Updates the motion generator commands of an active control, with external controller
+   *
+   * @param motion_generator_input the new motion generator input
+   * @param control_input the external control input for each joint
+   *
+   * @throw ControlException if an error related to torque control or motion generation occurred,
+   or
+   * the motion was already finished.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   */
+  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
+
+  friend class Robot;
+
+ private:
+  /**
+   * Construct a new ActiveMotionGenerator object
+   *
+   * @param robot shared_ptr to the Robot::Impl in the Robot
+   * @param motion_id id of the managed motion
+   * @param control_lock of the Robot, preventing other read and write accesses during the active
+   * control
+   * @param controller_type defining which controller shall be used
+   */
+  ActiveMotionGenerator(std::shared_ptr<Robot::Impl> robot_impl,
+                        uint32_t motion_id,
+                        std::unique_lock<std::mutex> control_lock,
+                        research_interface::robot::Move::ControllerMode controller_type)
+      : ActiveControl(robot_impl, motion_id, std::move(control_lock)),
+        controller_type_(controller_type){};
+
   research_interface::robot::Move::ControllerMode controller_type_;
 };
 

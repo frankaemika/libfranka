@@ -29,7 +29,7 @@ class ActiveControlTest : public ::testing::Test {
             // server_.sendEmptyState<robot::RobotState>().spinOnce();
         };
 
-  std::unique_ptr<ActiveControl<JointVelocities>> startTorqueControl() {
+  std::unique_ptr<ActiveTorqueControl> startTorqueControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -37,7 +37,7 @@ class ActiveControlTest : public ::testing::Test {
     return robot_.startTorqueControl();
   }
 
-  std::unique_ptr<ActiveControl<JointPositions>> startJointPositionsControl() {
+  std::unique_ptr<ActiveMotionGenerator<JointPositions>> startJointPositionsControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -46,7 +46,7 @@ class ActiveControlTest : public ::testing::Test {
         research_interface::robot::Move::ControllerMode::kJointImpedance);
   }
 
-  std::unique_ptr<ActiveControl<JointVelocities>> startJointVelocityControl() {
+  std::unique_ptr<ActiveMotionGenerator<JointVelocities>> startJointVelocityControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -55,7 +55,7 @@ class ActiveControlTest : public ::testing::Test {
         research_interface::robot::Move::ControllerMode::kJointImpedance);
   }
 
-  std::unique_ptr<ActiveControl<CartesianPose>> startCartesianPositionControl() {
+  std::unique_ptr<ActiveMotionGenerator<CartesianPose>> startCartesianPositionControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -64,7 +64,7 @@ class ActiveControlTest : public ::testing::Test {
         research_interface::robot::Move::ControllerMode::kJointImpedance);
   }
 
-  std::unique_ptr<ActiveControl<CartesianVelocities>> startCartesianVelocityControl() {
+  std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> startCartesianVelocityControl() {
     EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
@@ -80,7 +80,7 @@ class ActiveControlTest : public ::testing::Test {
 };
 
 TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
 
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
@@ -89,7 +89,7 @@ TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
 }
 
 TEST_F(ActiveControlTest, jointPositionControl) {
-  std::unique_ptr<ActiveControl<JointPositions>> active_control = startJointPositionsControl();
+  auto active_control = startJointPositionsControl();
   JointPositions default_joint_positions{{1, 1, 1, 1, 1, 1, 1}};
 
   EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
@@ -98,7 +98,7 @@ TEST_F(ActiveControlTest, jointPositionControl) {
 }
 
 TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -107,7 +107,7 @@ TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
 }
 
 TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -117,7 +117,7 @@ TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
 }
 
 TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
@@ -128,7 +128,7 @@ TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
 }
 
 TEST_F(ActiveControlTest, CanReadOnce) {
-  std::unique_ptr<ActiveControl<JointVelocities>> active_control = startTorqueControl();
+  auto active_control = startTorqueControl();
   const Duration time_first_read(1);
   const Duration time_second_read(5);
   const RobotState kFirstExpectedRobotState{.time = time_first_read};

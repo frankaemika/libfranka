@@ -22,12 +22,14 @@ namespace franka {
 
 class Model;
 
-template <class MotionGeneratorType>
-class ActiveControl;
+class ActiveTorqueControl;
+
+template <typename MotionGeneratorType>
+class ActiveMotionGenerator;
 
 /**
- * Maintains a network connection to the robot, provides the current robot state, gives access to
- * the model library and allows to control the robot.
+ * Maintains a network connection to the robot, provides the current robot state, gives access
+ * to the model library and allows to control the robot.
  *
  * @note
  * The members of this class are threadsafe.
@@ -39,31 +41,31 @@ class ActiveControl;
  *
  * @anchor f-frame
  * @par Flange frame F
- * The flange frame is located at the center of the flange surface. Its z-axis is identical with the
- * axis of rotation of the last joint. This frame is fixed and cannot be changed.
+ * The flange frame is located at the center of the flange surface. Its z-axis is identical with
+ * the axis of rotation of the last joint. This frame is fixed and cannot be changed.
  *
  * @anchor ne-frame
  * @par Nominal end effector frame NE
- * The nominal end effector frame is configured outside of libfranka (in DESK) and cannot be changed
- * here. It may be used to set end effector frames which are rarely changed.
+ * The nominal end effector frame is configured outside of libfranka (in DESK) and cannot be
+ * changed here. It may be used to set end effector frames which are rarely changed.
  *
  * @anchor ee-frame
  * @par end effector frame EE
  * By default, the end effector frame EE is the same as the nominal end effector frame NE
- * (i.e. the transformation between NE and EE is the identity transformation). It may be used to set
- * end effector frames which are changed more frequently (such as a tool that is grasped with the
- * end effector). With Robot::setEE, a custom transformation matrix can be set.
+ * (i.e. the transformation between NE and EE is the identity transformation). It may be used to
+ * set end effector frames which are changed more frequently (such as a tool that is grasped
+ * with the end effector). With Robot::setEE, a custom transformation matrix can be set.
  *
  * @anchor k-frame
  * @par Stiffness frame K
- * This frame describes the transformation from the end effector frame EE to the stiffness frame K.
- * The stiffness frame is used for Cartesian impedance control, and for measuring and applying
- * forces. The values set using Robot::setCartesianImpedance are used in the direction of the
- * stiffness frame. It can be set with Robot::setK.
- * This frame allows to modify the compliance behavior of the robot (e.g. to have a low
- * stiffness around a specific point which is not the end effector). The stiffness frame does not
- * affect where the robot will move to. The user should always command the desired end effector
- * frame (and not the desired stiffness frame).
+ * This frame describes the transformation from the end effector frame EE to the stiffness frame
+ * K. The stiffness frame is used for Cartesian impedance control, and for measuring and
+ * applying forces. The values set using Robot::setCartesianImpedance are used in the direction
+ * of the stiffness frame. It can be set with Robot::setK. This frame allows to modify the
+ * compliance behavior of the robot (e.g. to have a low stiffness around a specific point which
+ * is not the end effector). The stiffness frame does not affect where the robot will move to.
+ * The user should always command the desired end effector frame (and not the desired stiffness
+ * frame).
  */
 class Robot {
  public:
@@ -651,7 +653,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl<JointVelocities>> startTorqueControl();
+  std::unique_ptr<ActiveTorqueControl> startTorqueControl();
 
   /**
    * TODO: update
@@ -665,7 +667,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl<JointPositions>> startJointPositionControl(
+  std::unique_ptr<ActiveMotionGenerator<JointPositions>> startJointPositionControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -679,7 +681,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl<JointVelocities>> startJointVelocityControl(
+  std::unique_ptr<ActiveMotionGenerator<JointVelocities>> startJointVelocityControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -693,7 +695,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl<CartesianPose>> startCartesianPositionControl(
+  std::unique_ptr<ActiveMotionGenerator<CartesianPose>> startCartesianPositionControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -708,7 +710,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl<CartesianVelocities>> startCartesianVelocityControl(
+  std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> startCartesianVelocityControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -774,7 +776,7 @@ class Robot {
    * @throw std::invalid_argument if joint - level torque commands are NaN or infinity.
    */
   template <typename T>
-  std::unique_ptr<ActiveControl<T>> startControl(
+  std::unique_ptr<ActiveMotionGenerator<T>> startControl(
       const research_interface::robot::Move::ControllerMode& controller_type);
 
   std::shared_ptr<Impl> impl_;
