@@ -10,6 +10,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
+#include <franka/active_control.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
 
@@ -108,9 +109,13 @@ std::vector<double> generateTrajectory(double a_max) {
 void writeLogToFile(const std::vector<franka::Record>& log);
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
+  bool use_external_control_loop = false;
+  if (argc != 2 && argc != 3) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname> optional: <use_external_control_loop>"
+              << std::endl;
     return -1;
+  } else if (argc == 3) {
+    use_external_control_loop = !std::strcmp(argv[2], "true");
   }
 
   // Parameters
@@ -150,25 +155,43 @@ int main(int argc, char** argv) {
     size_t index = 0;
     std::vector<double> trajectory = generateTrajectory(max_acceleration);
 
-    robot.control(
-        [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
-          return controller.step(robot_state);
-        },
-        [&](const franka::RobotState&, franka::Duration period) -> franka::JointVelocities {
-          index += period.toMSec();
+    auto callback_control = [&](const franka::RobotState& robot_state,
+                                franka::Duration) -> franka::Torques {
+      return controller.step(robot_state);
+    };
 
-          if (index >= trajectory.size()) {
-            index = trajectory.size() - 1;
-          }
+    auto callback_motion_generator = [&](const franka::RobotState&,
+                                         franka::Duration period) -> franka::JointVelocities {
+      index += period.toMSec();
 
-          franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities.dq[joint_number] = trajectory[index];
+      if (index >= trajectory.size()) {
+        index = trajectory.size() - 1;
+      }
 
-          if (index >= trajectory.size() - 1) {
-            return franka::MotionFinished(velocities);
-          }
-          return velocities;
-        });
+      franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
+      velocities.dq[joint_number] = trajectory[index];
+
+      if (index >= trajectory.size() - 1) {
+        return franka::MotionFinished(velocities);
+      }
+      return velocities;
+    };
+
+    if (use_external_control_loop) {
+      bool motion_finished = false;
+      auto active_control = robot.startJointVelocityControl(
+          research_interface::robot::Move::ControllerMode::kExternalController);
+      while (!motion_finished) {
+        auto [robot_state, duration] = active_control->readOnce();
+        auto cartesian_velocities = callback_motion_generator(robot_state, duration);
+        auto torques = callback_control(robot_state, duration);
+        motion_finished = cartesian_velocities.motion_finished;
+        active_control->writeOnce(cartesian_velocities, torques);
+      }
+    } else {
+      robot.control(callback_control, callback_motion_generator);
+    }
+
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
     writeLogToFile(e.log);

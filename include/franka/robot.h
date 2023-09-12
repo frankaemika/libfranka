@@ -28,8 +28,8 @@ template <typename MotionGeneratorType>
 class ActiveMotionGenerator;
 
 /**
- * Maintains a network connection to the robot, provides the current robot state, gives access
- * to the model library and allows to control the robot.
+ * Maintains a network connection to the robot, provides the current robot state, gives access to
+ * the model library and allows to control the robot.
  *
  * @note
  * The members of this class are threadsafe.
@@ -41,26 +41,26 @@ class ActiveMotionGenerator;
  *
  * @anchor f-frame
  * @par Flange frame F
- * The flange frame is located at the center of the flange surface. Its z-axis is identical with
- * the axis of rotation of the last joint. This frame is fixed and cannot be changed.
+ * The flange frame is located at the center of the flange surface. Its z-axis is identical with the
+ * axis of rotation of the last joint. This frame is fixed and cannot be changed.
  *
  * @anchor ne-frame
  * @par Nominal end effector frame NE
- * The nominal end effector frame is configured outside of libfranka (in DESK) and cannot be
- * changed here. It may be used to set end effector frames which are rarely changed.
+ * The nominal end effector frame is configured outside of libfranka (in DESK) and cannot be changed
+ * here. It may be used to set end effector frames which are rarely changed.
  *
  * @anchor ee-frame
  * @par end effector frame EE
  * By default, the end effector frame EE is the same as the nominal end effector frame NE
- * (i.e. the transformation between NE and EE is the identity transformation). It may be used to
- * set end effector frames which are changed more frequently (such as a tool that is grasped
- * with the end effector). With Robot::setEE, a custom transformation matrix can be set.
+ * (i.e. the transformation between NE and EE is the identity transformation). It may be used to set
+ * end effector frames which are changed more frequently (such as a tool that is grasped with the
+ * end effector). With Robot::setEE, a custom transformation matrix can be set.
  *
  * @anchor k-frame
  * @par Stiffness frame K
  * This frame describes the transformation from the end effector frame EE to the stiffness frame
- * K. The stiffness frame is used for Cartesian impedance control, and for measuring and
- * applying forces. The values set using Robot::setCartesianImpedance are used in the direction
+ * K. The stiffness frame is used for Cartesian impedance control, and for measuring and applying
+ * forces. The values set using Robot::setCartesianImpedance are used in the direction
  * of the stiffness frame. It can be set with Robot::setK. This frame allows to modify the
  * compliance behavior of the robot (e.g. to have a low stiffness around a specific point which
  * is not the end effector). The stiffness frame does not affect where the robot will move to.
@@ -645,7 +645,7 @@ class Robot {
   /**
    * Starts a new torque controller
    *
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveTorqueControl for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
@@ -656,10 +656,11 @@ class Robot {
   std::unique_ptr<ActiveTorqueControl> startTorqueControl();
 
   /**
-   * TODO: update
-   * @param control_type esearch_interface::robot::Move::ControllerMode control type for the
+   * Starts a new joint position motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
    * operation
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
@@ -671,10 +672,11 @@ class Robot {
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
-   * TODO: update
-   * @param control_type esearch_interface::robot::Move::ControllerMode control type for the
+   * Starts a new joint velocity motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
    * operation
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -685,10 +687,11 @@ class Robot {
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
-   * TODO: update
-   * @param control_type esearch_interface::robot::Move::ControllerMode control type for the
+   * Starts a new cartesian position motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
    * operation
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
    * @throw InvalidOperationException if a conflicting operation is already running.
@@ -699,10 +702,11 @@ class Robot {
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
-   * TODO: update
-   * @param control_type esearch_interface::robot::Move::ControllerMode control type for the
+   * Starts a new cartesian velocity motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
    * operation
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
@@ -767,7 +771,7 @@ class Robot {
    * @tparam T the franka control type
    * @param control_mode defines the type of motion / control that shall be started
    * @param controller_mode the controller-mode that shall be used
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation
    occurred.

@@ -8,8 +8,6 @@
 
 #include "robot_impl.h"
 
-#include <iostream>
-
 namespace franka {
 
 ActiveControl::ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
@@ -76,8 +74,6 @@ void ActiveMotionGenerator<MotionGeneratorType>::writeOnce(
   }
 
   if (motion_generator_input.motion_finished) {
-    // there should be a finish motion function with motion generator
-    // robot_impl_->finishMotion(motion_id_, &motion_generator_input, &control_input);
     auto motion_command = robot_impl->createMotionCommand(motion_generator_input);
 
     robot_impl->finishMotion(motion_id, &motion_command, nullptr);

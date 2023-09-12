@@ -82,30 +82,6 @@ class Robot::Impl : public RobotControl {
    */
   void finishMotion(uint32_t motion_id, const Torques& control_input);
 
-  // /**
-  //  * Finishes a control
-  //  *
-  //  * @param motion_id the id of the running control process
-  //  * @param motion_generator_type motion generator could JointPosition, JointVelocities,
-  //  * CartesianPose, CartesianVelocities
-  //  * @param control_input the final control-input
-  //  */
-  // template <typename MotionGeneratorType>
-  // void finishMotion(uint32_t motion_id,
-  //                   const MotionGeneratorType& motion_generator,
-  //                   const Torques* control_input = nullptr);
-
-  // /**
-  //  * Finishes a control with motion and control input
-  //  *
-  //  * @param motion_id the id of the running control process
-  //  * @param motion_generator_type motion generator could JointPosition, JointVelocities,
-  //  * CartesianPose, CartesianVelocities
-  //  * @param control_input the final control-input
-  //  */
-  // template <typename MotionGeneratorType>
-  // void finishMotion(uint32_t motion_id, const MotionGeneratorType& motion_generator);
-
   template <typename T, typename... TArgs>
   uint32_t executeCommand(TArgs... /* args */);
 

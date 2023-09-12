@@ -3,6 +3,7 @@
 #include <cmath>
 #include <iostream>
 
+#include <franka/active_control.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
 
@@ -16,10 +17,15 @@
  */
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
+  bool use_external_control_loop = false;
+  if (argc != 2 && argc != 3) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname> optional: <use_external_control_loop>"
+              << std::endl;
     return -1;
+  } else if (argc == 3) {
+    use_external_control_loop = !std::strcmp(argv[2], "true");
   }
+
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -61,8 +67,9 @@ int main(int argc, char** argv) {
     double v_max = 0.1;
     double angle = M_PI / 4.0;
     double time = 0.0;
-    robot.control([=, &time](const franka::RobotState&,
-                             franka::Duration period) -> franka::CartesianVelocities {
+
+    auto callback_control = [=, &time](const franka::RobotState&,
+                                       franka::Duration period) -> franka::CartesianVelocities {
       time += period.toSec();
 
       double cycle = std::floor(pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
@@ -76,7 +83,21 @@ int main(int argc, char** argv) {
         return franka::MotionFinished(output);
       }
       return output;
-    });
+    };
+
+    if (use_external_control_loop) {
+      bool motion_finished = false;
+      auto active_control = robot.startCartesianVelocityControl(
+          research_interface::robot::Move::ControllerMode::kJointImpedance);
+      while (!motion_finished) {
+        auto [robot_state, duration] = active_control->readOnce();
+        auto cartesian_velocities = callback_control(robot_state, duration);
+        motion_finished = cartesian_velocities.motion_finished;
+        active_control->writeOnce(cartesian_velocities);
+      }
+    } else {
+      robot.control(callback_control);
+    }
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

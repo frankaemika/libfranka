@@ -323,31 +323,6 @@ void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input)
 
   finishMotion(motion_id, &motion_command, &controller_command);
 }
-
-// template <typename MotionGeneratorType>
-// void Robot::Impl::finishMotion(uint32_t motion_id,
-//                                const MotionGeneratorType& motion_generator,
-//                                const Torques* control_input) {
-//   research_interface::robot::MotionGeneratorCommand motion_command =
-//       createMotionCommand(motion_generator);
-
-//   if (!control_input) {
-//     research_interface::robot::ControllerCommand controller_command =
-//         createControllerCommand(control_input);
-
-//     finishMotion(motion_id, &motion_command, &controller_command);
-//   } else {
-//     finishMotion(motion_id, &motion_command, nullptr);
-//   }
-// }
-
-// template <typename MotionGeneratorType>
-// void Robot::Impl::finishMotion(uint32_t motion_id, const MotionGeneratorType& motion_generator) {
-//   research_interface::robot::MotionGeneratorCommand motion_command =
-//       createMotionCommand(motion_generator);
-//   finishMotion(motion_id, &motion_command, nullptr);
-// }
-
 research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
     const JointPositions& control_input) {
   checkFinite(control_input.q);

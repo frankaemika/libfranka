@@ -15,10 +15,15 @@
  */
 
 int main(int argc, char** argv) {
-  if (argc != 2) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
+  bool use_external_control_loop = false;
+  if (argc != 2 && argc != 3) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname> optional: <use_external_control_loop>"
+              << std::endl;
     return -1;
+  } else if (argc == 3) {
+    use_external_control_loop = !std::strcmp(argv[2], "true");
   }
+
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -66,38 +71,20 @@ int main(int argc, char** argv) {
       return output;
     };
 
-    bool motion_finished = false;
-    auto active_control = robot.startJointPositionControl(
-        research_interface::robot::Move::ControllerMode::kJointImpedance);
-    while (!motion_finished) {
-      auto [robot_state, duration] = active_control->readOnce();
-      auto joint_positions = control_callback(robot_state, duration);
-      motion_finished = joint_positions.motion_finished;
-      std::cout << "is motion finished: " << motion_finished << std::endl;
-      active_control->writeOnce(joint_positions);
+    if (use_external_control_loop) {
+      bool motion_finished = false;
+      auto active_control = robot.startJointPositionControl(
+          research_interface::robot::Move::ControllerMode::kJointImpedance);
+      while (!motion_finished) {
+        auto [robot_state, duration] = active_control->readOnce();
+        auto joint_positions = control_callback(robot_state, duration);
+        motion_finished = joint_positions.motion_finished;
+        active_control->writeOnce(joint_positions);
+      }
+    } else {
+      robot.control(control_callback);
     }
 
-    // robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-    //                                          franka::Duration period) -> franka::JointPositions {
-    //   time += period.toSec();
-
-    //   if (time == 0.0) {
-    //     initial_position = robot_state.q_d;
-    //   }
-
-    //   double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
-
-    //   franka::JointPositions output = {{initial_position[0], initial_position[1],
-    //                                     initial_position[2], initial_position[3] + delta_angle,
-    //                                     initial_position[4] + delta_angle, initial_position[5],
-    //                                     initial_position[6] + delta_angle}};
-
-    //   if (time >= 5.0) {
-    //     std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-    //     return franka::MotionFinished(output);
-    //   }
-    //   return output;
-    // });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;
