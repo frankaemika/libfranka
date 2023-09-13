@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.12.0 - 2023-09-14
+
+Requires Franka Research 3 system version >= 5.2.0
+
+ * **BREAKING** ActiveControl serves now as base class for ActiveTorqueControl, that implements the torque control functionality
+ * ActiveMotionGenerator class introduced to support external control loops for JointPositions, JointVelocities, CartesianPose and CartesianVelocities
+
 ## 0.11.0 - 2023-08-16
 
 Requires Franka Research 3 system version >= 5.2.0

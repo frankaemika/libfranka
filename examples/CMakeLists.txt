@@ -20,7 +20,7 @@ add_library(examples_common STATIC
   examples_common.cpp
 )
 
-target_link_libraries(examples_common PRIVATE Franka::Franka Eigen3::Eigen3 libfranka-common)
+target_link_libraries(examples_common PRIVATE Franka::Franka Eigen3::Eigen3)
 target_include_directories(examples_common PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -50,7 +50,7 @@ foreach(example ${EXAMPLES})
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
-  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3 libfranka-common)
+  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3)
 endforeach()
 
 target_link_libraries(joint_impedance_control Threads::Threads)

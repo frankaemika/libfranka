@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(libfranka_VERSION 0.11.0)
+set(libfranka_VERSION 0.12.0)
 
 project(libfranka
   VERSION ${libfranka_VERSION}
@@ -113,6 +113,9 @@ target_link_libraries(franka PRIVATE
   Poco::Net
   Eigen3::Eigen3
   Threads::Threads
+)
+
+target_link_libraries(franka PUBLIC
   libfranka-common
 )
 
@@ -120,7 +123,7 @@ target_link_libraries(franka PRIVATE
 include(GNUInstallDirs)
 set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
 
-install(TARGETS franka
+install(TARGETS franka libfranka-common
   EXPORT FrankaTargets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
