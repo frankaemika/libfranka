@@ -11,6 +11,7 @@
 #include <Poco/Path.h>
 
 #include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
 

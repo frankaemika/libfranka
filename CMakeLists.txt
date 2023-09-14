@@ -55,6 +55,8 @@ add_subdirectory(common)
 ## Library
 add_library(franka SHARED
   src/active_control.cpp
+  src/active_motion_generator.cpp
+  src/active_torque_control.cpp
   src/control_loop.cpp
   src/control_tools.cpp
   src/control_types.cpp

@@ -5,6 +5,7 @@
 #include <thread>
 
 #include <franka/active_control.h>
+#include <franka/active_torque_control.h>
 #include <franka/duration.h>
 #include <franka/exception.h>
 #include <franka/robot.h>

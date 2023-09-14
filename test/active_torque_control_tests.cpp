@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 
 #include <franka/active_control.h>
+#include <franka/active_torque_control.h>
 #include <franka/control_types.h>
 #include <franka/exception.h>
 #include <robot_impl.h>

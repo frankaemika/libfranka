@@ -1,6 +1,8 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
+#include <franka/active_torque_control.h>
 #include <franka/robot.h>
 
 #include <utility>
@@ -55,10 +57,10 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-                                    [](const RobotState&, Duration) -> JointVelocities {
-                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-                                    },
-                                    limit_rate, cutoff_frequency);
+      [](const RobotState&, Duration) -> JointVelocities {
+        return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+      },
+      limit_rate, cutoff_frequency);
   loop();
 }
 
@@ -254,10 +256,10 @@ std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>> Robot::startControl(
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
-  research_interface::robot::Move::MotionGeneratorMode motion_generator_mode_rbk =
+  research_interface::robot::Move::MotionGeneratorMode motion_generator_mode =
       MotionGeneratorTraits<MotionGeneratorType>::kMotionGeneratorMode;
 
-  uint32_t motion_id = impl_->startMotion(controller_type, motion_generator_mode_rbk,
+  uint32_t motion_id = impl_->startMotion(controller_type, motion_generator_mode,
                                           ControlLoop<MotionGeneratorType>::kDefaultDeviation,
                                           ControlLoop<MotionGeneratorType>::kDefaultDeviation);
 
