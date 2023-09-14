@@ -16,8 +16,7 @@ ActiveControl::ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
     : robot_impl(std::move(robot_impl)),
       motion_id(motion_id),
       control_lock(std::move(control_lock)),
-      control_finished(false),
-      first_read_attempt(true) {}
+      control_finished(false) {}
 
 ActiveControl::~ActiveControl() {
   if (!control_finished) {
@@ -29,13 +28,11 @@ std::pair<RobotState, Duration> ActiveControl::readOnce() {
   auto robot_state = robot_impl->readOnce();
   robot_impl->throwOnMotionError(robot_state, motion_id);
 
-  if (first_read_attempt) {
-    first_read_attempt = false;
+  if (!last_read_access.has_value()) {
     last_read_access = robot_state.time;
-    return std::make_pair(robot_state, Duration(0));
   }
 
-  auto time_since_last_read = robot_state.time - last_read_access;
+  auto time_since_last_read = robot_state.time - last_read_access.value();
   last_read_access = robot_state.time;
 
   return std::make_pair(robot_state, time_since_last_read);

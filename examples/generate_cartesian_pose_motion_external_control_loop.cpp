@@ -1,25 +1,28 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2023 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <cmath>
 #include <iostream>
 
+#include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
-
 #include "examples_common.h"
 
 /**
- * @example generate_joint_position_motion.cpp
- * An example showing how to generate a joint position motion.
+ * @example generate_cartesian_pose_motion_external_control_loop.cpp
+ * An example showing how to generate a Cartesian motion with an external control loop.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
 int main(int argc, char** argv) {
+  // Check whether the required arguments were passed
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
+
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -42,29 +45,46 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    std::array<double, 7> initial_position;
+    std::array<double, 16> initial_pose;
     double time = 0.0;
-    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-                                             franka::Duration period) -> franka::JointPositions {
+
+    auto callback_control = [&time, &initial_pose](
+                                const franka::RobotState& robot_state,
+                                franka::Duration period) -> franka::CartesianPose {
       time += period.toSec();
 
       if (time == 0.0) {
-        initial_position = robot_state.q_d;
+        initial_pose = robot_state.O_T_EE_c;
       }
 
-      double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
+      constexpr double kRadius = 0.3;
+      double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
+      double delta_x = kRadius * std::sin(angle);
+      double delta_z = kRadius * (std::cos(angle) - 1);
 
-      franka::JointPositions output = {{initial_position[0], initial_position[1],
-                                        initial_position[2], initial_position[3] + delta_angle,
-                                        initial_position[4] + delta_angle, initial_position[5],
-                                        initial_position[6] + delta_angle}};
+      std::array<double, 16> new_pose = initial_pose;
+      new_pose[12] += delta_x;
+      new_pose[14] += delta_z;
 
-      if (time >= 5.0) {
+      if (time >= 10.0) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(output);
+        return franka::MotionFinished(new_pose);
       }
-      return output;
-    });
+      return new_pose;
+    };
+
+    bool motion_finished = false;
+    std::unique_ptr<franka::ActiveControl> active_control = robot.startCartesianPositionControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+    while (!motion_finished) {
+      auto read_once_return = active_control->readOnce();
+      auto robot_state = read_once_return.first;
+      auto duration = read_once_return.second;
+      auto cartesian_positions = callback_control(robot_state, duration);
+      motion_finished = cartesian_positions.motion_finished;
+      active_control->writeOnce(cartesian_positions);
+    }
+
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

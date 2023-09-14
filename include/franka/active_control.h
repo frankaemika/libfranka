@@ -44,16 +44,26 @@ class ActiveControl {
   std::pair<RobotState, Duration> readOnce();
 
   /**
+   * Updates torque commands of an active control
+   *
+   * hint: implemented in ActiveTorqueControl
+   *
+   * @return void
+   */
+  virtual void writeOnce(const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  /**
    * Updates the joint position and torque commands of an active control
    *
    * hint: implemented in ActiveMotionGenerator<JointPositions>
    *
    * @return void
    */
-  virtual void writeOnce(
-      const JointPositions& /* motion_generator_input */,
-      const std::optional<const Torques>& /*control_input*/ = std::optional<const Torques>()) {
-    throw franka::ControlException(wrong_write_once_method_called_);
+  virtual void writeOnce(const JointPositions& /* motion_generator_input */,
+                         const std::optional<const Torques>& /*control_input*/) {
+    throw franka::ControlException(wrong_write_once_method_called);
   };
 
   /**
@@ -63,10 +73,9 @@ class ActiveControl {
    *
    * @return void
    */
-  virtual void writeOnce(
-      const JointVelocities& /* motion_generator_input */,
-      const std::optional<const Torques>& /* control_input */ = std::optional<const Torques>()) {
-    throw franka::ControlException(wrong_write_once_method_called_);
+  virtual void writeOnce(const JointVelocities& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
   };
 
   /**
@@ -76,10 +85,9 @@ class ActiveControl {
    *
    * @return void
    */
-  virtual void writeOnce(
-      const CartesianPose& /* motion_generator_input */,
-      const std::optional<const Torques>& /* control_input */ = std::optional<const Torques>()) {
-    throw franka::ControlException(wrong_write_once_method_called_);
+  virtual void writeOnce(const CartesianPose& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
   };
 
   /**
@@ -89,13 +97,56 @@ class ActiveControl {
    *
    * @return void
    */
-  virtual void writeOnce(
-      const CartesianVelocities& /* motion_generator_input */,
-      const std::optional<const Torques>& /* control_input */ = std::optional<const Torques>()) {
-    throw franka::ControlException(wrong_write_once_method_called_);
+  virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
   };
 
-  protected:
+  /**
+   * Updates the joint position commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointPositions& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the joint velocity commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointVelocities& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the cartesian position commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianPose& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the cartesian velocity commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+ protected:
   /**
    * Construct a new ActiveControl object
    *
@@ -120,14 +171,11 @@ class ActiveControl {
   /// flag indicating if control process is finished
   bool control_finished;
 
-  /// flag indicating if it is the first read access
-  bool first_read_attempt;
-
   /// duration to last read access
-  Duration last_read_access;
+  std::optional<Duration> last_read_access;
 
  private:
-  const std::string wrong_write_once_method_called_{
+  const std::string wrong_write_once_method_called{
       "Wrong writeOnce method called for currently active control!"};
 };
 

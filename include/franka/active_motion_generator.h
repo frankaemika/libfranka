@@ -33,10 +33,8 @@ class ActiveMotionGenerator : public ActiveControl {
    * the motion was already finished.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  void writeOnce(
-      const MotionGeneratorType& motion_generator_input,
-      const std::optional<const Torques>& control_input = std::optional<const Torques>());
-
+  void writeOnce(const MotionGeneratorType& motion_generator_input,
+                 const std::optional<const Torques>& control_input) override;
   /**
    * franka::Robot as friend to allow construction of ActiveMotionGenerator<MotionGeneratorType> in
    * start<MotionGeneratorType>Control methods

@@ -1,25 +1,27 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2023 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <cmath>
 #include <iostream>
 
+#include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
-
 #include "examples_common.h"
-
 /**
- * @example generate_joint_position_motion.cpp
- * An example showing how to generate a joint position motion.
+ * @example generate_joint_position_motion_external_control_loop.cpp
+ * An example showing how to generate a joint position motion with an external control loop..
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
 int main(int argc, char** argv) {
+  // Check whether the required arguments were passed
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
+
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -42,10 +44,11 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    std::array<double, 7> initial_position;
+    std::array<double, 7> initial_position{{0, 0, 0, 0, 0, 0, 0}};
     double time = 0.0;
-    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-                                             franka::Duration period) -> franka::JointPositions {
+    auto control_callback = [&initial_position, &time](
+                                const franka::RobotState& robot_state,
+                                franka::Duration period) -> franka::JointPositions {
       time += period.toSec();
 
       if (time == 0.0) {
@@ -64,7 +67,20 @@ int main(int argc, char** argv) {
         return franka::MotionFinished(output);
       }
       return output;
-    });
+    };
+
+    bool motion_finished = false;
+    std::unique_ptr<franka::ActiveControl> active_control = robot.startJointPositionControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+    while (!motion_finished) {
+      auto read_once_return = active_control->readOnce();
+      auto robot_state = read_once_return.first;
+      auto duration = read_once_return.second;
+      auto joint_positions = control_callback(robot_state, duration);
+      motion_finished = joint_positions.motion_finished;
+      active_control->writeOnce(joint_positions);
+    }
+
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

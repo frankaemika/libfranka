@@ -29,7 +29,7 @@ class ActiveTorqueControl : public ActiveControl {
    * the motion was already finished.
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
-  void writeOnce(const Torques& control_input);
+  void writeOnce(const Torques& control_input) override;
 
   /**
    * franka::Robot as friend to allow construction of ActiveTorqueControl in
@@ -50,7 +50,7 @@ class ActiveTorqueControl : public ActiveControl {
   ActiveTorqueControl(std::shared_ptr<Robot::Impl> robot_impl,
                       uint32_t motion_id,
                       std::unique_lock<std::mutex> control_lock)
-      : ActiveControl(robot_impl, motion_id, std::move(control_lock)){};
+      : ActiveControl(std::move(robot_impl), motion_id, std::move(control_lock)){};
 };
 
 }  // namespace franka

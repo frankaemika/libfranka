@@ -324,35 +324,35 @@ void Robot::Impl::finishMotion(uint32_t motion_id, const Torques& control_input)
   finishMotion(motion_id, &motion_command, &controller_command);
 }
 research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
-    const JointPositions& control_input) {
-  checkFinite(control_input.q);
+    const JointPositions& motion_input) {
+  checkFinite(motion_input.q);
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.q_c = control_input.q;
+  motion_command.q_c = motion_input.q;
 
   return motion_command;
 }
 
 research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
-    const JointVelocities& control_input) {
-  checkFinite(control_input.dq);
+    const JointVelocities& motion_input) {
+  checkFinite(motion_input.dq);
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.dq_c = control_input.dq;
+  motion_command.dq_c = motion_input.dq;
 
   return motion_command;
 }
 
 research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
-    const CartesianPose& control_input) {
-  checkMatrix(control_input.O_T_EE);
+    const CartesianPose& motion_input) {
+  checkMatrix(motion_input.O_T_EE);
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.O_T_EE_c = control_input.O_T_EE;
+  motion_command.O_T_EE_c = motion_input.O_T_EE;
 
-  if (control_input.hasElbow()) {
+  if (motion_input.hasElbow()) {
     motion_command.valid_elbow = true;
-    motion_command.elbow_c = control_input.elbow;
+    motion_command.elbow_c = motion_input.elbow;
     checkElbow(motion_command.elbow_c);
   } else {
     motion_command.valid_elbow = false;
@@ -363,15 +363,15 @@ research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionComma
 }
 
 research_interface::robot::MotionGeneratorCommand Robot::Impl::createMotionCommand(
-    const CartesianVelocities& control_input) {
-  checkFinite(control_input.O_dP_EE);
+    const CartesianVelocities& motion_input) {
+  checkFinite(motion_input.O_dP_EE);
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.O_dP_EE_c = control_input.O_dP_EE;
+  motion_command.O_dP_EE_c = motion_input.O_dP_EE;
 
-  if (control_input.hasElbow()) {
+  if (motion_input.hasElbow()) {
     motion_command.valid_elbow = true;
-    motion_command.elbow_c = control_input.elbow;
+    motion_command.elbow_c = motion_input.elbow;
     checkElbow(motion_command.elbow_c);
   } else {
     motion_command.valid_elbow = false;

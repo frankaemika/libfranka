@@ -3,10 +3,9 @@
 #include <cmath>
 #include <iostream>
 
-#include <franka/active_control.h>
-#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
+
 #include "examples_common.h"
 
 /**
@@ -17,15 +16,10 @@
  */
 
 int main(int argc, char** argv) {
-  bool use_external_control_loop = false;
-  if (argc != 2 && argc != 3) {
-    std::cerr << "Usage: " << argv[0] << " <robot-hostname> optional: <use_external_control_loop>"
-              << std::endl;
+  if (argc != 2) {
+    std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
-  } else if (argc == 3) {
-    use_external_control_loop = !std::strcmp(argv[2], "true");
   }
-
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -50,10 +44,8 @@ int main(int argc, char** argv) {
 
     std::array<double, 16> initial_pose;
     double time = 0.0;
-
-    auto callback_control = [&time, &initial_pose](
-                                const franka::RobotState& robot_state,
-                                franka::Duration period) -> franka::CartesianPose {
+    robot.control([&time, &initial_pose](const franka::RobotState& robot_state,
+                                         franka::Duration period) -> franka::CartesianPose {
       time += period.toSec();
 
       if (time == 0.0) {
@@ -74,21 +66,7 @@ int main(int argc, char** argv) {
         return franka::MotionFinished(new_pose);
       }
       return new_pose;
-    };
-
-    if (use_external_control_loop) {
-      bool motion_finished = false;
-      auto active_control = robot.startCartesianPositionControl(
-          research_interface::robot::Move::ControllerMode::kJointImpedance);
-      while (!motion_finished) {
-        auto [robot_state, duration] = active_control->readOnce();
-        auto cartesian_positions = callback_control(robot_state, duration);
-        motion_finished = cartesian_positions.motion_finished;
-        active_control->writeOnce(cartesian_positions);
-      }
-    } else {
-      robot.control(callback_control);
-    }
+    });
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

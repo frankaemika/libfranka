@@ -57,10 +57,10 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
   assertOwningLock(control_lock);
 
   ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
-      [](const RobotState&, Duration) -> JointVelocities {
-        return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-      },
-      limit_rate, cutoff_frequency);
+                                    [](const RobotState&, Duration) -> JointVelocities {
+                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+                                    },
+                                    limit_rate, cutoff_frequency);
   loop();
 }
 

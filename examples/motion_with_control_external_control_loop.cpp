@@ -1,4 +1,4 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2023 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <cmath>
 #include <fstream>
@@ -10,14 +10,17 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
+#include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
 
 #include "examples_common.h"
 
 /**
- * @example motion_with_control.cpp
- * An example showing how to use a joint velocity motion generator and torque control.
+ * @example motion_with_control_external_control_loop.cpp
+ * An example showing how to use a joint velocity motion generator and torque control with an
+ * external control loop.
  *
  * Additionally, this example shows how to capture and write logs in case an exception is thrown
  * during a motion.
@@ -108,6 +111,7 @@ std::vector<double> generateTrajectory(double a_max) {
 void writeLogToFile(const std::vector<franka::Record>& log);
 
 int main(int argc, char** argv) {
+  // Check whether the required arguments were passed
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
@@ -150,25 +154,41 @@ int main(int argc, char** argv) {
     size_t index = 0;
     std::vector<double> trajectory = generateTrajectory(max_acceleration);
 
-    robot.control(
-        [&](const franka::RobotState& robot_state, franka::Duration) -> franka::Torques {
-          return controller.step(robot_state);
-        },
-        [&](const franka::RobotState&, franka::Duration period) -> franka::JointVelocities {
-          index += period.toMSec();
+    auto callback_control = [&](const franka::RobotState& robot_state,
+                                franka::Duration) -> franka::Torques {
+      return controller.step(robot_state);
+    };
 
-          if (index >= trajectory.size()) {
-            index = trajectory.size() - 1;
-          }
+    auto callback_motion_generator = [&](const franka::RobotState&,
+                                         franka::Duration period) -> franka::JointVelocities {
+      index += period.toMSec();
 
-          franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
-          velocities.dq[joint_number] = trajectory[index];
+      if (index >= trajectory.size()) {
+        index = trajectory.size() - 1;
+      }
 
-          if (index >= trajectory.size() - 1) {
-            return franka::MotionFinished(velocities);
-          }
-          return velocities;
-        });
+      franka::JointVelocities velocities{{0, 0, 0, 0, 0, 0, 0}};
+      velocities.dq[joint_number] = trajectory[index];
+
+      if (index >= trajectory.size() - 1) {
+        return franka::MotionFinished(velocities);
+      }
+      return velocities;
+    };
+
+    bool motion_finished = false;
+    std::unique_ptr<franka::ActiveControl> active_control = robot.startJointVelocityControl(
+        research_interface::robot::Move::ControllerMode::kExternalController);
+    while (!motion_finished) {
+      auto read_once_return = active_control->readOnce();
+      auto robot_state = read_once_return.first;
+      auto duration = read_once_return.second;
+      auto cartesian_velocities = callback_motion_generator(robot_state, duration);
+      auto torques = callback_control(robot_state, duration);
+      motion_finished = cartesian_velocities.motion_finished;
+      active_control->writeOnce(cartesian_velocities, torques);
+    }
+
   } catch (const franka::ControlException& e) {
     std::cout << e.what() << std::endl;
     writeLogToFile(e.log);
