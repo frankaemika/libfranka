@@ -11,6 +11,7 @@
 #include <franka/duration.h>
 #include <franka/lowpass_filter.h>
 #include <franka/robot_state.h>
+#include <research_interface/robot/service_types.h>
 
 /**
  * @file robot.h
@@ -21,7 +22,10 @@ namespace franka {
 
 class Model;
 
-class ActiveControl;
+class ActiveTorqueControl;
+
+template <typename MotionGeneratorType>
+class ActiveMotionGenerator;
 
 /**
  * Maintains a network connection to the robot, provides the current robot state, gives access to
@@ -54,14 +58,14 @@ class ActiveControl;
  *
  * @anchor k-frame
  * @par Stiffness frame K
- * This frame describes the transformation from the end effector frame EE to the stiffness frame K.
- * The stiffness frame is used for Cartesian impedance control, and for measuring and applying
- * forces. The values set using Robot::setCartesianImpedance are used in the direction of the
- * stiffness frame. It can be set with Robot::setK.
- * This frame allows to modify the compliance behavior of the robot (e.g. to have a low
- * stiffness around a specific point which is not the end effector). The stiffness frame does not
- * affect where the robot will move to. The user should always command the desired end effector
- * frame (and not the desired stiffness frame).
+ * This frame describes the transformation from the end effector frame EE to the stiffness frame
+ * K. The stiffness frame is used for Cartesian impedance control, and for measuring and applying
+ * forces. The values set using Robot::setCartesianImpedance are used in the direction
+ * of the stiffness frame. It can be set with Robot::setK. This frame allows to modify the
+ * compliance behavior of the robot (e.g. to have a low stiffness around a specific point which
+ * is not the end effector). The stiffness frame does not affect where the robot will move to.
+ * The user should always command the desired end effector frame (and not the desired stiffness
+ * frame).
  */
 class Robot {
  public:
@@ -641,7 +645,7 @@ class Robot {
   /**
    * Starts a new torque controller
    *
-   * @return unique_ptr of ActiveControl for the started motion
+   * @return unique_ptr of ActiveTorqueControl for the started motion
    *
    * @throw ControlException if an error related to torque control or motion generation
    * occurred.
@@ -649,7 +653,69 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveControl> startTorqueControl();
+  std::unique_ptr<ActiveTorqueControl> startTorqueControl();
+
+  /**
+   * Starts a new joint position motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
+   * operation
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
+   *
+   * @throw ControlException if an error related to torque control or motion generation
+   * occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  std::unique_ptr<ActiveMotionGenerator<JointPositions>> startJointPositionControl(
+      const research_interface::robot::Move::ControllerMode& control_type);
+
+  /**
+   * Starts a new joint velocity motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
+   * operation
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
+   * @throw ControlException if an error related to torque control or motion generation
+   * occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  std::unique_ptr<ActiveMotionGenerator<JointVelocities>> startJointVelocityControl(
+      const research_interface::robot::Move::ControllerMode& control_type);
+
+  /**
+   * Starts a new cartesian position motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
+   * operation
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
+   * @throw ControlException if an error related to torque control or motion generation
+   * occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  std::unique_ptr<ActiveMotionGenerator<CartesianPose>> startCartesianPositionControl(
+      const research_interface::robot::Move::ControllerMode& control_type);
+
+  /**
+   * Starts a new cartesian velocity motion generator
+   *
+   * @param control_type research_interface::robot::Move::ControllerMode control type for the
+   * operation
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
+   *
+   * @throw ControlException if an error related to torque control or motion generation
+   * occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
+   */
+  std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> startCartesianVelocityControl(
+      const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
    * Stops all currently running motions.
@@ -699,6 +765,24 @@ class Robot {
   Robot(std::shared_ptr<Impl> robot_impl);
 
  private:
+  /**
+   * Starts a new motion generator and controller
+   *
+   * @tparam T the franka control type
+   * @param control_mode defines the type of motion / control that shall be started
+   * @param controller_mode the controller-mode that shall be used
+   * @return unique_ptr of ActiveMotionGenerator for the started motion
+   *
+   * @throw ControlException if an error related to torque control or motion generation
+   occurred.
+   * @throw InvalidOperationException if a conflicting operation is already running.*
+   * @throw NetworkException if the connection is lost,e.g.after a timeout.
+   * @throw std::invalid_argument if joint - level torque commands are NaN or infinity.
+   */
+  template <typename T>
+  std::unique_ptr<ActiveMotionGenerator<T>> startControl(
+      const research_interface::robot::Move::ControllerMode& controller_type);
+
   std::shared_ptr<Impl> impl_;
   std::mutex control_mutex_;
 };

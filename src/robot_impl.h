@@ -45,6 +45,22 @@ class Robot::Impl : public RobotControl {
    */
   virtual void writeOnce(const Torques& control_input);
 
+  virtual void writeOnce(const JointPositions& motion_generator_input);
+  virtual void writeOnce(const JointVelocities& motion_generator_input);
+  virtual void writeOnce(const CartesianPose& motion_generator_input);
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input);
+
+  virtual void writeOnce(const JointPositions& motion_generator_input,
+                         const Torques& control_input);
+
+  virtual void writeOnce(const JointVelocities& motion_generator_input,
+                         const Torques& control_input);
+
+  virtual void writeOnce(const CartesianPose& motion_generator_input, const Torques& control_input);
+
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input,
+                         const Torques& control_input);
+
   ServerVersion serverVersion() const noexcept;
   RealtimeConfig realtimeConfig() const noexcept override;
 
@@ -71,11 +87,32 @@ class Robot::Impl : public RobotControl {
 
   Model loadModel() const;
 
+  research_interface::robot::ControllerCommand createControllerCommand(
+      const Torques& control_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointPositions& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const JointVelocities& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianPose& motion_input);
+
+  research_interface::robot::MotionGeneratorCommand createMotionCommand(
+      const CartesianVelocities& motion_input);
+
  protected:
   bool motionGeneratorRunning() const noexcept;
   bool controllerRunning() const noexcept;
 
  private:
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input);
+
+  template <typename MotionGeneratorType>
+  void writeOnce(const MotionGeneratorType& motion_generator_input, const Torques& control_input);
+
   std::string commandNotPossibleMsg() const {
     std::stringstream ss;
     ss << " command rejected: command not possible in the current mode ("
@@ -85,9 +122,6 @@ class Robot::Impl : public RobotControl {
     }
     return ss.str();
   }
-
-  research_interface::robot::ControllerCommand createControllerCommand(
-      const Torques& control_input);
 
   template <typename T>
   using IsBaseOfGetterSetter =

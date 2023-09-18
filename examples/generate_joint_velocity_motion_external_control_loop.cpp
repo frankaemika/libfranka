@@ -1,25 +1,29 @@
-// Copyright (c) 2017 Franka Emika GmbH
+// Copyright (c) 2023 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <cmath>
 #include <iostream>
 
+#include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
 #include <franka/exception.h>
 #include <franka/robot.h>
 
 #include "examples_common.h"
 
 /**
- * @example generate_joint_position_motion.cpp
- * An example showing how to generate a joint position motion.
+ * @example generate_joint_velocity_motion_external_control_loop.cpp
+ * An example showing how to generate a joint velocity motion with an external control loop.
  *
  * @warning Before executing this example, make sure there is enough space in front of the robot.
  */
 
 int main(int argc, char** argv) {
+  // Check whether the required arguments were passed
   if (argc != 2) {
     std::cerr << "Usage: " << argv[0] << " <robot-hostname>" << std::endl;
     return -1;
   }
+
   try {
     franka::Robot robot(argv[1]);
     setDefaultBehavior(robot);
@@ -42,29 +46,38 @@ int main(int argc, char** argv) {
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}},
         {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}}, {{20.0, 20.0, 20.0, 25.0, 25.0, 25.0}});
 
-    std::array<double, 7> initial_position;
+    double time_max = 1.0;
+    double omega_max = 1.0;
     double time = 0.0;
-    robot.control([&initial_position, &time](const franka::RobotState& robot_state,
-                                             franka::Duration period) -> franka::JointPositions {
+
+    auto callback_control = [=, &time](const franka::RobotState&,
+                                       franka::Duration period) -> franka::JointVelocities {
       time += period.toSec();
 
-      if (time == 0.0) {
-        initial_position = robot_state.q_d;
-      }
+      double cycle = std::floor(std::pow(-1.0, (time - std::fmod(time, time_max)) / time_max));
+      double omega = cycle * omega_max / 2.0 * (1.0 - std::cos(2.0 * M_PI / time_max * time));
 
-      double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));
+      franka::JointVelocities velocities = {{0.0, 0.0, 0.0, omega, omega, omega, omega}};
 
-      franka::JointPositions output = {{initial_position[0], initial_position[1],
-                                        initial_position[2], initial_position[3] + delta_angle,
-                                        initial_position[4] + delta_angle, initial_position[5],
-                                        initial_position[6] + delta_angle}};
-
-      if (time >= 5.0) {
+      if (time >= 2 * time_max) {
         std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-        return franka::MotionFinished(output);
+        return franka::MotionFinished(velocities);
       }
-      return output;
-    });
+      return velocities;
+    };
+
+    bool motion_finished = false;
+    std::unique_ptr<franka::ActiveControl> active_control = robot.startJointVelocityControl(
+        research_interface::robot::Move::ControllerMode::kJointImpedance);
+    while (!motion_finished) {
+      auto read_once_return = active_control->readOnce();
+      auto robot_state = read_once_return.first;
+      auto duration = read_once_return.second;
+      auto joint_velocities = callback_control(robot_state, duration);
+      motion_finished = joint_velocities.motion_finished;
+      active_control->writeOnce(joint_velocities);
+    }
+
   } catch (const franka::Exception& e) {
     std::cout << e.what() << std::endl;
     return -1;

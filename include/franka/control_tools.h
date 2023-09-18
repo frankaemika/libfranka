@@ -90,4 +90,33 @@ inline void checkFinite(const std::array<double, N>& array) {
   }
 }
 
+/**
+ * Checks if all elements of the transformation matrix are finite and if it is a homogeneous
+ * transformation
+ *
+ * @param transform the transformation matrix to check
+ */
+inline void checkMatrix(const std::array<double, 16>& transform) {
+  checkFinite(transform);
+  if (!isHomogeneousTransformation(transform)) {
+    throw std::invalid_argument(
+        "libfranka: Attempt to set invalid transformation in motion generator. Has to be column "
+        "major!");
+  }
+}
+
+/**
+ * Checks if all elements of the elbow vector are finite and if the elbow configuration is valid
+ *
+ * @param elbow the elbow vector to check
+ */
+inline void checkElbow(const std::array<double, 2>& elbow) {
+  checkFinite(elbow);
+  if (!isValidElbow(elbow)) {
+    throw std::invalid_argument(
+        "Invalid elbow configuration given! Only +1 or -1 are allowed for the sign of the 4th "
+        "joint.");
+  }
+}
+
 }  // namespace franka

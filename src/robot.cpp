@@ -1,6 +1,8 @@
 // Copyright (c) 2017 Franka Emika GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include <franka/active_control.h>
+#include <franka/active_motion_generator.h>
+#include <franka/active_torque_control.h>
 #include <franka/robot.h>
 
 #include <utility>
@@ -248,7 +250,25 @@ void Robot::automaticErrorRecovery() {
   impl_->executeCommand<research_interface::robot::AutomaticErrorRecovery>();
 }
 
-std::unique_ptr<ActiveControl> Robot::startTorqueControl() {
+template <typename MotionGeneratorType>
+std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>> Robot::startControl(
+    const research_interface::robot::Move::ControllerMode& controller_type) {
+  std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
+  assertOwningLock(control_lock);
+
+  research_interface::robot::Move::MotionGeneratorMode motion_generator_mode =
+      MotionGeneratorTraits<MotionGeneratorType>::kMotionGeneratorMode;
+
+  uint32_t motion_id = impl_->startMotion(controller_type, motion_generator_mode,
+                                          ControlLoop<MotionGeneratorType>::kDefaultDeviation,
+                                          ControlLoop<MotionGeneratorType>::kDefaultDeviation);
+
+  return std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>>(
+      new ActiveMotionGenerator<MotionGeneratorType>(impl_, motion_id, std::move(control_lock),
+                                                     controller_type));
+}
+
+std::unique_ptr<ActiveTorqueControl> Robot::startTorqueControl() {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
@@ -259,8 +279,28 @@ std::unique_ptr<ActiveControl> Robot::startTorqueControl() {
                          ControlLoop<JointVelocities>::kDefaultDeviation,
                          ControlLoop<JointVelocities>::kDefaultDeviation);
 
-  return std::unique_ptr<ActiveControl>(
-      new ActiveControl(impl_, motion_id, std::move(control_lock)));
+  return std::unique_ptr<ActiveTorqueControl>(
+      new ActiveTorqueControl(impl_, motion_id, std::move(control_lock)));
+}
+
+std::unique_ptr<ActiveMotionGenerator<JointPositions>> Robot::startJointPositionControl(
+    const research_interface::robot::Move::ControllerMode& control_type) {
+  return startControl<JointPositions>(control_type);
+}
+
+std::unique_ptr<ActiveMotionGenerator<JointVelocities>> Robot::startJointVelocityControl(
+    const research_interface::robot::Move::ControllerMode& control_type) {
+  return startControl<JointVelocities>(control_type);
+}
+
+std::unique_ptr<ActiveMotionGenerator<CartesianPose>> Robot::startCartesianPositionControl(
+    const research_interface::robot::Move::ControllerMode& control_type) {
+  return startControl<CartesianPose>(control_type);
+}
+
+std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> Robot::startCartesianVelocityControl(
+    const research_interface::robot::Move::ControllerMode& control_type) {
+  return startControl<CartesianVelocities>(control_type);
 }
 
 void Robot::stop() {
@@ -272,5 +312,14 @@ Model Robot::loadModel() {
 }
 
 Robot::Robot(std::shared_ptr<Impl> robot_impl) : impl_(std::move(robot_impl)){};
+
+template std::unique_ptr<ActiveMotionGenerator<JointVelocities>> Robot::startControl<
+    JointVelocities>(const research_interface::robot::Move::ControllerMode& controller_type);
+template std::unique_ptr<ActiveMotionGenerator<JointPositions>> Robot::startControl<JointPositions>(
+    const research_interface::robot::Move::ControllerMode& controller_type);
+template std::unique_ptr<ActiveMotionGenerator<CartesianPose>> Robot::startControl<CartesianPose>(
+    const research_interface::robot::Move::ControllerMode& controller_type);
+template std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> Robot::startControl<
+    CartesianVelocities>(const research_interface::robot::Move::ControllerMode& controller_type);
 
 }  // namespace franka

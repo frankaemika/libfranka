@@ -37,7 +37,8 @@ list(APPEND TEST_DEPENDENCIES fcimodels)
 
 ## Test runner
 add_executable(run_all_tests
-  active_control_tests.cpp
+  active_motion_generator_tests.cpp
+  active_torque_control_tests.cpp
   calculations_tests.cpp
   control_loop_tests.cpp
   control_types_tests.cpp

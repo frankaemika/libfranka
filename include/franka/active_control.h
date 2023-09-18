@@ -3,41 +3,34 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <utility>
 
 #include <franka/control_types.h>
+#include <franka/exception.h>
 #include <franka/robot_state.h>
 
 #include "robot.h"
 
 /**
  * @file active_control.h
- * Contains the `franka::ActiveControl` type.
+ * Contains the `franka::ActiveControl`, `franka::ActiveTorqueControl` and
+ * `franka::ActiveMotionGenerator` type.
  */
 
 namespace franka {
 
 /**
  * Allows the user to read the state of a Robot and to send new control commands after starting a
- * control process of an Robot.
+ * control process of a Robot.
  *
- * hint: To create an ActiveControl, see Robot::startControl
+ * hint: To create an ActiveControl, see franka::ActiveTorqueControl or
+ * franka::ActiveMotionGenerator
  *
  */
 class ActiveControl {
  public:
   virtual ~ActiveControl();
-
-  /**
-   * Updates the joint-level based torque commands of an active joint effort control
-   *
-   * @param control_input the new joint-level based torques
-   *
-   * @throw ControlException if an error related to torque control or motion generation occurred, or
-   * the motion was already finished.
-   * @throw NetworkException if the connection is lost, e.g. after a timeout.
-   */
-  void writeOnce(const Torques& control_input);
 
   /**
    * Waits for a robot state update and returns it.
@@ -51,17 +44,113 @@ class ActiveControl {
   std::pair<RobotState, Duration> readOnce();
 
   /**
-   * @note ActiveControl objects can only be created during the Robot::startMotion. To allow access
-   * to the private constructor Robot is defined as friend
+   * Updates torque commands of an active control
    *
+   * hint: implemented in ActiveTorqueControl
+   *
+   * @return void
    */
-  friend class Robot;
+  virtual void writeOnce(const Torques& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
 
- private:
+  /**
+   * Updates the joint position and torque commands of an active control
+   *
+   * hint: implemented in ActiveMotionGenerator<JointPositions>
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointPositions& /* motion_generator_input */,
+                         const std::optional<const Torques>& /*control_input*/) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  /**
+   * Updates the joint velocity and torque commands of an active control
+   *
+   * hint: implemented in ActiveMotionGenerator<JointVelocities>
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointVelocities& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  /**
+   * Updates the cartesian position and torque commands of an active control
+   *
+   * hint: implemented in ActiveMotionGenerator<CartesianPose>
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianPose& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  /**
+   * Updates the cartesian velocity and torque commands of an active control
+   *
+   * hint: implemented in ActiveMotionGenerator<CartesianVelocities>
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */,
+                         const std::optional<const Torques>& /* control_input */) {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  /**
+   * Updates the joint position commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointPositions& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the joint velocity commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const JointVelocities& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the cartesian position commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianPose& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+  /**
+   * Updates the cartesian velocity commands of an active control, with internal controller
+   *
+   * @param motion_generator_input the new motion generator input
+   *
+   * @return void
+   */
+  virtual void writeOnce(const CartesianVelocities& motion_generator_input) {
+    writeOnce(motion_generator_input, std::optional<const Torques>());
+  };
+
+ protected:
   /**
    * Construct a new ActiveControl object
    *
-   * @param robot shared_ptr to the Robot::Impl in the Robot
+   * @param robot_impl shared_ptr to the Robot::Impl in the Robot
    * @param motion_id id of the managed motion
    * @param control_lock of the Robot, preventing other read and write accesses during the active
    * control
@@ -70,12 +159,24 @@ class ActiveControl {
                 uint32_t motion_id,
                 std::unique_lock<std::mutex> control_lock);
 
-  std::shared_ptr<Robot::Impl> robot_impl_;
-  uint32_t motion_id_;
-  std::unique_lock<std::mutex> control_lock_;
-  bool control_finished_;
-  bool first_read_attempt_;
-  Duration last_read_access_;
+  /// shared pointer to Robot::Impl instance for read and write accesses
+  std::shared_ptr<Robot::Impl> robot_impl;
+
+  /// motion id of running motion
+  uint32_t motion_id;
+
+  /// control-lock preventing parallel control processes
+  std::unique_lock<std::mutex> control_lock;
+
+  /// flag indicating if control process is finished
+  bool control_finished;
+
+  /// duration to last read access
+  std::optional<Duration> last_read_access;
+
+ private:
+  const std::string wrong_write_once_method_called{
+      "Wrong writeOnce method called for currently active control!"};
 };
 
 }  // namespace franka

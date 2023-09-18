@@ -8,6 +8,7 @@
 #include <utility>
 
 #include <franka/active_control.h>
+#include <franka/active_torque_control.h>
 #include <franka/control_types.h>
 #include <franka/exception.h>
 #include <franka/lowpass_filter.h>
@@ -490,8 +491,8 @@ TEST(RobotMock, CanStartOnlyOneControl) {
 
   EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(2);
 
-  EXPECT_NO_THROW(std::unique_ptr<ActiveControl> control = robot.startTorqueControl());
+  EXPECT_NO_THROW(auto control = robot.startTorqueControl());
 
-  std::unique_ptr<ActiveControl> control = robot.startTorqueControl();
+  auto control = robot.startTorqueControl();
   EXPECT_THROW(robot.startTorqueControl(), InvalidOperationException);
 }

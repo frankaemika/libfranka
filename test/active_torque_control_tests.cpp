@@ -3,6 +3,7 @@
 #include <gmock/gmock.h>
 
 #include <franka/active_control.h>
+#include <franka/active_torque_control.h>
 #include <franka/control_types.h>
 #include <franka/exception.h>
 #include <robot_impl.h>
@@ -12,89 +13,89 @@
 #include "mock_robot_impl.h"
 #include "mock_server.h"
 
+using ::testing::Matcher;
+
 using namespace research_interface;
 
 using namespace franka;
 
-class ActiveControlTest : public ::testing::Test {
+class ActiveTorqueControlTest : public ::testing::Test {
  public:
-  ActiveControlTest()
-      : robot_impl_mock_(std::make_shared<RobotImplMock>(
+  ActiveTorqueControlTest()
+      : robot_impl_mock(std::make_shared<RobotImplMock>(
             std::move(std::make_unique<Network>("127.0.0.1", robot::kCommandPort)),
             0,
             RealtimeConfig::kIgnore)),
-        robot_(RobotMock(robot_impl_mock_)) {
-    server_.sendEmptyState<robot::RobotState>().spinOnce();
-  };
+        robot(RobotMock(robot_impl_mock)){};
 
-  std::unique_ptr<ActiveControl> startControl() {
-    EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
+  std::unique_ptr<ActiveTorqueControl> startTorqueControl() {
+    EXPECT_CALL(*robot_impl_mock, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));
 
-    return robot_.startTorqueControl();
+    return robot.startTorqueControl();
   }
 
  protected:
-  RobotMockServer server_;
-  std::shared_ptr<RobotImplMock> robot_impl_mock_;
-  RobotMock robot_;
+  RobotMockServer server;
+  std::shared_ptr<RobotImplMock> robot_impl_mock;
+  RobotMock robot;
 };
 
-TEST_F(ActiveControlTest, CanWriteOnceIfControlNotFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+TEST_F(ActiveTorqueControlTest, CanWriteOnceIfControlNotFinished) {
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
 
-  EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
-  EXPECT_CALL(*robot_impl_mock_, writeOnce(testing::_)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, writeOnce(Matcher<const Torques&>(testing::_))).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
 }
 
-TEST_F(ActiveControlTest, CanCallFinishMotionWhenFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+TEST_F(ActiveTorqueControlTest, CanCallFinishMotionWhenFinished) {
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
-  EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, finishMotion(100, testing::_, testing::_)).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
 }
 
-TEST_F(ActiveControlTest, CanNotWriteOnceIfControlFinished) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+TEST_F(ActiveTorqueControlTest, CanNotWriteOnceIfControlFinished) {
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
-  EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, finishMotion(100, testing::_, testing::_)).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
   EXPECT_THROW(active_control->writeOnce(default_control_output), ControlException);
 }
 
-TEST_F(ActiveControlTest, ControlTokenReleasedAfterFinishingControl) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+TEST_F(ActiveTorqueControlTest, ControlTokenReleasedAfterFinishingControl) {
+  auto active_control = startTorqueControl();
   Torques default_control_output{{0, 0, 0, 0, 0, 0, 0}};
   default_control_output.motion_finished = true;
 
-  EXPECT_CALL(*robot_impl_mock_, finishMotion(100, testing::_, testing::_)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, finishMotion(100, testing::_, testing::_)).Times(1);
   EXPECT_NO_THROW(active_control->writeOnce(default_control_output));
-  EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
-  EXPECT_NO_THROW(startControl());
+  EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(1);
+  EXPECT_NO_THROW(startTorqueControl());
 }
 
-TEST_F(ActiveControlTest, CanReadOnce) {
-  std::unique_ptr<ActiveControl> active_control = startControl();
+TEST_F(ActiveTorqueControlTest, CanReadOnce) {
+  auto active_control = startTorqueControl();
   const Duration time_first_read(1);
   const Duration time_second_read(5);
   const RobotState kFirstExpectedRobotState{.time = time_first_read};
   const RobotState kSecondExpectedRobotState{.time = time_second_read};
 
-  EXPECT_CALL(*robot_impl_mock_, readOnce())
+  EXPECT_CALL(*robot_impl_mock, readOnce())
       .Times(2)
       .WillOnce(::testing::Return(kFirstExpectedRobotState))
       .WillOnce(::testing::Return(kSecondExpectedRobotState));
-  EXPECT_CALL(*robot_impl_mock_, cancelMotion(100)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, cancelMotion(100)).Times(1);
   auto& first_throw_motion_error_call =
-      EXPECT_CALL(*robot_impl_mock_, throwOnMotionError(kFirstExpectedRobotState, 100)).Times(1);
-  EXPECT_CALL(*robot_impl_mock_, throwOnMotionError(kSecondExpectedRobotState, 100))
+      EXPECT_CALL(*robot_impl_mock, throwOnMotionError(kFirstExpectedRobotState, 100)).Times(1);
+  EXPECT_CALL(*robot_impl_mock, throwOnMotionError(kSecondExpectedRobotState, 100))
       .Times(1)
       .After(first_throw_motion_error_call);
 

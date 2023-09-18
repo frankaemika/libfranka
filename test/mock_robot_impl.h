@@ -25,6 +25,16 @@ class RobotImplMock : public Robot::Impl {
                     const robot::MotionGeneratorCommand* motion_command,
                     const robot::ControllerCommand* control_command));
   MOCK_METHOD1(writeOnce, void(const Torques& control_input));
+  MOCK_METHOD1(writeOnce, void(const JointPositions& motion_input));
+  MOCK_METHOD1(writeOnce, void(const JointVelocities& motion_input));
+  MOCK_METHOD1(writeOnce, void(const CartesianPose& motion_input));
+  MOCK_METHOD1(writeOnce, void(const CartesianVelocities& motion_input));
+  MOCK_METHOD2(writeOnce, void(const JointPositions& motion_input, const Torques& control_input));
+  MOCK_METHOD2(writeOnce, void(const JointVelocities& motion_input, const Torques& control_input));
+  MOCK_METHOD2(writeOnce, void(const CartesianPose& motion_input, const Torques& control_input));
+  MOCK_METHOD2(writeOnce,
+               void(const CartesianVelocities& motion_input, const Torques& control_input));
+
   MOCK_METHOD0(readOnce, RobotState());
   MOCK_METHOD2(throwOnMotionError, void(const RobotState& robot_state, uint32_t motion_id));
 };
