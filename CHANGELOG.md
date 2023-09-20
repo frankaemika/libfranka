@@ -1,4 +1,7 @@
 # CHANGELOG
+## 0.12.1 - 2023-09-20
+
+ * Fix install common/include typo
 
 ## 0.12.0 - 2023-09-14
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(libfranka_VERSION 0.12.0)
+set(libfranka_VERSION 0.12.1)
 
 project(libfranka
   VERSION ${libfranka_VERSION}
@@ -131,7 +131,7 @@ install(TARGETS franka libfranka-common
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-install(DIRECTORY include/ common/include DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY include/ common/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   USE_SOURCE_PERMISSIONS
 )
 
