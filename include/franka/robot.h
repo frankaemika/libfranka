@@ -22,10 +22,7 @@ namespace franka {
 
 class Model;
 
-class ActiveTorqueControl;
-
-template <typename MotionGeneratorType>
-class ActiveMotionGenerator;
+class ActiveControlBase;
 
 /**
  * Maintains a network connection to the robot, provides the current robot state, gives access to
@@ -448,7 +445,7 @@ class Robot {
    *
    * @see Robot::read for a way to repeatedly receive the robot state.
    */
-  RobotState readOnce();
+  virtual RobotState readOnce();
 
   /**
    * @name Commands
@@ -653,7 +650,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveTorqueControl> startTorqueControl();
+  virtual std::unique_ptr<ActiveControlBase> startTorqueControl();
 
   /**
    * Starts a new joint position motion generator
@@ -668,7 +665,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveMotionGenerator<JointPositions>> startJointPositionControl(
+  virtual std::unique_ptr<ActiveControlBase> startJointPositionControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -683,7 +680,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveMotionGenerator<JointVelocities>> startJointVelocityControl(
+  virtual std::unique_ptr<ActiveControlBase> startJointVelocityControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -698,7 +695,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveMotionGenerator<CartesianPose>> startCartesianPositionControl(
+  virtual std::unique_ptr<ActiveControlBase> startCartesianPoseControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -714,7 +711,7 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    * @throw std::invalid_argument if joint-level torque commands are NaN or infinity.
    */
-  std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> startCartesianVelocityControl(
+  virtual std::unique_ptr<ActiveControlBase> startCartesianVelocityControl(
       const research_interface::robot::Move::ControllerMode& control_type);
 
   /**
@@ -764,6 +761,11 @@ class Robot {
    */
   Robot(std::shared_ptr<Impl> robot_impl);
 
+  /**
+   * Default constructor to enable mocking and testing.
+   */
+  Robot() = default;
+
  private:
   /**
    * Starts a new motion generator and controller
@@ -780,7 +782,7 @@ class Robot {
    * @throw std::invalid_argument if joint - level torque commands are NaN or infinity.
    */
   template <typename T>
-  std::unique_ptr<ActiveMotionGenerator<T>> startControl(
+  std::unique_ptr<ActiveControlBase> startControl(
       const research_interface::robot::Move::ControllerMode& controller_type);
 
   std::shared_ptr<Impl> impl_;
