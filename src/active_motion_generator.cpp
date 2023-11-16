@@ -7,6 +7,7 @@
 #include <research_interface/robot/rbk_types.h>
 
 #include "robot_impl.h"
+
 namespace franka {
 
 template <typename MotionGeneratorType>

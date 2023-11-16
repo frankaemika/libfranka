@@ -11,8 +11,7 @@
 
 /**
  * @file active_control_base.h
- * Abstract interface class as the base of the active controllers. Used for mocking and testing in
- * franka_ros2.
+ * Abstract interface class as the base of the active controllers.
  */
 
 namespace franka {

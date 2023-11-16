@@ -9,8 +9,8 @@
 
 /**
  * @file active_control.h
- * Contains the `franka::ActiveControl`, `franka::ActiveTorqueControl` and
- * `franka::ActiveMotionGenerator` type.
+ * Implements the ActiveControlBase abstract class. Contains the `franka::ActiveControl`,
+ * `franka::ActiveTorqueControl` and `franka::ActiveMotionGenerator` type.
  */
 
 namespace franka {
@@ -20,46 +20,46 @@ namespace franka {
  */
 class ActiveControl : public ActiveControlBase {
  public:
-  virtual ~ActiveControl();
+  ~ActiveControl();
 
-  virtual std::pair<RobotState, Duration> readOnce();
+  std::pair<RobotState, Duration> readOnce();
 
-  virtual void writeOnce(const Torques& /* control_input */) {
+  void writeOnce(const Torques& /* control_input */) override {
     throw franka::ControlException(wrong_write_once_method_called);
   };
 
-  virtual void writeOnce(const JointPositions& /* motion_generator_input */,
-                         const std::optional<const Torques>& /*control_input*/) {
+  void writeOnce(const JointPositions& /* motion_generator_input */,
+                 const std::optional<const Torques>& /*control_input*/) override {
     throw franka::ControlException(wrong_write_once_method_called);
   };
-  virtual void writeOnce(const JointVelocities& /* motion_generator_input */,
-                         const std::optional<const Torques>& /* control_input */) {
-    throw franka::ControlException(wrong_write_once_method_called);
-  };
-
-  virtual void writeOnce(const CartesianPose& /* motion_generator_input */,
-                         const std::optional<const Torques>& /* control_input */) {
+  void writeOnce(const JointVelocities& /* motion_generator_input */,
+                 const std::optional<const Torques>& /* control_input */) override {
     throw franka::ControlException(wrong_write_once_method_called);
   };
 
-  virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */,
-                         const std::optional<const Torques>& /* control_input */) {
+  void writeOnce(const CartesianPose& /* motion_generator_input */,
+                 const std::optional<const Torques>& /* control_input */) override {
     throw franka::ControlException(wrong_write_once_method_called);
   };
 
-  virtual void writeOnce(const JointPositions& motion_generator_input) {
+  void writeOnce(const CartesianVelocities& /* motion_generator_input */,
+                 const std::optional<const Torques>& /* control_input */) override {
+    throw franka::ControlException(wrong_write_once_method_called);
+  };
+
+  void writeOnce(const JointPositions& motion_generator_input) override {
     writeOnce(motion_generator_input, std::optional<const Torques>());
   };
 
-  virtual void writeOnce(const JointVelocities& motion_generator_input) {
+  void writeOnce(const JointVelocities& motion_generator_input) override {
     writeOnce(motion_generator_input, std::optional<const Torques>());
   };
 
-  virtual void writeOnce(const CartesianPose& motion_generator_input) {
+  void writeOnce(const CartesianPose& motion_generator_input) override {
     writeOnce(motion_generator_input, std::optional<const Torques>());
   };
 
-  virtual void writeOnce(const CartesianVelocities& motion_generator_input) {
+  void writeOnce(const CartesianVelocities& motion_generator_input) override {
     writeOnce(motion_generator_input, std::optional<const Torques>());
   };
 

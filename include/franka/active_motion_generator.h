@@ -5,7 +5,7 @@
 #include "active_control.h"
 
 /**
- * @file active_control.h
+ * @file active_motion_generator.h
  * Contains the `franka::ActiveMotionGenerator` type.
  */
 
