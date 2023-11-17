@@ -44,7 +44,6 @@ class ActiveControlBase {
    *
    * hint: implemented in ActiveTorqueControl
    *
-   * @return void
    */
   virtual void writeOnce(const Torques& /* control_input */) = 0;
 
@@ -53,7 +52,6 @@ class ActiveControlBase {
    *
    * hint: implemented in ActiveMotionGenerator<JointPositions>
    *
-   * @return void
    */
   virtual void writeOnce(const JointPositions& /* motion_generator_input */,
                          const std::optional<const Torques>& /*control_input*/) = 0;
@@ -63,7 +61,6 @@ class ActiveControlBase {
    *
    * hint: implemented in ActiveMotionGenerator<JointVelocities>
    *
-   * @return void
    */
   virtual void writeOnce(const JointVelocities& /* motion_generator_input */,
                          const std::optional<const Torques>& /* control_input */) = 0;
@@ -72,7 +69,6 @@ class ActiveControlBase {
    *
    * hint: implemented in ActiveMotionGenerator<CartesianPose>
    *
-   * @return void
    */
   virtual void writeOnce(const CartesianPose& /* motion_generator_input */,
                          const std::optional<const Torques>& /* control_input */) = 0;
@@ -82,7 +78,6 @@ class ActiveControlBase {
    *
    * hint: implemented in ActiveMotionGenerator<CartesianVelocities>
    *
-   * @return void
    */
   virtual void writeOnce(const CartesianVelocities& /* motion_generator_input */,
                          const std::optional<const Torques>& /* control_input */) = 0;
@@ -91,7 +86,6 @@ class ActiveControlBase {
    *
    * @param motion_generator_input the new motion generator input
    *
-   * @return void
    */
   virtual void writeOnce(const JointPositions& motion_generator_input) = 0;
 
@@ -100,7 +94,6 @@ class ActiveControlBase {
    *
    * @param motion_generator_input the new motion generator input
    *
-   * @return void
    */
   virtual void writeOnce(const JointVelocities& motion_generator_input) = 0;
   /**
@@ -108,7 +101,6 @@ class ActiveControlBase {
    *
    * @param motion_generator_input the new motion generator input
    *
-   * @return void
    */
   virtual void writeOnce(const CartesianPose& motion_generator_input) = 0;
 
@@ -117,7 +109,6 @@ class ActiveControlBase {
    *
    * @param motion_generator_input the new motion generator input
    *
-   * @return void
    */
   virtual void writeOnce(const CartesianVelocities& motion_generator_input) = 0;
 

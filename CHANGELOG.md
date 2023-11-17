@@ -3,8 +3,8 @@
 ## 0.13.0 - 2023-11-16
 
  * Add abstract ActiveControlBase class for the ActiveControllers to implement.
- * Fix function naming errors in robot class.
- * ActiveController initializer functions return ActiveControlBase
+ * **BREAKING** Fix function naming errors in robot class.
+ * **BREAKING** ActiveController initializer functions return ActiveControlBase
 
 ## 0.12.1 - 2023-09-20
 

@@ -20,9 +20,9 @@ namespace franka {
  */
 class ActiveControl : public ActiveControlBase {
  public:
-  ~ActiveControl();
+  ~ActiveControl() override;
 
-  std::pair<RobotState, Duration> readOnce();
+  std::pair<RobotState, Duration> readOnce() override;
 
   void writeOnce(const Torques& /* control_input */) override {
     throw franka::ControlException(wrong_write_once_method_called);
@@ -32,6 +32,7 @@ class ActiveControl : public ActiveControlBase {
                  const std::optional<const Torques>& /*control_input*/) override {
     throw franka::ControlException(wrong_write_once_method_called);
   };
+
   void writeOnce(const JointVelocities& /* motion_generator_input */,
                  const std::optional<const Torques>& /* control_input */) override {
     throw franka::ControlException(wrong_write_once_method_called);
