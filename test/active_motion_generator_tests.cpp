@@ -29,7 +29,7 @@ class ActiveMotionGeneratorTest : public ::testing::Test {
             RealtimeConfig::kIgnore)),
         robot_(RobotMock(robot_impl_mock_)){};
 
-  std::unique_ptr<ActiveControl> startControl(
+  std::unique_ptr<ActiveControlBase> startControl(
       research_interface::robot::Move::ControllerMode controller_mode);
 
   using CurrentMotionGeneratorType = MotionGeneratorType;
@@ -49,7 +49,7 @@ class ActiveMotionGeneratorTest : public ::testing::Test {
 };
 
 template <>
-std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<JointPositions>::startControl(
+std::unique_ptr<ActiveControlBase> ActiveMotionGeneratorTest<JointPositions>::startControl(
     research_interface::robot::Move::ControllerMode controller_mode) {
   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
       .Times(1)
@@ -59,7 +59,7 @@ std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<JointPositions>::startC
 }
 
 template <>
-std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<JointVelocities>::startControl(
+std::unique_ptr<ActiveControlBase> ActiveMotionGeneratorTest<JointVelocities>::startControl(
     research_interface::robot::Move::ControllerMode controller_mode) {
   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
       .Times(1)
@@ -69,17 +69,17 @@ std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<JointVelocities>::start
 }
 
 template <>
-std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<CartesianPose>::startControl(
+std::unique_ptr<ActiveControlBase> ActiveMotionGeneratorTest<CartesianPose>::startControl(
     research_interface::robot::Move::ControllerMode controller_mode) {
   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
       .Times(1)
       .WillOnce(::testing::Return(default_motion_id));
 
-  return robot_.startCartesianPositionControl(controller_mode);
+  return robot_.startCartesianPoseControl(controller_mode);
 }
 
 template <>
-std::unique_ptr<ActiveControl> ActiveMotionGeneratorTest<CartesianVelocities>::startControl(
+std::unique_ptr<ActiveControlBase> ActiveMotionGeneratorTest<CartesianVelocities>::startControl(
     research_interface::robot::Move::ControllerMode controller_mode) {
   EXPECT_CALL(*robot_impl_mock_, startMotion(testing::_, testing::_, testing::_, testing::_))
       .Times(1)

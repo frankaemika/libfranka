@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
     };
 
     bool motion_finished = false;
-    std::unique_ptr<franka::ActiveControl> active_control = robot.startJointVelocityControl(
+    auto active_control = robot.startJointVelocityControl(
         research_interface::robot::Move::ControllerMode::kJointImpedance);
     while (!motion_finished) {
       auto read_once_return = active_control->readOnce();

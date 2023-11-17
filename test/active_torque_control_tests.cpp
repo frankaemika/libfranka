@@ -28,7 +28,7 @@ class ActiveTorqueControlTest : public ::testing::Test {
             RealtimeConfig::kIgnore)),
         robot(RobotMock(robot_impl_mock)){};
 
-  std::unique_ptr<ActiveTorqueControl> startTorqueControl() {
+  std::unique_ptr<ActiveControlBase> startTorqueControl() {
     EXPECT_CALL(*robot_impl_mock, startMotion(testing::_, testing::_, testing::_, testing::_))
         .Times(1)
         .WillOnce(::testing::Return(100));

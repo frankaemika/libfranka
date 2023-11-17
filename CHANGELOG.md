@@ -1,4 +1,11 @@
 # CHANGELOG
+
+## 0.13.0 - 2023-11-16
+
+ * Add abstract ActiveControlBase class for the ActiveControllers to implement.
+ * **BREAKING** Fix function naming errors in robot class.
+ * **BREAKING** ActiveController initializer functions return ActiveControlBase
+
 ## 0.12.1 - 2023-09-20
 
  * Fix install common/include typo

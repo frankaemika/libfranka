@@ -251,7 +251,7 @@ void Robot::automaticErrorRecovery() {
 }
 
 template <typename MotionGeneratorType>
-std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>> Robot::startControl(
+std::unique_ptr<ActiveControlBase> Robot::startControl(
     const research_interface::robot::Move::ControllerMode& controller_type) {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
@@ -262,13 +262,11 @@ std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>> Robot::startControl(
   uint32_t motion_id = impl_->startMotion(controller_type, motion_generator_mode,
                                           ControlLoop<MotionGeneratorType>::kDefaultDeviation,
                                           ControlLoop<MotionGeneratorType>::kDefaultDeviation);
-
-  return std::unique_ptr<ActiveMotionGenerator<MotionGeneratorType>>(
-      new ActiveMotionGenerator<MotionGeneratorType>(impl_, motion_id, std::move(control_lock),
-                                                     controller_type));
+  return std::unique_ptr<ActiveControlBase>(new ActiveMotionGenerator<MotionGeneratorType>(
+      impl_, motion_id, std::move(control_lock), controller_type));
 }
 
-std::unique_ptr<ActiveTorqueControl> Robot::startTorqueControl() {
+std::unique_ptr<ActiveControlBase> Robot::startTorqueControl() {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
 
@@ -279,26 +277,26 @@ std::unique_ptr<ActiveTorqueControl> Robot::startTorqueControl() {
                          ControlLoop<JointVelocities>::kDefaultDeviation,
                          ControlLoop<JointVelocities>::kDefaultDeviation);
 
-  return std::unique_ptr<ActiveTorqueControl>(
+  return std::unique_ptr<ActiveControlBase>(
       new ActiveTorqueControl(impl_, motion_id, std::move(control_lock)));
 }
 
-std::unique_ptr<ActiveMotionGenerator<JointPositions>> Robot::startJointPositionControl(
+std::unique_ptr<ActiveControlBase> Robot::startJointPositionControl(
     const research_interface::robot::Move::ControllerMode& control_type) {
   return startControl<JointPositions>(control_type);
 }
 
-std::unique_ptr<ActiveMotionGenerator<JointVelocities>> Robot::startJointVelocityControl(
+std::unique_ptr<ActiveControlBase> Robot::startJointVelocityControl(
     const research_interface::robot::Move::ControllerMode& control_type) {
   return startControl<JointVelocities>(control_type);
 }
 
-std::unique_ptr<ActiveMotionGenerator<CartesianPose>> Robot::startCartesianPositionControl(
+std::unique_ptr<ActiveControlBase> Robot::startCartesianPoseControl(
     const research_interface::robot::Move::ControllerMode& control_type) {
   return startControl<CartesianPose>(control_type);
 }
 
-std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> Robot::startCartesianVelocityControl(
+std::unique_ptr<ActiveControlBase> Robot::startCartesianVelocityControl(
     const research_interface::robot::Move::ControllerMode& control_type) {
   return startControl<CartesianVelocities>(control_type);
 }
@@ -313,13 +311,13 @@ Model Robot::loadModel() {
 
 Robot::Robot(std::shared_ptr<Impl> robot_impl) : impl_(std::move(robot_impl)){};
 
-template std::unique_ptr<ActiveMotionGenerator<JointVelocities>> Robot::startControl<
-    JointVelocities>(const research_interface::robot::Move::ControllerMode& controller_type);
-template std::unique_ptr<ActiveMotionGenerator<JointPositions>> Robot::startControl<JointPositions>(
+template std::unique_ptr<ActiveControlBase> Robot::startControl<JointVelocities>(
     const research_interface::robot::Move::ControllerMode& controller_type);
-template std::unique_ptr<ActiveMotionGenerator<CartesianPose>> Robot::startControl<CartesianPose>(
+template std::unique_ptr<ActiveControlBase> Robot::startControl<JointPositions>(
     const research_interface::robot::Move::ControllerMode& controller_type);
-template std::unique_ptr<ActiveMotionGenerator<CartesianVelocities>> Robot::startControl<
-    CartesianVelocities>(const research_interface::robot::Move::ControllerMode& controller_type);
+template std::unique_ptr<ActiveControlBase> Robot::startControl<CartesianPose>(
+    const research_interface::robot::Move::ControllerMode& controller_type);
+template std::unique_ptr<ActiveControlBase> Robot::startControl<CartesianVelocities>(
+    const research_interface::robot::Move::ControllerMode& controller_type);
 
 }  // namespace franka
