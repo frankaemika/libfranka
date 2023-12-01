@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.13.1 - 2023-11-30
+
+ * Hotfix: (temporary-workaround) for max-path-pose-deviation in ExternalMode for callback based control.
+
 ## 0.13.0 - 2023-11-16
 
  * Add abstract ActiveControlBase class for the ActiveControllers to implement.
