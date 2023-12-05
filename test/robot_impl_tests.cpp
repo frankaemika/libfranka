@@ -251,7 +251,6 @@ TEST(RobotImpl, CanStartExternalControllerMotion) {
   server
       .onReceiveRobotCommand([=](const RobotCommand& command) {
         EXPECT_EQ(kMessageID, command.message_id);
-        testMotionGeneratorCommandsAreEqual(sent_command.motion, command.motion);
         testControllerCommandsAreEqual(sent_command.control, command.control);
       })
       .spinOnce();

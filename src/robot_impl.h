@@ -107,6 +107,8 @@ class Robot::Impl : public RobotControl {
   bool controllerRunning() const noexcept;
 
  private:
+  RobotState current_state_;
+
   template <typename MotionGeneratorType>
   void writeOnce(const MotionGeneratorType& motion_generator_input);
 

@@ -8,6 +8,9 @@
 
 #include "load_calculations.h"
 
+#include <franka/lowpass_filter.h>
+#include <franka/rate_limiting.h>
+
 namespace franka {
 
 namespace {
@@ -90,20 +93,32 @@ RobotState Robot::Impl::readOnce() {
   research_interface::robot::RobotState robot_state;
   while (network_->udpReceive<decltype(robot_state)>(&robot_state)) {
   }
-
-  return convertRobotState(receiveRobotState());
+  current_state_ = convertRobotState(receiveRobotState());
+  return current_state_;
 }
 
 void Robot::Impl::writeOnce(const Torques& control_input) {
   research_interface::robot::ControllerCommand control_command =
       createControllerCommand(control_input);
+  research_interface::robot::MotionGeneratorCommand command{};
+  double cutoff_frequency{100.0};
 
-  research_interface::robot::MotionGeneratorCommand motion_command{};
-  motion_command.dq_c = {0, 0, 0, 0, 0, 0, 0};
+  // Temporary workaround for the max-path-pose-deviation bug[BFFTRAC-1639]
+  JointVelocities motion(current_state_.dq);
+  command.dq_c = motion.dq;
+  for (size_t i = 0; i < 7; i++) {
+    command.dq_c[i] =
+        lowpassFilter(kDeltaT, command.dq_c[i], current_state_.dq_d[i], cutoff_frequency);
+  }
+  command.dq_c =
+      limitRate(computeUpperLimitsJointVelocity(current_state_.q_d),
+                computeLowerLimitsJointVelocity(current_state_.q_d), kMaxJointAcceleration,
+                kMaxJointJerk, command.dq_c, current_state_.dq_d, current_state_.ddq_d);
+  checkFinite(command.dq_c);
 
   network_->tcpThrowIfConnectionClosed();
 
-  sendRobotCommand(&motion_command, &control_command);
+  sendRobotCommand(&command, &control_command);
 }
 
 template <typename MotionGeneratorType>
