@@ -181,14 +181,14 @@ if(BUILD_DOCUMENTATION)
 endif()
 
 ## Packaging
-set(CPACK_PACKAGE_VENDOR "Franka Emika GmbH")
+set(CPACK_PACKAGE_VENDOR "Franka Robotics GmbH")
 set(CPACK_GENERATOR "DEB;TGZ")
 set(CPACK_PACKAGE_VERSION ${libfranka_VERSION})
 set(CPACK_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_PROCESSOR})
 
 # Debian versions require a dash
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Emika GmbH")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Robotics GmbH")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
 set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka, ros-melodic-libfranka, ros-noetic-libfranka, ros-foxy-libfranka")
 include(CPack)
@@ -227,7 +227,10 @@ if(CLANG_FORMAT_PROG)
     COMMENT "Checking code formatting with clang-format"
     VERBATIM
   )
+else(CLANG_FORMAT_PROG)
+  MESSAGE(WARNING "Could not find clang-format-6.0")
 endif()
+
 find_program(CLANG_TIDY_PROG clang-tidy-6.0 DOC "'clang-tidy' executable")
 if(CLANG_TIDY_PROG)
   # Build JSON string for clang-tidy's line filter
@@ -252,4 +255,6 @@ if(CLANG_TIDY_PROG)
     COMMENT "Running clang-tidy"
     VERBATIM
   )
+else(CLANG_TIDY_PROG)
+  MESSAGE(WARNING "Could not find clang-tidy-6.0")
 endif()

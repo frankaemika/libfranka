@@ -1,6 +1,6 @@
-# libfranka: C++ library for Franka Emika research robots
+# libfranka: C++ library for Franka Robotics research robots
 
-With this library, you can control research versions of Franka Emika robots. See the [Franka Control Interface (FCI) documentation][fci-docs] for more information about what `libfranka` can do and how to set it up.
+With this library, you can control research versions of Franka Robotics robots. See the [Franka Control Interface (FCI) documentation][fci-docs] for more information about what `libfranka` can do and how to set it up.
 
 ## License
 
