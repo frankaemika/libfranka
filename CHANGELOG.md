@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.13.3 - 2024-01-18
+
+Requires Franka Research 3 system version >= 5.5.0
+
+ * Bump libfranka-common version compatible with 5.5.0
+ * Delete the temporary-workaround max-path-pose deviation. Fixed in the system image.
+
 ## 0.13.2 - 2023-12-04
 
  * Hotfix: (temporary-workaround) for max-path-pose-deviation in ExternalMode for active control.
