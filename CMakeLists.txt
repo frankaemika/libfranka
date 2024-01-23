@@ -130,7 +130,6 @@ target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/include>
   $<INSTALL_INTERFACE:include>
-  "build/_deps/tracy-src/public"
 )
 
 target_link_libraries(franka PRIVATE
