@@ -5,9 +5,24 @@
 #include <memory>
 #include <sstream>
 
+
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
+
+#ifdef PACKET_HW_TIMESTAMPS
+#include <linux/net_tstamp.h>
+#include <linux/sockios.h>
+//#include <sys/socket.h>
+
+void set_hw_ts(Poco::Net::Socket& sock) {
+
+
+    int enable = SOF_TIMESTAMPING_RX_HARDWARE | SOF_TIMESTAMPING_RAW_HARDWARE |
+                 SOF_TIMESTAMPING_SYS_HARDWARE | SOF_TIMESTAMPING_SOFTWARE;
+    sock.setOption(SOL_SOCKET, SO_TIMESTAMP, enable);
+}
+#endif
 
 Network::Network(const std::string& franka_address,
                  uint16_t franka_port,
@@ -36,6 +51,10 @@ Network::Network(const std::string& franka_address,
     udp_socket_.bind({"0.0.0.0", 0});
     udp_socket_.setReceiveTimeout(Poco::Timespan{1000l * udp_timeout.count()});
     udp_port_ = udp_socket_.address().port();
+
+#ifdef PACKET_HW_TIMESTAMPS
+    set_hw_ts(udp_socket_);
+#endif
   } catch (const Poco::Net::ConnectionRefusedException& e) {
     throw NetworkException(
         "libfranka: Connection to FCI refused. Please install FCI feature or enable FCI mode in Desk."s);
