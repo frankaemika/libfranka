@@ -35,9 +35,17 @@ GIT_REPOSITORY https://github.com/wolfpld/tracy.git
 GIT_TAG master
 GIT_SHALLOW TRUE
 GIT_PROGRESS TRUE
+OVERRIDE_FIND_PACKAGE
 )
 FetchContent_MakeAvailable (tracy)
-
+#install(
+#    TARGETS TracyClient
+#    EXPORT ${PROJECT_NAME}Targets
+#    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}/
+#    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/
+#    RUNTIME DESTINATION ${CMAKE_INSTALL_LIBDIR}/
+#    # More arguments as necessary...
+#  )
 
 ## Dependencies
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
@@ -93,9 +101,11 @@ add_library(franka SHARED
   src/robot_state.cpp
   src/vacuum_gripper.cpp
   src/vacuum_gripper_state.cpp
-  src/mock_server.cpp
 )
 add_library(Franka::Franka ALIAS franka)
+
+#add_library (tracy)
+#target_include_directories (tracy PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 
 set_target_properties(franka PROPERTIES
   WINDOWS_EXPORT_ALL_SYMBOLS ON
@@ -123,6 +133,7 @@ target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/include>
   $<INSTALL_INTERFACE:include>
+  "build/_deps/tracy-src/public"
 )
 
 target_link_libraries(franka PRIVATE
@@ -131,50 +142,51 @@ target_link_libraries(franka PRIVATE
   Eigen3::Eigen3
   Threads::Threads
   libfranka-common
+  Tracy::TracyClient
 )
 
 ## Installation
-include(GNUInstallDirs)
-set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
-
-install(TARGETS franka
-  EXPORT FrankaTargets
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  USE_SOURCE_PERMISSIONS
-)
-
-install(DIRECTORY common/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  USE_SOURCE_PERMISSIONS
-)
-
-export(EXPORT FrankaTargets
-  NAMESPACE Franka::
-  FILE ${CMAKE_CURRENT_BINARY_DIR}/FrankaTargets.cmake
-)
-
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
-  COMPATIBILITY SameMajorVersion
-)
-configure_package_config_file(cmake/FrankaConfig.cmake.in
-  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
-  INSTALL_DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
-)
-
-install(FILES
-  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
-  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
-)
-install(EXPORT FrankaTargets
-  NAMESPACE Franka::
-  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
-)
-
+#include(GNUInstallDirs)
+#set(INSTALL_CMAKE_CONFIG_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/Franka)
+#
+#install(TARGETS franka
+#  EXPORT FrankaTargets
+#  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+#  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+#)
+#install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+#  USE_SOURCE_PERMISSIONS
+#)
+#
+#install(DIRECTORY common/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+#  USE_SOURCE_PERMISSIONS
+#)
+#
+#export(EXPORT FrankaTargets
+#  NAMESPACE Franka::
+#  FILE ${CMAKE_CURRENT_BINARY_DIR}/FrankaTargets.cmake
+#)
+#
+#include(CMakePackageConfigHelpers)
+#write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
+#  COMPATIBILITY SameMajorVersion
+#)
+#configure_package_config_file(cmake/FrankaConfig.cmake.in
+#  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
+#  INSTALL_DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+#)
+#
+#install(FILES
+#  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfig.cmake
+#  ${CMAKE_CURRENT_BINARY_DIR}/FrankaConfigVersion.cmake
+#  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+#)
+#install(EXPORT FrankaTargets
+#  NAMESPACE Franka::
+#  DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+#)
+#
 ## Subprojects
 
 # Ignore find_package(Franka) in subprojects.
