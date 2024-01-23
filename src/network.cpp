@@ -15,12 +15,28 @@ namespace franka {
 #include <linux/sockios.h>
 //#include <sys/socket.h>
 
-void set_hw_ts(Poco::Net::Socket& sock) {
+/* This routine selects the correct socket option to enable timestamping. */
+static void do_ts_sockopt(int sock) {
+  printf("Selecting hardware timestamping mode.\n");
 
-
+  {
     int enable = SOF_TIMESTAMPING_RX_HARDWARE | SOF_TIMESTAMPING_RAW_HARDWARE |
                  SOF_TIMESTAMPING_SYS_HARDWARE | SOF_TIMESTAMPING_SOFTWARE;
-    sock.setOption(SOL_SOCKET, SO_TIMESTAMP, enable);
+    int ret = setsockopt(sock, SOL_SOCKET, SO_TIMESTAMPING, &enable, sizeof(int));
+
+    if (ret != 0) {
+      std::cout << "Failed to enable sockopt for hw timestamps:  " << strerror(errno) << std::endl;
+    } else {
+      printf("enabled timestamping sockopt\n");
+    }
+  }
+}
+
+void set_hw_ts(Poco::Net::Socket& sock) {
+  do_ts_sockopt(sock.impl()->sockfd());
+    //int enable = SOF_TIMESTAMPING_RX_HARDWARE | SOF_TIMESTAMPING_RAW_HARDWARE |
+    //             SOF_TIMESTAMPING_SYS_HARDWARE | SOF_TIMESTAMPING_SOFTWARE;
+    //sock.setOption(SOL_SOCKET, SO_TIMESTAMP, enable);
 }
 #endif
 
