@@ -13,10 +13,17 @@ using motion_mode_t = move_t::MotionGeneratorMode;
 
 struct Modes {
   std::mutex mut;
-  research_interface::robot::ControllerMode ctrl_mode;
-  research_interface::robot::MotionGeneratorMode motion_mode;
-  research_interface::robot::RobotMode robot_mode;
+  research_interface::robot::ControllerMode ctrl_mode{research_interface::robot::ControllerMode::kOther};
+  research_interface::robot::MotionGeneratorMode motion_mode{research_interface::robot::MotionGeneratorMode::kIdle};
+  research_interface::robot::RobotMode robot_mode{research_interface::robot::RobotMode::kIdle};
 };
+
+research_interface::robot::RobotState zero_state() {
+  research_interface::robot::RobotState state{};
+  std::memset(reinterpret_cast<void*>(&state), 0, sizeof(research_interface::robot::RobotState));
+
+  return state;
+}
 
 research_interface::robot::ControllerMode convert_mode(const ctrl_mode_t & mode) {
 
@@ -63,7 +70,7 @@ RobotTypes::Connect::Response connSuccessResponse() {
 
 void send_state(MockServer<RobotTypes>& server, Modes& modes) {
   using clock = std::chrono::steady_clock;
-  research_interface::robot::RobotState state{};
+  research_interface::robot::RobotState state = zero_state();
 
   std::unique_lock<std::mutex> modes_lck(modes.mut);
   state.controller_mode = modes.ctrl_mode;
