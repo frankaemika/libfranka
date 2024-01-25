@@ -245,7 +245,6 @@ T Network::udpBlockingReceiveUnsafe() try {
 #endif
 
   if (bytes_received != static_cast<int>(buffer.size())) {
-    std::cout << "Inc " << bytes_received << std::endl; 
     throw ProtocolException("libfranka: incorrect object size");
   }
 
@@ -359,9 +358,6 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
   do {
     lock.lock();
     tcpReadFromBuffer<T>(10ms);
-    for (auto id : received_responses_) {
-      std::cout << "Receide " << id.first << std::endl;
-    }
     it = received_responses_.find(command_id);
     lock.unlock();
     std::this_thread::yield();

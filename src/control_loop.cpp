@@ -68,7 +68,6 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
       limit_rate_(limit_rate),
       cutoff_frequency_(cutoff_frequency) {
   bool throw_on_error = robot_.realtimeConfig() == RealtimeConfig::kEnforce;
-  std::cout << "cons 1" << std::endl;
   std::string error_message;
   if (!setCurrentThreadToHighestSchedulerPriority(&error_message) && throw_on_error) {
     throw RealtimeException(error_message);
@@ -128,17 +127,13 @@ ControlLoop<T>::ControlLoop(RobotControl& robot,
 
 template <typename T>
 void ControlLoop<T>::operator()() try {
-  std::cout << "operator 1" << std::endl;
   RobotState robot_state = robot_.update(nullptr, nullptr);
-  std::cout << "before throw" << std::endl;
   robot_.throwOnMotionError(robot_state, motion_id_);
-  std::cout << "after throw" << std::endl;
 
   Duration previous_time = robot_state.time;
 
   research_interface::robot::MotionGeneratorCommand motion_command{};
   if (control_callback_) {
-  std::cout << "operator 2" << std::endl;
     research_interface::robot::ControllerCommand control_command{};
     while (spinMotion(robot_state, robot_state.time - previous_time, &motion_command) &&
            spinControl(robot_state, robot_state.time - previous_time, &control_command)) {
