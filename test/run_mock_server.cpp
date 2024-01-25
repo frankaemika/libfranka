@@ -88,18 +88,13 @@ void send_state(MockServer<RobotTypes>& server, Modes& modes) {
 
 void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& modes) {
   using clock = std::chrono::steady_clock;
-  const auto sleep_dt = 50us;
-
   auto t_next = clock::now() + std::chrono::microseconds(dt_us);
 
   while (true) {
 
     send_state(server, modes);
-
-    while (clock::now() < t_next) {
-      std::this_thread::sleep_for(sleep_dt);
-    }
     t_next += std::chrono::microseconds(dt_us);
+    std::this_thread::sleep_for(t_next - clock::now());
   }
 }
 
@@ -182,8 +177,7 @@ int main(int argc, char* argv[]) {
       cv.notify_one();
       lck.unlock();
 
-
-      server.sendResponse<research_interface::robot::Move>(cmd_id, moveResp);
+      //server.sendResponse<research_interface::robot::Move>(cmd_id, moveResp);
     }).spinOnce();
 
     //std::this_thread::sleep_for(std::chrono::microseconds(500));
