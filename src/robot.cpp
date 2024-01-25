@@ -55,13 +55,12 @@ void Robot::control(std::function<Torques(const RobotState&, franka::Duration)> 
                     double cutoff_frequency) {
   std::unique_lock<std::mutex> control_lock(control_mutex_, std::try_to_lock);
   assertOwningLock(control_lock);
-  // temporary workaround for the max_path_pose_deviation issue
-  limit_rate = true;
-  ControlLoop<JointPositions> loop(*impl_, std::move(control_callback),
-                                   [](const RobotState& robot_state, Duration) -> JointPositions {
-                                     return JointPositions(robot_state.q);
-                                   },
-                                   limit_rate, cutoff_frequency);
+
+  ControlLoop<JointVelocities> loop(*impl_, std::move(control_callback),
+                                    [](const RobotState&, Duration) -> JointVelocities {
+                                      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+                                    },
+                                    limit_rate, cutoff_frequency);
   loop();
 }
 
