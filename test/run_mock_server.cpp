@@ -88,13 +88,16 @@ void send_state(MockServer<RobotTypes>& server, Modes& modes) {
 
 void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& modes) {
   using clock = std::chrono::steady_clock;
-  auto t_next = clock::now() + std::chrono::microseconds(dt_us);
+  auto t_start = clock::now();
+  uint64_t cycle = 0;
 
   while (true) {
-
     send_state(server, modes);
-    t_next += std::chrono::microseconds(dt_us);
-    std::this_thread::sleep_for(t_next - clock::now());
+
+    std::this_thread::sleep_for(
+            std::max(
+              std::chrono::nanoseconds(0),
+              std::chrono::nanoseconds(++cycle * dt_us*1000) - std::chrono::nanoseconds(clock::now() - t_start)));
   }
 }
 
