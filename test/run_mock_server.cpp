@@ -172,16 +172,16 @@ int main(int argc, char* argv[]) {
   //server.sendResponse<research_interface::robot::Move>(cmd_id, moveResp).spinOnce();
 
   while (true) {
-    server.onReceiveRobotCommand([&](const research_interface::robot::RobotCommand& cmd){
-      //std::cout << "Received UDP Move" << std::endl;
-      cmd_id = cmd.message_id;
-      std::unique_lock<std::mutex> lck(mut);
-      cmd_received = true;
-      cv.notify_one();
-      lck.unlock();
+    //server.onReceiveRobotCommand([&](const research_interface::robot::RobotCommand& cmd){
+    //  //std::cout << "Received UDP Move" << std::endl;
+    //  cmd_id = cmd.message_id;
+    //  std::unique_lock<std::mutex> lck(mut);
+    //  cmd_received = true;
+    //  cv.notify_one();
+    //  lck.unlock();
 
-      //server.sendResponse<research_interface::robot::Move>(cmd_id, moveResp);
-    }).spinOnce();
+    //  //server.sendResponse<research_interface::robot::Move>(cmd_id, moveResp);
+    //}).spinOnce();
 
     //std::this_thread::sleep_for(std::chrono::microseconds(500));
 
