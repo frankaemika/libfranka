@@ -238,8 +238,6 @@ uint32_t Robot::Impl::startMotion(
     }
 
     robot_state = update(nullptr, nullptr);
-    motion_generator_mode_ = current_move_motion_generator_mode_;
-    controller_mode_ = current_move_controller_mode_;
   }
 
   logger_.flush();
