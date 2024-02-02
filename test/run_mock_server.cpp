@@ -78,9 +78,9 @@ void send_state(MockServer<RobotTypes>& server, Modes& modes) {
   state.robot_mode = modes.robot_mode;
   modes_lck.unlock();
 
-  auto time_ms = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now().time_since_epoch()).count();
+  auto time_us = std::chrono::duration_cast<std::chrono::nanoseconds>(clock::now().time_since_epoch()).count();
 
-  state.message_id = time_ms;
+  state.message_id = time_us;
 
   server.sendStateSync<research_interface::robot::RobotState>(state);
 
@@ -88,16 +88,21 @@ void send_state(MockServer<RobotTypes>& server, Modes& modes) {
 
 void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& modes) {
   using clock = std::chrono::steady_clock;
-  auto t_start = clock::now();
-  uint64_t cycle = 0;
+  uint64_t cycles = 0;
+  auto init_time = clock::now();;
 
   while (true) {
     send_state(server, modes);
 
-    std::this_thread::sleep_for(
-            std::max(
-              std::chrono::nanoseconds(0),
-              std::chrono::nanoseconds(++cycle * dt_us*1000) - std::chrono::nanoseconds(clock::now() - t_start)));
+   // if (cycles % 1000) {
+   //     std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count() % 1000<< std::endl;
+   // }
+
+    auto tts = std::chrono::microseconds(++cycles*dt_us) - std::chrono::duration_cast<std::chrono::microseconds>(clock::now() - init_time);
+
+    //std::cout << "TTS: " << tts.count() << std::endl;
+
+    std::this_thread::sleep_for(tts);
   }
 }
 

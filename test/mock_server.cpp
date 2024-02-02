@@ -87,7 +87,7 @@ template <typename C>
 void MockServer<C>::serverThread() {
   std::unique_lock<std::timed_mutex> lock(command_mutex_);
 
-  constexpr const char* kHostname = "127.0.0.1";
+  constexpr const char* kHostname = "192.168.102.10";
   Poco::Net::ServerSocket srv;
   srv.bind({kHostname, C::kCommandPort}, true);
   srv.listen();

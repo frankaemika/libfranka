@@ -191,7 +191,8 @@ MockServer<C>& MockServer<C>::sendEmptyStateSync() {
 template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::sendStateSync(T& state) {
-  state.message_id = ++sequence_number_;
+  //state.message_id = ++sequence_number_;
+  sequence_number_++;
   udp_socket_.sendBytes(&state, sizeof(state));
   return *this;
 }
