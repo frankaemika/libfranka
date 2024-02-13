@@ -53,6 +53,12 @@ class MockServer {
   MockServer& sendEmptyState();
 
   template <typename T>
+  MockServer& sendEmptyStateSync();
+
+  template <typename T>
+  MockServer& sendStateSync(T& state);
+
+  template <typename T>
   MockServer& sendResponse(const uint32_t& command_id,
                            std::function<typename T::Response()> create_response);
 
@@ -110,7 +116,9 @@ class MockServer {
   std::condition_variable_any cv_;
   std::timed_mutex command_mutex_;
   std::mutex tcp_mutex_;
-  std::mutex udp_mutex_;
+  std::mutex udp_send_mutex_;
+  std::mutex udp_rcv_mutex_;
+  Socket udp_socket_;
   std::thread server_thread_;
   bool block_;
   bool shutdown_;
@@ -169,6 +177,23 @@ template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::sendEmptyState() {
   return onSendUDP<T>([=](T& state) { state.message_id = ++sequence_number_; });
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendEmptyStateSync() {
+  T state{};
+  state.message_id = ++sequence_number_;
+  udp_socket_.sendBytes(&state, sizeof(state));
+  return *this;
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendStateSync(T& state) {
+  state.message_id = ++sequence_number_;
+  udp_socket_.sendBytes(&state, sizeof(state));
+  return *this;
 }
 
 template <typename C>

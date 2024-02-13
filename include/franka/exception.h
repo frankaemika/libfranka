@@ -14,6 +14,16 @@
 
 namespace franka {
 
+struct NICTime {
+  uint64_t nic_time_ns = 0;
+  uint64_t kernel_time_ns = 0;
+  uint64_t user_time_ns = 0;
+
+  thread_local static NICTime last_nic_time;
+};
+
+
+
 /**
  * Base class for all exceptions used by `libfranka`.
  */

@@ -69,6 +69,17 @@ target_link_libraries(run_all_tests PUBLIC ${TEST_DEPENDENCIES})
 
 add_test(Default run_all_tests --gtest_output=xml:${TEST_OUTPUT_DIR}/default.xml)
 
+##### Mock Franka Server #####
+add_executable(franka_mock_server
+  run_mock_server.cpp
+  mock_server.cpp
+)
+
+target_link_libraries(franka_mock_server PRIVATE
+  ${TEST_DEPENDENCIES}
+)
+########
+
 if(BUILD_COVERAGE)
   find_program(LCOV_PROG lcov)
   if(NOT LCOV_PROG)

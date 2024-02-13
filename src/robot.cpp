@@ -224,12 +224,6 @@ RobotState Robot::readOnce() {
   return impl_->readOnce();
 }
 
-VirtualWallCuboid Robot::getVirtualWall(int32_t id) {
-  VirtualWallCuboid virtual_wall;
-  impl_->executeCommand<research_interface::robot::GetCartesianLimit>(id, &virtual_wall);
-  return virtual_wall;
-}
-
 void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
                                  const std::array<double, 7>& upper_torque_thresholds_acceleration,
                                  const std::array<double, 7>& lower_torque_thresholds_nominal,
@@ -282,17 +276,6 @@ void Robot::setLoad(
     const std::array<double, 3>& F_x_Cload,  // NOLINT(readability-identifier-naming)
     const std::array<double, 9>& load_inertia) {
   impl_->executeCommand<research_interface::robot::SetLoad>(load_mass, F_x_Cload, load_inertia);
-}
-
-void Robot::setFilters(double joint_position_filter_frequency,
-                       double joint_velocity_filter_frequency,
-                       double cartesian_position_filter_frequency,
-                       double cartesian_velocity_filter_frequency,
-                       double controller_filter_frequency) {
-  impl_->executeCommand<research_interface::robot::SetFilters>(
-      joint_position_filter_frequency, joint_velocity_filter_frequency,
-      cartesian_position_filter_frequency, cartesian_velocity_filter_frequency,
-      controller_filter_frequency);
 }
 
 void Robot::automaticErrorRecovery() {

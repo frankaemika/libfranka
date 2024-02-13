@@ -18,13 +18,11 @@ using franka::Torques;
 
 using research_interface::robot::AutomaticErrorRecovery;
 using research_interface::robot::Connect;
-using research_interface::robot::GetCartesianLimit;
 using research_interface::robot::LoadModelLibrary;
 using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
 using research_interface::robot::SetCollisionBehavior;
 using research_interface::robot::SetEEToK;
-using research_interface::robot::SetFilters;
 using research_interface::robot::SetGuidingMode;
 using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
@@ -79,12 +77,6 @@ bool Command<Move>::compare(const Move::Request& request_one, const Move::Reques
 }
 
 template <>
-bool Command<GetCartesianLimit>::compare(const GetCartesianLimit::Request& request_one,
-                                         const GetCartesianLimit::Request& request_two) {
-  return request_one.id == request_two.id;
-}
-
-template <>
 bool Command<SetCollisionBehavior>::compare(const SetCollisionBehavior::Request& request_one,
                                             const SetCollisionBehavior::Request& request_two) {
   return request_one.lower_torque_thresholds_acceleration ==
@@ -133,20 +125,6 @@ bool Command<SetNEToEE>::compare(const SetNEToEE::Request& request_one,
 }
 
 template <>
-bool Command<SetFilters>::compare(const SetFilters::Request& request_one,
-                                  const SetFilters::Request& request_two) {
-  return request_one.joint_position_filter_frequency ==
-             request_two.joint_position_filter_frequency &&
-         request_one.joint_velocity_filter_frequency ==
-             request_two.joint_velocity_filter_frequency &&
-         request_one.cartesian_position_filter_frequency ==
-             request_two.cartesian_position_filter_frequency &&
-         request_one.cartesian_velocity_filter_frequency ==
-             request_two.cartesian_velocity_filter_frequency &&
-         request_one.controller_filter_frequency == request_two.controller_filter_frequency;
-}
-
-template <>
 bool Command<SetLoad>::compare(const SetLoad::Request& request_one,
                                const SetLoad::Request& request_two) {
   return request_one.F_x_Cload == request_two.F_x_Cload &&
@@ -169,12 +147,6 @@ Move::Request Command<Move>::getExpected() {
   return Move::Request(Move::ControllerMode::kJointImpedance,
                        Move::MotionGeneratorMode::kJointVelocity, Move::Deviation(1, 2, 3),
                        Move::Deviation(4, 5, 6));
-}
-
-template <>
-GetCartesianLimit::Request Command<GetCartesianLimit>::getExpected() {
-  int32_t limit_id = 3;
-  return GetCartesianLimit::Request(limit_id);
 }
 
 template <>
@@ -226,11 +198,6 @@ SetNEToEE::Request Command<SetNEToEE>::getExpected() {
 }
 
 template <>
-SetFilters::Request Command<SetFilters>::getExpected() {
-  return SetFilters::Request(1, 10, 100, 100, 1000);
-}
-
-template <>
 SetLoad::Request Command<SetLoad>::getExpected() {
   double m_load = 1.5;
   std::array<double, 3> F_x_Cload{0.01, 0.01, 0.1};
@@ -259,24 +226,13 @@ typename T::Response Command<T>::createResponse(const typename T::Request&,
   return typename T::Response(status);
 }
 
-template <>
-GetCartesianLimit::Response Command<GetCartesianLimit>::createResponse(
-    const GetCartesianLimit::Request&,
-    GetCartesianLimit::Status status) {
-  std::array<double, 3> object_world_size{2, 2, 2};
-  std::array<double, 16> object_frame{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
-  return GetCartesianLimit::Response(status, object_world_size, object_frame, true);
-}
-
-using CommandTypes = ::testing::Types<GetCartesianLimit,
-                                      SetCollisionBehavior,
+using CommandTypes = ::testing::Types<SetCollisionBehavior,
                                       SetJointImpedance,
                                       SetCartesianImpedance,
                                       SetGuidingMode,
                                       SetEEToK,
                                       SetNEToEE,
                                       SetLoad,
-                                      SetFilters,
                                       Move,
                                       StopMove,
                                       AutomaticErrorRecovery>;
@@ -336,12 +292,14 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
   EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
 }
 
-INSTANTIATE_TEST_CASE_P(StopMoveCommandTests,
-                        StopMoveCommand,
-                        ::testing::Values(StopMove::Status::kCommandNotPossibleRejected,
-                                          StopMove::Status::kReflexAborted,
-                                          StopMove::Status::kEmergencyAborted,
-                                          StopMove::Status::kAborted));
+INSTANTIATE_TEST_CASE_P(
+    StopMoveCommandTests,
+    StopMoveCommand,
+    ::testing::Values(StopMove::Status::kCommandNotPossibleRejected,
+                      StopMove::Status::kReflexAborted,
+                      StopMove::Status::kEmergencyAborted,
+                      StopMove::Status::kAborted,
+                      StopMove::Status::kCommandRejectedDueToActivatedSafetyFunctions));
 
 TEST_P(StopMoveCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
@@ -364,9 +322,7 @@ using GetterSetterCommandTypes = ::testing::Types<SetCollisionBehavior,
                                                   SetCartesianImpedance,
                                                   SetEEToK,
                                                   SetNEToEE,
-                                                  SetLoad,
-                                                  SetFilters,
-                                                  GetCartesianLimit>;
+                                                  SetLoad>;
 
 TYPED_TEST_CASE(GetterSetterCommand, GetterSetterCommandTypes);
 
@@ -431,11 +387,13 @@ TEST_P(MoveCommand, CanReceiveErrorResponses) {
 INSTANTIATE_TEST_CASE_P(
     AutomaticErrorRecoveryCommandTests,
     AutomaticErrorRecoveryCommand,
-    ::testing::Values(AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
-                      AutomaticErrorRecovery::Status::kReflexAborted,
-                      AutomaticErrorRecovery::Status::kEmergencyAborted,
-                      AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
-                      AutomaticErrorRecovery::Status::kAborted));
+    ::testing::Values(
+        AutomaticErrorRecovery::Status::kCommandNotPossibleRejected,
+        AutomaticErrorRecovery::Status::kReflexAborted,
+        AutomaticErrorRecovery::Status::kEmergencyAborted,
+        AutomaticErrorRecovery::Status::kManualErrorRecoveryRequiredRejected,
+        AutomaticErrorRecovery::Status::kAborted,
+        AutomaticErrorRecovery::Status::kCommandRejectedDueToActivatedSafetyFunctions));
 
 TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
   RobotMockServer server;
@@ -455,12 +413,15 @@ TEST_P(AutomaticErrorRecoveryCommand, CanReceiveErrorResponses) {
   EXPECT_THROW(robot.executeCommand<AutomaticErrorRecovery>(request), CommandException);
 }
 
-INSTANTIATE_TEST_CASE_P(MoveCommandTests,
-                        MoveCommand,
-                        ::testing::Values(Move::Status::kPreempted,
-                                          Move::Status::kStartAtSingularPoseRejected,
-                                          Move::Status::kInvalidArgumentRejected,
-                                          Move::Status::kReflexAborted,
-                                          Move::Status::kEmergencyAborted,
-                                          Move::Status::kInputErrorAborted,
-                                          Move::Status::kAborted));
+INSTANTIATE_TEST_CASE_P(
+    MoveCommandTests,
+    MoveCommand,
+    ::testing::Values(Move::Status::kPreempted,
+                      Move::Status::kStartAtSingularPoseRejected,
+                      Move::Status::kInvalidArgumentRejected,
+                      Move::Status::kReflexAborted,
+                      Move::Status::kEmergencyAborted,
+                      Move::Status::kInputErrorAborted,
+                      Move::Status::kAborted,
+                      Move::Status::kCommandRejectedDueToActivatedSafetyFunctions,
+                      Move::Status::kPreemptedDueToActivatedSafetyFunctions));
