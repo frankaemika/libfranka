@@ -218,10 +218,14 @@ template <typename T> int udp_timestamp_receive(std::array<uint8_t, sizeof(T)>& 
   addr = Poco::Net::SocketAddress(reinterpret_cast<sockaddr*>(&host_address), sizeof(struct sockaddr_in));
 
   packet_time_t packet_time = handle_time(&msg);
-  char packet_timing_str[1024];
-  sprintf(packet_timing_str, "nic:%lu,kernel:%lu,user:%lu", packet_time.nic_ts, packet_time.kernel_ts, packet_time.user_ts);
+  //char packet_timing_str[1024];
+  //sprintf(packet_timing_str, "nic:%lu,kernel:%lu,user:%lu", packet_time.nic_ts, packet_time.kernel_ts, packet_time.user_ts);
 
-  TracyMessage(packet_timing_str, strlen(packet_timing_str));
+  //TracyMessage(packet_timing_str, strlen(packet_timing_str));
+
+  NICTime::last_nic_time.nic_time_ns = packet_time.nic_ts;
+  NICTime::last_nic_time.kernel_time_ns = packet_time.kernel_ts;
+  NICTime::last_nic_time.user_time_ns = packet_time.user_ts;
 
   return got;
 

@@ -10,6 +10,8 @@ using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
 
+thread_local NICTime NICTime::last_nic_time = NICTime();
+
 #ifdef PACKET_HW_TIMESTAMPS
 #include <linux/net_tstamp.h>
 #include <linux/sockios.h>
