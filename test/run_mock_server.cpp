@@ -4,6 +4,7 @@
 #include <thread>
 #include <mutex>
 #include <cassert>
+#include <x86intrin.h>
 
 using namespace std::chrono_literals;
 
@@ -98,11 +99,31 @@ void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& m
    //     std::cout << std::chrono::duration_cast<std::chrono::microseconds>(now.time_since_epoch()).count() % 1000<< std::endl;
    // }
 
-    auto tts = std::chrono::microseconds(++cycles*dt_us) - std::chrono::duration_cast<std::chrono::microseconds>(clock::now() - init_time);
+    auto prev_time = clock::now();
+    auto tts = std::chrono::microseconds(++cycles*dt_us) - std::chrono::duration_cast<std::chrono::microseconds>(prev_time - init_time);
 
     //std::cout << "TTS: " << tts.count() << std::endl;
 
     std::this_thread::sleep_for(tts);
+
+
+        // __rdtsc intrinsic is used to read the time stamp counter
+    // This allows the loop to run for a fixed number of cycles
+    //uint64_t prev = __rdtsc();
+    uint64_t ticks = 0;
+    do {
+      do
+      {
+        // Pause intrinsic
+
+        _mm_pause();
+      } while (++ticks % 1000 != 0);
+    } while (clock::now() - prev_time < tts);
+
+    if (clock::now() - prev_time > 1.1*tts) {
+      std::cout << "Missed deadline by more than 10%" << std::endl;
+    }
+
   }
 }
 
