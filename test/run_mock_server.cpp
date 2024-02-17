@@ -117,11 +117,11 @@ void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& m
         // Pause intrinsic
 
         _mm_pause();
-      } while (++ticks % 1000 != 0);
+      } while (++ticks % 100 != 0);
     } while (std::chrono::duration_cast<std::chrono::microseconds>(clock::now() - prev_time) < tts);
 
     if (std::chrono::duration_cast<std::chrono::microseconds>(clock::now() - prev_time) > 1.1*tts) {
-      std::cout << "Missed deadline by more than 10%, expeceted " << tts.count() << " slept " << std::chrono::duration_cast<std::chrono::microseconds>(clock::now()-prev_time).count() <<  std::endl;
+      std::cout << "Missed deadline by more than 10%, expeceted " << tts.count() << " slept " << std::chrono::duration_cast<std::chrono::microseconds>(clock::now()-prev_time).count() << " " << ticks <<std::endl;
     }
 
   }
