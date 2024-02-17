@@ -104,7 +104,7 @@ void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& m
 
     //std::cout << "TTS: " << tts.count() << std::endl;
 
-    std::this_thread::sleep_for(tts);
+    //std::this_thread::sleep_for(tts);
 
 
         // __rdtsc intrinsic is used to read the time stamp counter
