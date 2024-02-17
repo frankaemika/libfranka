@@ -121,7 +121,7 @@ void send_states_thread(MockServer<RobotTypes>& server, uint64_t dt_us, Modes& m
     } while (clock::now() - prev_time < tts);
 
     if (clock::now() - prev_time > 1.1*tts) {
-      std::cout << "Missed deadline by more than 10%, expeceted " << tts.count() << " slept " << (clock::now()-prev).count() <<  std::endl;
+      std::cout << "Missed deadline by more than 10%, expeceted " << tts.count() << " slept " << (clock::now()-prev_time).count() <<  std::endl;
     }
 
   }
