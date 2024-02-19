@@ -12,13 +12,14 @@
 //#include <gtest/gtest.h>
 
 template <typename C>
-MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
+MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number, const std::string& ip)
     : block_{false},
       shutdown_{false},
       continue_{false},
       initialized_{false},
       sequence_number_{sequence_number},
-      on_connect_{on_connect} {
+      on_connect_{on_connect},
+      ip_(ip) {
   std::unique_lock<std::timed_mutex> lock(command_mutex_);
   server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 
@@ -87,7 +88,7 @@ template <typename C>
 void MockServer<C>::serverThread() {
   std::unique_lock<std::timed_mutex> lock(command_mutex_);
 
-  constexpr const char* kHostname = "192.168.102.10";
+  const char* kHostname = ip_ == "" ? "127.0.0.1" : ip_.c_str();
   Poco::Net::ServerSocket srv;
   srv.bind({kHostname, C::kCommandPort}, true);
   srv.listen();

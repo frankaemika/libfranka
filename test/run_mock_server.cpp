@@ -149,7 +149,7 @@ int main(int argc, char* argv[]) {
     return RobotTypes::Connect::Response(status);
   };
 
-  MockServer<RobotTypes> server(onConn);
+  MockServer<RobotTypes> server(onConn, 0, std::string(argv[1]));
 
   std::unique_lock<std::mutex> lck(mut);
   while (!connected) {

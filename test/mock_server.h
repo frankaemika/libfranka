@@ -46,7 +46,7 @@ class MockServer {
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
 
-  MockServer(ConnectCallbackT on_connect = ConnectCallbackT(), uint32_t sequence_number = 0);
+  MockServer(ConnectCallbackT on_connect = ConnectCallbackT(), uint32_t sequence_number = 0, const std::string& ip = "");
   ~MockServer();
 
   template <typename T>
@@ -129,6 +129,8 @@ class MockServer {
 
   const ConnectCallbackT on_connect_;
   std::deque<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
+
+  std::string ip_;
 
   MockServer& doForever(std::function<bool()> callback,
                         typename decltype(MockServer::commands_)::iterator it);
