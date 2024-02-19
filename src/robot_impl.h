@@ -85,6 +85,10 @@ class Robot::Impl : public RobotControl {
       case T::Status::kInvalidArgumentRejected:
         throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                                " command rejected: invalid argument!");
+      case T::Status::kCommandRejectedDueToActivatedSafetyFunctions:
+        throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
+                               " command rejected due to activated safety function! Please disable "
+                               "all safety functions. ");
       default:
         throw ProtocolException("libfranka: Unexpected response while handling "s +
                                 research_interface::robot::CommandTraits<T>::kName + " command!");
@@ -102,6 +106,10 @@ class Robot::Impl : public RobotControl {
       case T::Status::kCommandNotPossibleRejected:
         throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
                                commandNotPossibleMsg());
+      case T::Status::kCommandRejectedDueToActivatedSafetyFunctions:
+        throw CommandException("libfranka: "s + research_interface::robot::CommandTraits<T>::kName +
+                               " command rejected due to activated safety function! Please disable "
+                               "all safety functions.");
       default:
         throw ProtocolException("libfranka: Unexpected response while handling "s +
                                 research_interface::robot::CommandTraits<T>::kName + " command!");
@@ -187,6 +195,18 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
           " command aborted!");
+    case research_interface::robot::Move::Status::kPreemptedDueToActivatedSafetyFunctions:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command preempted due to activated safety function! Please disable all safety "
+          "functions.");
+    case research_interface::robot::Move::Status::kCommandRejectedDueToActivatedSafetyFunctions:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected due to activated safety function! Please disable all safety "
+          "functions.");
     default:
       throw ProtocolException(
           "libfranka: Unexpected response while handling "s +
@@ -223,6 +243,12 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::StopMo
           "libfranka: "s +
           research_interface::robot::CommandTraits<research_interface::robot::StopMove>::kName +
           " command aborted: motion aborted by reflex!");
+    case research_interface::robot::StopMove::Status::kCommandRejectedDueToActivatedSafetyFunctions:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected due to activated safety function! Please disable all safety "
+          "functions.");
     default:
       throw ProtocolException(
           "libfranka: Unexpected response while handling "s +
@@ -265,6 +291,13 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Automa
                              research_interface::robot::CommandTraits<
                                  research_interface::robot::AutomaticErrorRecovery>::kName +
                              " command aborted!");
+    case research_interface::robot::AutomaticErrorRecovery::Status::
+        kCommandRejectedDueToActivatedSafetyFunctions:
+      throw CommandException(
+          "libfranka: "s +
+          research_interface::robot::CommandTraits<research_interface::robot::Move>::kName +
+          " command rejected due to activated safety function! Please disable all safety "
+          "functions.");
     default:
       throw ProtocolException("libfranka: Unexpected response while handling "s +
                               research_interface::robot::CommandTraits<
@@ -278,25 +311,6 @@ uint32_t Robot::Impl::executeCommand(TArgs... args) {
   uint32_t command_id = network_->tcpSendRequest<T>(args...);
   typename T::Response response = network_->tcpBlockingReceiveResponse<T>(command_id);
   handleCommandResponse<T>(response);
-  return command_id;
-}
-
-template <>
-inline uint32_t Robot::Impl::
-    executeCommand<research_interface::robot::GetCartesianLimit, int32_t, VirtualWallCuboid*>(
-        int32_t id,
-        VirtualWallCuboid* virtual_wall_cuboid) {
-  using research_interface::robot::GetCartesianLimit;
-  uint32_t command_id = network_->tcpSendRequest<GetCartesianLimit>(id);
-  GetCartesianLimit::Response response =
-      network_->tcpBlockingReceiveResponse<GetCartesianLimit>(command_id);
-
-  virtual_wall_cuboid->p_frame = response.object_frame;
-  virtual_wall_cuboid->object_world_size = response.object_world_size;
-  virtual_wall_cuboid->active = response.object_activation;
-  virtual_wall_cuboid->id = id;
-
-  handleCommandResponse<GetCartesianLimit>(response);
   return command_id;
 }
 

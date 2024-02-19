@@ -46,11 +46,17 @@ class MockServer {
   using ReceiveRobotCommandCallbackT =
       std::function<void(const research_interface::robot::RobotCommand&)>;
 
-  MockServer(ConnectCallbackT on_connect = ConnectCallbackT(), uint32_t sequence_number = 0);
+  MockServer(ConnectCallbackT on_connect = ConnectCallbackT(), uint32_t sequence_number = 0, const std::string& ip = "");
   ~MockServer();
 
   template <typename T>
   MockServer& sendEmptyState();
+
+  template <typename T>
+  MockServer& sendEmptyStateSync();
+
+  template <typename T>
+  MockServer& sendStateSync(T& state);
 
   template <typename T>
   MockServer& sendResponse(const uint32_t& command_id,
@@ -110,7 +116,9 @@ class MockServer {
   std::condition_variable_any cv_;
   std::timed_mutex command_mutex_;
   std::mutex tcp_mutex_;
-  std::mutex udp_mutex_;
+  std::mutex udp_send_mutex_;
+  std::mutex udp_rcv_mutex_;
+  Socket udp_socket_;
   std::thread server_thread_;
   bool block_;
   bool shutdown_;
@@ -121,6 +129,8 @@ class MockServer {
 
   const ConnectCallbackT on_connect_;
   std::deque<std::pair<std::string, std::function<void(Socket&, Socket&)>>> commands_;
+
+  std::string ip_;
 
   MockServer& doForever(std::function<bool()> callback,
                         typename decltype(MockServer::commands_)::iterator it);
@@ -169,6 +179,24 @@ template <typename C>
 template <typename T>
 MockServer<C>& MockServer<C>::sendEmptyState() {
   return onSendUDP<T>([=](T& state) { state.message_id = ++sequence_number_; });
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendEmptyStateSync() {
+  T state{};
+  state.message_id = ++sequence_number_;
+  udp_socket_.sendBytes(&state, sizeof(state));
+  return *this;
+}
+
+template <typename C>
+template <typename T>
+MockServer<C>& MockServer<C>::sendStateSync(T& state) {
+  //state.message_id = ++sequence_number_;
+  sequence_number_++;
+  udp_socket_.sendBytes(&state, sizeof(state));
+  return *this;
 }
 
 template <typename C>

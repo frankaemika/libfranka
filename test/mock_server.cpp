@@ -7,16 +7,19 @@
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/ServerSocket.h>
 #include <Poco/Net/StreamSocket.h>
-#include <gtest/gtest.h>
+#include  <cassert>
+#include <iostream>
+//#include <gtest/gtest.h>
 
 template <typename C>
-MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number)
+MockServer<C>::MockServer(ConnectCallbackT on_connect, uint32_t sequence_number, const std::string& ip)
     : block_{false},
       shutdown_{false},
       continue_{false},
       initialized_{false},
       sequence_number_{sequence_number},
-      on_connect_{on_connect} {
+      on_connect_{on_connect},
+      ip_(ip) {
   std::unique_lock<std::timed_mutex> lock(command_mutex_);
   server_thread_ = std::thread(&MockServer<C>::serverThread, this);
 
@@ -46,7 +49,7 @@ MockServer<C>::~MockServer() {
       ss << commands_.front().first << std::endl;
       commands_.pop_front();
     }
-    ADD_FAILURE() << ss.str();
+    std::cerr << ss.str() << std::endl;
   }
 }
 
@@ -85,7 +88,7 @@ template <typename C>
 void MockServer<C>::serverThread() {
   std::unique_lock<std::timed_mutex> lock(command_mutex_);
 
-  constexpr const char* kHostname = "127.0.0.1";
+  const char* kHostname = ip_ == "" ? "127.0.0.1" : ip_.c_str();
   Poco::Net::ServerSocket srv;
   srv.bind({kHostname, C::kCommandPort}, true);
   srv.listen();
@@ -108,12 +111,12 @@ void MockServer<C>::serverThread() {
   tcp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
     std::lock_guard<std::mutex> _(tcp_mutex_);
     int rv = tcp_socket.sendBytes(data, size);
-    ASSERT_EQ(static_cast<int>(size), rv) << "Send error on TCP socket";
+    assert(rv == static_cast<int>(size));
   };
   tcp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
     std::lock_guard<std::mutex> _(tcp_mutex_);
     int rv = tcp_socket.receiveBytes(data, size);
-    ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on TCP socket";
+    assert(rv == static_cast<int>(size));
   };
 
   uint16_t udp_port;
@@ -128,15 +131,17 @@ void MockServer<C>::serverThread() {
   udp_socket.setBlocking(true);
   Socket udp_socket_wrapper;
   udp_socket_wrapper.sendBytes = [&](const void* data, size_t size) {
-    std::lock_guard<std::mutex> _(udp_mutex_);
+    std::lock_guard<std::mutex> _(udp_send_mutex_);
     int rv = udp_socket.sendTo(data, size, {remote_address.host(), udp_port});
-    ASSERT_EQ(static_cast<int>(size), rv) << "Send error on UDP socket";
+    assert(rv == static_cast<int>(size));
   };
   udp_socket_wrapper.receiveBytes = [&](void* data, size_t size) {
-    std::lock_guard<std::mutex> _(udp_mutex_);
+    std::lock_guard<std::mutex> _(udp_rcv_mutex_);
     int rv = udp_socket.receiveFrom(data, size, remote_address);
-    ASSERT_EQ(static_cast<int>(size), rv) << "Receive error on UDP socket";
+    assert(rv == static_cast<int>(size));
   };
+
+  udp_socket_ = udp_socket_wrapper;
 
   sendInitialState(udp_socket_wrapper);
 
@@ -155,8 +160,7 @@ void MockServer<C>::serverThread() {
   }
 
   if (!ignore_udp_buffer_) {
-    EXPECT_FALSE(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ))
-        << "UDP socket still has data";
+    assert(udp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ) == false);
   }
 
   if (tcp_socket.poll(Poco::Timespan(), Poco::Net::Socket::SelectMode::SELECT_READ)) {
@@ -165,7 +169,7 @@ void MockServer<C>::serverThread() {
     std::array<uint8_t, 16> buffer;
 
     int rv = tcp_socket.receiveBytes(buffer.data(), buffer.size());
-    EXPECT_EQ(0, rv) << "TCP socket still has data";
+    assert(rv == 0);
   }
 }
 

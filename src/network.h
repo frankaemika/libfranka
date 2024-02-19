@@ -11,12 +11,17 @@
 #include <thread>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include <Poco/Net/DatagramSocket.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 
+#include <tracy/Tracy.hpp>
+
 #include <franka/exception.h>
+
+#define PACKET_HW_TIMESTAMPS
 
 namespace franka {
 
@@ -110,6 +115,118 @@ bool Network::udpReceive(T* data) {
   return false;
 }
 
+static void make_address(unsigned short port,
+                         struct sockaddr_in *host_address) {
+  bzero(host_address, sizeof(struct sockaddr_in));
+
+  host_address->sin_family = AF_INET;
+  host_address->sin_port = htons(port);
+  host_address->sin_addr.s_addr = INADDR_ANY;
+}
+
+struct packet_time_t {
+  uint64_t nic_ts;
+  uint64_t kernel_ts;
+  uint64_t user_ts;
+};
+
+inline packet_time_t parse_time(struct timespec *ts) {
+  /* Hardware timestamping provides three timestamps -
+   *   system (software)
+   *   transformed (hw converted to sw)
+   *   raw (hardware)
+   * in that order - though depending on socket option, you may have 0 in
+   * some of them.
+   */
+  // printf("timestamps " TIME_FMT TIME_FMT TIME_FMT "\n",
+  //   (uint64_t)ts[0].tv_sec, (uint64_t)ts[0].tv_nsec,
+  //   (uint64_t)ts[1].tv_sec, (uint64_t)ts[1].tv_nsec,
+  //   (uint64_t)ts[2].tv_sec, (uint64_t)ts[2].tv_nsec );
+
+  if (ts == nullptr) {
+    return packet_time_t();
+  }
+
+  auto sys_now = std::chrono::system_clock::now();
+  uint64_t nanoseconds_user = std::chrono::duration_cast<std::chrono::nanoseconds>(sys_now.time_since_epoch()).count();
+  // printf("time_user : %d.%06d\n", (int) time_user.tv_sec,
+  //                                 (int) time_user.tv_usec);
+
+  uint64_t nanoseconds_nic = ts[2].tv_sec * 1000000000 + ts[2].tv_nsec;
+  uint64_t nanoseconds_kernel = ts[0].tv_sec * 1000000000 + ts[0].tv_nsec;
+
+  return packet_time_t{
+    .nic_ts = nanoseconds_nic,
+    .kernel_ts = nanoseconds_kernel,
+    .user_ts = nanoseconds_user
+  };
+}
+
+inline packet_time_t handle_time(struct msghdr *msg) {
+  struct timespec *ts = NULL;
+  struct cmsghdr *cmsg;
+
+  for (cmsg = CMSG_FIRSTHDR(msg); cmsg; cmsg = CMSG_NXTHDR(msg, cmsg)) {
+    if (cmsg->cmsg_level != SOL_SOCKET)
+      continue;
+
+    switch (cmsg->cmsg_type) {
+    case SO_TIMESTAMPNS:
+      ts = (struct timespec *)CMSG_DATA(cmsg);
+      break;
+    case SO_TIMESTAMPING:
+      ts = (struct timespec *)CMSG_DATA(cmsg);
+      break;
+    default:
+      /* Ignore other cmsg options */
+      break;
+    }
+  }
+
+  return parse_time(ts);
+}
+
+template <typename T> int udp_timestamp_receive(std::array<uint8_t, sizeof(T)>& buffer, Poco::Net::DatagramSocket& socket, Poco::Net::SocketAddress& addr) {
+  struct msghdr msg;
+  struct iovec iov;
+  struct sockaddr_in host_address;
+  char control[1024];
+  int got;
+
+  /* recvmsg header structure */
+  make_address(0, &host_address);
+  iov.iov_base = buffer.data();
+  iov.iov_len = buffer.size();
+  msg.msg_iov = &iov;
+  msg.msg_iovlen = 1;
+  msg.msg_name = &host_address;
+  msg.msg_namelen = sizeof(struct sockaddr_in);
+  msg.msg_control = control;
+  msg.msg_controllen = 1024;
+
+  /* block for message */
+  got = recvmsg(socket.impl()->sockfd(), &msg, 0);
+
+  if (got == -1) {
+    if (errno == EAGAIN) {
+      return 0;
+    } else {
+      throw NetworkException(strerror(errno));
+    }
+  }
+
+  addr = Poco::Net::SocketAddress(reinterpret_cast<sockaddr*>(&host_address), sizeof(struct sockaddr_in));
+
+  packet_time_t packet_time = handle_time(&msg);
+  char packet_timing_str[1024];
+  sprintf(packet_timing_str, "nic:%lu,kernel:%lu,user:%lu", packet_time.nic_ts, packet_time.kernel_ts, packet_time.user_ts);
+
+  TracyMessage(packet_timing_str, strlen(packet_timing_str));
+
+  return got;
+
+}
+
 template <typename T>
 T Network::udpBlockingReceive() {
   std::lock_guard<std::mutex> _(udp_mutex_);
@@ -120,15 +237,21 @@ template <typename T>
 T Network::udpBlockingReceiveUnsafe() try {
   std::array<uint8_t, sizeof(T)> buffer;
 
+#ifdef PACKET_HW_TIMESTAMPS
+  int bytes_received = udp_timestamp_receive<T>(buffer, udp_socket_, udp_server_address_);
+#else
   int bytes_received =
       udp_socket_.receiveFrom(buffer.data(), static_cast<int>(buffer.size()), udp_server_address_);
+#endif
 
   if (bytes_received != static_cast<int>(buffer.size())) {
+    std::cout << "Inc " << bytes_received << std::endl; 
     throw ProtocolException("libfranka: incorrect object size");
   }
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
+    std::cout << "Exception  " << e.what() << std::endl; 
   using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: UDP receive: "s + e.what());
 }
@@ -236,6 +359,9 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
   do {
     lock.lock();
     tcpReadFromBuffer<T>(10ms);
+    for (auto id : received_responses_) {
+      std::cout << "Receide " << id.first << std::endl;
+    }
     it = received_responses_.find(command_id);
     lock.unlock();
     std::this_thread::yield();
