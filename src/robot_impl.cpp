@@ -413,6 +413,11 @@ Model Robot::Impl::loadModel() const {
   return Model(*network_);
 }
 
+// for the tests
+Model Robot::Impl::loadModel(std::unique_ptr<RobotModelBase> robot_model) const {
+  return Model(*network_, std::move(robot_model));
+}
+
 RobotState convertRobotState(const research_interface::robot::RobotState& robot_state) noexcept {
   RobotState converted;
   converted.O_T_EE = robot_state.O_T_EE;

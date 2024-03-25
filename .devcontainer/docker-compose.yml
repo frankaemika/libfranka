@@ -1,0 +1,28 @@
+version: '2'
+
+services:
+  libfranka_project:
+    build: .
+    container_name: libfranka
+    network_mode: "host"
+    shm_size: 512m
+    privileged: true
+    command: /bin/bash
+    tty: true
+    stdin_open: true
+    volumes:
+      - ../:/workspaces
+      - ~/.gitconfig:/etc/gitconfig:ro
+    user: 1001:1001
+    cap_add:
+      - SYS_NICE
+    ulimits:
+      rtprio: 99
+      rttime: -1
+      memlock: 8428281856
+    environment:
+      PATH: /opt/openrobots/bin:$PATH
+      PKG_CONFIG_PATH: /opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH
+      LD_LIBRARY_PATH: /opt/openrobots/lib:$LD_LIBRARY_PATH
+      PYTHONPATH: /opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH # Adapt your desired python version here
+      CMAKE_PREFIX_PATH: /opt/openrobots:$CMAKE_PREFIX_PATH

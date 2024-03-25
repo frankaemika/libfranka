@@ -9,6 +9,7 @@
 
 #include <franka/model.h>
 #include <franka/robot.h>
+#include <franka/robot_model_base.h>
 #include <research_interface/robot/rbk_types.h>
 #include <research_interface/robot/service_traits.h>
 #include <research_interface/robot/service_types.h>
@@ -86,6 +87,9 @@ class Robot::Impl : public RobotControl {
   uint32_t executeCommand(TArgs... /* args */);
 
   Model loadModel() const;
+
+  // for the unit tests
+  Model loadModel(std::unique_ptr<RobotModelBase> robot_model) const;
 
   research_interface::robot::ControllerCommand createControllerCommand(
       const Torques& control_input);

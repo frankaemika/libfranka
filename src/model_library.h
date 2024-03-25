@@ -28,8 +28,6 @@ class ModelLibrary {
   const std::function<decltype(Ji_J_J8)> body_jacobian_flange;
   const std::function<decltype(Ji_J_J9)> body_jacobian_ee;
 
-  const std::function<decltype(M_NE)> mass;
-
   const std::function<decltype(O_J_J1)> zero_jacobian_joint1;
   const std::function<decltype(O_J_J2)> zero_jacobian_joint2;
   const std::function<decltype(O_J_J3)> zero_jacobian_joint3;
@@ -49,9 +47,6 @@ class ModelLibrary {
   const std::function<decltype(O_T_J7)> joint7;
   const std::function<decltype(O_T_J8)> flange;
   const std::function<decltype(O_T_J9)> ee;
-
-  const std::function<decltype(c_NE)> coriolis;
-  const std::function<decltype(g_NE)> gravity;
 };
 
 }  // namespace franka
