@@ -27,6 +27,7 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty" CACHE PATH
 ## Dependencies
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
+find_package(pinocchio REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -80,6 +81,7 @@ add_library(franka SHARED
   src/robot_state.cpp
   src/vacuum_gripper.cpp
   src/vacuum_gripper_state.cpp
+  src/robot_model.cpp
 )
 add_library(Franka::Franka ALIAS franka)
 
@@ -107,6 +109,7 @@ endif()
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -115,6 +118,7 @@ target_link_libraries(franka PRIVATE
   Poco::Net
   Eigen3::Eigen3
   Threads::Threads
+  pinocchio::pinocchio
 )
 
 target_link_libraries(franka PUBLIC
@@ -157,6 +161,13 @@ install(FILES
 install(EXPORT FrankaTargets
   NAMESPACE Franka::
   DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
+)
+
+set(ROBOT_MODELS_PATH ${CMAKE_INSTALL_PREFIX}/share/robot_models)
+configure_file(cmake/config.h.in config.h)
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/robot_models
+        DESTINATION share
 )
 
 ## Subprojects

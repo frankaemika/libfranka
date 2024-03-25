@@ -59,16 +59,6 @@ void Ji_J_J9(const double q[7], const double F_T_EE[16], double b_Ji_J_J9[42]) {
   }
 }
 
-void M_NE(const double q[7],
-          const double I_load[9],
-          double m_load,
-          const double F_x_Cload[3],
-          double M_NE[49]) {
-  if (model_library_interface) {
-    model_library_interface->M_NE(q, I_load, m_load, F_x_Cload, M_NE);
-  }
-}
-
 void O_J_J1(double b_O_J_J1[42]) {
   if (model_library_interface) {
     model_library_interface->O_J_J1(b_O_J_J1);
@@ -166,26 +156,5 @@ void O_T_J8(const double q[7], double O_T_J8[16]) {
 void O_T_J9(const double q[7], const double F_T_EE[16], double O_T_J9[16]) {
   if (model_library_interface) {
     model_library_interface->O_T_J9(q, F_T_EE, O_T_J9);
-  }
-}
-
-void c_NE(const double q[7],
-          const double dq[7],
-          const double I_load[9],
-          double m_load,
-          const double F_x_Cload[3],
-          double c_NE[7]) {
-  if (model_library_interface) {
-    model_library_interface->c_NE(q, dq, I_load, m_load, F_x_Cload, c_NE);
-  }
-}
-
-void g_NE(const double q[7],
-          const double g_earth[3],
-          double m_load,
-          const double F_x_Cload[3],
-          double g_NE[7]) {
-  if (model_library_interface) {
-    model_library_interface->g_NE(q, g_earth, m_load, F_x_Cload, g_NE);
   }
 }

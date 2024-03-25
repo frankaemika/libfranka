@@ -12,6 +12,7 @@ if(NOT FRANKA_IS_FOUND)
 endif()
 find_package(Eigen3 REQUIRED)
 find_package(Poco REQUIRED COMPONENTS Foundation)
+find_package(pinocchio REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -55,10 +56,10 @@ foreach(example ${EXAMPLES})
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
   )
-  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3)
+  target_link_libraries(${example} Franka::Franka examples_common Eigen3::Eigen3 pinocchio::pinocchio)
 endforeach()
 
-target_link_libraries(joint_impedance_control Threads::Threads)
+target_link_libraries(joint_impedance_control Threads::Threads pinocchio::pinocchio)
 target_link_libraries(motion_with_control Poco::Foundation)
 target_link_libraries(motion_with_control_external_control_loop Poco::Foundation)
 
