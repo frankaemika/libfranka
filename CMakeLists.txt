@@ -109,7 +109,6 @@ endif()
 
 target_include_directories(franka PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
   $<INSTALL_INTERFACE:include>
 )
 
@@ -161,13 +160,6 @@ install(FILES
 install(EXPORT FrankaTargets
   NAMESPACE Franka::
   DESTINATION ${INSTALL_CMAKE_CONFIG_DIR}
-)
-
-set(ROBOT_MODELS_PATH ${CMAKE_INSTALL_PREFIX}/share/robot_models)
-configure_file(cmake/config.h.in config.h)
-
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/robot_models
-        DESTINATION share
 )
 
 ## Subprojects

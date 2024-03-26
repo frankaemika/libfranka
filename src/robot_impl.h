@@ -14,6 +14,7 @@
 #include <research_interface/robot/service_traits.h>
 #include <research_interface/robot/service_types.h>
 
+#include "franka/commands/get_robot_model_command.hpp"
 #include "logger.h"
 #include "network.h"
 #include "robot_control.h"
@@ -83,10 +84,10 @@ class Robot::Impl : public RobotControl {
    */
   void finishMotion(uint32_t motion_id, const Torques& control_input);
 
-  template <typename T, typename... TArgs>
-  uint32_t executeCommand(TArgs... /* args */);
+  template <typename T, typename ReturnType = uint32_t, typename... TArgs>
+  ReturnType executeCommand(TArgs... /* args */);
 
-  Model loadModel() const;
+  Model loadModel(const std::string& urdf_model) const;
 
   // for the unit tests
   Model loadModel(std::unique_ptr<RobotModelBase> robot_model) const;
@@ -178,6 +179,11 @@ class Robot::Impl : public RobotControl {
     }
   }
 
+  template <typename T,
+            typename ReturnType,
+            typename = std::enable_if_t<!std::is_same_v<ReturnType, void>>>
+  ReturnType handleCommandResponse(const typename T::Response& response) const;
+
   research_interface::robot::RobotCommand sendRobotCommand(
       const research_interface::robot::MotionGeneratorCommand* motion_command,
       const research_interface::robot::ControllerCommand* control_command) const;
@@ -200,6 +206,35 @@ class Robot::Impl : public RobotControl {
   research_interface::robot::ControllerMode current_move_controller_mode_;
   uint64_t message_id_;
 };
+
+template <>
+inline GetRobotModelResult
+Robot::Impl::handleCommandResponse<research_interface::robot::GetRobotModel, GetRobotModelResult>(
+    const research_interface::robot::GetRobotModel::Response& response) const {
+  using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
+
+  switch (response.status) {
+    case research_interface::robot::GetRobotModel::Status::kSuccess:
+      return GetRobotModelResult{.robot_model_urdf = response.robot_model};
+    case research_interface::robot::GetRobotModel::Status::kCommandNotPossibleRejected:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::GetRobotModel>::kName +
+                             commandNotPossibleMsg());
+    case research_interface::robot::GetRobotModel::Status::
+        kCommandRejectedDueToActivatedSafetyFunctions:
+      throw CommandException("libfranka: "s +
+                             research_interface::robot::CommandTraits<
+                                 research_interface::robot::GetRobotModel>::kName +
+                             " command rejected due to activated safety function! Please disable "
+                             "all safety functions.");
+    default:
+      throw ProtocolException("libfranka: Unexpected response while handling "s +
+                              research_interface::robot::CommandTraits<
+                                  research_interface::robot::GetRobotModel>::kName +
+                              " command!");
+  }
+}
 
 template <>
 inline void Robot::Impl::handleCommandResponse<research_interface::robot::Move>(
@@ -368,12 +403,24 @@ inline void Robot::Impl::handleCommandResponse<research_interface::robot::Automa
   }
 }
 
-template <typename T, typename... TArgs>
-uint32_t Robot::Impl::executeCommand(TArgs... args) {
+template <typename T, typename ReturnType, typename... TArgs>
+ReturnType Robot::Impl::executeCommand(TArgs... args) {
   uint32_t command_id = network_->tcpSendRequest<T>(args...);
   typename T::Response response = network_->tcpBlockingReceiveResponse<T>(command_id);
   handleCommandResponse<T>(response);
   return command_id;
+}
+
+template <>
+inline GetRobotModelResult
+Robot::Impl::executeCommand<research_interface::robot::GetRobotModel, GetRobotModelResult>() {
+  uint32_t command_id = network_->tcpSendRequest<research_interface::robot::GetRobotModel>();
+  research_interface::robot::GetRobotModel::Response response =
+      network_->tcpBlockingReceiveResponse<research_interface::robot::GetRobotModel>(command_id);
+  auto get_robot_model_result =
+      handleCommandResponse<research_interface::robot::GetRobotModel, GetRobotModelResult>(
+          response);
+  return get_robot_model_result;
 }
 
 }  // namespace franka

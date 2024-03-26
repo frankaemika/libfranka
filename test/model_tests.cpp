@@ -115,6 +115,12 @@ TEST(InvalidModel, ThrowsIfNoModelReceived) {
   franka::Robot robot("127.0.0.1");
 
   server
+      .waitForCommand<GetRobotModel>([this](const typename GetRobotModel::Request& /*request*/) {
+        return GetRobotModel::Response(GetRobotModel::Status::kSuccess);
+      })
+      .spinOnce();
+
+  server
       .waitForCommand<LoadModelLibrary>([&](const LoadModelLibrary::Request&) {
         return LoadModelLibrary::Response(LoadModelLibrary::Status::kError);
       })

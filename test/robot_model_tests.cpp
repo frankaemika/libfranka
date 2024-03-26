@@ -37,7 +37,7 @@ std::string readFileToString(const std::string& filename) {
 
 class RobotModelTest : public ::testing::Test {
  protected:
-  std::unique_ptr<RobotModel> model;
+  std::unique_ptr<franka::RobotModel> model;
   std::array<double, 7> q = {0, 0, 0, 0, 0, 0, 0};
   std::array<double, 7> dq = {0, 0, 0, 0, 0, 0, 0};
   std::array<double, 7> unit_dq = {1, 1, 1, 1, 1, 1, 1};
@@ -56,7 +56,7 @@ class RobotModelTest : public ::testing::Test {
 
   RobotModelTest() {
     auto urdf_string = readFileToString(urdf_path);
-    model = std::make_unique<RobotModel>(urdf_string);
+    model = std::make_unique<franka::RobotModel>(urdf_string);
   }
 };
 

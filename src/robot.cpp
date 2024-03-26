@@ -192,6 +192,12 @@ RobotState Robot::readOnce() {
   return impl_->readOnce();
 }
 
+auto Robot::getRobotModel() -> std::string {
+  auto get_robot_model =
+      impl_->executeCommand<research_interface::robot::GetRobotModel, GetRobotModelResult>();
+  return get_robot_model.robot_model_urdf;
+}
+
 void Robot::setCollisionBehavior(const std::array<double, 7>& lower_torque_thresholds_acceleration,
                                  const std::array<double, 7>& upper_torque_thresholds_acceleration,
                                  const std::array<double, 7>& lower_torque_thresholds_nominal,
@@ -306,7 +312,7 @@ void Robot::stop() {
 }
 
 Model Robot::loadModel() {
-  return impl_->loadModel();
+  return impl_->loadModel(getRobotModel());
 }
 
 Model Robot::loadModel(std::unique_ptr<RobotModelBase> robot_model) {
