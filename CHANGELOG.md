@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.13.4 - 2024-03-26
+
+Requires Franka Research 3 system version >= 5.5.0
+
+- Compute dynamic robot parameters with Pinocchio library.  
+
 ## 0.13.3 - 2024-01-18
 
 Requires Franka Research 3 system version >= 5.5.0

@@ -1,5 +1,9 @@
+# Start with a base image
 FROM ubuntu:20.04
+
+# Set non-interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
+
 
 ARG USER_UID=1001
 ARG USER_GID=1001

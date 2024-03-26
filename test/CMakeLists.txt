@@ -22,6 +22,7 @@ set(TEST_DEPENDENCIES
   Threads::Threads
   franka
   libfranka-common
+  pinocchio::pinocchio
 )
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
@@ -54,6 +55,7 @@ add_executable(run_all_tests
   rate_limiting_tests.cpp
   robot_command_tests.cpp
   robot_impl_tests.cpp
+  robot_model_tests.cpp
   robot_state_tests.cpp
   robot_tests.cpp
   vacuum_gripper_tests.cpp

@@ -309,6 +309,10 @@ Model Robot::loadModel() {
   return impl_->loadModel();
 }
 
+Model Robot::loadModel(std::unique_ptr<RobotModelBase> robot_model) {
+  return impl_->loadModel(std::move(robot_model));
+}
+
 Robot::Robot(std::shared_ptr<Impl> robot_impl) : impl_(std::move(robot_impl)){};
 
 template std::unique_ptr<ActiveControlBase> Robot::startControl<JointVelocities>(

@@ -10,6 +10,7 @@
 #include <franka/control_types.h>
 #include <franka/duration.h>
 #include <franka/lowpass_filter.h>
+#include <franka/robot_model_base.h>
 #include <franka/robot_state.h>
 #include <research_interface/robot/service_types.h>
 
@@ -17,7 +18,6 @@
  * @file robot.h
  * Contains the franka::Robot type.
  */
-
 namespace franka {
 
 class Model;
@@ -738,6 +738,9 @@ class Robot {
    * @throw NetworkException if the connection is lost, e.g. after a timeout.
    */
   Model loadModel();
+
+  // Loads the model library for the unittests mockRobotModel
+  Model loadModel(std::unique_ptr<RobotModelBase> robot_model);
 
   /**
    * Returns the software version reported by the connected server.

@@ -1,0 +1,25 @@
+{
+    "name": "libfranka_container",
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "libfranka_project",
+    "workspaceFolder": "/workspaces",
+    "remoteUser": "user",
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "bungcip.better-toml",
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cmake-tools",
+                "xaver.clang-format",
+                "josetr.cmake-language-support-vscode",
+                "twxs.cmake",
+                "cheshirekow.cmake-format"
+            ]
+        }
+    }
+}
