@@ -409,8 +409,8 @@ void Robot::Impl::cancelMotion(uint32_t motion_id) {
   current_move_controller_mode_ = research_interface::robot::ControllerMode::kOther;
 }
 
-Model Robot::Impl::loadModel() const {
-  return Model(*network_);
+Model Robot::Impl::loadModel(const std::string& urdf_model) const {
+  return Model(*network_, urdf_model);
 }
 
 // for the tests

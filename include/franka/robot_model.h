@@ -11,6 +11,8 @@
 
 #include "franka/robot_model_base.h"
 
+namespace franka {
+
 /**
  * Implements RobotModelBase using Pinocchio.
  */
@@ -58,3 +60,5 @@ class RobotModel : public RobotModelBase {
   pinocchio::FrameIndex last_link_frame_index_;
   pinocchio::JointIndex last_joint_index_;
 };
+
+}  // namespace franka
