@@ -5,7 +5,6 @@
 #include <array>
 #include <memory>
 
-#include <config.h>
 #include <franka/robot.h>
 #include <franka/robot_model_base.h>
 #include <franka/robot_state.h>
@@ -63,7 +62,7 @@ class Model {
    *
    * @throw ModelException if the model library cannot be loaded.
    */
-  explicit Model(franka::Network& network);
+  explicit Model(franka::Network& network, const std::string& urdf_model);
 
   /**
    * Creates a new Model instance only for the tests.
@@ -299,7 +298,6 @@ class Model {
  private:
   std::unique_ptr<ModelLibrary> library_;
   std::unique_ptr<RobotModelBase> robot_model_;
-  std::string k_urdf_path_ = std::string(ROBOT_MODELS_PATH) + "/fr3.urdf";
 };
 
 }  // namespace franka
