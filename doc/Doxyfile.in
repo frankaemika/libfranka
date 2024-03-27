@@ -51,7 +51,7 @@ PROJECT_BRIEF          = "FCI C++ API"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/Logo_FRANKA_EMIKA_dark.png
+PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/Logo_FRANKA_ROBOTICS_dark.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
