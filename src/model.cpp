@@ -14,20 +14,6 @@
 #include "model_library.h"
 #include "network.h"
 
-std::string readURDFFromFile(const std::string& filename) {
-  std::ifstream file(filename);
-  if (!file.is_open()) {
-    std::cerr << "Error opening file: " << filename << std::endl;
-    return "";
-  }
-
-  std::ostringstream oss;
-  oss << file.rdbuf();
-  file.close();
-
-  return oss.str();
-}
-
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 
 namespace franka {
@@ -38,10 +24,9 @@ Frame operator++(Frame& frame, int /* dummy */) noexcept {
   return original;
 }
 
-Model::Model(Network& network) : library_{new ModelLibrary(network)} {
-  // TODO(baris) workaround for now, get the robot specific urdf from the robot in the future
-  auto urdf_string = readURDFFromFile(k_urdf_path_);
-  robot_model_ = std::make_unique<RobotModel>(urdf_string);
+Model::Model(Network& network, const std::string& urdf_model)
+    : library_{new ModelLibrary(network)} {
+  robot_model_ = std::make_unique<RobotModel>(urdf_model);
 }
 
 // for the tests

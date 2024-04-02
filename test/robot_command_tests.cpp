@@ -18,6 +18,7 @@ using franka::Torques;
 
 using research_interface::robot::AutomaticErrorRecovery;
 using research_interface::robot::Connect;
+using research_interface::robot::GetRobotModel;
 using research_interface::robot::LoadModelLibrary;
 using research_interface::robot::Move;
 using research_interface::robot::SetCartesianImpedance;
@@ -28,6 +29,8 @@ using research_interface::robot::SetJointImpedance;
 using research_interface::robot::SetLoad;
 using research_interface::robot::SetNEToEE;
 using research_interface::robot::StopMove;
+
+const std::string kExpectedModelString = "test_string";
 
 template <typename T>
 class Command : public ::testing::Test {
@@ -138,6 +141,11 @@ bool Command<AutomaticErrorRecovery>::compare(const AutomaticErrorRecovery::Requ
 }
 
 template <>
+bool Command<GetRobotModel>::compare(const GetRobotModel::Request&, const GetRobotModel::Request&) {
+  return true;
+}
+
+template <>
 bool Command<StopMove>::compare(const StopMove::Request&, const StopMove::Request&) {
   return true;
 }
@@ -211,6 +219,11 @@ AutomaticErrorRecovery::Request Command<AutomaticErrorRecovery>::getExpected() {
 }
 
 template <>
+GetRobotModel::Request Command<GetRobotModel>::getExpected() {
+  return GetRobotModel::Request();
+}
+
+template <>
 StopMove::Request Command<StopMove>::getExpected() {
   return StopMove::Request();
 }
@@ -226,7 +239,15 @@ typename T::Response Command<T>::createResponse(const typename T::Request&,
   return typename T::Response(status);
 }
 
-using CommandTypes = ::testing::Types<SetCollisionBehavior,
+template <>
+typename GetRobotModel::Response Command<GetRobotModel>::createResponse(
+    const typename GetRobotModel::Request&,
+    const typename GetRobotModel::Status status) {
+  return typename GetRobotModel::Response(status, kExpectedModelString);
+}
+
+using CommandTypes = ::testing::Types<GetRobotModel,
+                                      SetCollisionBehavior,
                                       SetJointImpedance,
                                       SetCartesianImpedance,
                                       SetGuidingMode,
@@ -253,7 +274,11 @@ TYPED_TEST(Command, CanSendAndReceiveSuccess) {
           })
       .spinOnce();
 
-  EXPECT_NO_THROW(TestFixture::executeCommand(robot));
+  if constexpr (std::is_same_v<typename TestFixture::TCommand, GetRobotModel>) {
+    EXPECT_NO_THROW((robot.executeCommand<GetRobotModel, franka::GetRobotModelResult>()));
+  } else {
+    EXPECT_NO_THROW(TestFixture::executeCommand(robot));
+  }
 }
 
 TYPED_TEST(Command, CanSendAndReceiveRejected) {
@@ -271,7 +296,12 @@ TYPED_TEST(Command, CanSendAndReceiveRejected) {
           })
       .spinOnce();
 
-  EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
+  if constexpr (std::is_same_v<typename TestFixture::TCommand, GetRobotModel>) {
+    EXPECT_THROW((robot.executeCommand<GetRobotModel, franka::GetRobotModelResult>()),
+                 CommandException);
+  } else {
+    EXPECT_THROW(TestFixture::executeCommand(robot), CommandException);
+  }
 }
 
 TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
@@ -289,7 +319,12 @@ TYPED_TEST(Command, ThrowsProtocolExceptionIfInvalidResponseReceived) {
           })
       .spinOnce();
 
-  EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
+  if constexpr (std::is_same_v<typename TestFixture::TCommand, GetRobotModel>) {
+    EXPECT_THROW((robot.executeCommand<GetRobotModel, franka::GetRobotModelResult>()),
+                 ProtocolException);
+  } else {
+    EXPECT_THROW(TestFixture::executeCommand(robot), ProtocolException);
+  }
 }
 
 INSTANTIATE_TEST_CASE_P(

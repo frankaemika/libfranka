@@ -2,6 +2,8 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #include "franka/robot_model.h"
 
+namespace franka {
+
 RobotModel::RobotModel(const std::string& urdf) {
   pinocchio::urdf::buildModelFromXML(urdf, pinocchio_model_);
 
@@ -102,3 +104,5 @@ void RobotModel::mass(const std::array<double, 7>& q,
 
   std::copy(data.M.data(), data.M.data() + data.M.size(), m_ne.begin());
 }
+
+}  // namespace franka

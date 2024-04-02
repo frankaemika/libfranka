@@ -13,6 +13,7 @@
 #include <franka/robot_model_base.h>
 #include <franka/robot_state.h>
 #include <research_interface/robot/service_types.h>
+#include <franka/commands/get_robot_model_command.hpp>
 
 /**
  * @file robot.h
@@ -454,6 +455,14 @@ class Robot {
    * These functions should therefore not be called from within control or motion generator loops.
    * @{
    */
+
+  /**
+   * @throw CommandException if the Control reports an error.
+   * @throw NetworkException if the connection is lost, e.g. after a timeout.
+   *
+   * @return std::string Provides the URDF model of the attached robot arm as json string
+   */
+  auto getRobotModel() -> std::string;
 
   /**
    * Changes the collision behavior.
