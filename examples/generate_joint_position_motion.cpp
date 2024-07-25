@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
       time += period.toSec();
 
       if (time == 0.0) {
-        initial_position = robot_state.q_d;
+        initial_position = robot_state.q;
       }
 
       double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time));

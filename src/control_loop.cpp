@@ -159,10 +159,17 @@ void ControlLoop<JointPositions>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->q_c = motion.q;
+  std::array<double, 7> previous_joint_position{};
+  if (!initialized_filter_) {
+    previous_joint_position = command->q_c;
+    initialized_filter_ = true;
+  } else {
+    previous_joint_position = robot_state.q_d;
+  }
   if (cutoff_frequency_ < kMaxCutoffFrequency) {
     for (size_t i = 0; i < 7; i++) {
       command->q_c[i] =
-          lowpassFilter(kDeltaT, command->q_c[i], robot_state.q_d[i], cutoff_frequency_);
+          lowpassFilter(kDeltaT, command->q_c[i], previous_joint_position[i], cutoff_frequency_);
     }
   }
   if (limit_rate_) {
@@ -201,11 +208,25 @@ void ControlLoop<CartesianPose>::convertMotion(
     const RobotState& robot_state,
     research_interface::robot::MotionGeneratorCommand* command) {
   command->O_T_EE_c = motion.O_T_EE;
-  if (cutoff_frequency_ < kMaxCutoffFrequency) {
-    command->O_T_EE_c =
-        cartesianLowpassFilter(kDeltaT, command->O_T_EE_c, robot_state.O_T_EE_c, cutoff_frequency_);
+  std::array<double, 16> previous_cartesian_pose{};
+  std::array<double, 2> previous_elbow_pose{};
+  if (!initialized_filter_) {
+    previous_cartesian_pose = command->O_T_EE_c;
+    if (motion.hasElbow()) {
+      previous_elbow_pose = motion.elbow;
+    }
+    initialized_filter_ = true;
+  } else {
+    previous_cartesian_pose = robot_state.O_T_EE_c;
+    if (motion.hasElbow()) {
+      previous_elbow_pose = robot_state.elbow_c;
+    }
   }
 
+  if (cutoff_frequency_ < kMaxCutoffFrequency) {
+    command->O_T_EE_c = cartesianLowpassFilter(kDeltaT, command->O_T_EE_c, previous_cartesian_pose,
+                                               cutoff_frequency_);
+  }
   if (limit_rate_) {
     command->O_T_EE_c = limitRate(
         kMaxTranslationalVelocity, kMaxTranslationalAcceleration, kMaxTranslationalJerk,
@@ -219,7 +240,7 @@ void ControlLoop<CartesianPose>::convertMotion(
     command->elbow_c = motion.elbow;
     if (cutoff_frequency_ < kMaxCutoffFrequency) {
       command->elbow_c[0] =
-          lowpassFilter(kDeltaT, command->elbow_c[0], robot_state.elbow_c[0], cutoff_frequency_);
+          lowpassFilter(kDeltaT, command->elbow_c[0], previous_elbow_pose[0], cutoff_frequency_);
     }
     if (limit_rate_) {
       command->elbow_c[0] =

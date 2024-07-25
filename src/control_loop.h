@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <functional>
+#include <optional>
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
@@ -57,10 +58,10 @@ class ControlLoop {
   const bool limit_rate_;                          // NOLINT(readability-identifier-naming)
   const double cutoff_frequency_;                  // NOLINT(readability-identifier-naming)
   uint32_t motion_id_ = 0;
-
   void convertMotion(const T& motion,
                      const RobotState& robot_state,
                      research_interface::robot::MotionGeneratorCommand* command);
+  bool initialized_filter_{false};
 };
 
 }  // namespace franka

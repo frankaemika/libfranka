@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
       time += period.toSec();
 
       if (time == 0.0) {
-        initial_pose = robot_state.O_T_EE_c;
+        initial_pose = robot_state.O_T_EE;
       }
 
       constexpr double kRadius = 0.3;

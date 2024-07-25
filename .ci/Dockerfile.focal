@@ -45,16 +45,19 @@ RUN apt-get update \
     liburdfdom-headers-dev \
     libconsole-bridge-dev \
     libtinyxml2-dev \
-    lsb-release curl \
+    lsb-release \
+    curl \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get install -qqy lsb-release curl
 RUN mkdir -p /etc/apt/keyrings 
-RUN curl http://robotpkg.openrobots.org/packages/debian/robotpkg.asc \
-    | tee /etc/apt/keyrings/robotpkg.asc
 
-RUN  echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
-    | tee /etc/apt/sources.list.d/robotpkg.list
+# robotpkg was blocking curl request without the user-agent string
+RUN curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36" \
+    http://robotpkg.openrobots.org/packages/debian/robotpkg.asc | sudo tee /etc/apt/keyrings/robotpkg.asc
+
+RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
+| sudo tee /etc/apt/sources.list.d/robotpkg.list
 
 RUN apt-get update \
     && apt-get install -qqy robotpkg-pinocchio
