@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.13.5 - 2024-07-31
+## 0.14.0 - 2024-07-31
 
 Requires Franka Research 3 system version >= 5.8.0
 
