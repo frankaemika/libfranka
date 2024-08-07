@@ -4,7 +4,6 @@
 
 #include <cmath>
 #include <functional>
-#include <optional>
 
 #include <franka/control_types.h>
 #include <franka/duration.h>
