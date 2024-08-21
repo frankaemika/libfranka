@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model
+   href="http://download.ros.org/schema/package_format3.xsd"
+   schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>libfranka</name>
+  <version>0.13.4</version>
+  <description>libfranka is a C++ library for Franka Robotics research robots</description>
+  <maintainer email="support@franka.de">Franka Robotics GmbH</maintainer>
+  <license>Apache 2.0</license>
+
+  <url type="website">http://wiki.ros.org/libfranka</url>
+  <url type="repository">https://github.com/frankaemika/libfranka</url>
+  <url type="bugtracker">https://github.com/frankaemika/libfranka/issues</url>
+  <author>Franka Robotics GmbH</author>
+
+  <buildtool_depend>cmake</buildtool_depend>
+
+  <build_depend>eigen</build_depend>
+  <build_depend>libpoco-dev</build_depend>
+
+  <exec_depend>libpoco-dev</exec_depend>
+
+  <doc_depend>doxygen</doc_depend>
+  <doc_depend>graphviz</doc_depend>
+
+  <export>
+    <build_type>cmake</build_type>
+  </export>
+</package>
