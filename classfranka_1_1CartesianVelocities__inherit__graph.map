@@ -1,4 +1,0 @@
-<map id="franka::CartesianVelocities" name="franka::CartesianVelocities">
-<area shape="rect" id="node1" title="Stores values for Cartesian velocity motion generation." alt="" coords="5,80,201,107"/>
-<area shape="rect" id="node2" href="$structfranka_1_1Finishable.html" title="Helper type for control and motion generation loops." alt="" coords="35,5,172,32"/>
-</map>

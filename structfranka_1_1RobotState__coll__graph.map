@@ -1,5 +1,0 @@
-<map id="franka::RobotState" name="franka::RobotState">
-<area shape="rect" id="node1" title="Describes the robot state." alt="" coords="68,109,211,136"/>
-<area shape="rect" id="node2" href="$classfranka_1_1Duration.html" title="Represents a duration with millisecond resolution." alt="" coords="5,5,132,32"/>
-<area shape="rect" id="node3" href="$structfranka_1_1Errors.html" title="Enumerates errors that can occur while controlling a franka::Robot." alt="" coords="157,5,266,32"/>
-</map>

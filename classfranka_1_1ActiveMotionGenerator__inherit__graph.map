@@ -1,5 +1,0 @@
-<map id="franka::ActiveMotionGenerator&lt; MotionGeneratorType &gt;" name="franka::ActiveMotionGenerator&lt; MotionGeneratorType &gt;">
-<area shape="rect" id="node1" title="Allows the user to read the state of a Robot and to send new motion generator commands after starting..." alt="" coords="5,155,228,196"/>
-<area shape="rect" id="node2" href="$classfranka_1_1ActiveControl.html" title="Documented in ActiveControlBase." alt="" coords="37,80,196,107"/>
-<area shape="rect" id="node3" href="$classfranka_1_1ActiveControlBase.html" title="Allows the user to read the state of a Robot and to send new control commands after starting a contro..." alt="" coords="21,5,212,32"/>
-</map>
