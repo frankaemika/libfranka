@@ -4,7 +4,7 @@
    schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>libfranka</name>
-  <version>0.14.0</version>
+  <version>0.9.2</version>
   <description>libfranka is a C++ library for Franka Robotics research robots</description>
   <maintainer email="support@franka.de">Franka Robotics GmbH</maintainer>
   <license>Apache 2.0</license>
@@ -18,10 +18,8 @@
 
   <build_depend>eigen</build_depend>
   <build_depend>libpoco-dev</build_depend>
-  <build_depend>pinocchio</build_depend>
 
   <exec_depend>libpoco-dev</exec_depend>
-  <exec_depend>pinocchio</exec_depend>
 
   <doc_depend>doxygen</doc_depend>
   <doc_depend>graphviz</doc_depend>
