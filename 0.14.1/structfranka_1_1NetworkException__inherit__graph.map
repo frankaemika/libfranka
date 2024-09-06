@@ -1,0 +1,5 @@
+<map id="franka::NetworkException" name="franka::NetworkException">
+<area shape="rect" id="node1" title="NetworkException is thrown if a connection to the robot cannot be established, or when a timeout occu..." alt="" coords="5,155,196,181"/>
+<area shape="rect" id="node2" href="$structfranka_1_1Exception.html" title="Base class for all exceptions used by libfranka." alt="" coords="33,80,168,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="31,5,170,32"/>
+</map>

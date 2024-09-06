@@ -1,0 +1,12 @@
+<map id="include/franka/robot_state.h" name="include/franka/robot_state.h">
+<area shape="rect" id="node1" title="Contains the franka::RobotState types." alt="" coords="274,5,426,47"/>
+<area shape="rect" id="node2" href="$active__control__base_8h.html" title="Abstract interface class as the base of the active controllers." alt="" coords="5,244,164,285"/>
+<area shape="rect" id="node6" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states." alt="" coords="115,95,265,121"/>
+<area shape="rect" id="node8" href="$model_8h.html" title="Contains model library types." alt="" coords="265,169,435,196"/>
+<area shape="rect" id="node9" href="$robot_8h.html" title="Contains the franka::Robot type." alt="" coords="389,95,553,121"/>
+<area shape="rect" id="node10" href="$examples__common_8h.html" title="Contains common types and functions for the examples." alt="" coords="511,169,741,196"/>
+<area shape="rect" id="node3" href="$active__control_8h.html" title="Implements the ActiveControlBase abstract class." alt="" coords="123,333,281,375"/>
+<area shape="rect" id="node4" href="$active__motion__generator_8h.html" title="Contains the franka::ActiveMotionGenerator type." alt="" coords="32,423,191,464"/>
+<area shape="rect" id="node5" href="$active__torque__control_8h.html" title="Contains the franka::ActiveTorqueControl type." alt="" coords="215,423,373,464"/>
+<area shape="rect" id="node7" href="$exception_8h.html" title="Contains exception definitions." alt="" coords="46,169,241,196"/>
+</map>

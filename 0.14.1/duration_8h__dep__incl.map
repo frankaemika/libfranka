@@ -1,0 +1,17 @@
+<map id="include/franka/duration.h" name="include/franka/duration.h">
+<area shape="rect" id="node1" title="Contains the franka::Duration type." alt="" coords="297,5,481,32"/>
+<area shape="rect" id="node2" href="$gripper__state_8h.html" title="Contains the franka::GripperState type." alt="" coords="13,80,177,121"/>
+<area shape="rect" id="node4" href="$robot_8h.html" title="Contains the franka::Robot type." alt="" coords="307,177,471,203"/>
+<area shape="rect" id="node9" href="$examples__common_8h.html" title="Contains common types and functions for the examples." alt="" coords="103,259,333,285"/>
+<area shape="rect" id="node10" href="$robot__state_8h.html" title="Contains the franka::RobotState types." alt="" coords="429,80,581,121"/>
+<area shape="rect" id="node14" href="$vacuum__gripper__state_8h.html" title="Contains the franka::VacuumGripperState type." alt="" coords="717,80,887,121"/>
+<area shape="rect" id="node3" href="$gripper_8h.html" title="Contains the franka::Gripper type." alt="" coords="5,177,180,203"/>
+<area shape="rect" id="node5" href="$active__control_8h.html" title="Implements the ActiveControlBase abstract class." alt="" coords="541,423,700,464"/>
+<area shape="rect" id="node8" href="$model_8h.html" title="Contains model library types." alt="" coords="409,259,579,285"/>
+<area shape="rect" id="node6" href="$active__motion__generator_8h.html" title="Contains the franka::ActiveMotionGenerator type." alt="" coords="451,512,609,553"/>
+<area shape="rect" id="node7" href="$active__torque__control_8h.html" title="Contains the franka::ActiveTorqueControl type." alt="" coords="633,512,792,553"/>
+<area shape="rect" id="node11" href="$active__control__base_8h.html" title="Abstract interface class as the base of the active controllers." alt="" coords="541,333,700,375"/>
+<area shape="rect" id="node12" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states." alt="" coords="655,177,805,203"/>
+<area shape="rect" id="node13" href="$exception_8h.html" title="Contains exception definitions." alt="" coords="654,259,849,285"/>
+<area shape="rect" id="node15" href="$vacuum__gripper_8h.html" title="Contains the franka::VacuumGripper type." alt="" coords="830,169,1001,211"/>
+</map>
