@@ -1,0 +1,42 @@
+name: Generate Doxygen Documentation for libfranka
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  doxygen:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Doxygen
+      run: sudo apt-get install doxygen graphviz -y
+
+    - name: Generate Doxygen configuration and build it
+      run: |
+        TAG_NAME=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
+        mkdir -p build/doc/docs/$TAG_NAME && cd build && cmake -D BUILD_DOCUMENTATION=ON -D SKIP_CXX_BUILD=ON .. && make doc
+
+    - name: Move contents of html folder one level up
+      run: |
+        TAG_NAME=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
+        mv build/doc/docs/$TAG_NAME/html/* build/doc/docs/$TAG_NAME/
+
+    - name: Create index.html for redirect
+      run: |
+        TAG_NAME=$(echo $GITHUB_REF | sed 's/refs\/tags\///')
+        URL="https://frankaemika.github.io/libfranka/${TAG_NAME}/"
+        echo $URL
+        echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=$URL\"></head></html>" > build/doc/docs/index.html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: build/doc/docs
+        keep_files: true

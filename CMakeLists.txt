@@ -2,12 +2,22 @@ cmake_minimum_required(VERSION 3.4)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-set(libfranka_VERSION 0.13.4)
+set(libfranka_VERSION 0.13.5)
 
 project(libfranka
   VERSION ${libfranka_VERSION}
   LANGUAGES CXX
 )
+
+option(BUILD_DOCUMENTATION "Build documentation" OFF)
+option(SKIP_CXX_BUILD "Skips the c++ build" OFF)
+if(BUILD_DOCUMENTATION)
+  add_subdirectory(doc)
+
+  if(SKIP_CXX_BUILD)
+    return()
+  endif()
+endif()
 
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -173,11 +183,6 @@ endif()
 option(BUILD_EXAMPLES "Build example code" ON)
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
-endif()
-
-option(BUILD_DOCUMENTATION "Build documentation" OFF)
-if(BUILD_DOCUMENTATION)
-  add_subdirectory(doc)
 endif()
 
 ## Packaging
