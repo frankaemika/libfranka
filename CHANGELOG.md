@@ -4,9 +4,21 @@
 
 Requires Franka Research 3 system version >= 5.8.0
 
-- Joint/Cartesian Pose velocity and acceleration errors are minimized.
-- Joint position and cartesian pose examples can now start from the initial q or O_T_EE
-- Joint position and cartesian pose low-pass filters are fixed to use the same command in the first package.
+ * Joint/Cartesian Pose velocity and acceleration errors are minimized.
+ * Joint position and cartesian pose examples can now start from the initial q or O_T_EE
+ * Joint position and cartesian pose low-pass filters are fixed to use the same command in the first package.
+
+ * **Important**: The flags `fci_joint_motion_generator_position_limits_violation_flag` and `fci_cartesian_motion_generator_joint_position_limits_violation_flag` are now always set to false and will be deprecated in future releases. They will be replaced by joint_position_limits_violation.
+
+## 0.14.1 - 2024-09-06
+
+ * Added doxygen generation
+
+## 0.14.0 - 2024-03-26
+
+Requires Franka Research 3 system version >= 5.7.0
+
+ * Compute dynamic robot parameters with Pinocchio library.
 
 ## 0.13.5 - 2024-09-06
 
@@ -16,12 +28,6 @@ Requires Franka Research 3 system version >= 5.8.0
 Requires Franka Research 3 system version >= 5.5.0
 
  * Added package.xml for ros humble release
-
-## 0.13.4 - 2024-03-26
-
-Requires Franka Research 3 system version >= 5.7.0
-
- * Compute dynamic robot parameters with Pinocchio library.
 
 ## 0.13.3 - 2024-01-18
 

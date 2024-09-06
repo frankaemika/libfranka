@@ -9,6 +9,16 @@ project(libfranka
   LANGUAGES CXX
 )
 
+option(BUILD_DOCUMENTATION "Build documentation" OFF)
+option(SKIP_CXX_BUILD "Skips the c++ build" OFF)
+if(BUILD_DOCUMENTATION)
+  add_subdirectory(doc)
+
+  if(SKIP_CXX_BUILD)
+    return()
+  endif()
+endif()
+
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(CMAKE_CXX_STANDARD 17)
@@ -188,11 +198,6 @@ endif()
 option(BUILD_EXAMPLES "Build example code" ON)
 if(BUILD_EXAMPLES)
   add_subdirectory(examples)
-endif()
-
-option(BUILD_DOCUMENTATION "Build documentation" OFF)
-if(BUILD_DOCUMENTATION)
-  add_subdirectory(doc)
 endif()
 
 ## Packaging
