@@ -1,0 +1,8 @@
+<map id="include/franka/gripper_state.h" name="include/franka/gripper_state.h">
+<area shape="rect" id="node1" title="Contains the franka::GripperState type." alt="" coords="5,5,169,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="35,169,102,196"/>
+<area shape="rect" id="node3" title=" " alt="" coords="49,95,125,121"/>
+<area shape="rect" id="node4" href="$duration_8h.html" title="Contains the franka::Duration type." alt="" coords="150,95,283,121"/>
+<area shape="rect" id="node5" title=" " alt="" coords="141,169,207,196"/>
+<area shape="rect" id="node6" title=" " alt="" coords="232,169,284,196"/>
+</map>

@@ -1,0 +1,4 @@
+<map id="franka::Exception" name="franka::Exception">
+<area shape="rect" id="node1" title="Base class for all exceptions used by libfranka." alt="" coords="7,80,142,107"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,144,32"/>
+</map>

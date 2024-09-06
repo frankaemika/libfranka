@@ -1,0 +1,5 @@
+<map id="franka::ProtocolException" name="franka::ProtocolException">
+<area shape="rect" id="node1" title="ProtocolException is thrown if the robot returns an incorrect message." alt="" coords="5,155,193,181"/>
+<area shape="rect" id="node2" href="$structfranka_1_1Exception.html" title="Base class for all exceptions used by libfranka." alt="" coords="32,80,167,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="30,5,169,32"/>
+</map>
