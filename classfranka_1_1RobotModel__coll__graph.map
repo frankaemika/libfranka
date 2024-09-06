@@ -1,0 +1,4 @@
+<map id="franka::RobotModel" name="franka::RobotModel">
+<area shape="rect" id="node1" title="Implements RobotModelBase using Pinocchio." alt="" coords="5,80,155,107"/>
+<area shape="rect" id="node2" href="$classRobotModelBase.html" title="Robot dynamic parameters computed from the URDF model with Pinocchio." alt="" coords="14,5,146,32"/>
+</map>

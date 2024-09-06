@@ -1,0 +1,11 @@
+<map id="include/franka/vacuum_gripper.h" name="include/franka/vacuum_gripper.h">
+<area shape="rect" id="node1" title="Contains the franka::VacuumGripper type." alt="" coords="275,5,445,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,259,72,285"/>
+<area shape="rect" id="node3" title=" " alt="" coords="203,259,269,285"/>
+<area shape="rect" id="node4" title=" " alt="" coords="521,102,599,129"/>
+<area shape="rect" id="node5" title=" " alt="" coords="440,184,499,211"/>
+<area shape="rect" id="node6" href="$vacuum__gripper__state_8h.html" title="Contains the franka::VacuumGripperState type." alt="" coords="274,95,446,136"/>
+<area shape="rect" id="node7" title=" " alt="" coords="325,184,401,211"/>
+<area shape="rect" id="node8" href="$duration_8h.html" title="Contains the franka::Duration type." alt="" coords="65,184,199,211"/>
+<area shape="rect" id="node9" title=" " alt="" coords="106,259,158,285"/>
+</map>
