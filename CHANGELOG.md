@@ -8,7 +8,7 @@ Requires Franka Research 3 system version >= 5.8.0
  * Joint position and cartesian pose examples can now start from the initial q or O_T_EE
  * Joint position and cartesian pose low-pass filters are fixed to use the same command in the first package.
 
- * **Important**: The flags `fci_joint_motion_generator_position_limits_violation_flag` and `fci_cartesian_motion_generator_joint_position_limits_violation_flag` are now always set to false and will be deprecated in future releases. They will be replaced by joint_position_limits_violation.
+ * **Important**: The flags `fci_joint_motion_generator_position_limits_violation_flag` and `fci_cartesian_motion_generator_joint_position_limits_violation_flag` are now always set to false and will be deprecated in future releases. They will be replaced by `joint_position_limits_violation`.
 
 ## 0.14.1 - 2024-09-06
 
