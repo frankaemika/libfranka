@@ -2,10 +2,13 @@
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 
 #include <franka/active_control.h>
+#include <franka/control_tools.h>
+#include <franka/control_types.h>
+#include <iostream>
+
 #include <franka/exception.h>
 #include <franka/robot.h>
 #include <research_interface/robot/rbk_types.h>
-
 #include "robot_impl.h"
 
 namespace franka {
@@ -16,7 +19,12 @@ ActiveControl::ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
     : robot_impl(std::move(robot_impl)),
       motion_id(motion_id),
       control_lock(std::move(control_lock)),
-      control_finished(false) {}
+      control_finished(false) {
+  std::string warning_message;
+  if (!setCurrentThreadToHighestSchedulerPriority(&warning_message)) {
+    std::cout << "libfranka [WARNING]: " << warning_message << std::endl;
+  }
+}
 
 ActiveControl::~ActiveControl() {
   if (!control_finished) {
