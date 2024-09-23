@@ -86,10 +86,6 @@ void Robot::Impl::throwOnMotionError(const RobotState& robot_state, uint32_t mot
 }
 
 RobotState Robot::Impl::readOnce() {
-  // Delete old data from the UDP buffer.
-  research_interface::robot::RobotState robot_state;
-  while (network_->udpReceive<decltype(robot_state)>(&robot_state)) {
-  }
   current_state_ = convertRobotState(receiveRobotState());
   return current_state_;
 }
