@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.13.6 - 2024-09-05
+
+Requires Franka Research 3 system version >= 5.5.0
+
+ * Hotfix: set realtime scheduling for active control
+ * Hotfix: Fix readOnce for active control 
+
 ## 0.13.4 - 2024-09-05
 
 Requires Franka Research 3 system version >= 5.5.0
