@@ -1,0 +1,5 @@
+<map id="franka::RealtimeException" name="franka::RealtimeException">
+<area shape="rect" id="node1" title="RealtimeException is thrown if realtime priority cannot be set." alt="" coords="5,155,200,181"/>
+<area shape="rect" id="node2" href="$structfranka_1_1Exception.html" title="Base class for all exceptions used by libfranka." alt="" coords="35,80,170,107"/>
+<area shape="rect" id="node3" title=" " alt="" coords="33,5,172,32"/>
+</map>
