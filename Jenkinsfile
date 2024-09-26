@@ -182,6 +182,7 @@ pipeline {
                   sh 'cpack'
                   fePublishDebian('*.deb', 'fci', "deb.distribution=${env.DISTRO};deb.component=main;deb.architecture=amd64")
                   dir('doc') {
+                    sh 'mv docs/*/html/ html/'
                     sh 'tar cfz ../libfranka-docs.tar.gz html'
                   }
                   sh "rename -e 's/(.tar.gz|.deb)\$/-${env.DISTRO}\$1/' *.deb *.tar.gz"
