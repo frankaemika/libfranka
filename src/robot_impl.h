@@ -15,7 +15,7 @@
 #include <research_interface/robot/service_types.h>
 
 #include "franka/commands/get_robot_model_command.hpp"
-#include "logger.h"
+#include "logging/robot_state_logger.hpp"
 #include "network.h"
 #include "robot_control.h"
 
@@ -192,7 +192,7 @@ class Robot::Impl : public RobotControl {
 
   std::unique_ptr<Network> network_;
 
-  Logger logger_;
+  RobotStateLogger logger_;
 
   const RealtimeConfig realtime_config_;  // NOLINT(readability-identifier-naming)
   uint16_t ri_version_;

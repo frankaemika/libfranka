@@ -6,8 +6,8 @@
 #include <cstring>
 #include <limits>
 
-#include <logger.h>
 #include <robot_impl.h>
+#include <logging/robot_state_logger.hpp>
 
 #include "helpers.h"
 #include "mock_server.h"

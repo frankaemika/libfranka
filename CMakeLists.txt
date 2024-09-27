@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.11)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -72,6 +72,9 @@ if(BUILD_COVERAGE)
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
 
+## Load dependencies
+include(FetchFMT)
+
 ## Submodules
 add_subdirectory(common)
 
@@ -91,8 +94,6 @@ add_library(franka SHARED
   src/library_downloader.cpp
   src/library_loader.cpp
   src/load_calculations.cpp
-  src/log.cpp
-  src/logger.cpp
   src/lowpass_filter.cpp
   src/model.cpp
   src/model_library.cpp
@@ -104,6 +105,11 @@ add_library(franka SHARED
   src/vacuum_gripper.cpp
   src/vacuum_gripper_state.cpp
   src/robot_model.cpp
+
+  src/logging/cout_logging_sink.cpp
+  src/logging/logger.cpp
+  src/logging/robot_state_log.cpp
+  src/logging/robot_state_logger.cpp
 )
 add_library(Franka::Franka ALIAS franka)
 
@@ -144,6 +150,7 @@ target_link_libraries(franka PRIVATE
 
 target_link_libraries(franka PUBLIC
   libfranka-common
+  fmt::fmt
 )
 
 ## Installation
