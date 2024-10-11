@@ -48,7 +48,6 @@ add_executable(run_all_tests
   gripper_command_tests.cpp
   gripper_tests.cpp
   helpers.cpp
-  logger_tests.cpp
   lowpass_filter_tests.cpp
   mock_server.cpp
   model_tests.cpp
@@ -60,6 +59,9 @@ add_executable(run_all_tests
   robot_tests.cpp
   vacuum_gripper_tests.cpp
   vacuum_gripper_command_tests.cpp
+
+  logging/logging_tests.cpp
+  logging/robot_state_logger_tests.cpp
 )
 
 set(TEST_COMPILE_DEFINITIONS FRANKA_TEST_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}")

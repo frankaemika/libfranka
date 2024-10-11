@@ -4,11 +4,11 @@
 #include <franka/active_control.h>
 #include <franka/control_tools.h>
 #include <franka/control_types.h>
-#include <iostream>
-
 #include <franka/exception.h>
 #include <franka/robot.h>
 #include <research_interface/robot/rbk_types.h>
+#include <franka/logging/logger.hpp>
+
 #include "robot_impl.h"
 
 namespace franka {
@@ -20,9 +20,9 @@ ActiveControl::ActiveControl(std::shared_ptr<Robot::Impl> robot_impl,
       motion_id(motion_id),
       control_lock(std::move(control_lock)),
       control_finished(false) {
-  std::string warning_message;
+  auto warning_message = std::string();
   if (!setCurrentThreadToHighestSchedulerPriority(&warning_message)) {
-    std::cout << "libfranka [WARNING]: " << warning_message << std::endl;
+    logging::logWarn("{}", warning_message);
   }
 }
 

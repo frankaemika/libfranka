@@ -7,6 +7,9 @@ list(INSERT CMAKE_MODULE_PATH 0 ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+## Load dependencies
+include(FetchFMT)
+
 if(NOT FRANKA_IS_FOUND)
     find_package(Franka REQUIRED)
 endif()
@@ -21,7 +24,7 @@ add_library(examples_common STATIC
   examples_common.cpp
 )
 
-target_link_libraries(examples_common PRIVATE Franka::Franka Eigen3::Eigen3)
+target_link_libraries(examples_common PUBLIC Franka::Franka Eigen3::Eigen3)
 target_include_directories(examples_common PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
@@ -68,3 +71,6 @@ install(TARGETS ${EXAMPLES}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Further examples
+add_subdirectory(utility_examples)

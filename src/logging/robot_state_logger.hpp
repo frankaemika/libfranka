@@ -1,4 +1,4 @@
-// Copyright (c) 2023 Franka Robotics GmbH
+// Copyright (c) 2024 Franka Robotics GmbH
 // Use of this source code is governed by the Apache-2.0 license, see LICENSE
 #pragma once
 
@@ -6,15 +6,15 @@
 #include <string>
 #include <vector>
 
-#include <franka/log.h>
 #include <franka/robot_state.h>
 #include <research_interface/robot/rbk_types.h>
+#include <franka/logging/robot_state_log.hpp>
 
 namespace franka {
 
-class Logger {
+class RobotStateLogger {
  public:
-  explicit Logger(size_t log_size);
+  explicit RobotStateLogger(size_t log_size);
 
   void log(const RobotState& state, const research_interface::robot::RobotCommand& command);
 

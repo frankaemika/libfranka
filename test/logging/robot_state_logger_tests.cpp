@@ -6,17 +6,17 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <franka/log.h>
+#include <franka/logging/robot_state_log.hpp>
 
 #include "helpers.h"
-#include "logger.h"
+#include "logging/robot_state_logger.hpp"
 
 using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
 using namespace ::testing;
 
-TEST(Logger, LogIsFIFO) {
+TEST(RobotStateLogger, LogIsFIFO) {
   size_t log_count = 5;
-  franka::Logger logger(log_count);
+  franka::RobotStateLogger logger(log_count);
 
   std::vector<franka::RobotState> states;
   std::vector<research_interface::robot::RobotCommand> commands;
@@ -40,9 +40,9 @@ TEST(Logger, LogIsFIFO) {
   }
 }
 
-TEST(Logger, LogIsAFixedSizeRing) {
+TEST(RobotStateLogger, LogIsAFixedSizeRing) {
   size_t ring = 5;
-  franka::Logger logger(ring);
+  franka::RobotStateLogger logger(ring);
 
   std::vector<franka::RobotState> states;
   std::vector<research_interface::robot::RobotCommand> commands;
@@ -69,9 +69,9 @@ TEST(Logger, LogIsAFixedSizeRing) {
   EXPECT_EQ(ring, log.size());
 }
 
-TEST(Logger, LoggerEmptyAfterFlush) {
+TEST(RobotStateLogger, LoggerEmptyAfterFlush) {
   size_t log_count = 5;
-  franka::Logger logger(log_count);
+  franka::RobotStateLogger logger(log_count);
 
   for (size_t i = 0; i < log_count; i++) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
@@ -85,8 +85,8 @@ TEST(Logger, LoggerEmptyAfterFlush) {
   EXPECT_EQ(0u, log.size());
 }
 
-TEST(Logger, NoLogWhenLogSizeZero) {
-  franka::Logger logger(0);
+TEST(RobotStateLogger, NoLogWhenLogSizeZero) {
+  franka::RobotStateLogger logger(0);
 
   size_t log_count = 50;
   for (size_t i = 0; i < log_count; i++) {
@@ -97,9 +97,9 @@ TEST(Logger, NoLogWhenLogSizeZero) {
   EXPECT_EQ(0u, log.size());
 }
 
-TEST(Logger, WellFormattedString) {
+TEST(RobotStateLogger, WellFormattedString) {
   size_t log_count = 5;
-  franka::Logger logger(log_count);
+  franka::RobotStateLogger logger(log_count);
 
   for (size_t i = 0; i < log_count; i++) {
     logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
@@ -125,8 +125,8 @@ TEST(Logger, WellFormattedString) {
   EXPECT_EQ(log_count + 1, newlines_count);
 }
 
-TEST(Logger, NoDuplicateColumns) {
-  franka::Logger logger(1);
+TEST(RobotStateLogger, NoDuplicateColumns) {
+  franka::RobotStateLogger logger(1);
   logger.log(franka::RobotState{}, research_interface::robot::RobotCommand{});
 
   std::string log = franka::logToCSV(logger.flush());
@@ -136,9 +136,9 @@ TEST(Logger, NoDuplicateColumns) {
   EXPECT_THAT(findDuplicates(titles), ElementsAre());
 }
 
-TEST(Logger, EmptyLogEmptyString) {
+TEST(RobotStateLogger, EmptyLogEmptyString) {
   size_t log_count = 5;
-  franka::Logger logger(log_count);
+  franka::RobotStateLogger logger(log_count);
 
   std::string csv_string = franka::logToCSV(logger.flush());
 

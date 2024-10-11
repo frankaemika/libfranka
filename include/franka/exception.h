@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <franka/log.h>
+#include <franka/logging/robot_state_log.hpp>
 
 /**
  * @file exception.h

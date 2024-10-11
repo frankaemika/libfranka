@@ -7,8 +7,10 @@ Requires Franka Research 3 system version >= 5.8.0
  * Joint/Cartesian Pose velocity and acceleration errors are minimized.
  * Joint position and cartesian pose examples can now start from the initial q or O_T_EE
  * Joint position and cartesian pose low-pass filters are fixed to use the same command in the first package.
+ * Introduction of a general logger. A user can now add their own logger implementation for receiving log messages.
 
  * **Important**: The flags `fci_joint_motion_generator_position_limits_violation_flag` and `fci_cartesian_motion_generator_joint_position_limits_violation_flag` are now always set to false and will be deprecated in future releases. They will be replaced by `joint_position_limits_violation`.
+ * **Breaking Change**: The former logger for the csv robot state logger was renamed to 'robot_state_logger' and was moved.
 
 ## 0.14.1 - 2024-09-06
 
