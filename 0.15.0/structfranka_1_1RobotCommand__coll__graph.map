@@ -1,0 +1,19 @@
+<map id="franka::RobotCommand" name="franka::RobotCommand">
+<area shape="rect" id="Node000001" title="Command sent to the robot." alt="" coords="571,104,747,129"/>
+<area shape="rect" id="Node000002" href="$classfranka_1_1JointPositions.html" title="Stores values for joint position motion generation." alt="" coords="211,5,369,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="384,25,464,38,548,59,597,80,637,101,635,106,594,85,546,65,463,43,383,30"/>
+<area shape="rect" id="Node000003" href="$structfranka_1_1Finishable.html" title="Helper type for control and motion generation loops." alt="" coords="5,104,143,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="101,94,142,66,191,40,224,28,226,33,193,44,145,70,104,98"/>
+<area shape="rect" id="Node000004" href="$classfranka_1_1JointVelocities.html" title="Stores values for joint velocity motion generation." alt="" coords="209,55,371,80"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="143,98,233,77,234,83,144,104"/>
+<area shape="rect" id="Node000005" href="$classfranka_1_1CartesianPose.html" title="Stores values for Cartesian pose motion generation." alt="" coords="208,104,372,129"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="157,114,208,114,208,119,157,119"/>
+<area shape="rect" id="Node000006" href="$classfranka_1_1CartesianVelocities.html" title="Stores values for Cartesian velocity motion generation." alt="" coords="192,153,388,179"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="144,130,234,151,233,156,143,135"/>
+<area shape="rect" id="Node000007" href="$classfranka_1_1Torques.html" title="Stores joint&#45;level torque commands without gravity and friction." alt="" coords="229,203,351,228"/>
+<area shape="poly" id="edge10_Node000007_Node000003" title=" " alt="" coords="105,135,145,162,193,188,230,200,228,205,191,192,143,167,102,140"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="385,76,547,97,579,101,578,107,546,102,384,81"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="386,114,570,114,570,119,386,119"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="402,152,546,134,590,127,591,132,547,139,403,157"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="364,207,452,195,546,171,595,150,636,127,639,132,598,155,548,177,453,200,365,212"/>
+</map>

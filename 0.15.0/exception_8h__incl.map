@@ -1,0 +1,36 @@
+<map id="include/franka/exception.h" name="include/franka/exception.h">
+<area shape="rect" id="Node000001" title="Contains exception definitions." alt="" coords="49,5,243,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,92,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,33,77,72,74,68,129,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="117,79,175,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="149,31,149,65,143,65,143,31"/>
+<area shape="rect" id="Node000004" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states." alt="" coords="199,79,298,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="164,28,222,68,219,73,161,33"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="79,152,141,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="228,106,146,148,144,143,225,102"/>
+<area shape="rect" id="Node000006" href="$control__types_8h.html" title="Contains helper types for returning motion generation and joint&#45;level torque commands." alt="" coords="165,152,332,177"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="251,104,251,138,246,138,246,104"/>
+<area shape="rect" id="Node000010" href="$robot__state_8h.html" title="Contains the franka::RobotState types." alt="" coords="417,152,571,177"/>
+<area shape="poly" id="edge9_Node000004_Node000010" title=" " alt="" coords="289,101,442,146,441,151,287,107"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="370,299,426,324"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="217,180,188,193,162,210,147,229,147,239,152,249,165,260,185,269,239,285,301,296,357,304,356,309,300,302,238,290,183,274,162,264,148,252,142,240,142,228,158,206,185,189,215,175"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="163,225,225,251"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="242,179,213,216,209,213,238,176"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="249,225,360,251"/>
+<area shape="poly" id="edge8_Node000006_Node000009" title=" " alt="" coords="260,176,289,213,285,216,256,179"/>
+<area shape="poly" id="edge10_Node000010_Node000007" title=" " alt="" coords="477,179,450,200,426,227,412,256,404,286,399,284,407,254,421,224,446,196,474,175"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="463,299,539,324"/>
+<area shape="poly" id="edge11_Node000010_Node000011" title=" " alt="" coords="518,175,545,195,567,224,570,244,563,263,549,279,533,293,530,289,545,275,558,260,565,243,562,226,541,199,515,180"/>
+<area shape="rect" id="Node000012" href="$duration_8h.html" title="Contains the franka::Duration type." alt="" coords="627,225,761,251"/>
+<area shape="poly" id="edge12_Node000010_Node000012" title=" " alt="" coords="527,175,649,218,647,223,525,180"/>
+<area shape="rect" id="Node000016" href="$errors_8h.html" title="Contains the franka::Errors type." alt="" coords="435,225,553,251"/>
+<area shape="poly" id="edge16_Node000010_Node000016" title=" " alt="" coords="497,178,497,212,491,212,491,178"/>
+<area shape="rect" id="Node000013" title=" " alt="" coords="570,299,637,324"/>
+<area shape="poly" id="edge13_Node000012_Node000013" title=" " alt="" coords="681,253,631,292,627,288,678,249"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="661,299,727,324"/>
+<area shape="poly" id="edge14_Node000012_Node000014" title=" " alt="" coords="697,251,697,285,691,285,691,251"/>
+<area shape="rect" id="Node000015" title=" " alt="" coords="752,299,804,324"/>
+<area shape="poly" id="edge15_Node000012_Node000015" title=" " alt="" coords="709,249,755,287,752,292,706,253"/>
+<area shape="poly" id="edge17_Node000016_Node000007" title=" " alt="" coords="480,253,426,292,423,288,477,249"/>
+<area shape="poly" id="edge18_Node000016_Node000011" title=" " alt="" coords="498,251,501,285,496,285,492,251"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="include/franka/log.h" name="include/franka/log.h">
+<area shape="rect" id="Node000001" title="Contains helper types for logging sent commands and received robot states." alt="" coords="100,5,251,31"/>
+<area shape="rect" id="Node000002" href="$exception_8h.html" title="Contains exception definitions." alt="" coords="78,79,273,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="178,44,178,79,173,79,173,44"/>
+<area shape="rect" id="Node000003" href="$active__control_8h.html" title="Implements the ActiveControlBase abstract class." alt="" coords="96,240,255,280"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="161,116,145,153,141,172,145,191,154,216,165,238,161,241,149,219,139,193,136,172,139,151,157,114"/>
+<area shape="rect" id="Node000006" href="$active__control__base_8h.html" title="Abstract interface class as the base of the active controllers." alt="" coords="155,152,313,192"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="194,114,222,150,218,153,190,117"/>
+<area shape="rect" id="Node000004" href="$active__motion__generator_8h.html" title="Contains the franka::ActiveMotionGenerator type." alt="" coords="5,328,164,368"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="147,291,107,330,103,326,144,287"/>
+<area shape="rect" id="Node000005" href="$active__torque__control_8h.html" title="Contains the franka::ActiveTorqueControl type." alt="" coords="188,328,347,368"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="207,287,249,326,245,330,204,291"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="216,205,191,241,186,238,211,202"/>
+</map>
