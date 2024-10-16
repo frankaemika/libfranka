@@ -1,0 +1,73 @@
+<map id="include/franka/active_torque_control.h" name="include/franka/active_torque_control.h">
+<area shape="rect" id="Node000001" title="Contains the franka::ActiveTorqueControl type." alt="" coords="323,5,481,45"/>
+<area shape="rect" id="Node000002" href="$active__control_8h.html" title="Implements the ActiveControlBase abstract class." alt="" coords="339,93,465,119"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="405,46,405,79,399,79,399,46"/>
+<area shape="rect" id="Node000003" href="$active__control__base_8h.html" title="Abstract interface class as the base of the active controllers." alt="" coords="323,167,481,207"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="405,119,405,153,399,153,399,119"/>
+<area shape="rect" id="Node000008" href="$exception_8h.html" title="Contains exception definitions." alt="" coords="101,255,244,280"/>
+<area shape="poly" id="edge27_Node000002_Node000008" title=" " alt="" coords="386,121,313,169,201,249,198,244,310,164,383,116"/>
+<area shape="rect" id="Node000023" href="$robot_8h.html" title="Contains the franka::Robot type." alt="" coords="801,328,869,353"/>
+<area shape="poly" id="edge28_Node000002_Node000023" title=" " alt="" coords="425,116,803,319,800,324,422,121"/>
+<area shape="rect" id="Node000004" href="$control__types_8h.html" title="Contains helper types for returning motion generation and joint&#45;level torque commands." alt="" coords="269,409,436,434"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="444,204,466,219,485,236,496,257,494,281,472,320,443,354,412,382,384,403,381,399,409,378,439,350,468,317,489,279,491,258,480,240,463,223,441,209"/>
+<area shape="poly" id="edge7_Node000003_Node000008" title=" " alt="" coords="348,209,220,253,218,248,346,204"/>
+<area shape="rect" id="Node000013" href="$robot__state_8h.html" title="Contains the franka::RobotState types." alt="" coords="92,409,245,434"/>
+<area shape="poly" id="edge23_Node000003_Node000013" title=" " alt="" coords="372,209,340,230,309,257,286,282,272,304,257,327,236,355,192,401,188,398,232,352,253,324,267,301,282,279,305,253,337,226,369,205"/>
+<area shape="rect" id="Node000020" title=" " alt="" coords="543,409,621,434"/>
+<area shape="poly" id="edge24_Node000003_Node000020" title=" " alt="" coords="447,205,482,225,513,253,538,288,557,326,579,394,574,396,552,328,533,291,509,256,479,229,445,209"/>
+<area shape="rect" id="Node000021" title=" " alt="" coords="319,255,394,280"/>
+<area shape="poly" id="edge25_Node000003_Node000021" title=" " alt="" coords="393,208,373,244,368,241,389,206"/>
+<area shape="rect" id="Node000022" title=" " alt="" coords="419,255,479,280"/>
+<area shape="poly" id="edge26_Node000003_Node000022" title=" " alt="" coords="416,206,437,241,432,244,411,208"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="423,577,479,603"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="372,432,401,456,428,488,444,526,452,563,446,564,439,528,424,491,397,459,369,436"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="772,497,835,522"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="412,431,449,439,759,497,758,502,448,444,411,437"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="303,497,413,522"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="356,434,359,483,354,483,351,434"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="12,328,99,353"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="155,282,88,323,85,318,152,278"/>
+<area shape="rect" id="Node000010" title=" " alt="" coords="461,409,519,434"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="198,278,455,400,453,405,195,282"/>
+<area shape="rect" id="Node000011" href="$log_8h.html" title="Contains helper types for logging sent commands and received robot states." alt="" coords="123,328,222,353"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="175,280,175,314,170,314,170,280"/>
+<area shape="poly" id="edge12_Node000011_Node000004" title=" " alt="" coords="200,351,315,401,313,406,198,356"/>
+<area shape="rect" id="Node000012" title=" " alt="" coords="5,409,68,434"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="154,356,70,404,67,399,151,351"/>
+<area shape="poly" id="edge13_Node000011_Node000013" title=" " alt="" coords="175,354,173,395,167,395,169,353"/>
+<area shape="poly" id="edge14_Node000013_Node000005" title=" " alt="" coords="182,432,238,484,291,527,353,556,411,576,409,581,351,561,289,532,234,488,179,436"/>
+<area shape="rect" id="Node000014" title=" " alt="" coords="83,577,159,603"/>
+<area shape="poly" id="edge15_Node000013_Node000014" title=" " alt="" coords="151,436,123,459,110,474,100,490,96,509,98,528,110,564,105,566,92,529,91,509,96,488,106,471,119,455,148,432"/>
+<area shape="rect" id="Node000015" href="$duration_8h.html" title="Contains the franka::Duration type." alt="" coords="1401,497,1534,522"/>
+<area shape="poly" id="edge16_Node000013_Node000015" title=" " alt="" coords="217,431,258,439,421,456,558,465,793,469,1029,469,1167,475,1330,487,1387,493,1387,498,1330,492,1167,480,1029,475,793,474,558,471,420,461,258,444,216,437"/>
+<area shape="rect" id="Node000019" href="$errors_8h.html" title="Contains the franka::Errors type." alt="" coords="110,497,227,522"/>
+<area shape="poly" id="edge20_Node000013_Node000019" title=" " alt="" coords="171,434,171,482,166,482,166,434"/>
+<area shape="rect" id="Node000016" title=" " alt="" coords="1434,577,1501,603"/>
+<area shape="poly" id="edge17_Node000015_Node000016" title=" " alt="" coords="1470,522,1470,563,1465,563,1465,522"/>
+<area shape="rect" id="Node000017" title=" " alt="" coords="1525,577,1591,603"/>
+<area shape="poly" id="edge18_Node000015_Node000017" title=" " alt="" coords="1482,520,1536,566,1533,570,1479,524"/>
+<area shape="rect" id="Node000018" title=" " alt="" coords="1357,577,1409,603"/>
+<area shape="poly" id="edge19_Node000015_Node000018" title=" " alt="" coords="1457,524,1408,570,1404,566,1453,520"/>
+<area shape="poly" id="edge21_Node000019_Node000005" title=" " alt="" coords="210,519,411,575,409,580,209,525"/>
+<area shape="poly" id="edge22_Node000019_Node000014" title=" " alt="" coords="164,524,137,567,133,564,159,521"/>
+<area shape="poly" id="edge33_Node000023_Node000004" title=" " alt="" coords="802,349,449,404,423,409,422,403,448,399,801,344"/>
+<area shape="poly" id="edge32_Node000023_Node000010" title=" " alt="" coords="801,349,681,368,606,384,532,404,526,406,525,401,531,399,605,378,680,362,801,343"/>
+<area shape="poly" id="edge40_Node000023_Node000013" title=" " alt="" coords="801,347,573,366,417,383,258,404,233,409,232,403,258,399,416,377,572,361,800,342"/>
+<area shape="poly" id="edge34_Node000023_Node000015" title=" " alt="" coords="870,340,1012,344,1205,353,1382,371,1443,383,1464,391,1477,400,1488,419,1490,442,1481,484,1476,483,1485,442,1483,421,1473,403,1462,396,1442,389,1381,376,1204,359,1012,349,869,345"/>
+<area shape="poly" id="edge30_Node000023_Node000020" title=" " alt="" coords="802,354,635,404,626,407,625,402,633,399,801,349"/>
+<area shape="rect" id="Node000024" title=" " alt="" coords="1264,409,1351,434"/>
+<area shape="poly" id="edge29_Node000023_Node000024" title=" " alt="" coords="870,342,1035,360,1143,377,1252,399,1264,402,1263,407,1251,404,1142,382,1035,366,869,347"/>
+<area shape="rect" id="Node000025" title=" " alt="" coords="1375,409,1439,434"/>
+<area shape="poly" id="edge31_Node000023_Node000025" title=" " alt="" coords="870,340,958,343,1081,352,1222,370,1364,399,1372,401,1370,406,1363,404,1221,375,1080,357,957,348,870,345"/>
+<area shape="rect" id="Node000026" href="$lowpass__filter_8h.html" title="Contains functions for filtering signals with a low&#45;pass filter." alt="" coords="1071,409,1239,434"/>
+<area shape="poly" id="edge35_Node000023_Node000026" title=" " alt="" coords="870,348,1096,403,1095,408,869,353"/>
+<area shape="rect" id="Node000027" href="$robot__model__base_8h_source.html" title=" " alt="" coords="1169,489,1318,529"/>
+<area shape="poly" id="edge38_Node000023_Node000027" title=" " alt="" coords="870,340,1007,344,1192,354,1362,372,1421,384,1441,391,1453,399,1464,418,1464,434,1454,449,1437,462,1388,482,1332,496,1331,491,1387,477,1434,457,1450,445,1459,433,1459,419,1449,403,1438,396,1419,389,1361,377,1192,359,1007,350,869,345"/>
+<area shape="rect" id="Node000028" title=" " alt="" coords="645,401,812,441"/>
+<area shape="poly" id="edge41_Node000023_Node000028" title=" " alt="" coords="821,356,767,395,764,391,818,351"/>
+<area shape="rect" id="Node000029" title=" " alt="" coords="837,401,1047,441"/>
+<area shape="poly" id="edge42_Node000023_Node000029" title=" " alt="" coords="853,351,907,391,904,395,849,356"/>
+<area shape="poly" id="edge36_Node000026_Node000005" title=" " alt="" coords="1129,437,1008,483,929,509,848,532,749,553,650,569,493,588,493,582,649,564,748,548,847,527,928,504,1006,478,1127,432"/>
+<area shape="poly" id="edge37_Node000026_Node000006" title=" " alt="" coords="1109,437,849,500,848,494,1108,431"/>
+<area shape="poly" id="edge39_Node000027_Node000005" title=" " alt="" coords="1169,521,493,587,493,582,1168,515"/>
+</map>
