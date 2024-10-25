@@ -50,16 +50,50 @@ RUN apt-get update \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /etc/apt/keyrings 
+# Add the necessary 3rd party dependencies for the robot-service
+RUN git clone --recursive --branch boost-1.77.0 https://github.com/boostorg/boost.git \
+    && cd boost \
+    && ./bootstrap.sh --prefix=/usr \
+    && ./b2 install
 
-# robotpkg was blocking curl request without the user-agent string
-RUN curl -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36" \
-    http://robotpkg.openrobots.org/packages/debian/robotpkg.asc | sudo tee /etc/apt/keyrings/robotpkg.asc
+RUN git clone --branch 10.0.0 https://github.com/leethomason/tinyxml2.git \
+    && cd tinyxml2 \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_POSITION_INDEPENDENT_CODE=ON  \
+    && make && make install
 
-RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
-| sudo tee /etc/apt/sources.list.d/robotpkg.list
+RUN git clone --branch 1.0.5 https://github.com/ros/urdfdom_headers.git \
+    && cd urdfdom_headers \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    && make && make install
 
-RUN apt-get update \
-    && apt-get install -qqy robotpkg-pinocchio
+RUN git clone --branch 1.0.2 https://github.com/ros/console_bridge.git \
+    && cd console_bridge \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    && make && make install
+
+RUN git clone --branch 4.0.0 https://github.com/ros/urdfdom.git \
+    && cd urdfdom \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    && make && make install
+
+RUN git clone --recursive --branch v2.7.0 https://github.com/stack-of-tasks/pinocchio.git \
+    && cd pinocchio \
+    && mkdir build \
+    && cd build \
+    && cmake .. -DBUILD_TESTING=OFF -DBUILD_PYTHON_INTERFACE=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    && make -j4 \
+    && make install
+
+RUN git clone --recursive --branch v3.11.1 https://github.com/nlohmann/json.git \
+    && cd json \
+    && mkdir build \
+    && cd build \
+    && cmake .. -DJSON_BuildTests=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib \
+    && make -j4 \
+    && make install
 
 USER $USERNAME
