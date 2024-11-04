@@ -44,6 +44,7 @@ RUN apt-get update \
     git \
     libeigen3-dev \
     libpoco-dev \
+    libfmt-dev \
     python3-dev \
     python3-pip \
     liburdfdom-headers-dev \
