@@ -50,7 +50,6 @@ set(THIRDPARTY_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty" CACHE PATH
 find_package(Poco REQUIRED COMPONENTS Net Foundation)
 find_package(Eigen3 REQUIRED)
 find_package(pinocchio REQUIRED)
-find_package(fmt REQUIRED)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -72,6 +71,9 @@ if(BUILD_COVERAGE)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
   set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
 endif()
+
+## Load dependencies
+include(FetchFMT)
 
 ## Submodules
 add_subdirectory(common)
@@ -144,11 +146,11 @@ target_link_libraries(franka PRIVATE
   Eigen3::Eigen3
   Threads::Threads
   pinocchio::pinocchio
-  fmt::fmt
 )
 
 target_link_libraries(franka PUBLIC
   libfranka-common
+  fmt::fmt
 )
 
 ## Installation
