@@ -1,4 +1,7 @@
+# Start with a base image
 FROM ubuntu:20.04
+
+# Set non-interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG USER_UID=1001
@@ -23,6 +26,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 # Install necessary packages
 RUN apt-get update \
     && apt-get install -y \
+    bash-completion \
     build-essential \
     clang-6.0 \
     clang-format-6.0 \
@@ -43,15 +47,16 @@ RUN apt-get update \
     libfmt-dev \
     python3-dev \
     python3-pip \
-    liburdfdom-headers-dev \
-    libconsole-bridge-dev \
     libtinyxml2-dev \
     lsb-release \
     curl \
     wget \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -s $(which clang-tidy-6.0) /usr/bin/clang-tidy \
+    && ln -s $(which clang-format-6.0) /usr/bin/clang-format
 
 # Add the necessary 3rd party dependencies for the robot-service
+# Note: the order is important, change at your own risk.
 RUN git clone --recursive --branch boost-1.77.0 https://github.com/boostorg/boost.git \
     && cd boost \
     && ./bootstrap.sh --prefix=/usr \
@@ -63,14 +68,14 @@ RUN git clone --branch 10.0.0 https://github.com/leethomason/tinyxml2.git \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_POSITION_INDEPENDENT_CODE=ON  \
     && make && make install
 
-RUN git clone --branch 1.0.5 https://github.com/ros/urdfdom_headers.git \
-    && cd urdfdom_headers \
+RUN git clone --branch 1.0.2 https://github.com/ros/console_bridge.git \
+    && cd console_bridge \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
     && make && make install
 
-RUN git clone --branch 1.0.2 https://github.com/ros/console_bridge.git \
-    && cd console_bridge \
+RUN git clone --branch 1.0.5 https://github.com/ros/urdfdom_headers.git \
+    && cd urdfdom_headers \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
     && make && make install

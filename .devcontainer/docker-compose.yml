@@ -2,7 +2,12 @@ version: '2'
 
 services:
   libfranka_project:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_UID: 1001
+        USER_GID: 1001
     container_name: libfranka
     network_mode: "host"
     shm_size: 512m

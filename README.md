@@ -90,8 +90,13 @@ git submodule update
 mkdir build
 cd build
 
+# You may encounter problems during the cmake configure process
+# without first setting:
+export CMAKE_PREFIX_PATH=/opt/openrobots/lib/cmake  # for pinocchio, etc...
+# or as a parameter to cmake explicitely.
+
 # Configure the project and build
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF ..
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF [-DCMAKE_PREFIX_PATH=/opt/openrobots/lib/cmake] ..
 cmake --build .
 ```
 
