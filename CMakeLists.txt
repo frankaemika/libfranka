@@ -216,7 +216,7 @@ set(CPACK_SYSTEM_NAME ${CMAKE_HOST_SYSTEM_PROCESSOR})
 # Debian versions require a dash
 set(CPACK_DEBIAN_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION}-1)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Franka Robotics GmbH")
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libpoco-dev, libfmt-dev, libeigen3-dev")
 set(CPACK_DEBIAN_PACKAGE_CONFLICTS "ros-kinetic-libfranka, ros-melodic-libfranka, ros-noetic-libfranka, ros-foxy-libfranka, ros-humble-libfranka")
 include(CPack)
 
