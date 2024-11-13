@@ -11,14 +11,12 @@
         "vscode": {
             "extensions": [
                 "ms-python.python",
-                "bungcip.better-toml",
+                "tamasfe.even-better-toml",
                 "ms-vscode.cpptools",
-                "ms-vscode.cpptools-extension-pack",
-                "ms-vscode.cmake-tools",
                 "xaver.clang-format",
-                "josetr.cmake-language-support-vscode",
                 "twxs.cmake",
-                "cheshirekow.cmake-format"
+                "cheshirekow.cmake-format",
+                "ms-azuretools.vscode-docker"
             ]
         }
     }
