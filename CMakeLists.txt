@@ -163,11 +163,14 @@ install(TARGETS franka libfranka-common
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
-set_target_properties(franka PROPERTIES INSTALL_RPATH "/opt/openrobotics/lib")
-  
-install(DIRECTORY include/ common/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-  USE_SOURCE_PERMISSIONS
-)
+# Extract the directory containing the cmake folder
+get_filename_component(PINOCCHIO_CMAKE_PATH "${pinocchio_DIR}" DIRECTORY)
+
+# Extract the library path
+get_filename_component(PINOCCHIO_LIB_PATH "${PINOCCHIO_CMAKE_PATH}" DIRECTORY)
+
+# This section sets the RPATH for the franka target to the directory containing the pinocchio library
+set_target_properties(franka PROPERTIES INSTALL_RPATH "${PINOCCHIO_LIB_PATH}")
 
 export(EXPORT FrankaTargets
   NAMESPACE Franka::
