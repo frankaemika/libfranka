@@ -163,6 +163,8 @@ install(TARGETS franka libfranka-common
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
+set_target_properties(franka PROPERTIES INSTALL_RPATH "/opt/openrobotics/lib")
+  
 install(DIRECTORY include/ common/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   USE_SOURCE_PERMISSIONS
 )
