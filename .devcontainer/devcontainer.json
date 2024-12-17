@@ -4,9 +4,7 @@
     "service": "libfranka_project",
     "workspaceFolder": "/workspaces",
     "remoteUser": "user",
-    "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash"
-    },
+    "initializeCommand": "echo \"USER_UID=$(id -u $USER)\nUSER_GID=$(id -g $USER)\" > .devcontainer/.env",
     "customizations": {
         "vscode": {
             "extensions": [
@@ -17,7 +15,11 @@
                 "twxs.cmake",
                 "cheshirekow.cmake-format",
                 "ms-azuretools.vscode-docker"
-            ]
+            ],
+            "settings": {
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.profiles.linux": { "bash": { "path": "/bin/bash" } }
+            }
         }
     }
 }

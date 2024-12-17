@@ -80,8 +80,8 @@ cd libfranka
 # List available tags
 git tag -l
 
-# Checkout a specific tag (e.g., 0.14.1)
-git checkout 0.14.1
+# Checkout a specific tag (e.g., 0.15.0)
+git checkout 0.15.0
 
 # Update submodules
 git submodule update
@@ -96,7 +96,7 @@ export CMAKE_PREFIX_PATH=/opt/openrobots/lib/cmake  # for pinocchio, etc...
 # or as a parameter to cmake explicitely.
 
 # Configure the project and build
-cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF [-DCMAKE_PREFIX_PATH=/opt/openrobots/lib/cmake] ..
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=OFF ..
 cmake --build .
 ```
 

@@ -68,5 +68,11 @@ RUN mkdir -p /etc/apt/keyrings && \
     apt-get update && \
     apt-get install -qqy robotpkg-pinocchio
 
+ENV PATH=/opt/openrobots/bin:$PATH \
+    PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH \
+    LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH \
+    PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH \
+    CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
+
 USER $USERNAME
-SHELL ["/usr/bin/env bash", "-c"]
+SHELL ["/bin/bash", "-c"]
