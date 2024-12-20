@@ -10,16 +10,14 @@ ARG USERNAME=user
 
 WORKDIR /workspaces
 
+# Create a non-root user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir -p -m 0700 /run/user/"${USER_UID}" \
-    && mkdir -p -m 0700 /run/user/"${USER_UID}"/gdm \
-    && chown user:user /run/user/"${USER_UID}" \
-    && chown user:user /workspaces \
-    && chown user:user /run/user/"${USER_UID}"/gdm \
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
+    && chown -R $USER_UID:$USER_GID /workspaces \
     && apt-get update \
     && apt-get install -y sudo \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
@@ -51,6 +49,7 @@ RUN apt-get update \
     lsb-release \
     curl \
     wget \
+    && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which clang-tidy-6.0) /usr/bin/clang-tidy \
     && ln -s $(which clang-format-6.0) /usr/bin/clang-format
@@ -60,31 +59,45 @@ RUN apt-get update \
 RUN git clone --recursive --branch boost-1.77.0 https://github.com/boostorg/boost.git \
     && cd boost \
     && ./bootstrap.sh --prefix=/usr \
-    && ./b2 install
+    && ./b2 install \
+    && cd ../.. \
+    && rm -rf boost
 
 RUN git clone --branch 10.0.0 https://github.com/leethomason/tinyxml2.git \
     && cd tinyxml2 \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib -DCMAKE_POSITION_INDEPENDENT_CODE=ON  \
-    && make && make install
+    && make \
+    && make install \
+    && cd ../.. \
+    && rm -rf tinyxml2
 
 RUN git clone --branch 1.0.2 https://github.com/ros/console_bridge.git \
     && cd console_bridge \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
-    && make && make install
+    && make \
+    && make install \
+    && cd ../.. \
+    && rm -rf console_bridge
 
 RUN git clone --branch 1.0.5 https://github.com/ros/urdfdom_headers.git \
     && cd urdfdom_headers \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
-    && make && make install
+    && make \
+    && make install \
+    && cd ../.. \
+    && rm -rf urdfdom_headers
 
 RUN git clone --branch 4.0.0 https://github.com/ros/urdfdom.git \
     && cd urdfdom \
     && mkdir build && cd build \
     && cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_LIBDIR=/usr/lib \
-    && make && make install
+    && make \
+    && make install \
+    && cd ../.. \
+    && rm -rf urdfdom
 
 RUN git clone --recursive --branch v2.7.0 https://github.com/stack-of-tasks/pinocchio.git \
     && cd pinocchio \
@@ -92,7 +105,9 @@ RUN git clone --recursive --branch v2.7.0 https://github.com/stack-of-tasks/pino
     && cd build \
     && cmake .. -DBUILD_TESTING=OFF -DBUILD_PYTHON_INTERFACE=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib \
     && make -j4 \
-    && make install
+    && make install \
+    && cd ../.. \
+    && rm -rf pinocchio
 
 RUN git clone --recursive --branch v3.11.1 https://github.com/nlohmann/json.git \
     && cd json \
@@ -100,6 +115,8 @@ RUN git clone --recursive --branch v3.11.1 https://github.com/nlohmann/json.git 
     && cd build \
     && cmake .. -DJSON_BuildTests=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=/usr/lib \
     && make -j4 \
-    && make install
+    && make install \
+    && cd ../.. \
+    && rm -rf json
 
 USER $USERNAME

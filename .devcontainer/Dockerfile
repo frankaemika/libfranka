@@ -10,16 +10,14 @@ ARG USERNAME=user
 
 WORKDIR /workspaces
 
+# Create a non-root user
 RUN groupadd --gid $USER_GID $USERNAME \
     && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
-    && mkdir -p -m 0700 /run/user/"${USER_UID}" \
-    && mkdir -p -m 0700 /run/user/"${USER_UID}"/gdm \
-    && chown -R $USER_UID:$USER_GID /run/user/"${USER_UID}" \
     && chown -R $USER_UID:$USER_GID /workspaces \
-    && chown -R $USER_UID:$USER_GID /run/user/"${USER_UID}"/gdm \
-    # [Optional] Add sudo support. Omit if you don't need to install software after connecting.
     && apt-get update \
     && apt-get install -y sudo \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/* \
     && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
@@ -32,7 +30,6 @@ RUN apt-get update \
     clang-format-6.0 \
     clang-tidy-6.0 \
     cmake \
-    curl \
     doxygen \
     graphviz \
     lcov \
@@ -54,25 +51,27 @@ RUN apt-get update \
     lsb-release \
     curl \
     wget \
+    && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
     && ln -s $(which clang-tidy-6.0) /usr/bin/clang-tidy \
     && ln -s $(which clang-format-6.0) /usr/bin/clang-format
 
-#####
-#####  Install Pinocchio
-#####
+# Install Pinocchio
 RUN mkdir -p /etc/apt/keyrings && \
     curl -fsSL http://robotpkg.openrobots.org/packages/debian/robotpkg.asc | tee /etc/apt/keyrings/robotpkg.asc && \
     echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/robotpkg.asc] http://robotpkg.openrobots.org/packages/debian/pub $(lsb_release -cs) robotpkg" \
     | tee /etc/apt/sources.list.d/robotpkg.list && \
     apt-get update && \
-    apt-get install -qqy robotpkg-pinocchio
+    apt-get install -y robotpkg-pinocchio && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/*
 
+# Set environment variables
 ENV PATH=/opt/openrobots/bin:$PATH \
     PKG_CONFIG_PATH=/opt/openrobots/lib/pkgconfig:$PKG_CONFIG_PATH \
     LD_LIBRARY_PATH=/opt/openrobots/lib:$LD_LIBRARY_PATH \
     PYTHONPATH=/opt/openrobots/lib/python3.10/site-packages:$PYTHONPATH \
-    CMAKE_PREFIX_PATH=/opt/openrobots:$CMAKE_PREFIX_PATH
+    CMAKE_PREFIX_PATH=/opt/openrobots/lib/cmake:$CMAKE_PREFIX_PATH
 
 USER $USERNAME
 SHELL ["/bin/bash", "-c"]
