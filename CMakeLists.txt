@@ -146,11 +146,11 @@ target_link_libraries(franka PRIVATE
   Eigen3::Eigen3
   Threads::Threads
   pinocchio::pinocchio
+  fmt::fmt
 )
 
 target_link_libraries(franka PUBLIC
   libfranka-common
-  fmt::fmt
 )
 
 ## Installation

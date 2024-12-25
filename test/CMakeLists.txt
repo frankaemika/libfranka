@@ -23,6 +23,7 @@ set(TEST_DEPENDENCIES
   franka
   libfranka-common
   pinocchio::pinocchio
+  fmt::fmt
 )
 set(TEST_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
