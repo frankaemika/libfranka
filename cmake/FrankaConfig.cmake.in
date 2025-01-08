@@ -3,6 +3,8 @@ get_filename_component(Franka_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+find_package(fmt REQUIRED)
+
 if(NOT TARGET Franka::Franka)
   include("${Franka_CMAKE_DIR}/FrankaTargets.cmake")
 endif()
