@@ -60,6 +60,10 @@ uint16_t Network::udpPort() const noexcept {
   return udp_port_;
 }
 
+bool Network::isTcpSocketAlive() const noexcept {
+  return !tcp_socket_.poll(Poco::Timespan(0), Poco::Net::Socket::SELECT_ERROR);
+}
+
 void Network::tcpThrowIfConnectionClosed() try {
   std::unique_lock<std::mutex> lock(tcp_mutex_, std::try_to_lock);
   if (!lock.owns_lock()) {

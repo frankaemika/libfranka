@@ -387,6 +387,11 @@ research_interface::robot::ControllerCommand Robot::Impl::createControllerComman
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
+  // Check if the socket is still alive before trying to send anything to the robot.
+  if (!network_->isTcpSocketAlive()) {
+    return;
+  }
+
   try {
     executeCommand<research_interface::robot::StopMove>();
   } catch (const CommandException& e) {

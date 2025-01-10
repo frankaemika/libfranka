@@ -28,12 +28,15 @@ class Network {
  public:
   Network(const std::string& franka_address,
           uint16_t franka_port,
-          std::chrono::milliseconds tcp_timeout = std::chrono::seconds(60),
+          std::chrono::milliseconds tcp_timeout = std::chrono::seconds(1),
           std::chrono::milliseconds udp_timeout = std::chrono::seconds(1),
           std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
   ~Network();
 
   uint16_t udpPort() const noexcept;
+
+  // Needed by Robot::Impl::cancelMotion.
+  bool isTcpSocketAlive() const noexcept;
 
   template <typename T>
   T udpBlockingReceive();
@@ -133,6 +136,9 @@ T Network::udpBlockingReceiveUnsafe() try {
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
+  // In case of a connection interruption, the socket is in an undefined state and should be closed.
+  udp_socket_.close();
+  tcp_socket_.shutdown();
   using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: UDP receive: "s + e.what());
 }
