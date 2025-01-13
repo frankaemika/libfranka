@@ -8,6 +8,7 @@ Requires Franka Research 3 System Version >= 5.7.2
 * Updated joint position and cartesian pose examples to start from the initial `q` or `O_T_EE`.
 * Fixed joint position and cartesian pose low-pass filters to use the same command in the first package.
 * Added a general logger, allowing users to implement custom loggers for receiving log messages.
+* Fixed the bug that prevented exit in case of network connection interruption.
 
 **Important**
 * The flags `fci_joint_motion_generator_position_limits_violation_flag` and `fci_cartesian_motion_generator_joint_position_limits_violation_flag` are now always set to `false` and will be deprecated in future releases. They will be replaced by `joint_position_limits_violation`.

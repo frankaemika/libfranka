@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <franka/control_tools.h>
+#include <franka/logging/logger.hpp>
 
 #include "load_calculations.h"
 
@@ -387,8 +388,8 @@ research_interface::robot::ControllerCommand Robot::Impl::createControllerComman
 }
 
 void Robot::Impl::cancelMotion(uint32_t motion_id) {
-  // Check if the socket is still alive before trying to send anything to the robot.
   if (!network_->isTcpSocketAlive()) {
+    logging::logWarn("libfranka robot: TCP connection is closed. Cannot cancel motion.");
     return;
   }
 

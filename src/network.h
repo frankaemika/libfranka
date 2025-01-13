@@ -35,7 +35,14 @@ class Network {
 
   uint16_t udpPort() const noexcept;
 
-  // Needed by Robot::Impl::cancelMotion.
+  /**
+   * @brief Checks if the TCP socket is alive.
+   *
+   * This function determines whether the TCP socket is currently active and able to communicate.
+   * It is needed by the method Robot::Impl::cancelMotion().
+   *
+   * @return true if the TCP socket is alive, false otherwise.
+   */
   bool isTcpSocketAlive() const noexcept;
 
   template <typename T>
