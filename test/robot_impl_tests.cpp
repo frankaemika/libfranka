@@ -6,6 +6,7 @@
 #include <cstring>
 #include <limits>
 
+#include <franka/active_control.h>
 #include <robot_impl.h>
 #include <logging/robot_state_logger.hpp>
 
@@ -83,6 +84,31 @@ TEST(RobotImpl, StopsIfControlConnectionClosed) {
 
   EXPECT_THROW(robot->update(nullptr, nullptr), NetworkException);
   EXPECT_THROW(robot->writeOnce(franka::Torques{{1, 2, 3, 4, 5, 6, 7}}), NetworkException);
+}
+
+TEST(RobotImpl, StopsIfServerDiesInActiveControl) {
+  std::unique_ptr<franka::Robot> robot;
+  std::unique_ptr<franka::ActiveControlBase> rw_interface;
+
+  {
+    RobotMockServer server;
+    robot.reset(new franka::Robot("127.0.0.1", franka::RealtimeConfig::kIgnore));
+
+    server
+        .onSendUDP<RobotState>([=](RobotState& robot_state) {
+          robot_state.motion_generator_mode = MotionGeneratorMode::kJointVelocity;
+          robot_state.controller_mode = ControllerMode::kExternalController;
+          robot_state.robot_mode = RobotMode::kMove;
+        })
+        .spinOnce()
+        .waitForCommand<Move>(
+            [](const Move::Request&) { return Move::Response(Move::Status::kMotionStarted); })
+        .spinOnce();
+
+    EXPECT_NO_THROW(rw_interface = robot->startTorqueControl());
+  }
+
+  EXPECT_THROW(rw_interface->readOnce(), NetworkException);
 }
 
 TEST(RobotImpl, CanStartMotion) {

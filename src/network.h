@@ -143,8 +143,6 @@ T Network::udpBlockingReceiveUnsafe() try {
 
   return *reinterpret_cast<T*>(buffer.data());
 } catch (const Poco::Exception& e) {
-  // In case of a connection interruption, the socket is in an undefined state and should be closed.
-  udp_socket_.close();
   tcp_socket_.shutdown();
   using namespace std::string_literals;  // NOLINT(google-build-using-namespace)
   throw NetworkException("libfranka: UDP receive: "s + e.what());
