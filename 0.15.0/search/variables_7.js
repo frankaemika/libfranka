@@ -10,9 +10,7 @@ var searchData=
   ['joint_5fp2p_5finsufficient_5ftorque_5ffor_5fplanning_7',['joint_p2p_insufficient_torque_for_planning',['../structfranka_1_1Errors.html#a1c78be870253b510a4516acf14c2d3e3',1,'franka::Errors']]],
   ['joint_5fposition_5flimits_5fviolation_8',['joint_position_limits_violation',['../structfranka_1_1Errors.html#a44ba0d45e52639280d32cf447f967e29',1,'franka::Errors']]],
   ['joint_5fposition_5fmotion_5fgenerator_5fstart_5fpose_5finvalid_9',['joint_position_motion_generator_start_pose_invalid',['../structfranka_1_1Errors.html#a7af91cbf61dc79304bff3ffadc51ea86',1,'franka::Errors']]],
-  ['joint_5fpositions_10',['joint_positions',['../structfranka_1_1RobotCommand.html#a086afcec596eae5284b6c39dc1452280',1,'franka::RobotCommand']]],
-  ['joint_5freflex_11',['joint_reflex',['../structfranka_1_1Errors.html#afb0928680c586e73d4e2cd4b42c7fe48',1,'franka::Errors']]],
-  ['joint_5fvelocities_12',['joint_velocities',['../structfranka_1_1RobotCommand.html#a049657cf2bbbb53d6ffa5581721e7b71',1,'franka::RobotCommand']]],
-  ['joint_5fvelocity_5fviolation_13',['joint_velocity_violation',['../structfranka_1_1Errors.html#a803ac4acbc26350602ea2eb02b7b30c4',1,'franka::Errors']]],
-  ['joint_5fvia_5fmotion_5fgenerator_5fplanning_5fjoint_5flimit_5fviolation_14',['joint_via_motion_generator_planning_joint_limit_violation',['../structfranka_1_1Errors.html#aef3c74f48978545187ee2dc3a96db1c8',1,'franka::Errors']]]
+  ['joint_5freflex_10',['joint_reflex',['../structfranka_1_1Errors.html#afb0928680c586e73d4e2cd4b42c7fe48',1,'franka::Errors']]],
+  ['joint_5fvelocity_5fviolation_11',['joint_velocity_violation',['../structfranka_1_1Errors.html#a803ac4acbc26350602ea2eb02b7b30c4',1,'franka::Errors']]],
+  ['joint_5fvia_5fmotion_5fgenerator_5fplanning_5fjoint_5flimit_5fviolation_12',['joint_via_motion_generator_planning_joint_limit_violation',['../structfranka_1_1Errors.html#aef3c74f48978545187ee2dc3a96db1c8',1,'franka::Errors']]]
 ];

@@ -18,6 +18,5 @@ var searchData=
   ['startjointpositioncontrol_15',['startJointPositionControl',['../classfranka_1_1Robot.html#a5452c17e66d1980f785c050cfb807361',1,'franka::Robot']]],
   ['startjointvelocitycontrol_16',['startJointVelocityControl',['../classfranka_1_1Robot.html#ae3a2ac097d4dd8b3278e86540414c5e4',1,'franka::Robot']]],
   ['starttorquecontrol_17',['startTorqueControl',['../classfranka_1_1Robot.html#a92b2837848e618c78896bc5b77eba0ea',1,'franka::Robot']]],
-  ['state_18',['state',['../structfranka_1_1Record.html#a58249658c9549fbc792eea90e7b6a7cc',1,'franka::Record']]],
-  ['stop_19',['stop',['../classfranka_1_1Gripper.html#add7397fb6c5631650c139d26a85c8e1d',1,'franka::Gripper::stop()'],['../classfranka_1_1Robot.html#a69cb08e075a81ecf3f26e94d26a06296',1,'franka::Robot::stop()'],['../classfranka_1_1VacuumGripper.html#a3722fe5488c516b4082c878a083cc865',1,'franka::VacuumGripper::stop()']]]
+  ['stop_18',['stop',['../classfranka_1_1Gripper.html#add7397fb6c5631650c139d26a85c8e1d',1,'franka::Gripper::stop()'],['../classfranka_1_1Robot.html#a69cb08e075a81ecf3f26e94d26a06296',1,'franka::Robot::stop()'],['../classfranka_1_1VacuumGripper.html#a3722fe5488c516b4082c878a083cc865',1,'franka::VacuumGripper::stop()']]]
 ];

@@ -97,7 +97,7 @@ $(document).ready(function() { init_codefold(0); });
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &lt;stdexcept&gt;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span> </div>
-<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;<a class="code" href="log_8h.html">franka/log.h</a>&gt;</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="preprocessor">#include &lt;franka/logging/robot_state_log.hpp&gt;</span></div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span> </div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="keyword">namespace </span>franka {</div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span> </div>
@@ -161,7 +161,6 @@ $(document).ready(function() { init_codefold(0); });
 </div>
 <div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span> </div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>}  <span class="comment">// namespace franka</span></div>
-<div class="ttc" id="alog_8h_html"><div class="ttname"><a href="log_8h.html">log.h</a></div><div class="ttdoc">Contains helper types for logging sent commands and received robot states.</div></div>
 <div class="ttc" id="astructfranka_1_1CommandException_html"><div class="ttname"><a href="structfranka_1_1CommandException.html">franka::CommandException</a></div><div class="ttdoc">CommandException is thrown if an error occurs during command execution.</div><div class="ttdef"><b>Definition</b> exception.h:91</div></div>
 <div class="ttc" id="astructfranka_1_1ControlException_html"><div class="ttname"><a href="structfranka_1_1ControlException.html">franka::ControlException</a></div><div class="ttdoc">ControlException is thrown if an error occurs during motion generation or torque control.</div><div class="ttdef"><b>Definition</b> exception.h:73</div></div>
 <div class="ttc" id="astructfranka_1_1ControlException_html_a2efb9628eef80a3819031dbf2e2cb518"><div class="ttname"><a href="structfranka_1_1ControlException.html#a2efb9628eef80a3819031dbf2e2cb518">franka::ControlException::ControlException</a></div><div class="ttdeci">ControlException(const std::string &amp;what, std::vector&lt; franka::Record &gt; log={}) noexcept</div><div class="ttdoc">Creates the exception with an explanatory string and a Log object.</div></div>

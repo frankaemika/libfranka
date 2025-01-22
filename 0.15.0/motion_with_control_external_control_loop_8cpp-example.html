@@ -296,7 +296,7 @@ $(function() {
 <div class="line">      <span class="keywordflow">return</span>;</div>
 <div class="line">    }</div>
 <div class="line">    std::ofstream log_stream(log_file.path().c_str());</div>
-<div class="line">    log_stream &lt;&lt; <a id="a14" name="a14"></a><a class="code hl_function" href="log_8h.html#a01fbdb37b0e6beb04ba108d5f5024fd9">franka::logToCSV</a>(log);</div>
+<div class="line">    log_stream &lt;&lt; franka::logToCSV(log);</div>
 <div class="line"> </div>
 <div class="line">    std::cout &lt;&lt; <span class="stringliteral">&quot;Log file written to: &quot;</span> &lt;&lt; log_file.path() &lt;&lt; std::endl;</div>
 <div class="line">  } <span class="keywordflow">catch</span> (...) {</div>
@@ -314,7 +314,6 @@ $(function() {
 <div class="ttc" id="acontrol__types_8h_html_a20791f7142d78bbbe3c957cc66a23ade"><div class="ttname"><a href="control__types_8h.html#a20791f7142d78bbbe3c957cc66a23ade">franka::MotionFinished</a></div><div class="ttdeci">Torques MotionFinished(Torques command) noexcept</div><div class="ttdoc">Helper method to indicate that a motion should stop after processing the given command.</div><div class="ttdef"><b>Definition</b> control_types.h:294</div></div>
 <div class="ttc" id="aexamples__common_8h_html"><div class="ttname"><a href="examples__common_8h.html">examples_common.h</a></div><div class="ttdoc">Contains common types and functions for the examples.</div></div>
 <div class="ttc" id="aexception_8h_html"><div class="ttname"><a href="exception_8h.html">exception.h</a></div><div class="ttdoc">Contains exception definitions.</div></div>
-<div class="ttc" id="alog_8h_html_a01fbdb37b0e6beb04ba108d5f5024fd9"><div class="ttname"><a href="log_8h.html#a01fbdb37b0e6beb04ba108d5f5024fd9">franka::logToCSV</a></div><div class="ttdeci">std::string logToCSV(const std::vector&lt; Record &gt; &amp;log)</div><div class="ttdoc">Writes the log to a string in CSV format.</div></div>
 <div class="ttc" id="arobot_8h_html"><div class="ttname"><a href="robot_8h.html">robot.h</a></div><div class="ttdoc">Contains the franka::Robot type.</div></div>
 <div class="ttc" id="astructfranka_1_1ControlException_html"><div class="ttname"><a href="structfranka_1_1ControlException.html">franka::ControlException</a></div><div class="ttdoc">ControlException is thrown if an error occurs during motion generation or torque control.</div><div class="ttdef"><b>Definition</b> exception.h:73</div></div>
 <div class="ttc" id="astructfranka_1_1ControlException_html_ae57f0ac0a9aa195057af1f1cc712b41e"><div class="ttname"><a href="structfranka_1_1ControlException.html#ae57f0ac0a9aa195057af1f1cc712b41e">franka::ControlException::log</a></div><div class="ttdeci">const std::vector&lt; franka::Record &gt; log</div><div class="ttdoc">Vector of states and commands logged just before the exception occurred.</div><div class="ttdef"><b>Definition</b> exception.h:85</div></div>
