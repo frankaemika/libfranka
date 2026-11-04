@@ -33,6 +33,15 @@ class Network {
           std::tuple<bool, int, int, int> tcp_keepalive = std::make_tuple(true, 1, 3, 1));
   ~Network();
 
+  /**
+   * Upper bound for the size of a single TCP response, including its header.
+   *
+   * Responses that declare a larger size are rejected with a ProtocolException before any memory
+   * is allocated for them. The largest response the robot sends is the robot model (URDF), which
+   * is orders of magnitude smaller than this limit.
+   */
+  static constexpr size_t kMaxTcpResponseSize = 16 * 1024 * 1024;
+
   uint16_t udpPort() const noexcept;
 
   /**
@@ -96,6 +105,14 @@ class Network {
 
   template <typename T>
   void tcpReadFromBuffer(std::chrono::microseconds timeout);
+
+  /**
+   * Removes the given buffered response and throws a ProtocolException if it is shorter than
+   * min_size bytes. Must be called before the response is interpreted as a message.
+   */
+  void tcpEraseAndThrowIfResponseTooShort(
+      std::unordered_map<uint32_t, std::vector<uint8_t>>::const_iterator response,
+      size_t min_size);
 
   Poco::Net::StreamSocket tcp_socket_;
   Poco::Net::DatagramSocket udp_socket_;
@@ -176,7 +193,7 @@ void Network::tcpReadFromBuffer(std::chrono::microseconds timeout) try {
       available_bytes >= static_cast<int>(sizeof(typename T::Header))) {
     typename T::Header header;
     tcp_socket_.receiveBytes(&header, sizeof(header));
-    if (header.size < sizeof(header)) {
+    if (header.size < sizeof(header) || header.size > kMaxTcpResponseSize) {
       throw ProtocolException("libfranka: Incorrect TCP message size.");
     }
     pending_response_.resize(header.size);
@@ -236,11 +253,9 @@ bool Network::tcpReceiveResponse(uint32_t command_id,
   tcpReadFromBuffer<T>(0us);
   auto received_response = received_responses_.find(command_id);
   if (received_response != received_responses_.end()) {
-    auto message = reinterpret_cast<const typename T::template Message<typename T::Response>*>(
-        received_response->second.data());
-    if (message->header.size < sizeof(message)) {
-      throw ProtocolException("libfranka: Incorrect TCP message size.");
-    }
+    using MessageType = typename T::template Message<typename T::Response>;
+    tcpEraseAndThrowIfResponseTooShort(received_response, sizeof(MessageType));
+    auto message = reinterpret_cast<const MessageType*>(received_response->second.data());
     handler(message->getInstance());
     received_responses_.erase(received_response);
     return true;
@@ -262,14 +277,12 @@ typename T::Response Network::tcpBlockingReceiveResponse(uint32_t command_id,
     std::this_thread::yield();
   } while (received_response == received_responses_.end());
 
-  auto message = *reinterpret_cast<const typename T::template Message<typename T::Response>*>(
-      received_response->second.data());
-  if (message.header.size < sizeof(message)) {
-    throw ProtocolException("libfranka: Incorrect TCP message size.");
-  }
+  using MessageType = typename T::template Message<typename T::Response>;
+  tcpEraseAndThrowIfResponseTooShort(received_response, sizeof(MessageType));
+  auto message = *reinterpret_cast<const MessageType*>(received_response->second.data());
 
-  if (vl_buffer != nullptr && message.header.size != sizeof(message)) {
-    size_t data_size = message.header.size - sizeof(message);
+  if (vl_buffer != nullptr && received_response->second.size() != sizeof(message)) {
+    size_t data_size = received_response->second.size() - sizeof(message);
     std::vector<uint8_t> data_buffer(data_size);
     std::memcpy(data_buffer.data(), &received_response->second[sizeof(message)], data_size);
     *vl_buffer = data_buffer;
@@ -295,6 +308,9 @@ Network::tcpBlockingReceiveResponse<research_interface::robot::GetRobotModel>(
     std::this_thread::yield();
   } while (received_response == received_responses_.end());
 
+  tcpEraseAndThrowIfResponseTooShort(received_response,
+                                     sizeof(research_interface::robot::CommandHeader) +
+                                         sizeof(research_interface::robot::GetRobotModel::Status));
   auto get_robot_model =
       research_interface::robot::GetRobotModel::Message<
           research_interface::robot::GetRobotModel::Response>::deserialize(received_response

@@ -3,6 +3,11 @@
 All notable changes to libfranka in this file.
 
 
+## [Unreleased]
+### libfranka - C++
+- fix: TCP responses are now length-checked before they are decoded. A response shorter than its expected message (for example a header-only `Connect` or `GetRobotModel` reply) used to cause an out-of-bounds read or a crash and now throws `ProtocolException` (#244).
+- fix: TCP responses that declare a size above `Network::kMaxTcpResponseSize` (16 MiB) are rejected before any buffer is allocated, instead of allocating the declared size and waiting for the payload (#245).
+
 ## [0.21.3]
 - fix: `ActiveControl` destructor no longer lets exceptions (e.g. `NetworkException` from `cancelMotion()` on an already-interrupted TCP connection) escape, which previously called `std::terminate()` and crashed the process after an error/reflex interrupted a motion (notably via pylibfranka).
 ### pylibfranka - Python

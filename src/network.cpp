@@ -82,4 +82,13 @@ void Network::tcpThrowIfConnectionClosed() try {
   throw NetworkException("libfranka: "s + e.what());
 }
 
+void Network::tcpEraseAndThrowIfResponseTooShort(
+    std::unordered_map<uint32_t, std::vector<uint8_t>>::const_iterator response,
+    size_t min_size) {
+  if (response->second.size() < min_size) {
+    received_responses_.erase(response);
+    throw ProtocolException("libfranka: Incorrect TCP message size.");
+  }
+}
+
 }  // namespace franka
