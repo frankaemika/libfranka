@@ -37,6 +37,7 @@ add_executable(run_all_tests
   helpers.cpp
   lowpass_filter_tests.cpp
   mock_server.cpp
+  network_tests.cpp
   model_tests.cpp
   rate_limiting_tests.cpp
   robot_command_tests.cpp
